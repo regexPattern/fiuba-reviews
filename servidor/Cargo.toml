@@ -1,0 +1,11 @@
+[package]
+name = "servidor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.69"
+axum = { version = "0.6.7", features = ["headers"] }
+sea-orm = { version = "0.11.0", features = ["sqlx-postgres", "runtime-tokio-rustls", "debug-print"] }
+tokio = { version = "1.25.0", features = ["full"] }
+tracing-subscriber = "0.3.16"
