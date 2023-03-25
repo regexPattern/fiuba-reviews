@@ -1,0 +1,15 @@
+name: "fiuba-reviews"
+services:
+  backend:
+    build: ./backend
+    depends_on:
+      - database
+    ports:
+      - "5000:5000"
+  database:
+    build: ./database
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+      
