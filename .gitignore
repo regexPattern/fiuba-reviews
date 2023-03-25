@@ -1,3 +1,9 @@
-/**/target
-database/init.sql
+frontend/.svelte-kit
+frontend/build
+frontend/node_modules
+
+backend/target
+
 database/http-cacache
+database/init.sql
+database/target
