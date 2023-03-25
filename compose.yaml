@@ -1,3 +1,4 @@
+name: "fiuba-reviews"
 services:
   backend:
     build: ./backend
