@@ -7,3 +7,4 @@ edition = "2021"
 axum = "0.6.12"
 sea-orm = { version = "0.11.1", features = ["sqlx-postgres", "runtime-tokio-rustls"] }
 tokio = { version = "1.26.0", features = ["full"] }
+tower-http = { version = "0.4.0", features = ["cors"] }
