@@ -1,2 +1,3 @@
-/adaptador/http-cacache
 /**/target
+database/init.sql
+database/http-cacache
