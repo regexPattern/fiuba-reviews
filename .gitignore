@@ -5,5 +5,5 @@ frontend/node_modules
 backend/target
 
 database/http-cacache
-database/init.sql
+database/*.sql
 database/target
