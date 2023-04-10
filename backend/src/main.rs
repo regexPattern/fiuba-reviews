@@ -12,7 +12,7 @@ async fn main() {
 
     let addr: SocketAddr = "0.0.0.0:5000".parse().unwrap();
 
-    let _ = Database::connect("postgres://postgres:postgres@localhost:5432/postgres")
+    let _ = Database::connect("postgres://postgres:postgres@database:5432/postgres")
         .await
         .unwrap();
 
