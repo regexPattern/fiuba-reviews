@@ -11,13 +11,13 @@ CREATE TABLE IF NOT EXISTS materias (
 
     pub const CATEDRAS: &'static str = "\
 CREATE TABLE IF NOT EXISTS catedras (
-    codigo         UUID PRIMARY KEY,
+    codigo         TEXT PRIMARY KEY,
     codigo_materia INTEGER REFERENCES materias(codigo) NOT NULL
 );";
 
     pub const DOCENTES: &'static str = "\
 CREATE TABLE IF NOT EXISTS docentes (
-    codigo                UUID PRIMARY KEY,
+    codigo                TEXT PRIMARY KEY,
     nombre                TEXT NOT NULL,
     respuestas            INTEGER NOT NULL,
     acepta_critica        DOUBLE PRECISION,
@@ -33,16 +33,16 @@ CREATE TABLE IF NOT EXISTS docentes (
 
     pub const COMENTARIOS: &'static str = "\
 CREATE TABLE IF NOT EXISTS comentarios (
-    codigo         UUID PRIMARY KEY,
-    codigo_docente UUID REFERENCES docentes(codigo) NOT NULL,
+    codigo         TEXT PRIMARY KEY,
+    codigo_docente TEXT REFERENCES docentes(codigo) NOT NULL,
     cuatrimestre   TEXT NOT NULL,
     contenido      TEXT NOT NULL
 );";
 
     pub const CATEDRA_DOCENTE: &'static str = "\
 CREATE TABLE IF NOT EXISTS catedra_docente (
-    codigo_catedra UUID REFERENCES catedras(codigo),
-    codigo_docente UUID REFERENCES docentes(codigo),
+    codigo_catedra TEXT REFERENCES catedras(codigo),
+    codigo_docente TEXT REFERENCES docentes(codigo),
     CONSTRAINT catedra_docente_pkey PRIMARY KEY (codigo_catedra, codigo_docente)
 );";
 }
@@ -59,7 +59,10 @@ impl Materia {
 
 impl Catedra {
     pub fn insert_query(codigo_catedra: Uuid, codigo_materia: u32) -> String {
-        format!("INSERT INTO catedras (codigo, codigo_materia) VALUES ('{codigo_catedra}', {codigo_materia});")
+        format!(
+            "INSERT INTO catedras (codigo, codigo_materia) \
+VALUES ('{codigo_catedra}', {codigo_materia});"
+        )
     }
 }
 
@@ -85,9 +88,14 @@ impl ComentariosDocentePorCuatri {
     pub fn insert_query(&self, codigo_docente: &Uuid) -> String {
         let mut buffer = vec![];
 
-        for e in &self.entradas {
-            buffer.push(format!("INSERT INTO comentarios (codigo, codigo_docente, cuatrimestre, contenido) VALUES ('{}', '{codigo_docente}', '{}', '{}');",
-                Uuid::new_v4(), self.cuatrimestre, e.replace("'", "''")));
+        for contenido in &self.entradas {
+            buffer.push(format!(
+                "INSERT INTO comentarios (codigo, codigo_docente, cuatrimestre, contenido) \
+VALUES ('{}', '{codigo_docente}', '{}', '{}');",
+                Uuid::new_v4(),
+                self.cuatrimestre,
+                contenido.replace("'", "''")
+            ));
         }
 
         buffer.join("\n")
@@ -95,5 +103,8 @@ impl ComentariosDocentePorCuatri {
 }
 
 pub fn catedra_docente_rel_query(codigo_catedra: &Uuid, codigo_docente: &Uuid) -> String {
-    format!("INSERT INTO catedra_docente (codigo_catedra, codigo_docente) VALUES ('{codigo_catedra}', '{codigo_docente}');")
+    format!(
+        "INSERT INTO catedra_docente (codigo_catedra, codigo_docente) \
+VALUES ('{codigo_catedra}', '{codigo_docente}');"
+    )
 }
