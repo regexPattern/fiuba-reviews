@@ -44,7 +44,20 @@ pub async fn run() -> anyhow::Result<String> {
         };
 
         for (codigo_catedra, catedra) in catedras {
-            query_buffer.push(Catedra::insert_query(codigo_catedra, materia.codigo));
+            let mut nombres_docentes_catedra = catedra
+                .docentes
+                .keys()
+                .map(|nombre| nombre.to_owned())
+                .collect::<Vec<_>>();
+
+            nombres_docentes_catedra.sort();
+            let nombre_catedra = nombres_docentes_catedra.join("-");
+
+            query_buffer.push(Catedra::insert_query(
+                codigo_catedra,
+                nombre_catedra,
+                materia.codigo,
+            ));
 
             for (nombre_docente, calificacion) in catedra.docentes {
                 let codigo_docente = docente_to_uuid
