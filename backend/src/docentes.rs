@@ -46,12 +46,12 @@ pub async fn by_codigo(
 
 pub async fn by_catedra(
     State(pool): State<PgPool>,
-    Path(codigo_catedra): Path<String>,
+    Path(codigo): Path<String>,
 ) -> Result<Json<Vec<String>>, StatusCode> {
     let docentes_de_catedra = sqlx::query_as::<_, CatedraDocente>(
         "SELECT * FROM catedra_docente WHERE codigo_catedra = $1",
     )
-    .bind(codigo_catedra)
+    .bind(codigo)
     .fetch_all(&pool)
     .await
     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
