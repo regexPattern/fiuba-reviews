@@ -4,9 +4,9 @@ use axum::{
     Json,
 };
 use serde::Serialize;
-use sqlx::PgPool;
+use sqlx::{FromRow, PgPool};
 
-#[derive(Serialize)]
+#[derive(Serialize, FromRow)]
 pub struct Docente {
     codigo: String,
     nombre: String,
@@ -22,7 +22,7 @@ pub struct Docente {
     responde_mails: Option<f64>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, FromRow)]
 pub struct CatedraDocente {
     codigo_catedra: String,
     codigo_docente: String,
@@ -32,7 +32,8 @@ pub async fn by_codigo(
     State(pool): State<PgPool>,
     Path(codigo): Path<String>,
 ) -> Result<Json<Docente>, StatusCode> {
-    let docente = sqlx::query_as!(Docente, "SELECT * FROM docentes WHERE codigo = $1", codigo)
+    let docente = sqlx::query_as::<_, Docente>("SELECT * FROM docentes WHERE codigo = $1")
+        .bind(codigo)
         .fetch_one(&pool)
         .await
         .map_err(|err| match err {
@@ -47,11 +48,10 @@ pub async fn by_catedra(
     State(pool): State<PgPool>,
     Path(codigo_catedra): Path<String>,
 ) -> Result<Json<Vec<String>>, StatusCode> {
-    let docentes_de_catedra = sqlx::query_as!(
-        CatedraDocente,
+    let docentes_de_catedra = sqlx::query_as::<_, CatedraDocente>(
         "SELECT * FROM catedra_docente WHERE codigo_catedra = $1",
-        codigo_catedra
     )
+    .bind(codigo_catedra)
     .fetch_all(&pool)
     .await
     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
