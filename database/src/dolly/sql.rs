@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use uuid::Uuid;
 
 use super::{Calificacion, Catedra, ComentariosDocentePorCuatri, Materia};
@@ -12,6 +14,7 @@ CREATE TABLE IF NOT EXISTS materias (
     pub const CATEDRAS: &'static str = "\
 CREATE TABLE IF NOT EXISTS catedras (
     codigo         TEXT PRIMARY KEY,
+    nombre         TEXT NOT NULL,
     codigo_materia INTEGER REFERENCES materias(codigo) NOT NULL
 );";
 
@@ -58,29 +61,46 @@ impl Materia {
 }
 
 impl Catedra {
-    pub fn insert_query(codigo_catedra: Uuid, codigo_materia: u32) -> String {
-        format!(
-            "INSERT INTO catedras (codigo, codigo_materia) \
-VALUES ('{codigo_catedra}', {codigo_materia});"
-        )
+    pub fn insert_query(
+        codigo_catedra: Uuid,
+        nombre_catedra: String,
+        codigo_materia: u32,
+    ) -> String {
+        format!("INSERT INTO catedras (codigo, codigo_materia, nombre) VALUES ('{codigo_catedra}', {codigo_materia}, '{}');", nombre_catedra.replace("'", "''"))
     }
 }
 
 impl Calificacion {
     pub fn insert_query(&self, codigo_docente: &Uuid, nombre_docente: String) -> String {
-        let acepta_critica = self.acepta_critica.unwrap_or(0.0);
-        let asistencia = self.asistencia.unwrap_or(0.0);
-        let buen_trato = self.buen_trato.unwrap_or(0.0);
-        let claridad = self.claridad.unwrap_or(0.0);
-        let clase_organizada = self.clase_organizada.unwrap_or(0.0);
-        let cumple_horarios = self.cumple_horarios.unwrap_or(0.0);
-        let fomenta_participacion = self.fomenta_participacion.unwrap_or(0.0);
-        let panorama_amplio = self.panorama_amplio.unwrap_or(0.0);
-        let responde_mails = self.responde_mails.unwrap_or(0.0);
-        let respuestas = self.respuestas.unwrap_or(0.0);
+        let calificaciones = HashMap::from([
+            ("acepta_critica", self.acepta_critica),
+            ("asistencia", self.asistencia),
+            ("buen_trato", self.buen_trato),
+            ("claridad", self.claridad),
+            ("clase_organizada", self.clase_organizada),
+            ("cumple_horarios", self.cumple_horarios),
+            ("fomenta_participacion", self.fomenta_participacion),
+            ("panorama_amplio", self.panorama_amplio),
+            ("responde_mails", self.responde_mails),
+            ("respuestas", self.respuestas),
+        ]);
 
-        format!("INSERT INTO docentes (codigo, nombre, acepta_critica, asistencia, buen_trato, claridad, clase_organizada, cumple_horarios, fomenta_participacion, panorama_amplio, responde_mails, respuestas) \
-VALUES ('{codigo_docente}', '{}', {acepta_critica}, {asistencia}, {buen_trato}, {claridad}, {clase_organizada}, {cumple_horarios}, {fomenta_participacion}, {panorama_amplio}, {responde_mails}, {respuestas});", nombre_docente.replace("'", "''"))
+        let mut columns_to_insert = Vec::with_capacity(10);
+        let mut values_to_insert = Vec::with_capacity(10);
+
+        for (column_name, value) in calificaciones {
+            if let Some(value) = value {
+                columns_to_insert.push(column_name);
+                values_to_insert.push(value.to_string());
+            }
+        }
+
+        format!(
+            "INSERT INTO docentes (codigo, nombre, {}) VALUES ('{codigo_docente}', '{}', {});",
+            columns_to_insert.join(", "),
+            nombre_docente.replace("'", "''"),
+            values_to_insert.join(", ")
+        )
     }
 }
 
@@ -103,8 +123,5 @@ VALUES ('{}', '{codigo_docente}', '{}', '{}');",
 }
 
 pub fn catedra_docente_rel_query(codigo_catedra: &Uuid, codigo_docente: &Uuid) -> String {
-    format!(
-        "INSERT INTO catedra_docente (codigo_catedra, codigo_docente) \
-VALUES ('{codigo_catedra}', '{codigo_docente}');"
-    )
+    format!("INSERT INTO catedra_docente (codigo_catedra, codigo_docente) VALUES ('{codigo_catedra}', '{codigo_docente}');")
 }
