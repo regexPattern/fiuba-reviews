@@ -2,6 +2,8 @@ name: "fiuba-reviews"
 services:
   backend:
     build: ./backend
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@database:5432
     depends_on:
       database:
         condition: service_healthy
