@@ -4,9 +4,9 @@ use axum::{
     Json,
 };
 use serde::Serialize;
-use sqlx::PgPool;
+use sqlx::{FromRow, PgPool};
 
-#[derive(Serialize)]
+#[derive(Serialize, FromRow)]
 pub struct Comentario {
     codigo: String,
     codigo_docente: String,
@@ -18,14 +18,12 @@ pub async fn by_docente(
     State(pool): State<PgPool>,
     Path(codigo_docente): Path<String>,
 ) -> Result<Json<Vec<Comentario>>, StatusCode> {
-    let comentarios = sqlx::query_as!(
-        Comentario,
-        "SELECT * FROM comentarios WHERE codigo_docente = $1",
-        codigo_docente
-    )
-    .fetch_all(&pool)
-    .await
-    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let comentarios =
+        sqlx::query_as::<_, Comentario>("SELECT * FROM comentarios WHERE codigo_docente = $1")
+            .bind(codigo_docente)
+            .fetch_all(&pool)
+            .await
+            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     Ok(Json(comentarios))
 }
