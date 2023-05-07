@@ -11,7 +11,7 @@ use sqlx::postgres::PgPoolOptions;
 pub async fn run() -> anyhow::Result<()> {
     let pool = PgPoolOptions::new()
         .acquire_timeout(Duration::from_secs(5))
-        .connect(&std::env::var("DATABASE_URL").unwrap())
+        .connect(&std::env::var("DATABASE_URL")?)
         .await?;
 
     tracing::info!("establecida conexion con la base de datos");
@@ -19,12 +19,13 @@ pub async fn run() -> anyhow::Result<()> {
     let app = Router::new()
         .route("/materias", get(materias::get_all))
         .route("/materias/:codigo", get(materias::by_codigo))
-        .route("/catedras/:codigo_materia", get(catedras::by_materia))
+        .route("/materias/:codigo/catedras", get(catedras::by_materia))
         .route(
-            "/catedras/:codigo_materia/docentes",
+            "/catedras/:codigo_catedra/docentes",
             get(docentes::by_catedra),
         )
         .route("/docentes/:codigo", get(docentes::by_codigo))
+        .route("/docentes/:codigo/catedras", get(catedras::by_docente))
         .route("/comentarios/:codigo_docente", get(comentarios::by_docente))
         .with_state(pool);
 
