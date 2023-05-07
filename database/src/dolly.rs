@@ -84,48 +84,58 @@ impl Catedra {
     }
 }
 
-#[derive(Deserialize, Debug)]
-pub struct ComentariosDocentePorCuatri {
-    pub cuatrimestre: String,
-    pub entradas: Vec<String>,
+#[derive(Debug, PartialEq, Eq, Hash)]
+pub struct Comentarios {
+    pub codigo_materia: u32,
+    pub nombre_docente: String,
+    pub nombre_cuatrimestre: String,
 }
 
-impl ComentariosDocentePorCuatri {
+impl Comentarios {
     const URL: &'static str = "https://dollyfiuba.com/analitics/comentarios_docentes.json";
 
     pub async fn fetch_all(
         client: &ClientWithMiddleware,
-    ) -> anyhow::Result<HashMap<(u32, String), Self>> {
+    ) -> anyhow::Result<HashMap<Comentarios, Vec<String>>> {
         #[derive(Deserialize, Debug)]
-        struct ResponseComentario {
-            mat: u32,
-            doc: String,
-            cuat: String,
+        struct Cuatrimestre {
+            #[serde(alias = "mat")]
+            codigo_materia: u32,
+
+            #[serde(alias = "doc")]
+            nombre_docente: String,
+
+            #[serde(alias = "cuat")]
+            nombre_cuatrimestre: String,
+
             comentarios: Vec<Option<String>>,
         }
 
         tracing::info!("descargando listado de comentarios");
+
         let response = client.get(Self::URL).send().await?.text().await?;
-        let metadata: Vec<ResponseComentario> =
+        let cuatrimestres: Vec<Cuatrimestre> =
             serde_json::from_str(&response).map_err(|e| SerdeError::new(response, e))?;
 
-        let comentarios = metadata.into_iter().map(|metadata| {
-            let decoded_comentarios = metadata
+        let mut comentarios = HashMap::new();
+        for cuatrimestre in cuatrimestres {
+            let decoded_entries: Vec<_> = cuatrimestre
                 .comentarios
                 .into_iter()
                 .filter_map(|c| c)
                 .filter_map(|c| String::from_utf8(general_purpose::STANDARD.decode(c).ok()?).ok())
                 .collect();
 
-            (
-                (metadata.mat, metadata.doc),
-                Self {
-                    cuatrimestre: metadata.cuat,
-                    entradas: decoded_comentarios,
+            comentarios.insert(
+                Comentarios {
+                    nombre_cuatrimestre: cuatrimestre.nombre_cuatrimestre,
+                    nombre_docente: cuatrimestre.nombre_docente,
+                    codigo_materia: cuatrimestre.codigo_materia,
                 },
-            )
-        });
+                decoded_entries,
+            );
+        }
 
-        Ok(comentarios.collect())
+        Ok(comentarios)
     }
 }

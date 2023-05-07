@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use super::{Calificacion, Catedra, ComentariosDocentePorCuatri, Materia};
+use super::{Calificacion, Catedra, Materia};
 
 pub mod create_tables {
     pub const MATERIAS: &'static str = "\
@@ -104,23 +104,23 @@ impl Calificacion {
     }
 }
 
-impl ComentariosDocentePorCuatri {
-    pub fn insert_query(&self, codigo_docente: &Uuid) -> String {
-        let mut buffer = vec![];
-
-        for contenido in &self.entradas {
-            buffer.push(format!(
-                "INSERT INTO comentarios (codigo, codigo_docente, cuatrimestre, contenido) \
-VALUES ('{}', '{codigo_docente}', '{}', '{}');",
-                Uuid::new_v4(),
-                self.cuatrimestre,
-                contenido.replace("'", "''")
-            ));
-        }
-
-        buffer.join("\n")
-    }
-}
+// impl Comentarios {
+//     pub fn insert_query(&self, codigo_docente: &Uuid) -> String {
+//         let mut buffer = vec![];
+// 
+//         for contenido in &self.entradas {
+//             buffer.push(format!(
+//                 "INSERT INTO comentarios (codigo, codigo_docente, cuatrimestre, contenido) \
+// VALUES ('{}', '{codigo_docente}', '{}', '{}');",
+//                 Uuid::new_v4(),
+//                 self.cuatrimestre,
+//                 contenido.replace("'", "''")
+//             ));
+//         }
+// 
+//         buffer.join("\n")
+//     }
+// }
 
 pub fn catedra_docente_rel_query(codigo_catedra: &Uuid, codigo_docente: &Uuid) -> String {
     format!("INSERT INTO catedra_docente (codigo_catedra, codigo_docente) VALUES ('{codigo_catedra}', '{codigo_docente}');")

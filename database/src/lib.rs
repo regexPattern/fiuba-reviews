@@ -1,13 +1,15 @@
 mod dolly;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use dolly::sql::create_tables;
-use dolly::{Catedra, ComentariosDocentePorCuatri, Materia};
+use dolly::{Catedra, Materia};
 use http_cache_reqwest::{CACacheManager, Cache, CacheMode, HttpCache};
 use reqwest::Client;
 use reqwest_middleware::ClientBuilder;
 use uuid::Uuid;
+
+use crate::dolly::Comentarios;
 
 pub async fn run() -> anyhow::Result<String> {
     let client = ClientBuilder::new(Client::new())
@@ -19,7 +21,7 @@ pub async fn run() -> anyhow::Result<String> {
         .build();
 
     let materias = Materia::fetch_all(&client).await?;
-    let comentarios = ComentariosDocentePorCuatri::fetch_all(&client).await?;
+    let comentarios = Comentarios::fetch_all(&client).await?;
 
     let mut docente_to_uuid = HashMap::new();
 
@@ -31,7 +33,7 @@ pub async fn run() -> anyhow::Result<String> {
         create_tables::CATEDRA_DOCENTE.into(),
     ];
 
-    for materia in materias {
+    for materia in materias.take(1) {
         let mut query_buffer = vec![materia.insert_query()];
 
         let catedras = match Catedra::fetch_for_materia(&client, materia.codigo).await {
@@ -43,6 +45,8 @@ pub async fn run() -> anyhow::Result<String> {
             }
         };
 
+        let mut catedras_guardadas = HashSet::new();
+
         for (codigo_catedra, catedra) in catedras {
             let mut nombres_docentes_catedra = catedra
                 .docentes
@@ -50,8 +54,17 @@ pub async fn run() -> anyhow::Result<String> {
                 .map(|nombre| nombre.to_owned())
                 .collect::<Vec<_>>();
 
+            // TODO: Esta no s la forma mas eficiente de hacer esto claramente, ni en tiempo ni en
+            // memoria, pero como se me fueron ocurriendo estas ideas sobre la marcha, entonces por
+            // el momento se queda asi.
+            //
             nombres_docentes_catedra.sort();
             let nombre_catedra = nombres_docentes_catedra.join("-");
+            if catedras_guardadas.contains(&nombre_catedra) {
+                continue;
+            } else {
+                catedras_guardadas.insert(nombre_catedra.clone());
+            }
 
             query_buffer.push(Catedra::insert_query(
                 codigo_catedra,
@@ -79,11 +92,13 @@ pub async fn run() -> anyhow::Result<String> {
         output_buffer.push(query_buffer.join("\n"));
     }
 
-    for ((codigo_materia, nombre_docente), comentarios) in comentarios.into_iter() {
-        if let Some(codigo_docente) = docente_to_uuid.get(&(codigo_materia, nombre_docente)) {
-            output_buffer.push(comentarios.insert_query(codigo_docente));
-        }
-    }
+    let comentarios_vera = comentarios
+        .into_iter()
+        .filter(|(c, _)| c.codigo_materia == 7507 && c.nombre_docente == "Justo Narcizo")
+        .collect::<Vec<_>>();
+
+    dbg!(&comentarios_vera);
+    dbg!(comentarios_vera.len());
 
     Ok(output_buffer.join("\n\n"))
 }
