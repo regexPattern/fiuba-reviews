@@ -12,8 +12,6 @@ use reqwest::Client;
 use reqwest_middleware::ClientBuilder;
 use uuid::Uuid;
 
-// use crate::comentario::Cuatrimestre;
-
 pub async fn run() -> anyhow::Result<String> {
     let cliente = ClientBuilder::new(Client::new())
         .with(Cache(HttpCache {
