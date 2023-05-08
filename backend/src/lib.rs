@@ -17,16 +17,26 @@ pub async fn run() -> anyhow::Result<()> {
     tracing::info!("establecida conexion con la base de datos");
 
     let app = Router::new()
-        .route("/materias", get(materias::get_all))
-        .route("/materias/:codigo", get(materias::by_codigo))
-        .route("/materias/:codigo/catedras", get(catedras::by_materia))
+        .route("/materias", get(materias::listar))
+        .route("/materias/:codigo_materia", get(materias::informacion))
+        .route(
+            "/materias/:codigo_materia/catedras",
+            get(catedras::por_materia),
+        )
+        .route("/catedras/:codigo_catedra", get(catedras::informacion))
         .route(
             "/catedras/:codigo_catedra/docentes",
-            get(docentes::by_catedra),
+            get(docentes::por_catedra),
         )
-        .route("/docentes/:codigo", get(docentes::by_codigo))
-        .route("/docentes/:codigo/catedras", get(catedras::by_docente))
-        .route("/comentarios/:codigo_docente", get(comentarios::by_docente))
+        .route("/docentes/:codigo_docente", get(docentes::informacion))
+        .route(
+            "/docentes/:codigo_docente/catedras",
+            get(catedras::por_docente),
+        )
+        .route(
+            "/comentarios/:codigo_docente",
+            get(comentarios::por_docente),
+        )
         .with_state(pool);
 
     let addr: SocketAddr = "0.0.0.0:5000".parse().unwrap();
