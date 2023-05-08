@@ -7,6 +7,7 @@ services:
     depends_on:
       database:
         condition: service_healthy
+    restart: always
     ports:
       - "5000:5000"
 
@@ -18,7 +19,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
       timeout: 5s
       retries: 5
