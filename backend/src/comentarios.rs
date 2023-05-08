@@ -14,13 +14,13 @@ pub struct Comentario {
     contenido: String,
 }
 
-pub async fn by_docente(
+pub async fn por_docente(
     State(pool): State<PgPool>,
-    Path(codigo): Path<String>,
+    Path(codigo_docente): Path<String>,
 ) -> Result<Json<Vec<Comentario>>, StatusCode> {
     let comentarios =
         sqlx::query_as::<_, Comentario>("SELECT * FROM comentarios WHERE codigo_docente = $1")
-            .bind(codigo)
+            .bind(codigo_docente)
             .fetch_all(&pool)
             .await
             .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;

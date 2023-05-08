@@ -28,12 +28,12 @@ pub struct CatedraDocente {
     codigo_docente: String,
 }
 
-pub async fn by_codigo(
+pub async fn informacion(
     State(pool): State<PgPool>,
-    Path(codigo): Path<String>,
+    Path(codigo_catedra): Path<String>,
 ) -> Result<Json<Docente>, StatusCode> {
     let docente = sqlx::query_as::<_, Docente>("SELECT * FROM docentes WHERE codigo = $1")
-        .bind(codigo)
+        .bind(codigo_catedra)
         .fetch_one(&pool)
         .await
         .map_err(|err| match err {
@@ -44,14 +44,14 @@ pub async fn by_codigo(
     Ok(Json(docente))
 }
 
-pub async fn by_catedra(
+pub async fn por_catedra(
     State(pool): State<PgPool>,
-    Path(codigo): Path<String>,
+    Path(codigo_catedra): Path<String>,
 ) -> Result<Json<Vec<String>>, StatusCode> {
     let docentes_de_catedra = sqlx::query_as::<_, CatedraDocente>(
         "SELECT * FROM catedra_docente WHERE codigo_catedra = $1",
     )
-    .bind(codigo)
+    .bind(codigo_catedra)
     .fetch_all(&pool)
     .await
     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;

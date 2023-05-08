@@ -12,7 +12,7 @@ pub struct Materia {
     nombre: String,
 }
 
-pub async fn get_all(State(pool): State<PgPool>) -> Result<Json<Vec<Materia>>, StatusCode> {
+pub async fn listar(State(pool): State<PgPool>) -> Result<Json<Vec<Materia>>, StatusCode> {
     let materias = sqlx::query_as::<_, Materia>("SELECT * FROM materias")
         .fetch_all(&pool)
         .await
@@ -21,18 +21,15 @@ pub async fn get_all(State(pool): State<PgPool>) -> Result<Json<Vec<Materia>>, S
     Ok(Json(materias))
 }
 
-pub async fn by_codigo(
+pub async fn informacion(
     State(pool): State<PgPool>,
-    Path(codigo): Path<u32>,
+    Path(codigo_materia): Path<u32>,
 ) -> Result<Json<Materia>, StatusCode> {
     let materia = sqlx::query_as::<_, Materia>("SELECT * FROM materias WHERE codigo = $1")
-        .bind(codigo as i32)
+        .bind(codigo_materia as i32)
         .fetch_one(&pool)
         .await
-        .map_err(|err| match err {
-            sqlx::Error::RowNotFound => StatusCode::NOT_FOUND,
-            _ => StatusCode::INTERNAL_SERVER_ERROR,
-        })?;
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     Ok(Json(materia))
 }
