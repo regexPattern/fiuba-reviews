@@ -13,19 +13,19 @@ use uuid::Uuid;
 
 const URL_DESCARGA_BASE: &'static str = "https://dollyfiuba.com/analitics/cursos";
 
-pub const TABLA: &'static str = "\
-CREATE TABLE IF NOT EXISTS catedras (
+pub const TABLA: &'static str = r#"
+CREATE TABLE IF NOT EXISTS catedra (
     codigo         TEXT PRIMARY KEY,
     nombre         TEXT NOT NULL,
-    codigo_materia INTEGER REFERENCES materias(codigo) NOT NULL
-);";
+    codigo_materia INTEGER REFERENCES materia(codigo) NOT NULL
+);"#;
 
-pub const TABLA_RELACION_CATEDRA_DOCENTE: &'static str = "\
+pub const TABLA_RELACION_CATEDRA_DOCENTE: &'static str = r#"
 CREATE TABLE IF NOT EXISTS catedra_docente (
-    codigo_catedra TEXT REFERENCES catedras(codigo),
-    codigo_docente TEXT REFERENCES docentes(codigo),
+    codigo_catedra TEXT REFERENCES catedra(codigo),
+    codigo_docente TEXT REFERENCES docente(codigo),
     CONSTRAINT catedra_docente_pkey PRIMARY KEY (codigo_catedra, codigo_docente)
-);";
+);"#;
 
 pub struct Catedra {
     pub codigo: Uuid,
@@ -93,7 +93,8 @@ impl Catedra {
 
     pub fn sql(&self, codigo_materia: u32) -> String {
         format!(
-            "INSERT INTO catedras (codigo, codigo_materia, nombre) VALUES ('{}', {}, '{}');",
+            r#"INSERT INTO catedra (codigo, codigo_materia, nombre)
+VALUES ('{}', {}, '{}');"#,
             self.codigo,
             codigo_materia,
             self.nombre.replace("'", "''")
@@ -102,7 +103,8 @@ impl Catedra {
 
     pub fn relacionar_docente_sql(&self, codigo_docente: &Uuid) -> String {
         format!(
-            "INSERT INTO catedra_docente (codigo_catedra, codigo_docente) VALUES ('{}', '{}');",
+            r#"INSERT INTO catedra_docente (codigo_catedra, codigo_docente)
+VALUES ('{}', '{}');"#,
             self.codigo, codigo_docente
         )
     }

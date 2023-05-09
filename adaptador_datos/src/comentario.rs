@@ -8,13 +8,13 @@ use uuid::Uuid;
 
 const URL_DESCARGA: &'static str = "https://dollyfiuba.com/analitics/comentarios_docentes.json";
 
-pub const TABLA: &'static str = "\
-CREATE TABLE IF NOT EXISTS comentarios (
+pub const TABLA: &'static str = r#"
+CREATE TABLE IF NOT EXISTS comentario (
     codigo         TEXT PRIMARY KEY,
-    codigo_docente TEXT REFERENCES docentes(codigo) NOT NULL,
+    codigo_docente TEXT REFERENCES docente(codigo) NOT NULL,
     cuatrimestre   TEXT NOT NULL,
     contenido      TEXT NOT NULL
-);";
+);"#;
 
 #[derive(Deserialize, PartialEq, Eq, Hash)]
 pub struct Cuatrimestre {
@@ -67,8 +67,8 @@ impl Cuatrimestre {
             .iter()
             .map(|contenido| {
                 format!(
-                    "INSERT INTO comentarios (codigo, codigo_docente, cuatrimestre, contenido) \
-VALUES ('{}', '{}', '{}', '{}');",
+                    r#"INSERT INTO comentario (codigo, codigo_docente, cuatrimestre, contenido)
+VALUES ('{}', '{}', '{}', '{}');"#,
                     Uuid::new_v4(),
                     codigo_docente,
                     self.nombre,
