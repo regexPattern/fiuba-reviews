@@ -4,9 +4,9 @@ use std::{fs::File, io::Write};
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
 
-    let sql = database::run().await?;
-    let mut init_sql_file = File::create("init.sql")?;
-    init_sql_file.write_all(sql.as_bytes())?;
+    let data_inicializacion = adaptador::run().await?;
+    let mut archivo_init_sql = File::create("init.sql")?;
+    archivo_init_sql.write_all(data_inicializacion.as_bytes())?;
 
     Ok(())
 }
