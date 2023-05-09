@@ -3,19 +3,16 @@ services:
   backend:
     build: ./backend
     environment:
-      DATABASE_URL: postgres://postgres:postgres@database:5432
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432
       WAIT_HOSTS: database:5432
     depends_on:
       database:
         condition: service_healthy
     ports:
-      - 5000:5000
+      - ${BACKEND_PORT}:${BACKEND_PORT}
 
   database:
     build: ./adaptador_datos
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
     ports:
       - 5432:5432
     healthcheck:
