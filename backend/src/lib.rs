@@ -1,47 +1,51 @@
-mod catedras;
-mod comentarios;
-mod docentes;
-mod materias;
+mod catedra;
+mod comentario;
+mod materia;
 
-use std::{net::SocketAddr, time::Duration};
+use std::{
+    net::{Ipv4Addr, SocketAddr},
+    num::ParseIntError,
+    time::Duration,
+};
 
 use axum::{routing::get, Router, Server};
 use sqlx::postgres::PgPoolOptions;
+use thiserror::Error;
 
-pub async fn run() -> anyhow::Result<()> {
+#[derive(Error, Debug)]
+enum ErrorPuerto {
+    #[error("variable de entorno `BACKEND_PORT` no encontrada")]
+    VariableNoEncontrada,
+
+    #[error("variable de entorno `BACKEND_PORT` invalida: `{0}`")]
+    ValorInvalido(ParseIntError),
+}
+
+pub async fn escuchar() -> anyhow::Result<()> {
+    let puerto: u16 = std::env::var("BACKEND_PORT")
+        .map_err(|_| ErrorPuerto::VariableNoEncontrada)?
+        .parse()
+        .map_err(|err| ErrorPuerto::ValorInvalido(err))?;
+
     let pool = PgPoolOptions::new()
         .acquire_timeout(Duration::from_secs(5))
         .connect(&std::env::var("DATABASE_URL")?)
         .await?;
 
-    tracing::info!("establecida conexion con la base de datos");
+    tracing::info!("conexion establecida con la base de datos");
 
     let app = Router::new()
-        .route("/materias", get(materias::listar))
-        .route("/materias/:codigo_materia", get(materias::informacion))
+        .route("/materia", get(materia::index))
+        .route("/materia/:codigo_materia/catedras", get(materia::catedras))
         .route(
-            "/materias/:codigo_materia/catedras",
-            get(catedras::por_materia),
-        )
-        .route("/catedras/:codigo_catedra", get(catedras::informacion))
-        .route(
-            "/catedras/:codigo_catedra/docentes",
-            get(docentes::por_catedra),
-        )
-        .route("/docentes/:codigo_docente", get(docentes::informacion))
-        .route(
-            "/docentes/:codigo_docente/catedras",
-            get(catedras::por_docente),
-        )
-        .route(
-            "/comentarios/:codigo_docente",
-            get(comentarios::por_docente),
+            "/catedra/:codigo_catedra/docentes",
+            get(catedra::docentes_con_comentarios),
         )
         .with_state(pool);
 
-    let addr: SocketAddr = "0.0.0.0:5000".parse().unwrap();
+    let addr = SocketAddr::from(("0.0.0.0".parse::<Ipv4Addr>().unwrap(), puerto));
 
-    tracing::info!("escuchando en '{addr}'");
+    tracing::info!("escuchando en `{addr}`");
 
     Ok(Server::bind(&addr).serve(app.into_make_service()).await?)
 }
