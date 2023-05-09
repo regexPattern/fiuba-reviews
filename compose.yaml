@@ -3,23 +3,23 @@ services:
   backend:
     build: ./backend
     environment:
-      - DATABASE_URL=postgres://postgres:postgres@database:5432
+      DATABASE_URL: postgres://postgres:postgres@database:5432
+      WAIT_HOSTS: database:5432
     depends_on:
       database:
         condition: service_healthy
-    restart: always
     ports:
-      - "5000:5000"
+      - 5000:5000
 
   database:
-    build: ./database
+    build: ./adaptador_datos
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - 5432:5432
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
       interval: 5s
       timeout: 5s
       retries: 5
