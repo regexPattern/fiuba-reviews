@@ -4,6 +4,6 @@ frontend/node_modules
 
 backend/target
 
-database/http-cacache
-database/*.sql
-database/target
+adaptador_datos/http-cacache
+adaptador_datos/*.sql
+adaptador_datos/target
