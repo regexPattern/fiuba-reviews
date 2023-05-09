@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS comentario (
     codigo_docente TEXT REFERENCES docente(codigo) NOT NULL,
     cuatrimestre   TEXT NOT NULL,
     contenido      TEXT NOT NULL
-);"#;
+);
+"#;
 
 #[derive(Deserialize, PartialEq, Eq, Hash)]
 pub struct Cuatrimestre {
@@ -67,8 +68,10 @@ impl Cuatrimestre {
             .iter()
             .map(|contenido| {
                 format!(
-                    r#"INSERT INTO comentario (codigo, codigo_docente, cuatrimestre, contenido)
-VALUES ('{}', '{}', '{}', '{}');"#,
+                    r#"
+INSERT INTO comentario (codigo, codigo_docente, cuatrimestre, contenido)
+VALUES ('{}', '{}', '{}', '{}');
+"#,
                     Uuid::new_v4(),
                     codigo_docente,
                     self.nombre,
