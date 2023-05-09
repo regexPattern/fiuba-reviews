@@ -9,12 +9,12 @@ const URL_DESCARGA_MATERIAS: &'static str =
     "https://raw.githubusercontent.com/lugfi/dolly/master/data/comun.json";
 const URL_DESCARGA_EQUIVALENCIAS: &'static str = "https://raw.githubusercontent.com/lugfi/dolly/f47f553a89dc7c7cbf8192277c9f2e3e1e826bf0/data/equivalencias.json";
 
-pub const TABLA: &'static str = "\
-CREATE TABLE IF NOT EXISTS materias (
+pub const TABLA: &'static str = r#"
+CREATE TABLE IF NOT EXISTS materia (
     codigo INTEGER PRIMARY KEY,
     nombre TEXT NOT NULL,
     codigo_equivalencia INTEGER
-);";
+);"#;
 
 #[serde_as]
 #[derive(Deserialize, Debug)]
@@ -84,14 +84,14 @@ impl Materia {
     }
 
     pub fn sql(&self) -> String {
-        let mut columnas = "codigo, nombre".to_string();
-        let mut valores = format!("{}, '{}'", self.codigo, self.nombre.replace("'", "''"));
-
-        if let Some(codigo_equivalencia) = self.codigo_equivalencia {
-            columnas.push_str(", codigo_equivalencia");
-            valores.push_str(&format!(", {codigo_equivalencia}"));
-        }
-
-        format!("INSERT INTO materias ({columnas}) VALUES ({valores});")
+        format!(
+            r#"INSERT INTO materia (codigo, nombre, codigo_equivalencia)
+VALUES ({}, '{}', {});"#,
+            self.codigo,
+            self.nombre.replace("'", "''"),
+            self.codigo_equivalencia
+                .map(|v| v.to_string())
+                .unwrap_or("NULL".to_string())
+        )
     }
 }
