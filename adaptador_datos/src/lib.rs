@@ -15,7 +15,7 @@ use uuid::Uuid;
 pub async fn run() -> anyhow::Result<String> {
     let cliente = ClientBuilder::new(Client::new())
         .with(Cache(HttpCache {
-            mode: CacheMode::ForceCache,
+            mode: CacheMode::Default,
             manager: CACacheManager::default(),
             options: None,
         }))
@@ -62,7 +62,7 @@ pub async fn run() -> anyhow::Result<String> {
             }
         }
 
-        buffer_output.push(bloque_query_buffer.join("\n"));
+        buffer_output.push(bloque_query_buffer.join(""));
     }
 
     for (cuatrimestre, comentarios) in comentarios.into_iter() {
@@ -74,5 +74,5 @@ pub async fn run() -> anyhow::Result<String> {
         }
     }
 
-    Ok(buffer_output.join("\n\n"))
+    Ok(buffer_output.join(""))
 }

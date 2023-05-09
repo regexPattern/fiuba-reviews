@@ -17,20 +17,24 @@ pub const TABLA: &'static str = r#"
 CREATE TABLE IF NOT EXISTS catedra (
     codigo         TEXT PRIMARY KEY,
     nombre         TEXT NOT NULL,
-    codigo_materia INTEGER REFERENCES materia(codigo) NOT NULL
-);"#;
+    codigo_materia INTEGER REFERENCES materia(codigo) NOT NULL,
+    promedio       DOUBLE PRECISION NOT NULL
+);
+"#;
 
 pub const TABLA_RELACION_CATEDRA_DOCENTE: &'static str = r#"
 CREATE TABLE IF NOT EXISTS catedra_docente (
     codigo_catedra TEXT REFERENCES catedra(codigo),
     codigo_docente TEXT REFERENCES docente(codigo),
     CONSTRAINT catedra_docente_pkey PRIMARY KEY (codigo_catedra, codigo_docente)
-);"#;
+);
+"#;
 
 pub struct Catedra {
     pub codigo: Uuid,
     pub nombre: String,
     pub docentes: HashMap<String, Docente>,
+    pub promedio: f64,
 }
 
 impl PartialEq for Catedra {
@@ -82,10 +86,26 @@ impl Catedra {
             catedra.nombre = nombres_docentes.join("-");
         }
 
-        let catedras = catedras.into_iter().map(|catedra| Catedra {
-            codigo: Uuid::new_v4(),
-            nombre: catedra.nombre,
-            docentes: catedra.docentes,
+        let catedras = catedras.into_iter().map(|catedra| {
+            let acumulado: f64 = catedra
+                .docentes
+                .values()
+                .map(|docente| docente.promedio_calificaciones())
+                .sum();
+
+            let cantidad_docentes = catedra.docentes.len();
+            let promedio = if cantidad_docentes > 0 {
+                acumulado / cantidad_docentes as f64
+            } else {
+                0.0
+            };
+
+            Catedra {
+                codigo: Uuid::new_v4(),
+                nombre: catedra.nombre,
+                docentes: catedra.docentes,
+                promedio,
+            }
         });
 
         Ok(catedras.collect())
@@ -93,18 +113,23 @@ impl Catedra {
 
     pub fn sql(&self, codigo_materia: u32) -> String {
         format!(
-            r#"INSERT INTO catedra (codigo, codigo_materia, nombre)
-VALUES ('{}', {}, '{}');"#,
+            r#"
+INSERT INTO catedra (codigo, codigo_materia, nombre, promedio)
+VALUES ('{}', {}, '{}', {});
+"#,
             self.codigo,
             codigo_materia,
-            self.nombre.replace("'", "''")
+            self.nombre.replace("'", "''"),
+            self.promedio
         )
     }
 
     pub fn relacionar_docente_sql(&self, codigo_docente: &Uuid) -> String {
         format!(
-            r#"INSERT INTO catedra_docente (codigo_catedra, codigo_docente)
-VALUES ('{}', '{}');"#,
+            r#"
+INSERT INTO catedra_docente (codigo_catedra, codigo_docente)
+VALUES ('{}', '{}');
+"#,
             self.codigo, codigo_docente
         )
     }

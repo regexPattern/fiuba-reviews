@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS materia (
     codigo INTEGER PRIMARY KEY,
     nombre TEXT NOT NULL,
     codigo_equivalencia INTEGER
-);"#;
+);
+"#;
 
 #[serde_as]
 #[derive(Deserialize, Debug)]
@@ -85,8 +86,10 @@ impl Materia {
 
     pub fn sql(&self) -> String {
         format!(
-            r#"INSERT INTO materia (codigo, nombre, codigo_equivalencia)
-VALUES ({}, '{}', {});"#,
+            r#"
+INSERT INTO materia (codigo, nombre, codigo_equivalencia)
+VALUES ({}, '{}', {});
+"#,
             self.codigo,
             self.nombre.replace("'", "''"),
             self.codigo_equivalencia
