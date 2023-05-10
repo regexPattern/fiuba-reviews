@@ -32,10 +32,31 @@ pub struct DocenteConComentarios {
     comentarios: Vec<Comentario>,
 }
 
+#[derive(Serialize)]
+pub struct ComentariosCatedra {
+    nombre_catedra: String,
+    docentes_con_comentarios: Vec<DocenteConComentarios>,
+}
+
 pub async fn docentes_con_comentarios(
     State(pool): State<PgPool>,
     Path(codigo_catedra): Path<String>,
-) -> Result<Json<Vec<DocenteConComentarios>>, StatusCode> {
+) -> Result<Json<ComentariosCatedra>, StatusCode> {
+    #[derive(FromRow)]
+    struct NombreCatedra(String);
+
+    let nombre_catedra = sqlx::query_as::<_, NombreCatedra>(
+        r#"
+SELECT nombre
+FROM catedra
+WHERE codigo = $1;
+"#,
+    )
+    .bind(&codigo_catedra)
+    .fetch_one(&pool)
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
     let docentes = sqlx::query_as::<_, Docente>(
         r#"
 SELECT docente.*
@@ -60,5 +81,8 @@ AND catedra_docente.codigo_catedra = $1;
         }
     }
 
-    Ok(Json(docentes_con_comentarios))
+    Ok(Json(ComentariosCatedra {
+        nombre_catedra: nombre_catedra.0,
+        docentes_con_comentarios,
+    }))
 }

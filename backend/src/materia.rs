@@ -27,6 +27,12 @@ FROM materia;
     Ok(Json(materias))
 }
 
+#[derive(Serialize)]
+pub struct CatedrasConNombreMateria {
+    nombre_materia: String,
+    catedras: Vec<Catedra>,
+}
+
 #[derive(Serialize, FromRow)]
 pub struct Catedra {
     pub codigo: String,
@@ -37,8 +43,23 @@ pub struct Catedra {
 pub async fn catedras(
     State(pool): State<PgPool>,
     Path(codigo_materia): Path<u32>,
-) -> Result<Json<Vec<Catedra>>, StatusCode> {
-    let materia = sqlx::query_as::<_, Catedra>(
+) -> Result<Json<CatedrasConNombreMateria>, StatusCode> {
+    #[derive(FromRow)]
+    struct NombreMateria(String);
+
+    let nombre_materia = sqlx::query_as::<_, NombreMateria>(
+        r#"
+SELECT nombre
+FROM materia
+WHERE codigo = $1;
+"#,
+    )
+    .bind(codigo_materia as i32)
+    .fetch_one(&pool)
+    .await
+    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    let catedras = sqlx::query_as::<_, Catedra>(
         r#"
 SELECT codigo, nombre, promedio
 FROM catedra
@@ -51,5 +72,8 @@ ORDER BY promedio;
     .await
     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    Ok(Json(materia))
+    Ok(Json(CatedrasConNombreMateria {
+        nombre_materia: nombre_materia.0,
+        catedras,
+    }))
 }
