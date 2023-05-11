@@ -20,15 +20,15 @@ CREATE TABLE IF NOT EXISTS docente (
 "#;
 
 mod pesos_calificaciones {
-    pub const ACEPTA_CRITICA: f64 = 0.5;
+    pub const ACEPTA_CRITICA: f64 = 1.0;
     pub const ASISTENCIA: f64 = 1.0;
-    pub const BUEN_TRATO: f64 = 0.5;
-    pub const CLARIDAD: f64 = 0.7;
-    pub const CLASE_ORGANIZADA: f64 = 0.7;
+    pub const BUEN_TRATO: f64 = 1.0;
+    pub const CLARIDAD: f64 = 1.0;
+    pub const CLASE_ORGANIZADA: f64 = 1.0;
     pub const CUMPLE_HORARIOS: f64 = 1.0;
-    pub const FOMENTA_PARTICIPACION: f64 = 0.5;
-    pub const PANORAMA_AMPLIO: f64 = 0.5;
-    pub const RESPONDE_MAILS: f64 = 0.5;
+    pub const FOMENTA_PARTICIPACION: f64 = 1.0;
+    pub const PANORAMA_AMPLIO: f64 = 1.0;
+    pub const RESPONDE_MAILS: f64 = 1.0;
 }
 
 #[derive(Deserialize, Default)]
