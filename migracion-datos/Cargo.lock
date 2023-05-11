@@ -3,26 +3,6 @@
 version = 3
 
 [[package]]
-name = "adaptador"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "base64",
- "format_serde_error",
- "http-cache",
- "http-cache-reqwest",
- "reqwest",
- "reqwest-middleware",
- "serde",
- "serde_json",
- "serde_with",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "uuid",
-]
-
-[[package]]
 name = "android_system_properties"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1074,6 +1054,26 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.15",
+]
+
+[[package]]
+name = "migrador_datos"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "base64",
+ "format_serde_error",
+ "http-cache",
+ "http-cache-reqwest",
+ "reqwest",
+ "reqwest-middleware",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
 ]
 
 [[package]]
