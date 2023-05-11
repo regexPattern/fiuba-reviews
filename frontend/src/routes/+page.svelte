@@ -3,18 +3,23 @@
 
 	export let data: PageData;
 
-	let searchQuery = "";
+	let queryFiltro = "";
+	$: materiasMostradas = materiasFiltradas(queryFiltro);
+
+	function materiasFiltradas(queryFiltro: string) {
+		return data.materias.filter(
+			(m) => m.nombre.includes(queryFiltro.toLowerCase()) || m.codigo === parseInt(queryFiltro, 10),
+		);
+	}
 </script>
 
-<input bind:value={searchQuery} placeholder="Buscar materia" />
+<input bind:value={queryFiltro} placeholder="Buscar materia" use:debouce />
 <ul>
-	{#each data.materias as materia}
-		{#if materia.nombre.includes(searchQuery.toLowerCase()) || (searchQuery.length === 4 && materia.codigo === parseInt(searchQuery, 10))}
-			<li class="uppercase">
-				<a href={`/materia/${materia.codigo_equivalencia || materia.codigo}`}
-					>{materia.codigo} - {materia.nombre}</a
-				>
-			</li>
-		{/if}
+	{#each materiasMostradas as materia}
+		<li class="uppercase">
+			<a href={`/materia/${materia.codigo_equivalencia || materia.codigo}`}
+				>{materia.codigo} - {materia.nombre}</a
+			>
+		</li>
 	{/each}
 </ul>

@@ -3,6 +3,8 @@ import type { PageServerLoad } from "./$types";
 
 import { env } from "$env/dynamic/private";
 
+export const prerender = true;
+
 export const load = (async ({ params }) => {
 	const respuesta = await fetch(`${env.BACKEND_URL}/catedra/${params.codigo}/docentes`);
 	const payload = (await respuesta.json()) as {
