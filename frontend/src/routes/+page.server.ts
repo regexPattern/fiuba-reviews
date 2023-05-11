@@ -1,10 +1,9 @@
-import type { Materia } from "$lib/types";
 import type { PageServerLoad } from "./$types";
+import prisma from "$lib/prisma";
 
-import { env } from "$env/dynamic/private";
+export const prerender = true;
 
-export const load = (async ({ fetch }) => {
-	const respuesta = await fetch(`${env.BACKEND_URL}/materia`);
-	const materias = (await respuesta.json()) as Materia[];
+export const load = (async () => {
+	const materias = await prisma.materia.findMany();
 	return { materias };
 }) satisfies PageServerLoad;

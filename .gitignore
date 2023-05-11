@@ -1,9 +1,9 @@
+**/.env
+
 frontend/.svelte-kit
 frontend/build
 frontend/node_modules
 
-backend/target
-
-adaptador_datos/http-cacache
-adaptador_datos/*.sql
-adaptador_datos/target
+migracion-datos/http-cacache
+migracion-datos/*.sql
+migracion-datos/target
