@@ -5,5 +5,6 @@ export const prerender = true;
 
 export const load = (async () => {
 	const materias = await prisma.materia.findMany();
+
 	return { materias };
 }) satisfies PageServerLoad;

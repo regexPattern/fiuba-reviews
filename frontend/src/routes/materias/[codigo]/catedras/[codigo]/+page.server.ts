@@ -10,6 +10,7 @@ export const load = (async ({ params }) => {
 		},
 		select: {
 			nombre: true,
+			codigo_materia: true,
 			catedradocente: {
 				select: {
 					docentes: {
@@ -39,5 +40,5 @@ export const load = (async ({ params }) => {
 		return rel.docentes;
 	});
 
-	return { catedra, docentes };
+	return { catedra: { nombre: catedra.nombre, codigo_materia: catedra.codigo_materia }, docentes };
 }) satisfies PageServerLoad;

@@ -27,7 +27,7 @@
 <ul>
 	{#each data.materia.catedra as catedra}
 		<li>
-			<a href={`/catedras/${catedra.codigo}`}>{catedra.promedio.toFixed(1)} - {catedra.nombre}</a>
+			<a href={`/materias/${data.materia.codigo}/catedras/${catedra.codigo}`}>{catedra.promedio.toFixed(1)} - {catedra.nombre}</a>
 		</li>
 	{/each}
 </ul>
