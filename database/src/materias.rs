@@ -1,5 +1,6 @@
 use std::{cmp::Ordering, collections::HashMap};
 
+use format_serde_error::SerdeError;
 use reqwest_middleware::ClientWithMiddleware;
 use serde::Deserialize;
 
@@ -38,7 +39,10 @@ impl Materia {
 
         tracing::info!("descargando listado de materias");
         let res = http.get(URL_DESCARGA_MATERIAS).send().await?;
-        let Materias { mut materias } = res.json().await?;
+        let data = res.text().await?;
+
+        let Materias { mut materias } =
+            serde_json::from_str(&data).map_err(|err| SerdeError::new(data, err))?;
 
         Self::asignas_equivalencias(http, &mut materias).await?;
 
@@ -63,7 +67,10 @@ impl Materia {
         tracing::info!("descargando listado de equivalencias");
 
         let res = http.get(URL_DESCARGA_EQUIVALENCIAS).send().await?;
-        let codigos_equivalencias: Vec<Vec<u32>> = res.json().await?;
+        let data = res.text().await?;
+
+        let codigos_equivalencias: Vec<Vec<u32>> =
+            serde_json::from_str(&data).map_err(|err| SerdeError::new(data, err))?;
 
         let mut equivalencias = HashMap::new();
 
