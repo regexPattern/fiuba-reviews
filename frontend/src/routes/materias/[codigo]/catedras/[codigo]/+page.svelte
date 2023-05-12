@@ -16,7 +16,9 @@
 	ordenarPorPromedioDescendente();
 </script>
 
-<h1>{data.catedra.nombre}</h1>
+<h1 class="text-xl font-bold">{data.catedra.codigo_materia} - {data.catedra.nombre}</h1>
+<br />
+
 {#each data.docentes as docente}
 	<article class="mb-12">
 		<h3>{docente.promedio.toFixed(1)} - {docente.nombre}</h3>
