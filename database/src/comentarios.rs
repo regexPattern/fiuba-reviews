@@ -1,6 +1,7 @@
 use std::{collections::HashMap, hash::Hash};
 
 use base64::{engine::general_purpose, Engine};
+use format_serde_error::SerdeError;
 use reqwest_middleware::ClientWithMiddleware;
 use serde::Deserialize;
 use uuid::Uuid;
@@ -43,7 +44,10 @@ impl Cuatrimestre {
 
         tracing::info!("descargando listado de comentarios");
         let res = client.get(URL_DESCARGA).send().await?;
-        let cuatrimestres: Vec<Payload> = res.json().await?;
+        let data = res.text().await?;
+
+        let cuatrimestres: Vec<Payload> =
+            serde_json::from_str(&data).map_err(|err| SerdeError::new(data, err))?;
 
         Ok(cuatrimestres
             .into_iter()

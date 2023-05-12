@@ -3,6 +3,7 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+use format_serde_error::SerdeError;
 use reqwest_middleware::ClientWithMiddleware;
 use serde::Deserialize;
 use uuid::Uuid;
@@ -102,7 +103,10 @@ impl Materia {
             .send()
             .await?;
 
-        let Catedras { mut catedras } = res.json().await?;
+        let data = res.text().await?;
+
+        let Catedras { mut catedras } =
+            serde_json::from_str(&data).map_err(|err| SerdeError::new(data, err))?;
 
         for catedra in &mut catedras {
             let mut nombres_docentes: Vec<_> = catedra.nombre.split('-').collect();
