@@ -12,7 +12,7 @@ use reqwest::Client;
 use reqwest_middleware::ClientBuilder;
 use uuid::Uuid;
 
-pub async fn generar_sql() -> anyhow::Result<String> {
+pub async fn indexar_dolly() -> anyhow::Result<String> {
     let http = ClientBuilder::new(Client::new())
         .with(Cache(HttpCache {
             mode: CacheMode::Default,
