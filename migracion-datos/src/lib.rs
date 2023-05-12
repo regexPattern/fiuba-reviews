@@ -5,14 +5,20 @@ mod materias;
 use std::collections::HashMap;
 
 use comentarios::Cuatrimestre;
+use http_cache_reqwest::{CACacheManager, Cache, CacheMode, HttpCache};
 use materias::Materia;
-use reqwest_middleware::ClientWithMiddleware;
+use reqwest::Client;
+use reqwest_middleware::ClientBuilder;
 use uuid::Uuid;
 
-pub async fn descargar(cliente_http: &ClientWithMiddleware) -> anyhow::Result<String> {
-    let materias = Materia::descargar(cliente_http).await?;
-    let comentarios = Cuatrimestre::descargar_comentarios(cliente_http).await?;
-    let mut codigos_docentes = HashMap::new();
+pub async fn generar_sql() -> anyhow::Result<String> {
+    let cliente_http = ClientBuilder::new(Client::new())
+        .with(Cache(HttpCache {
+            mode: CacheMode::Default,
+            manager: CACacheManager::default(),
+            options: None,
+        }))
+        .build();
 
     let mut output: Vec<String> = vec![
         materias::CREACION_TABLA.into(),
@@ -22,10 +28,14 @@ pub async fn descargar(cliente_http: &ClientWithMiddleware) -> anyhow::Result<St
         catedras::CREACION_TABLA_CATEDRA_DOCENTE.into(),
     ];
 
+    let materias = Materia::descargar(&cliente_http).await?;
+    let comentarios = Cuatrimestre::descargar_comentarios(&cliente_http).await?;
+    let mut codigos_docentes = HashMap::new();
+
     for materia in materias.into_iter() {
         output.push(materia.query_sql());
 
-        let catedras = match materia.catedras(cliente_http).await {
+        let catedras = match materia.catedras(&cliente_http).await {
             Ok(catedras) => catedras,
             Err(err) => {
                 tracing::error!("error descargando catedras de materia {}", materia.codigo);
