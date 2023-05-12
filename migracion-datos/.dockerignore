@@ -1,7 +1,0 @@
-.dockerignore
-.env
-Dockerfile
-compose.yaml
-http-cacache
-init.sql
-target

@@ -1,12 +1,11 @@
 use std::{collections::HashMap, hash::Hash};
 
 use base64::{engine::general_purpose, Engine};
-use format_serde_error::SerdeError;
 use reqwest_middleware::ClientWithMiddleware;
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::catedras::NombreDocente;
+use crate::sql::Sql;
 
 const URL_DESCARGA: &str = "https://dollyfiuba.com/analitics/comentarios_docentes.json";
 
@@ -28,7 +27,7 @@ pub struct Cuatrimestre {
     pub codigo_materia: u32,
 
     #[serde(alias = "doc")]
-    pub nombre_docente: NombreDocente,
+    pub nombre_docente: String,
 }
 
 impl Cuatrimestre {
@@ -36,17 +35,15 @@ impl Cuatrimestre {
         client: &ClientWithMiddleware,
     ) -> anyhow::Result<HashMap<Cuatrimestre, Vec<String>>> {
         #[derive(Deserialize)]
-        struct ComentariosCuatrimestre {
+        struct Payload {
             #[serde(flatten)]
             cuatrimestre: Cuatrimestre,
             comentarios: Vec<Option<String>>,
         }
 
         tracing::info!("descargando listado de comentarios");
-
-        let respuesta = client.get(URL_DESCARGA).send().await?.text().await?;
-        let cuatrimestres: Vec<ComentariosCuatrimestre> =
-            serde_json::from_str(&respuesta).map_err(|err| SerdeError::new(respuesta, err))?;
+        let res = client.get(URL_DESCARGA).send().await?;
+        let cuatrimestres: Vec<Payload> = res.json().await?;
 
         Ok(cuatrimestres
             .into_iter()
@@ -77,7 +74,7 @@ VALUES ('{}', '{}', '{}', '{}');
                     Uuid::new_v4(),
                     codigo_docente,
                     self.nombre,
-                    contenido.replace('\'', "''")
+                    contenido.sanitizar()
                 )
             })
             .collect::<Vec<_>>()

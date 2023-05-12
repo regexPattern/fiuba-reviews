@@ -3,15 +3,16 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+use reqwest_middleware::ClientWithMiddleware;
 use serde::Deserialize;
 use uuid::Uuid;
+
+use crate::{materias::Materia, sql::Sql};
 
 pub const CREACION_TABLA_CATEDRAS: &str = r#"
 CREATE TABLE IF NOT EXISTS Catedra(
     codigo         TEXT PRIMARY KEY,
-    nombre         TEXT NOT NULL,
-    codigo_materia INTEGER REFERENCES Materia(codigo) NOT NULL,
-    promedio       DOUBLE PRECISION NOT NULL
+    codigo_materia INTEGER REFERENCES Materia(codigo) NOT NULL
 );
 "#;
 
@@ -23,7 +24,6 @@ CREATE TABLE IF NOT EXISTS Docente(
 
     -- Datos calificacion.
     respuestas            INTEGER NOT NULL,
-    promedio              DOUBLE PRECISION NOT NULL,
     acepta_critica        DOUBLE PRECISION,
     asistencia            DOUBLE PRECISION,
     buen_trato            DOUBLE PRECISION,
@@ -44,17 +44,14 @@ CREATE TABLE IF NOT EXISTS CatedraDocente(
 );
 "#;
 
+const URL_DESCARGA_CATEDRAS: &str = "https://dollyfiuba.com/analitics/cursos";
+
 #[derive(Debug)]
 pub struct Catedra {
     pub codigo: Uuid,
     pub nombre: String,
-    pub docentes: HashMap<NombreDocente, Calificacion>,
-    pub promedio: f64,
+    pub docentes: HashMap<String, Calificacion>,
 }
-
-#[derive(Clone, Deserialize, PartialEq, Eq, Hash, Debug)]
-#[serde(transparent)]
-pub struct NombreDocente(pub String);
 
 #[derive(Deserialize, Default, Debug)]
 pub struct Calificacion {
@@ -84,17 +81,53 @@ impl Hash for Catedra {
     }
 }
 
+impl Materia {
+    pub async fn catedras(&self, http: &ClientWithMiddleware) -> anyhow::Result<Vec<Catedra>> {
+        #[derive(Deserialize)]
+        struct Catedras {
+            #[serde(alias = "opciones")]
+            catedras: Vec<CatedraDolly>,
+        }
+
+        #[derive(Deserialize)]
+        struct CatedraDolly {
+            pub nombre: String,
+            pub docentes: HashMap<String, Calificacion>,
+        }
+
+        tracing::info!("descargando catedras de materia {}", self.codigo);
+
+        let res = http
+            .get(format!("{}/{}", URL_DESCARGA_CATEDRAS, self.codigo))
+            .send()
+            .await?;
+
+        let Catedras { mut catedras } = res.json().await?;
+
+        for catedra in &mut catedras {
+            let mut nombres_docentes: Vec<_> = catedra.nombre.split('-').collect();
+            nombres_docentes.sort();
+            catedra.nombre = nombres_docentes.join("-").to_uppercase();
+        }
+
+        let catedras = catedras.into_iter().map(|catedra| Catedra {
+            codigo: Uuid::new_v4(),
+            nombre: catedra.nombre,
+            docentes: catedra.docentes,
+        });
+
+        Ok(catedras.collect())
+    }
+}
+
 impl Catedra {
     pub fn query_sql(&self, codigo_materia: u32) -> String {
         format!(
             r#"
-INSERT INTO Catedra(codigo, codigo_materia, nombre, promedio)
-VALUES ('{}', {}, '{}', {});
+INSERT INTO Catedra(codigo, codigo_materia)
+VALUES ('{}', {});
 "#,
-            self.codigo,
-            codigo_materia,
-            self.nombre.replace('\'', "''"),
-            self.promedio
+            self.codigo, codigo_materia,
         )
     }
 
@@ -110,38 +143,15 @@ VALUES ('{}', '{}');
 }
 
 impl Calificacion {
-    pub fn promedio(&self) -> f64 {
-        let calificaciones = [
-            self.acepta_critica.unwrap_or_default(),
-            self.asistencia.unwrap_or_default(),
-            self.buen_trato.unwrap_or_default(),
-            self.claridad.unwrap_or_default(),
-            self.clase_organizada.unwrap_or_default(),
-            self.cumple_horarios.unwrap_or_default(),
-            self.fomenta_participacion.unwrap_or_default(),
-            self.panorama_amplio.unwrap_or_default(),
-            self.responde_mails.unwrap_or_default(),
-        ];
-
-        let cantidad_calificaciones = calificaciones.len();
-
-        if cantidad_calificaciones > 0 {
-            calificaciones.into_iter().sum::<f64>() / cantidad_calificaciones as f64
-        } else {
-            0.0
-        }
-    }
-
-    pub fn query_sql(&self, nombre_docente: &NombreDocente, codigo_docente: Uuid) -> String {
+    pub fn query_sql(&self, nombre_docente: &str, codigo_docente: Uuid) -> String {
         format!(
             r#"
-INSERT INTO Docente(codigo, nombre, respuestas, promedio, acepta_critica, asistencia, buen_trato, claridad, clase_organizada, cumple_horarios, fomenta_participacion, panorama_amplio, responde_mails)
-VALUES ('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});
+INSERT INTO Docente(codigo, nombre, respuestas, acepta_critica, asistencia, buen_trato, claridad, clase_organizada, cumple_horarios, fomenta_participacion, panorama_amplio, responde_mails)
+VALUES ('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {});
 "#,
             codigo_docente,
-            nombre_docente.0.replace('\'', "''"),
+            nombre_docente.sanitizar(),
             self.respuestas.unwrap_or(0),
-            self.promedio(),
             self.acepta_critica.map_or("NULL".into(), |v| v.to_string()),
             self.asistencia.map_or("NULL".into(), |v| v.to_string()),
             self.buen_trato.map_or("NULL".into(), |v| v.to_string()),
