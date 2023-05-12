@@ -1,4 +1,7 @@
-use std::collections::{HashMap, HashSet};
+use std::{
+    cmp::Ordering,
+    collections::{HashMap, HashSet},
+};
 
 use format_serde_error::SerdeError;
 use reqwest_middleware::ClientWithMiddleware;
@@ -13,10 +16,10 @@ const URL_DESCARGA_MATERIAS: &str =
     "https://raw.githubusercontent.com/lugfi/dolly/master/data/comun.json";
 
 pub const CREACION_TABLA: &str = r#"
-CREATE TABLE IF NOT EXISTS Materias(
+CREATE TABLE IF NOT EXISTS Materia(
     codigo              INTEGER PRIMARY KEY,
     nombre              TEXT NOT NULL,
-    codigo_equivalencia INTEGER
+    codigo_equivalencia INTEGER REFERENCES Materia(codigo)
 );
 "#;
 
@@ -51,6 +54,13 @@ impl Materia {
             serde_json::from_str(&res).map_err(|err| SerdeError::new(res, err))?;
 
         Self::asignas_equivalencias(cliente_http, &mut materias).await?;
+        materias.sort_by(
+            |a, b| match (a.codigo_equivalencia, b.codigo_equivalencia) {
+                (None, Some(_)) => Ordering::Less,
+                (Some(_), None) => Ordering::Greater,
+                _ => a.codigo.cmp(&b.codigo),
+            },
+        );
 
         Ok(materias)
     }
@@ -149,7 +159,7 @@ impl Materia {
     pub fn query_sql(&self) -> String {
         format!(
             r#"
-INSERT INTO Materias(codigo, nombre, codigo_equivalencia)
+INSERT INTO Materia(codigo, nombre, codigo_equivalencia)
 VALUES ({}, '{}', {});
 "#,
             self.codigo,

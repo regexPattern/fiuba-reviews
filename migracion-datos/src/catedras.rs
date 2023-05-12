@@ -7,16 +7,16 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 pub const CREACION_TABLA_CATEDRAS: &str = r#"
-CREATE TABLE IF NOT EXISTS Catedras(
+CREATE TABLE IF NOT EXISTS Catedra(
     codigo         TEXT PRIMARY KEY,
     nombre         TEXT NOT NULL,
-    codigo_materia INTEGER REFERENCES Materias(codigo) NOT NULL,
+    codigo_materia INTEGER REFERENCES Materia(codigo) NOT NULL,
     promedio       DOUBLE PRECISION NOT NULL
 );
 "#;
 
 pub const CREACION_TABLA_DOCENTES: &str = r#"
-CREATE TABLE IF NOT EXISTS Docentes(
+CREATE TABLE IF NOT EXISTS Docente(
     -- Datos personales.
     codigo                TEXT PRIMARY KEY,
     nombre                TEXT NOT NULL,
@@ -38,8 +38,8 @@ CREATE TABLE IF NOT EXISTS Docentes(
 
 pub const CREACION_TABLA_CATEDRA_DOCENTE: &str = r#"
 CREATE TABLE IF NOT EXISTS CatedraDocente(
-    codigo_catedra TEXT REFERENCES Catedras(codigo),
-    codigo_docente TEXT REFERENCES Docentes(codigo),
+    codigo_catedra TEXT REFERENCES Catedra(codigo),
+    codigo_docente TEXT REFERENCES Docente(codigo),
     CONSTRAINT catedra_docente_pkey PRIMARY KEY (codigo_catedra, codigo_docente)
 );
 "#;
@@ -88,7 +88,7 @@ impl Catedra {
     pub fn query_sql(&self, codigo_materia: u32) -> String {
         format!(
             r#"
-INSERT INTO Catedras(codigo, codigo_materia, nombre, promedio)
+INSERT INTO Catedra(codigo, codigo_materia, nombre, promedio)
 VALUES ('{}', {}, '{}', {});
 "#,
             self.codigo,
@@ -135,7 +135,7 @@ impl Calificacion {
     pub fn query_sql(&self, nombre_docente: &NombreDocente, codigo_docente: Uuid) -> String {
         format!(
             r#"
-INSERT INTO Docentes(codigo, nombre, respuestas, promedio, acepta_critica, asistencia, buen_trato, claridad, clase_organizada, cumple_horarios, fomenta_participacion, panorama_amplio, responde_mails)
+INSERT INTO Docente(codigo, nombre, respuestas, promedio, acepta_critica, asistencia, buen_trato, claridad, clase_organizada, cumple_horarios, fomenta_participacion, panorama_amplio, responde_mails)
 VALUES ('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});
 "#,
             codigo_docente,

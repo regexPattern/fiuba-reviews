@@ -11,9 +11,9 @@ use crate::catedras::NombreDocente;
 const URL_DESCARGA: &str = "https://dollyfiuba.com/analitics/comentarios_docentes.json";
 
 pub const CREACION_TABLA: &str = r#"
-CREATE TABLE IF NOT EXISTS Comentarios(
+CREATE TABLE IF NOT EXISTS Comentario(
     codigo         TEXT PRIMARY KEY,
-    codigo_docente TEXT REFERENCES Docentes(codigo) NOT NULL,
+    codigo_docente TEXT REFERENCES Docente(codigo) NOT NULL,
     cuatrimestre   TEXT NOT NULL,
     contenido      TEXT NOT NULL
 );
@@ -71,7 +71,7 @@ impl Cuatrimestre {
             .map(|contenido| {
                 format!(
                     r#"
-INSERT INTO Comentarios(codigo, codigo_docente, cuatrimestre, contenido)
+INSERT INTO Comentario(codigo, codigo_docente, cuatrimestre, contenido)
 VALUES ('{}', '{}', '{}', '{}');
 "#,
                     Uuid::new_v4(),
