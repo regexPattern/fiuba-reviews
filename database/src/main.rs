@@ -4,7 +4,7 @@ use std::{fs::File, io::Write};
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
 
-    let init_sql = migrador_datos::generar_sql().await?;
+    let init_sql = scraper::generar_sql().await?;
     let mut archivo = File::create("init.sql")?;
     archivo.write_all(init_sql.as_bytes())?;
 

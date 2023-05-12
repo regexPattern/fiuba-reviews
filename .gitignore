@@ -4,6 +4,6 @@ frontend/.svelte-kit
 frontend/build
 frontend/node_modules
 
-migracion-datos/http-cacache
-migracion-datos/*.sql
-migracion-datos/target
+database/*.sql
+database/http-cacache
+database/target

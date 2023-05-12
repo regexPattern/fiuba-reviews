@@ -1,6 +1,6 @@
-name: fiuba-reviews-base-de-datos
+name: fiuba-reviews-database
 services:
-  base-de-datos:
+  database:
     build:
       context: .
     environment:
