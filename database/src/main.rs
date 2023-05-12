@@ -1,12 +1,12 @@
-use std::{fs::File, io::Write};
+use std::io::Write;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
 
-    let init_sql = scraper::generar_sql().await?;
-    let mut archivo = File::create("init.sql")?;
-    archivo.write_all(init_sql.as_bytes())?;
+    let query_sql = database::indexar_dolly().await?;
+    let mut archivo_init_sql = std::fs::File::create("init.sql")?;
+    archivo_init_sql.write_all(query_sql.as_bytes())?;
 
     Ok(())
 }

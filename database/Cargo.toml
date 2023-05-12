@@ -1,7 +1,8 @@
 [package]
-name = "scraper"
+name = "database"
 version = "0.1.0"
 edition = "2021"
+description = "Adaptador de datos de DollyFIUBA"
 
 [dependencies]
 anyhow = "1.0.70"
