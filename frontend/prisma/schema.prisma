@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model catedradocente {
+  codigo_catedra String
+  codigo_docente String
+  catedras       catedra @relation(fields: [codigo_catedra], references: [codigo], onDelete: NoAction, onUpdate: NoAction)
+  docentes       docente @relation(fields: [codigo_docente], references: [codigo], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([codigo_catedra, codigo_docente], map: "catedra_docente_pkey")
+}
+
+model catedra {
+  codigo         String           @id
+  nombre         String
+  codigo_materia Int
+  promedio       Float
+  materia        materia          @relation(fields: [codigo_materia], references: [codigo], onDelete: NoAction, onUpdate: NoAction)
+  catedradocente catedradocente[]
+}
+
+model comentario {
+  codigo         String  @id
+  codigo_docente String
+  cuatrimestre   String
+  contenido      String
+  docente        docente @relation(fields: [codigo_docente], references: [codigo], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model docente {
+  codigo                String           @id
+  nombre                String
+  respuestas            Int
+  promedio              Float
+  acepta_critica        Float?
+  asistencia            Float?
+  buen_trato            Float?
+  claridad              Float?
+  clase_organizada      Float?
+  cumple_horarios       Float?
+  fomenta_participacion Float?
+  panorama_amplio       Float?
+  responde_mails        Float?
+  catedradocente        catedradocente[]
+  comentario            comentario[]
+}
+
+model materia {
+  codigo              Int       @id
+  nombre              String
+  codigo_equivalencia Int?
+  catedra             catedra[]
+  materia             materia?  @relation("materiaTomateria", fields: [codigo_equivalencia], references: [codigo], onDelete: NoAction, onUpdate: NoAction)
+  other_materia       materia[] @relation("materiaTomateria")
+}
