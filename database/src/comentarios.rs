@@ -10,11 +10,17 @@ use crate::sql::Sql;
 
 const URL_DESCARGA: &str = "https://dollyfiuba.com/analitics/comentarios_docentes.json";
 
-pub const CREACION_TABLA: &str = r#"
+pub const CREACION_TABLA_CUATRIMESTRES: &str = r#"
+CREATE TABLE IF NOT EXISTS Cuatrimestre(
+    nombre TEXT PRIMARY KEY
+);
+"#;
+
+pub const CREACION_TABLA_COMENTARIOS: &str = r#"
 CREATE TABLE IF NOT EXISTS Comentario(
-    codigo         TEXT PRIMARY KEY,
+    codigo         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     codigo_docente TEXT REFERENCES Docente(codigo) NOT NULL,
-    cuatrimestre   TEXT NOT NULL,
+    cuatrimestre   TEXT REFERENCES Cuatrimestre(nombre) NOT NULL,
     contenido      TEXT NOT NULL
 );
 "#;
@@ -32,9 +38,9 @@ pub struct Cuatrimestre {
 }
 
 impl Cuatrimestre {
-    pub async fn descargar_comentarios(
+    pub async fn descargar(
         client: &ClientWithMiddleware,
-    ) -> anyhow::Result<HashMap<Cuatrimestre, Vec<String>>> {
+    ) -> anyhow::Result<HashMap<Self, Vec<String>>> {
         #[derive(Deserialize)]
         struct Payload {
             #[serde(flatten)]
@@ -66,18 +72,32 @@ impl Cuatrimestre {
             .collect())
     }
 
-    pub fn sql(&self, codigo_docente: &Uuid, comentarios: &[String]) -> String {
+    pub fn sql(nombre: &str) -> String {
+        format!(r#"
+INSERT INTO Cuatrimestre(nombre)
+VALUES ('{}');
+        "#, nombre.sanitizar())
+    }
+}
+
+pub struct Comentario;
+
+impl Comentario {
+    pub fn sql(
+        cuatrimestre: &Cuatrimestre,
+        codigo_docente: &Uuid,
+        comentarios: &[String],
+    ) -> String {
         comentarios
             .iter()
             .map(|contenido| {
                 format!(
                     r#"
-INSERT INTO Comentario(codigo, codigo_docente, cuatrimestre, contenido)
-VALUES ('{}', '{}', '{}', '{}');
+INSERT INTO Comentario(cuatrimestre, codigo_docente, contenido)
+VALUES ('{}', '{}', '{}');
 "#,
-                    Uuid::new_v4(),
+                    cuatrimestre.nombre.sanitizar(),
                     codigo_docente,
-                    self.nombre,
                     contenido.sanitizar()
                 )
             })
