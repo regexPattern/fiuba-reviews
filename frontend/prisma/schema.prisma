@@ -7,22 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model catedra {
+  codigo         String           @id
+  codigo_materia Int
+  materia        materia          @relation(fields: [codigo_materia], references: [codigo], onDelete: NoAction, onUpdate: NoAction)
+  catedradocente catedradocente[]
+}
+
 model catedradocente {
   codigo_catedra String
   codigo_docente String
-  catedras       catedra @relation(fields: [codigo_catedra], references: [codigo], onDelete: NoAction, onUpdate: NoAction)
-  docentes       docente @relation(fields: [codigo_docente], references: [codigo], onDelete: NoAction, onUpdate: NoAction)
+  catedra        catedra @relation(fields: [codigo_catedra], references: [codigo], onDelete: NoAction, onUpdate: NoAction)
+  docente        docente @relation(fields: [codigo_docente], references: [codigo], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([codigo_catedra, codigo_docente], map: "catedra_docente_pkey")
-}
-
-model catedra {
-  codigo         String           @id
-  nombre         String
-  codigo_materia Int
-  promedio       Float
-  materia        materia          @relation(fields: [codigo_materia], references: [codigo], onDelete: NoAction, onUpdate: NoAction)
-  catedradocente catedradocente[]
 }
 
 model comentario {
@@ -37,7 +35,6 @@ model docente {
   codigo                String           @id
   nombre                String
   respuestas            Int
-  promedio              Float
   acepta_critica        Float?
   asistencia            Float?
   buen_trato            Float?

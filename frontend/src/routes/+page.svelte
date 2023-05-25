@@ -1,15 +1,24 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
+	import "../app.css";
 
 	export let data: PageData;
+
+	let materiaBuscada = "";
+	let materiasFiltradas = data.materias;
+
+	function filtrarMaterias() {
+		materiasFiltradas = data.materias.filter((m) => m.codigo === 6103);
+		console.log(data.materias.filter((m) => m.codigo === 6109));
+	}
 </script>
 
+<form>
+	<input bind:value={materiaBuscada} on:submit|preventDefault={filtrarMaterias} />
+	<input type="submit" />
+</form>
 <ul>
-	{#each data.materias as materia}
-		<li class="uppercase">
-			<a href={`/materias/${materia.codigo_equivalencia || materia.codigo}`}
-				>{materia.codigo} - {materia.nombre}</a
-			>
-		</li>
+	{#each materiasFiltradas as materia}
+		<li>{materia.codigo} - {materia.nombre}</li>
 	{/each}
 </ul>
