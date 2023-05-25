@@ -3,9 +3,9 @@ mod comentarios;
 mod materias;
 mod sql;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
-use comentarios::Cuatrimestre;
+use comentarios::{Cuatrimestre, Comentario};
 use http_cache_reqwest::{CACacheManager, Cache, CacheMode, HttpCache};
 use materias::Materia;
 use reqwest::Client;
@@ -25,11 +25,15 @@ pub async fn indexar_dolly() -> anyhow::Result<String> {
         materias::CREACION_TABLA.into(),
         catedras::CREACION_TABLA_CATEDRAS.into(),
         catedras::CREACION_TABLA_DOCENTES.into(),
-        comentarios::CREACION_TABLA.into(),
+        comentarios::CREACION_TABLA_CUATRIMESTRES.into(),
+        comentarios::CREACION_TABLA_COMENTARIOS.into(),
         catedras::CREACION_TABLA_CATEDRA_DOCENTE.into(),
+        catedras::CREACION_TABLA_CALIFICACION.into(),
     ];
 
     let materias = Materia::descargar(&http).await?;
+    let comentarios = Cuatrimestre::descargar(&http).await?;
+
     let mut codigos_docentes = HashMap::new();
 
     for materia in materias {
@@ -61,14 +65,17 @@ pub async fn indexar_dolly() -> anyhow::Result<String> {
         }
     }
 
-    let comentarios = Cuatrimestre::descargar_comentarios(&http).await?;
+    let nombres_cuatrimestres: HashSet<&str> = comentarios.keys().map(|c| c.nombre.as_str()).collect(); 
+    for nombre in nombres_cuatrimestres {
+        queries.push(Cuatrimestre::sql(nombre));
+    }
 
     for (cuatrimestre, entradas) in comentarios {
         if let Some(codigo_docente) = codigos_docentes.get(&(
             cuatrimestre.codigo_materia,
             cuatrimestre.nombre_docente.clone(),
         )) {
-            queries.push(cuatrimestre.sql(codigo_docente, &entradas));
+            queries.push(Comentario::sql(&cuatrimestre, codigo_docente, &entradas));
         }
     }
 

@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     hash::{Hash, Hasher},
 };
 
@@ -19,21 +19,8 @@ CREATE TABLE IF NOT EXISTS Catedra(
 
 pub const CREACION_TABLA_DOCENTES: &str = r#"
 CREATE TABLE IF NOT EXISTS Docente(
-    -- Datos personales.
-    codigo                TEXT PRIMARY KEY,
-    nombre                TEXT NOT NULL,
-
-    -- Datos calificacion.
-    respuestas            INTEGER NOT NULL,
-    acepta_critica        DOUBLE PRECISION,
-    asistencia            DOUBLE PRECISION,
-    buen_trato            DOUBLE PRECISION,
-    claridad              DOUBLE PRECISION,
-    clase_organizada      DOUBLE PRECISION,
-    cumple_horarios       DOUBLE PRECISION,
-    fomenta_participacion DOUBLE PRECISION,
-    panorama_amplio       DOUBLE PRECISION,
-    responde_mails        DOUBLE PRECISION
+    codigo TEXT PRIMARY KEY,
+    nombre TEXT NOT NULL
 );
 "#;
 
@@ -42,6 +29,22 @@ CREATE TABLE IF NOT EXISTS CatedraDocente(
     codigo_catedra TEXT REFERENCES Catedra(codigo),
     codigo_docente TEXT REFERENCES Docente(codigo),
     CONSTRAINT catedra_docente_pkey PRIMARY KEY (codigo_catedra, codigo_docente)
+);
+"#;
+
+pub const CREACION_TABLA_CALIFICACION: &str = r#"
+CREATE TABLE IF NOT EXISTS Calificacion(
+    codigo                UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    codigo_docente        TEXT REFERENCES Docente(codigo) NOT NULL,
+    acepta_critica        DOUBLE PRECISION NOT NULL,
+    asistencia            DOUBLE PRECISION NOT NULL,
+    buen_trato            DOUBLE PRECISION NOT NULL,
+    claridad              DOUBLE PRECISION NOT NULL,
+    clase_organizada      DOUBLE PRECISION NOT NULL,
+    cumple_horarios       DOUBLE PRECISION NOT NULL,
+    fomenta_participacion DOUBLE PRECISION NOT NULL,
+    panorama_amplio       DOUBLE PRECISION NOT NULL,
+    responde_mails        DOUBLE PRECISION NOT NULL
 );
 "#;
 
@@ -56,6 +59,8 @@ pub struct Catedra {
 
 #[derive(Deserialize, Default, Debug)]
 pub struct Calificacion {
+    respuestas: usize,
+
     acepta_critica: Option<f64>,
     asistencia: Option<f64>,
     buen_trato: Option<f64>,
@@ -65,7 +70,6 @@ pub struct Calificacion {
     fomenta_participacion: Option<f64>,
     panorama_amplio: Option<f64>,
     responde_mails: Option<f64>,
-    respuestas: Option<u32>,
 }
 
 impl PartialEq for Catedra {
@@ -83,7 +87,10 @@ impl Hash for Catedra {
 }
 
 impl Materia {
-    pub async fn catedras(&self, http: &ClientWithMiddleware) -> anyhow::Result<Vec<Catedra>> {
+    pub async fn catedras(
+        &self,
+        http: &ClientWithMiddleware,
+    ) -> anyhow::Result<impl Iterator<Item = Catedra>> {
         #[derive(Deserialize)]
         struct Catedras {
             #[serde(alias = "opciones")]
@@ -114,13 +121,16 @@ impl Materia {
             catedra.nombre = nombres_docentes.join("-").to_uppercase();
         }
 
-        let catedras = catedras.into_iter().map(|catedra| Catedra {
-            codigo: Uuid::new_v4(),
-            nombre: catedra.nombre,
-            docentes: catedra.docentes,
-        });
+        let catedras: HashSet<_> = catedras
+            .into_iter()
+            .map(|catedra| Catedra {
+                codigo: Uuid::new_v4(),
+                nombre: catedra.nombre,
+                docentes: catedra.docentes,
+            })
+            .collect();
 
-        Ok(catedras.collect())
+        Ok(catedras.into_iter())
     }
 }
 
@@ -148,27 +158,44 @@ VALUES ('{}', '{}');
 
 impl Calificacion {
     pub fn query_sql(&self, nombre_docente: &str, codigo_docente: Uuid) -> String {
-        format!(
+        let docente = format!(
             r#"
-INSERT INTO Docente(codigo, nombre, respuestas, acepta_critica, asistencia, buen_trato, claridad, clase_organizada, cumple_horarios, fomenta_participacion, panorama_amplio, responde_mails)
-VALUES ('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {});
+INSERT INTO Docente(codigo, nombre) VALUES ('{codigo_docente}', '{}');
+"#,
+            nombre_docente.sanitizar()
+        );
+
+        let acepta_critica = self.acepta_critica.unwrap_or_default();
+        let asistencia = self.asistencia.unwrap_or_default();
+        let buen_trato = self.buen_trato.unwrap_or_default();
+        let claridad = self.claridad.unwrap_or_default();
+        let clase_organizada = self.clase_organizada.unwrap_or_default();
+        let cumple_horarios = self.cumple_horarios.unwrap_or_default();
+        let fomenta_participacion = self.fomenta_participacion.unwrap_or_default();
+        let panorama_amplio = self.panorama_amplio.unwrap_or_default();
+        let responde_mails = self.responde_mails.unwrap_or_default();
+
+        let mut calificaciones = String::new();
+
+        for _ in 0..self.respuestas {
+            calificaciones.push_str(&format!(
+                r#"
+INSERT INTO Calificacion(codigo_docente, acepta_critica, asistencia, buen_trato, claridad, clase_organizada, cumple_horarios, fomenta_participacion, panorama_amplio, responde_mails)
+VALUES ('{}', {}, {}, {}, {}, {}, {}, {}, {}, {});
 "#,
             codigo_docente,
-            nombre_docente.sanitizar(),
-            self.respuestas.unwrap_or(0),
-            self.acepta_critica.map_or("NULL".into(), |v| v.to_string()),
-            self.asistencia.map_or("NULL".into(), |v| v.to_string()),
-            self.buen_trato.map_or("NULL".into(), |v| v.to_string()),
-            self.claridad.map_or("NULL".into(), |v| v.to_string()),
-            self.clase_organizada
-                .map_or("NULL".into(), |v| v.to_string()),
-            self.cumple_horarios
-                .map_or("NULL".into(), |v| v.to_string()),
-            self.fomenta_participacion
-                .map_or("NULL".into(), |v| v.to_string()),
-            self.panorama_amplio
-                .map_or("NULL".into(), |v| v.to_string()),
-            self.responde_mails.map_or("NULL".into(), |v| v.to_string()),
-        )
+            acepta_critica,
+            asistencia,
+            buen_trato,
+            claridad,
+            clase_organizada,
+            cumple_horarios,
+            fomenta_participacion,
+            panorama_amplio,
+            responde_mails,
+        ));
+        }
+
+        docente + &calificaciones
     }
 }
