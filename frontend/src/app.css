@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	@font-face {
+		font-family: "Inter";
+		src: local("Inter"), url("/fonts/Inter-Regular.ttf") format("truetype");
+		font-weight: normal;
+	}
+
+	@font-face {
+		font-family: "Inter";
+		src: local("Inter"), url("/fonts/Inter-Bold.ttf") format("truetype");
+		font-weight: bold;
+	}
+
+	@font-face {
+		font-family: "Inter";
+		src: local("Inter"), url("/fonts/Inter-Medium.ttf") format("truetype");
+		font-weight: 500;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		@apply text-bgDark dark:text-bgLight;
+	}
+}
+
+@layer components {
+	.inline-link {
+		@apply text-blue-600 underline after:content-["↗"] dark:text-blue-400;
+	}
+
+	.btn {
+		@apply flex items-center justify-center rounded-md border px-4 py-2;
+	}
+}
