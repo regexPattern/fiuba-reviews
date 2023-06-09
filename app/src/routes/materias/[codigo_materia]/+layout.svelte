@@ -8,7 +8,7 @@
 	<aside>
 		{#each data.catedras as c}
 			<div>
-				<a href={`/materias/${c.codigo_materia}/catedras/${c.codigo}`}
+				<a href={`/materias/${c.codigo_materia}/${c.codigo}`}
 					>{c.promedio.toFixed(1)} - {c.nombre}</a
 				>
 			</div>

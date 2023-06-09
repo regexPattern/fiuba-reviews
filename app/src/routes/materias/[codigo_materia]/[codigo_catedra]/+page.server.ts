@@ -25,18 +25,9 @@ export const load = (async ({ params }) => {
 		throw error(404, { message: "Not found" });
 	}
 
-	let docentes = catedra.catedradocente.map((d) => d.docente);
-
-	docentes.sort((a, b) => a.nombre.localeCompare(b.nombre));
-	docentes.sort((a, b) => {
-		if (a.respuestas === 0) {
-			return 1;
-		} else if (b.respuestas === 0) {
-			return -1;
-		} else {
-			return 0;
-		}
-	});
+	const docentes = catedra.catedradocente
+		.map((d) => d.docente)
+		.sort((a, b) => b.promedio - a.promedio);
 
 	for (const d of docentes) {
 		d.comentario.sort((a, b) => {
