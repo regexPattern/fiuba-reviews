@@ -31,7 +31,7 @@ pub struct Materia {
 }
 
 impl Materia {
-    pub async fn descargar(http: &ClientWithMiddleware) -> anyhow::Result<Vec<Self>> {
+    pub async fn descargar(http: &ClientWithMiddleware) -> anyhow::Result<impl Iterator<Item = Self>> {
         #[derive(Deserialize)]
         struct Materias {
             materias: Vec<Materia>,
@@ -57,7 +57,7 @@ impl Materia {
             },
         );
 
-        Ok(materias)
+        Ok(materias.into_iter())
     }
 
     async fn asignas_equivalencias(

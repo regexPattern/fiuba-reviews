@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     hash::{Hash, Hasher},
 };
 
@@ -83,7 +83,7 @@ impl Hash for Catedra {
 }
 
 impl Materia {
-    pub async fn catedras(&self, http: &ClientWithMiddleware) -> anyhow::Result<Vec<Catedra>> {
+    pub async fn catedras(&self, http: &ClientWithMiddleware) -> anyhow::Result<impl Iterator<Item = Catedra>> {
         #[derive(Deserialize)]
         struct Catedras {
             #[serde(alias = "opciones")]
@@ -114,13 +114,13 @@ impl Materia {
             catedra.nombre = nombres_docentes.join("-").to_uppercase();
         }
 
-        let catedras = catedras.into_iter().map(|catedra| Catedra {
+        let catedras: HashSet<_> = catedras.into_iter().map(|catedra| Catedra {
             codigo: Uuid::new_v4(),
             nombre: catedra.nombre,
             docentes: catedra.docentes,
-        });
+        }).collect();
 
-        Ok(catedras.collect())
+        Ok(catedras.into_iter())
     }
 }
 
