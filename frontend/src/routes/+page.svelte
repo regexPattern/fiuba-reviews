@@ -6,14 +6,10 @@
 	export let data: PageData;
 </script>
 
-<main class="container mx-auto p-4">
+<main class="container mx-auto mt-4 divide-y p-4 md:mt-8">
 	<section>
-		<h1
-			class="text-3xl font-bold leading-tight tracking-tighter md:text-5xl lg:text-6xl lg:leading-[1.1]"
-		>
-			Busca comentarios de docentes FIUBA.
-		</h1>
-		<div class="mt-4 max-w-[750px] space-y-3 text-lg text-slate-500 dark:text-slate-300 sm:text-xl">
+		<h1>Busca comentarios de docentes FIUBA.</h1>
+		<div class="text-subtitle mt-4 max-w-[750px] space-y-3">
 			<p>
 				Ayudate a decidir en qué cátedra cursar tus materias para el próximo cuatri, usando como
 				referencia las reseñas mandadas por estudiantes como vos.
@@ -31,13 +27,13 @@
 		<div class="mt-4 flex flex-col gap-3 font-medium sm:flex-row">
 			<a
 				href="/"
-				class="btn btn-primary bg-bgDark text-slate-50 hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-950 dark:hover:bg-slate-200"
+				class="btn bg-dark text-light hover:bg-dark-hover dark:bg-light dark:text-dark dark:hover:bg-light-hover"
 			>
 				Buscar
 			</a>
 			<a
 				href="https://github.com/regexPattern/fiuba-reviews"
-				class="btn btn-primary border-slate-200 bg-slate-50 text-slate-950 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 dark:hover:bg-slate-800"
+				class="btn border-light-border bg-light hover:bg-light-hover dark:border-dark-border dark:bg-dark dark:text-light dark:hover:bg-dark-hover"
 				target="_blank"
 			>
 				<svg viewBox="0 0 438.549 438.549" class="mr-2 h-4 w-4"
@@ -52,9 +48,11 @@
 	</section>
 
 	<section class="mt-8 pt-8">
-		<h2 class="text-xl font-bold leading-tight tracking-tighter lg:text-4xl">Ejemplos</h2>
-		<p class="mt-2 text-lg text-slate-500 dark:text-slate-300 sm:text-xl">Algunos comentarios de estudiantes que ya cursaron las materias que buscas.</p>
-		<div class="mt-3 grid grid-cols-4 gap-4">
+		<h2>Ejemplos</h2>
+		<p class="text-subtitle mt-2">
+			Algunos comentarios de estudiantes que ya cursaron las materias que buscas.
+		</p>
+		<div class="mt-3 grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 			{#each data.comentarios as comentario}
 				<TarjetaComentarioEjemplo {...comentario} />
 			{/each}

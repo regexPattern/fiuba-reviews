@@ -27,16 +27,28 @@
 	h4,
 	h5,
 	h6 {
-		@apply text-bgDark dark:text-bgLight;
+		@apply text-dark dark:text-light;
+	}
+
+	h1 {
+		@apply text-3xl font-bold leading-tight tracking-tighter md:text-5xl lg:text-6xl;
+	}
+
+	h2 {
+		@apply text-2xl font-bold leading-tight tracking-tight md:text-3xl lg:text-4xl;
 	}
 }
 
 @layer components {
+	.btn {
+		@apply flex items-center justify-center rounded-md border px-4 py-2;
+	}
+
 	.inline-link {
 		@apply text-blue-600 underline after:content-["↗"] dark:text-blue-400;
 	}
 
-	.btn {
-		@apply flex items-center justify-center rounded-md border px-4 py-2;
+	.text-subtitle {
+		@apply text-lg text-slate-500 dark:text-slate-300 sm:text-xl;
 	}
 }

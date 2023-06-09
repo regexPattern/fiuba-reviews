@@ -8,8 +8,12 @@ const config = {
 	theme: {
 		extend: {
 			colors: {
-				bgLight: colors.slate["50"],
-				bgDark: colors.slate["950"],
+				"light": colors.slate["50"],
+				"light-hover": colors.slate["100"],
+				"light-border": colors.slate["200"],
+				"dark": colors.slate["950"],
+				"dark-hover": colors.slate["800"],
+				"dark-border": colors.slate["800"],
 			},
 			fontFamily: {
 				sans: ["Inter", ...defaultTheme.fontFamily.sans],

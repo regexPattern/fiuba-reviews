@@ -4,9 +4,13 @@
 	export let docente: { nombre: string };
 </script>
 
-<article class="flex flex-col rounded-md border p-4">
-	<p class="line-clamp-6 flex-1">{contenido}</p>
-	<p class="mt-2 text-right">
+<article
+	class="flex-col rounded-md border border-light-border p-4 dark:border-dark-border sm:flex"
+>
+	<p class="line-clamp-6 flex-1 text-dark dark:text-light">
+		{contenido}
+	</p>
+	<p class="mt-3 text-right text-sm font-medium text-dark dark:text-slate-400">
 		{docente.nombre} - {cuatrimestre}
 	</p>
 </article>
