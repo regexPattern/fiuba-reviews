@@ -1,0 +1,1 @@
+Catedra no encontrada

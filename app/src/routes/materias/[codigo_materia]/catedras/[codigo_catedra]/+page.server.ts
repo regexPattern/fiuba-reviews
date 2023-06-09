@@ -1,9 +1,10 @@
 import type { PageServerLoad } from "./$types";
 
 import prisma from "$lib/prisma";
+import { error } from "@sveltejs/kit";
 
 export const load = (async ({ params }) => {
-	const catedra = await prisma.catedra.findUniqueOrThrow({
+	const catedra = await prisma.catedra.findUnique({
 		where: {
 			codigo: params.codigo_catedra
 		},
@@ -19,6 +20,10 @@ export const load = (async ({ params }) => {
 			}
 		}
 	});
+
+	if (catedra === null) {
+		throw error(404, { message: "Not found" });
+	}
 
 	let docentes = catedra.catedradocente.map((d) => d.docente);
 

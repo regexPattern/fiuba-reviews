@@ -1,10 +1,8 @@
 import type { PageServerLoad } from "./$types";
 
-import prisma from "$lib/prisma";
+import materias from "$lib/materias";
 
 export const load = (async () => {
-	const materias = await prisma.materia.findMany();
-
 	return {
 		materias: materias.map((m) => {
 			return {

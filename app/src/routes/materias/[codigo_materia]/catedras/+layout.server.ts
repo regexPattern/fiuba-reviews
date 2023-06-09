@@ -1,12 +1,20 @@
 import type { LayoutServerLoad } from "./$types";
 
 import prisma from "$lib/prisma";
+import materias from "$lib/materias";
+import { error } from "@sveltejs/kit";
+
+const codigo_materias_validos = materias.map(m => m.codigo);
 
 export const load = (async ({ params }) => {
+	const codigo_materia = parseInt(params.codigo_materia, 10);
+
+	if (!codigo_materias_validos.includes(codigo_materia)) {
+		throw error(404, { message: "Not found" });
+	}
+
 	const catedras_docentes = await prisma.catedra.findMany({
-		where: {
-			codigo_materia: parseInt(params.codigo_materia, 10)
-		},
+		where: { codigo_materia },
 		include: {
 			catedradocente: {
 				include: {

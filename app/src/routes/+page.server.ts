@@ -1,6 +1,6 @@
 import type { PageServerLoad } from "./$types";
 
-const COMENTARIOS = [
+const comentarios = [
 	{
 		contenido:
 			"Le pone toda la onda para que aprendas, incluso fuera del horario de clase. La teóricas las arma el, incluso te enseña a programar para hacer cálculos algebraicos. Te da clase hasta los feriados(algo bueno o malo según como lo veas), siempre cumple con los recreos y es respetuoso con el tiempo. Particularmente a mí no me pareció un tipo que explique muy bien ya que usa un lenguaje extremadamente matemático pero el hecho que sepa tanto y se dedique completamente a explicarte los temas hace que ese punto se compense. Además apunta  a ejercicios clave buscando que aprendas y puedas aprobar el parcial. Siempre dispuesto a enseñarte.",
@@ -40,5 +40,5 @@ const COMENTARIOS = [
 ];
 
 export const load = (() => {
-	return { comentarios: COMENTARIOS };
+	return { comentarios: comentarios };
 }) satisfies PageServerLoad;
