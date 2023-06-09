@@ -31,7 +31,9 @@ pub struct Materia {
 }
 
 impl Materia {
-    pub async fn descargar(http: &ClientWithMiddleware) -> anyhow::Result<impl Iterator<Item = Self>> {
+    pub async fn descargar(
+        http: &ClientWithMiddleware,
+    ) -> anyhow::Result<impl Iterator<Item = Self>> {
         #[derive(Deserialize)]
         struct Materias {
             materias: Vec<Materia>,

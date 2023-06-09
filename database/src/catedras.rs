@@ -25,15 +25,16 @@ CREATE TABLE IF NOT EXISTS Docente(
 
     -- Datos calificacion.
     respuestas            INTEGER NOT NULL,
-    acepta_critica        DOUBLE PRECISION,
-    asistencia            DOUBLE PRECISION,
-    buen_trato            DOUBLE PRECISION,
-    claridad              DOUBLE PRECISION,
-    clase_organizada      DOUBLE PRECISION,
-    cumple_horarios       DOUBLE PRECISION,
-    fomenta_participacion DOUBLE PRECISION,
-    panorama_amplio       DOUBLE PRECISION,
-    responde_mails        DOUBLE PRECISION
+    acepta_critica        DOUBLE PRECISION NOT NULL,
+    asistencia            DOUBLE PRECISION NOT NULL,
+    buen_trato            DOUBLE PRECISION NOT NULL,
+    claridad              DOUBLE PRECISION NOT NULL,
+    clase_organizada      DOUBLE PRECISION NOT NULL,
+    cumple_horarios       DOUBLE PRECISION NOT NULL,
+    fomenta_participacion DOUBLE PRECISION NOT NULL,
+    panorama_amplio       DOUBLE PRECISION NOT NULL,
+    responde_mails        DOUBLE PRECISION NOT NULL,
+    promedio              DOUBLE PRECISION NOT NULL
 );
 "#;
 
@@ -83,7 +84,10 @@ impl Hash for Catedra {
 }
 
 impl Materia {
-    pub async fn catedras(&self, http: &ClientWithMiddleware) -> anyhow::Result<impl Iterator<Item = Catedra>> {
+    pub async fn catedras(
+        &self,
+        http: &ClientWithMiddleware,
+    ) -> anyhow::Result<impl Iterator<Item = Catedra>> {
         #[derive(Deserialize)]
         struct Catedras {
             #[serde(alias = "opciones")]
@@ -114,11 +118,14 @@ impl Materia {
             catedra.nombre = nombres_docentes.join("-").to_uppercase();
         }
 
-        let catedras: HashSet<_> = catedras.into_iter().map(|catedra| Catedra {
-            codigo: Uuid::new_v4(),
-            nombre: catedra.nombre,
-            docentes: catedra.docentes,
-        }).collect();
+        let catedras: HashSet<_> = catedras
+            .into_iter()
+            .map(|catedra| Catedra {
+                codigo: Uuid::new_v4(),
+                nombre: catedra.nombre,
+                docentes: catedra.docentes,
+            })
+            .collect();
 
         Ok(catedras.into_iter())
     }
@@ -148,27 +155,36 @@ VALUES ('{}', '{}');
 
 impl Calificacion {
     pub fn query_sql(&self, nombre_docente: &str, codigo_docente: Uuid) -> String {
+        let acepta_critica = self.acepta_critica.unwrap_or_default();
+        let asistencia = self.asistencia.unwrap_or_default();
+        let buen_trato = self.buen_trato.unwrap_or_default();
+        let claridad = self.claridad.unwrap_or_default();
+        let clase_organizada = self.clase_organizada.unwrap_or_default();
+        let cumple_horarios = self.cumple_horarios.unwrap_or_default();
+        let fomenta_participacion = self.fomenta_participacion.unwrap_or_default();
+        let panorama_amplio = self.panorama_amplio.unwrap_or_default();
+        let responde_mails = self.responde_mails.unwrap_or_default();
+
+        let promedio = (acepta_critica + asistencia + buen_trato + claridad + clase_organizada + cumple_horarios + fomenta_participacion + panorama_amplio + responde_mails) / 9.0;
+
         format!(
             r#"
-INSERT INTO Docente(codigo, nombre, respuestas, acepta_critica, asistencia, buen_trato, claridad, clase_organizada, cumple_horarios, fomenta_participacion, panorama_amplio, responde_mails)
-VALUES ('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {});
+INSERT INTO Docente(codigo, nombre, respuestas, acepta_critica, asistencia, buen_trato, claridad, clase_organizada, cumple_horarios, fomenta_participacion, panorama_amplio, responde_mails, promedio)
+VALUES ('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});
 "#,
             codigo_docente,
             nombre_docente.sanitizar(),
-            self.respuestas.unwrap_or(0),
-            self.acepta_critica.map_or("NULL".into(), |v| v.to_string()),
-            self.asistencia.map_or("NULL".into(), |v| v.to_string()),
-            self.buen_trato.map_or("NULL".into(), |v| v.to_string()),
-            self.claridad.map_or("NULL".into(), |v| v.to_string()),
-            self.clase_organizada
-                .map_or("NULL".into(), |v| v.to_string()),
-            self.cumple_horarios
-                .map_or("NULL".into(), |v| v.to_string()),
-            self.fomenta_participacion
-                .map_or("NULL".into(), |v| v.to_string()),
-            self.panorama_amplio
-                .map_or("NULL".into(), |v| v.to_string()),
-            self.responde_mails.map_or("NULL".into(), |v| v.to_string()),
+            self.respuestas.unwrap_or_default(),
+            acepta_critica,
+            asistencia,
+            buen_trato,
+            claridad,
+            clase_organizada,
+            cumple_horarios,
+            fomenta_participacion,
+            panorama_amplio,
+            responde_mails,
+            promedio
         )
     }
 }
