@@ -4,6 +4,8 @@
 	export let data: PageData;
 </script>
 
-{#each data.comentarios as c}
-	<div>{c.docente.nombre}</div>
-{/each}
+<section>
+	{#each data.comentarios as c}
+		<div>{c.docente.nombre}</div>
+	{/each}
+</section>

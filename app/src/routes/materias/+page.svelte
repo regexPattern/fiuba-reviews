@@ -10,16 +10,18 @@
 	});
 </script>
 
-<input bind:value={search} placeholder="Buscar materias" />
-<ul>
-	{#each filtered_materias as m}
-		<li>
-			<a href={`/materias/${m.codigo_equivalencia ?? m.codigo}/catedras`}
-				>{m.codigo} - {m.nombre}
-				{#if m.codigo_equivalencia}
-					-> {m.codigo_equivalencia}
-				{/if}
-			</a>
-		</li>
-	{/each}
-</ul>
+<main class="w-full">
+	<input bind:value={search} placeholder="Buscar materias" />
+	<ul>
+		{#each filtered_materias as m}
+			<li>
+				<a href={`/materias/${m.codigo_equivalencia ?? m.codigo}`}
+					>{m.codigo} - {m.nombre}
+					{#if m.codigo_equivalencia}
+						-> {m.codigo_equivalencia}
+					{/if}
+				</a>
+			</li>
+		{/each}
+	</ul>
+</main>

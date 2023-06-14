@@ -26,7 +26,10 @@ export const load = (async ({ params }) => {
 
 	const catedras = catedras_docentes.map((c) => {
 		let docentes = c.catedradocente.map((cd) => cd.docente);
-		const nombre_catedra = docentes.map((d) => d.nombre).sort().join("-");
+		const nombre_catedra = docentes
+			.map((d) => d.nombre)
+			.sort()
+			.join("-");
 
 		docentes = docentes.filter((d) => d.respuestas != 0);
 		const promedio = docentes.reduce((curr, p) => curr + p.promedio, 0) / docentes.length;

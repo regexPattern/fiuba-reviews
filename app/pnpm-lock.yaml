@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -10,6 +10,9 @@ dependencies:
     version: 4.15.0(prisma@4.15.0)
 
 devDependencies:
+  '@rgossiaux/svelte-headlessui':
+    specifier: ^2.0.0
+    version: 2.0.0(svelte@3.59.1)
   '@sveltejs/adapter-auto':
     specifier: ^2.0.0
     version: 2.1.0(@sveltejs/kit@1.20.2)
@@ -341,6 +344,14 @@ packages:
   /@prisma/engines@4.15.0:
     resolution: {integrity: sha512-FTaOCGs0LL0OW68juZlGxFtYviZa4xdQj/rQEdat2txw0s3Vu/saAPKjNVXfIgUsGXmQ72HPgNr6935/P8FNAA==}
     requiresBuild: true
+
+  /@rgossiaux/svelte-headlessui@2.0.0(svelte@3.59.1):
+    resolution: {integrity: sha512-ksh245HqMM8yqkzd/OyAK2FCHZYOSA3ldLIHab7C9S60FmifqT24JFVgi8tZpsDEMk3plbfQvfah93n5IEi8sg==}
+    peerDependencies:
+      svelte: ^3.47.0
+    dependencies:
+      svelte: 3.59.1
+    dev: true
 
   /@sveltejs/adapter-auto@2.1.0(@sveltejs/kit@1.20.2):
     resolution: {integrity: sha512-o2pZCfATFtA/Gw/BB0Xm7k4EYaekXxaPGER3xGSY3FvzFJGTlJlZjBseaXwYSM94lZ0HniOjTokN3cWaLX6fow==}

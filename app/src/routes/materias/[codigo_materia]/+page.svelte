@@ -1,1 +1,1 @@
-testing
+Selecciona una catedra

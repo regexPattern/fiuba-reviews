@@ -12,6 +12,9 @@ export default {
 			gray: colors.slate,
 			blue: colors.cyan
 		},
+		fontFamily: {
+			sans: ["Inter, sans-serif"]
+		},
 		extend: {}
 	},
 	plugins: []
