@@ -7,3 +7,17 @@
 	font-weight: 100 900;
 	src: url("/fonts/Inter-VariableFont_slnt,wght.ttf");
 }
+
+@layer utilities {
+	.border-color {
+		@apply border-slate-300 dark:border-slate-700;
+	}
+
+	.divide-color {
+		@apply divide-slate-300 dark:divide-slate-700;
+	}
+
+	.sticky-bg-color {
+		@apply bg-white supports-[backdrop-filter]:bg-white/50 supports-[backdrop-filter]:backdrop-blur dark:bg-slate-900 dark:supports-[backdrop-filter]:bg-slate-900/50;
+	}
+}

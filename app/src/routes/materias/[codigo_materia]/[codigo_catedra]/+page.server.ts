@@ -29,6 +29,11 @@ export const load = (async ({ params }) => {
 		.map((d) => d.docente)
 		.sort((a, b) => b.promedio - a.promedio);
 
+	const nombre_catedra = docentes
+		.map((d) => d.nombre)
+		.sort()
+		.join("-");
+
 	for (const d of docentes) {
 		d.comentario.sort((a, b) => {
 			const [cuatriA, anioA] = a.cuatrimestre.split("Q");
@@ -44,5 +49,10 @@ export const load = (async ({ params }) => {
 		});
 	}
 
-	return { codigo_catedra: params.codigo_catedra, docentes };
+	return {
+		codigo_materia: params.codigo_materia,
+		codigo_catedra: params.codigo_catedra,
+		nombre_catedra,
+		docentes
+	};
 }) satisfies PageServerLoad;

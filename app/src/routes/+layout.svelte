@@ -2,21 +2,25 @@
 	import "../app.css";
 </script>
 
-<header
-	class="sticky top-0 z-20 h-16 border-b border-slate-300 text-slate-800 supports-[backdrop-filter]:bg-white/50 supports-[backdrop-filter]:backdrop-blur dark:border-slate-700 dark:text-slate-50 dark:supports-[backdrop-filter]:bg-slate-900/50"
->
+<header class="border-color sticky-bg-color sticky top-0 z-20 h-16 border-b">
 	<div class="flex h-full items-center px-4 font-semibold lg:container lg:mx-auto">
-		<div class="grow">Reviews</div>
-		<nav>
+		<div class="grow text-sm leading-6 text-slate-700 dark:text-slate-50">Reviews</div>
+		<nav class="text-sm leading-6 text-slate-700 dark:text-slate-50">
 			<ul class="flex space-x-4">
-				<li class="transition-colors hover:text-fiuba"><a href="/">Inicio</a></li>
-				<li class="transition-colors hover:text-fiuba"><a href="/materias">Materias</a></li>
-				<li class="transition-colors hover:text-fiuba"><a href="/docentes">Docentes</a></li>
+				<li><a href="/">Inicio</a></li>
+				<li><a href="/materias">Materias</a></li>
+				<li><a href="/docentes">Docentes</a></li>
 			</ul>
 		</nav>
 	</div>
 </header>
 
-<div class="h-full grow pb-6 lg:container lg:mx-auto lg:px-4 lg:py-8">
+<div class="mb-4 h-full grow lg:container lg:mx-auto lg:my-8">
 	<slot />
 </div>
+
+<style lang="postcss">
+	nav > ul > li {
+		@apply transition-colors hover:text-fiuba;
+	}
+</style>
