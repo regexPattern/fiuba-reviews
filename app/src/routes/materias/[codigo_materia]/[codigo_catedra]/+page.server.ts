@@ -44,5 +44,5 @@ export const load = (async ({ params }) => {
 		});
 	}
 
-	return { docentes };
+	return { codigo_catedra: params.codigo_catedra, docentes };
 }) satisfies PageServerLoad;

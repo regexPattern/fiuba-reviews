@@ -3,7 +3,7 @@
 </script>
 
 <header
-	class="sticky top-0 z-20 h-16 border-b text-slate-50 supports-[backdrop-filter]:bg-white/50 supports-[backdrop-filter]:backdrop-blur dark:border-slate-700 dark:supports-[backdrop-filter]:bg-slate-900/50"
+	class="sticky top-0 z-20 h-16 border-b border-slate-300 text-slate-800 supports-[backdrop-filter]:bg-white/50 supports-[backdrop-filter]:backdrop-blur dark:border-slate-700 dark:text-slate-50 dark:supports-[backdrop-filter]:bg-slate-900/50"
 >
 	<div class="flex h-full items-center px-4 font-semibold lg:container lg:mx-auto">
 		<div class="grow">Reviews</div>

@@ -2,14 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-*::-webkit-scrollbar-track {
-  background-color: #4299e1;
-}
-
-*::-webkit-scrollbar-thumb {
-  background-color: #EDF2F7;
-}
-
 @font-face {
 	font-family: "Inter";
 	font-weight: 100 900;
