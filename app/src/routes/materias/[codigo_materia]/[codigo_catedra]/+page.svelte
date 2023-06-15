@@ -8,14 +8,20 @@
 
 <article class="flex flex-col gap-4">
 	{#each data.docentes as d}
-		<Disclosure defaultOpen={true} class="rounded-lg border p-4">
-			<DisclosureButton class="w-full text-left">
+		<Disclosure defaultOpen={true} class="rounded-lg border dark:border-slate-700 dark:bg-slate-800 shadow shadow-slate-700/50">
+			<DisclosureButton class="w-full p-4 text-left font-semibold dark:text-slate-50">
 				{d.promedio.toFixed(1)} - {d.nombre}
 			</DisclosureButton>
+
 			<DisclosurePanel>
-				<ul class="list-inside list-disc">
+				<ul class="divide-y divide-slate-700 text-slate-300">
 					{#each d.comentario as c}
-						<li class="mt-2">{c.contenido}</li>
+						<li class="px-4 py-3">
+							<p class={`inline before:content-['"'] after:content-['"']`}>
+								{c.contenido}
+							</p>
+							<span class="text-slate-500"> - {c.cuatrimestre}</span>
+						</li>
 					{/each}
 				</ul>
 			</DisclosurePanel>

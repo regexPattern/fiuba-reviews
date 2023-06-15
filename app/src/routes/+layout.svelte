@@ -3,15 +3,15 @@
 </script>
 
 <header
-	class="sticky top-0 z-20 h-16 border-b bg-white supports-[backdrop-filter]:bg-white/50 supports-[backdrop-filter]:backdrop-blur"
+	class="sticky top-0 z-20 h-16 border-b text-slate-50 supports-[backdrop-filter]:bg-white/50 supports-[backdrop-filter]:backdrop-blur dark:border-slate-700 dark:supports-[backdrop-filter]:bg-slate-900/50"
 >
-	<div class="flex h-full items-center justify-between px-4 lg:container lg:mx-auto">
-		<div>Reviews</div>
+	<div class="flex h-full items-center px-4 font-semibold lg:container lg:mx-auto">
+		<div class="grow">Reviews</div>
 		<nav>
 			<ul class="flex space-x-4">
-				<li><a href="/">Inicio</a></li>
-				<li><a href="/materias">Materias</a></li>
-				<li><a href="/docentes">Docentes</a></li>
+				<li class="transition-colors hover:text-fiuba"><a href="/">Inicio</a></li>
+				<li class="transition-colors hover:text-fiuba"><a href="/materias">Materias</a></li>
+				<li class="transition-colors hover:text-fiuba"><a href="/docentes">Docentes</a></li>
 			</ul>
 		</nav>
 	</div>

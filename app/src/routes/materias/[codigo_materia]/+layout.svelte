@@ -7,17 +7,12 @@
 
 	let showList = false;
 
-	function collapseList() {
-		showList = false;
-	}
-
-	function toggleList() {
-		showList = !showList;
-	}
+	const collapseList = () => (showList = false);
+	const toggleList = () => (showList = !showList);
 </script>
 
 <div class="flex flex-col lg:flex-row">
-	<aside class="static top-24 z-10 h-full w-full lg:sticky lg:w-80 xl:w-96">
+	<aside class="static top-24 z-10 h-full w-full lg:sticky lg:w-96">
 		<div class="block border-b p-4 lg:hidden">
 			<button
 				aria-controls="catedras-list"
@@ -27,17 +22,22 @@
 			>
 		</div>
 
-		<ul id="catedras-list" class={`${showList ? "block" : "hidden"} px-2 lg:block`}>
+		<ul id="catedras-list" class={`${showList ? "block" : "hidden"} px-2 lg:block dark:text-slate-400`}>
 			{#each data.catedras as c}
 				<li
 					class={`${
-						$page.params.codigo_catedra === c.codigo ? "font-semibold" : "font-normal"
-					} overflow-hidden overflow-ellipsis whitespace-nowrap px-2 py-1`}
+						$page.params.codigo_catedra === c.codigo ? "font-semibold text-fiuba" : "font-normal"
+					} overflow-hidden overflow-ellipsis whitespace-nowrap p-2`}
 				>
 					<a
 						href={`/materias/${c.codigo_materia}/${c.codigo}`}
 						title={c.nombre}
-						on:click={collapseList}>{c.promedio.toFixed(1)} - {c.nombre}</a
+            class="hover:text-slate-100"
+						on:click={collapseList}
+						><span class="mr-1 rounded-md bg-fiuba p-[0.35rem] text-xs font-semibold text-white"
+							>{c.promedio.toFixed(1)}</span
+						>
+						{c.nombre}</a
 					>
 				</li>
 			{/each}
