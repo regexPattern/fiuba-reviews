@@ -1,9 +1,0 @@
-**/.env
-
-frontend/.svelte-kit
-frontend/build
-frontend/node_modules
-
-database/*.sql
-database/http-cacache
-database/target

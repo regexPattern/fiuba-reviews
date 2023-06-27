@@ -1,8 +1,8 @@
-name: fiuba-reviews-database
+name: fiuba-reviews
 services:
   database:
     build:
-      context: .
+      context: ./database
     environment:
       POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
