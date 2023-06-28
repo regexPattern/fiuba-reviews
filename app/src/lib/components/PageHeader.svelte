@@ -1,6 +1,6 @@
 <script lang="ts">
 	// TODO: https://dev.to/willkre/persistent-theme-switch-dark-mode-with-svelte-sveltekit-tailwind-1b9g
-	let darkMode = true;
+	let darkMode = false;
 
 	function handleSwitchDarkMode() {
 		darkMode = !darkMode;

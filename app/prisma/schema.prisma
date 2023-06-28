@@ -7,6 +7,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model calificacion {
+  codigo                String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  codigo_docente        String
+  acepta_critica        Float
+  asistencia            Float
+  buen_trato            Float
+  claridad              Float
+  clase_organizada      Float
+  cumple_horarios       Float
+  fomenta_participacion Float
+  panorama_amplio       Float
+  responde_mails        Float
+  docente               docente @relation(fields: [codigo_docente], references: [codigo], onDelete: NoAction, onUpdate: NoAction)
+}
+
 model catedra {
   codigo         String           @id
   codigo_materia Int
@@ -24,29 +39,25 @@ model catedradocente {
 }
 
 model comentario {
-  codigo         String  @id
-  codigo_docente String
-  cuatrimestre   String
-  contenido      String
-  docente        docente @relation(fields: [codigo_docente], references: [codigo], onDelete: NoAction, onUpdate: NoAction)
+  codigo                                             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  codigo_docente                                     String
+  cuatrimestre                                       String
+  contenido                                          String
+  docente                                            docente      @relation(fields: [codigo_docente], references: [codigo], onDelete: NoAction, onUpdate: NoAction)
+  cuatrimestre_comentario_cuatrimestreTocuatrimestre cuatrimestre @relation("comentario_cuatrimestreTocuatrimestre", fields: [cuatrimestre], references: [nombre], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model cuatrimestre {
+  nombre                                           String       @id
+  comentario_comentario_cuatrimestreTocuatrimestre comentario[] @relation("comentario_cuatrimestreTocuatrimestre")
 }
 
 model docente {
-  codigo                String           @id
-  nombre                String
-  respuestas            Int
-  acepta_critica        Float
-  asistencia            Float
-  buen_trato            Float
-  claridad              Float
-  clase_organizada      Float
-  cumple_horarios       Float
-  fomenta_participacion Float
-  panorama_amplio       Float
-  responde_mails        Float
-  promedio              Float
-  catedradocente        catedradocente[]
-  comentario            comentario[]
+  codigo         String           @id
+  nombre         String
+  calificacion   calificacion[]
+  catedradocente catedradocente[]
+  comentario     comentario[]
 }
 
 model materia {

@@ -1,16 +1,55 @@
+import prisma from "$lib/prisma";
+import { promedioDocente } from "$lib/utils";
 import type { LayoutServerLoad } from "./$types";
-import type { materia } from "@prisma/client";
-import type { Catedra } from "./catedras/+server";
+import { error } from "@sveltejs/kit";
 
-export const load = (async ({ fetch, params }) => {
-	const res_materia = await fetch(`/materias/${params.codigoMateria}`);
-	const res_catedras = await fetch(`/materias/${params.codigoMateria}/catedras`);
+export const load = (async ({ params }) => {
+	const materia = await prisma.materia.findUnique({
+		where: { codigo: Number(params.codigoMateria) }
+	});
 
-	const materia = (await res_materia.json()) as materia;
-	const catedras = ((await res_catedras.json()) as Catedra[]).map((c) => ({
-		...c,
-		codigo_materia: params.codigoMateria
-	}));
+	if (materia === null) {
+		throw error(404, { message: "Materia no encontrada" });
+	}
 
-	return { catedras };
+	const catedras = await prisma.catedra.findMany({
+		where: {
+			codigo_materia: Number(params.codigoMateria)
+		},
+		include: {
+			catedradocente: {
+				include: {
+					docente: {
+						select: {
+							nombre: true,
+							calificacion: true
+						}
+					}
+				}
+			}
+		}
+	});
+
+	const catedrasConPromedio = catedras.map((c) => {
+		let docentes = c.catedradocente.map(({ docente }) => ({ ...docente }));
+
+		const nombre = docentes
+			.map(({ nombre }) => nombre)
+			.sort()
+			.join("-");
+
+		docentes = docentes.filter((d) => d.calificacion.length != 0);
+		const promedio =
+			docentes.reduce((acc, curr) => acc + promedioDocente(curr.calificacion), 0) / docentes.length;
+
+		return { codigo: c.codigo, nombre, promedio };
+	});
+
+	return {
+		materia,
+		catedras: catedrasConPromedio.map((c) => ({
+			...c,
+			codigo_materia: params.codigoMateria
+		}))
+	};
 }) satisfies LayoutServerLoad;
