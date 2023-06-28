@@ -19,22 +19,8 @@ CREATE TABLE IF NOT EXISTS Catedra(
 
 pub const CREACION_TABLA_DOCENTES: &str = r#"
 CREATE TABLE IF NOT EXISTS Docente(
-    -- Datos personales.
-    codigo                TEXT PRIMARY KEY,
-    nombre                TEXT NOT NULL,
-
-    -- Datos calificacion.
-    respuestas            INTEGER NOT NULL,
-    acepta_critica        DOUBLE PRECISION NOT NULL,
-    asistencia            DOUBLE PRECISION NOT NULL,
-    buen_trato            DOUBLE PRECISION NOT NULL,
-    claridad              DOUBLE PRECISION NOT NULL,
-    clase_organizada      DOUBLE PRECISION NOT NULL,
-    cumple_horarios       DOUBLE PRECISION NOT NULL,
-    fomenta_participacion DOUBLE PRECISION NOT NULL,
-    panorama_amplio       DOUBLE PRECISION NOT NULL,
-    responde_mails        DOUBLE PRECISION NOT NULL,
-    promedio              DOUBLE PRECISION NOT NULL
+    codigo TEXT PRIMARY KEY,
+    nombre TEXT NOT NULL
 );
 "#;
 
@@ -43,6 +29,21 @@ CREATE TABLE IF NOT EXISTS CatedraDocente(
     codigo_catedra TEXT REFERENCES Catedra(codigo),
     codigo_docente TEXT REFERENCES Docente(codigo),
     CONSTRAINT catedra_docente_pkey PRIMARY KEY (codigo_catedra, codigo_docente)
+);
+"#;
+
+pub const CREACION_TABLA_CALIFICACION: &str = r#"
+CREATE TABLE IF NOT EXISTS Calificacion(
+    codigo_docente        TEXT REFERENCES Docente(codigo) NOT NULL,
+    acepta_critica        DOUBLE PRECISION NOT NULL,
+    asistencia            DOUBLE PRECISION NOT NULL,
+    buen_trato            DOUBLE PRECISION NOT NULL,
+    claridad              DOUBLE PRECISION NOT NULL,
+    clase_organizada      DOUBLE PRECISION NOT NULL,
+    cumple_horarios       DOUBLE PRECISION NOT NULL,
+    fomenta_participacion DOUBLE PRECISION NOT NULL,
+    panorama_amplio       DOUBLE PRECISION NOT NULL,
+    responde_mails        DOUBLE PRECISION NOT NULL
 );
 "#;
 
@@ -57,6 +58,8 @@ pub struct Catedra {
 
 #[derive(Deserialize, Default, Debug)]
 pub struct Calificacion {
+    respuestas: usize,
+
     acepta_critica: Option<f64>,
     asistencia: Option<f64>,
     buen_trato: Option<f64>,
@@ -66,7 +69,6 @@ pub struct Calificacion {
     fomenta_participacion: Option<f64>,
     panorama_amplio: Option<f64>,
     responde_mails: Option<f64>,
-    respuestas: Option<u32>,
 }
 
 impl PartialEq for Catedra {
@@ -155,6 +157,13 @@ VALUES ('{}', '{}');
 
 impl Calificacion {
     pub fn query_sql(&self, nombre_docente: &str, codigo_docente: Uuid) -> String {
+        let docente = format!(
+            r#"
+INSERT INTO Docente(codigo, nombre) VALUES ('{codigo_docente}', '{}');
+"#,
+            nombre_docente.sanitizar()
+        );
+
         let acepta_critica = self.acepta_critica.unwrap_or_default();
         let asistencia = self.asistencia.unwrap_or_default();
         let buen_trato = self.buen_trato.unwrap_or_default();
@@ -165,16 +174,15 @@ impl Calificacion {
         let panorama_amplio = self.panorama_amplio.unwrap_or_default();
         let responde_mails = self.responde_mails.unwrap_or_default();
 
-        let promedio = (acepta_critica + asistencia + buen_trato + claridad + clase_organizada + cumple_horarios + fomenta_participacion + panorama_amplio + responde_mails) / 9.0;
+        let mut calificaciones = String::new();
 
-        format!(
-            r#"
-INSERT INTO Docente(codigo, nombre, respuestas, acepta_critica, asistencia, buen_trato, claridad, clase_organizada, cumple_horarios, fomenta_participacion, panorama_amplio, responde_mails, promedio)
-VALUES ('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});
+        for _ in 0..self.respuestas {
+            calificaciones.push_str(&format!(
+                r#"
+INSERT INTO Calificacion(codigo_docente, acepta_critica, asistencia, buen_trato, claridad, clase_organizada, cumple_horarios, fomenta_participacion, panorama_amplio, responde_mails)
+VALUES ('{}', {}, {}, {}, {}, {}, {}, {}, {}, {});
 "#,
             codigo_docente,
-            nombre_docente.sanitizar(),
-            self.respuestas.unwrap_or_default(),
             acepta_critica,
             asistencia,
             buen_trato,
@@ -184,7 +192,9 @@ VALUES ('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});
             fomenta_participacion,
             panorama_amplio,
             responde_mails,
-            promedio
-        )
+        ));
+        }
+
+        docente + &calificaciones
     }
 }

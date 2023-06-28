@@ -1,5 +1,6 @@
 import prisma from "$lib/prisma";
 import type { PageServerLoad } from "./$types";
+import type { Actions } from "./$types";
 import { error } from "@sveltejs/kit";
 
 export const load = (async ({ params }) => {
@@ -52,3 +53,11 @@ export const load = (async ({ params }) => {
 		catedra: { nombre, docentes }
 	};
 }) satisfies PageServerLoad;
+
+export const actions = {
+	default: async ({ request }) => {
+		const formData = await request.formData();
+		const codigoDocente = formData.get("codigo");
+		const comentario = formData.get("comentario");
+	}
+} satisfies Actions;

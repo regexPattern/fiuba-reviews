@@ -27,6 +27,7 @@ pub async fn indexar_dolly() -> anyhow::Result<String> {
         catedras::CREACION_TABLA_DOCENTES.into(),
         comentarios::CREACION_TABLA.into(),
         catedras::CREACION_TABLA_CATEDRA_DOCENTE.into(),
+        catedras::CREACION_TABLA_CALIFICACION.into(),
     ];
 
     let materias = Materia::descargar(&http).await?;

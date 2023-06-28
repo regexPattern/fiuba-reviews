@@ -1,6 +1,6 @@
 import prisma from "$lib/prisma";
 import type { RequestHandler } from "./$types";
-import { error } from "@sveltejs/kit";
+import { json, error } from "@sveltejs/kit";
 
 export const GET = (async ({ params }) => {
 	const docente = await prisma.docente.findUnique({
@@ -11,9 +11,11 @@ export const GET = (async ({ params }) => {
 		throw error(404, { message: "Materia no encontrada" });
 	}
 
-	return new Response(JSON.stringify(docente));
+	return json(docente);
 }) satisfies RequestHandler;
 
-export const POST = (async ({ params }) => {
-	const calificacion = await prisma.docente.
+export const POST = (async ({ request }) => {
+	console.log(await request.text());
+
+	return json({})
 }) satisfies RequestHandler;

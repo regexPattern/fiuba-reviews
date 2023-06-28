@@ -1,14 +1,14 @@
 import prisma from "$lib/prisma";
-import { parseCodigoMateria } from "$lib/utils";
 import type { RequestHandler } from "./$types";
+import { json } from "@sveltejs/kit";
 
 export type Catedra = Awaited<ReturnType<typeof getCatedras>>[number];
 
 export const GET = (async ({ params }) => {
-	const catedras = await getCatedras(parseCodigoMateria(params.codigoMateria));
+	const catedras = await getCatedras(Number(params.codigoMateria));
 	catedras.sort((a, b) => b.promedio - a.promedio);
 
-	return new Response(JSON.stringify(catedras));
+	return json(catedras);
 }) satisfies RequestHandler;
 
 async function getCatedras(codigoMateria: number) {
