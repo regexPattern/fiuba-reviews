@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS CatedraDocente(
 
 pub const CREACION_TABLA_CALIFICACION: &str = r#"
 CREATE TABLE IF NOT EXISTS Calificacion(
+    codigo                UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     codigo_docente        TEXT REFERENCES Docente(codigo) NOT NULL,
     acepta_critica        DOUBLE PRECISION NOT NULL,
     asistencia            DOUBLE PRECISION NOT NULL,
