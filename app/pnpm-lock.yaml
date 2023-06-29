@@ -23,6 +23,12 @@ dependencies:
   tailwindcss-animate:
     specifier: ^1.0.6
     version: 1.0.6(tailwindcss@3.3.2)
+  zod:
+    specifier: ^3.21.4
+    version: 3.21.4
+  zod-form-data:
+    specifier: ^2.0.1
+    version: 2.0.1(zod@3.21.4)
 
 devDependencies:
   '@sveltejs/adapter-auto':
@@ -1709,3 +1715,15 @@ packages:
   /yaml@2.3.1:
     resolution: {integrity: sha512-2eHWfjaoXgTBC2jNM1LRef62VQa0umtvRiDSk6HSzW7RvS5YtkabJrwYLLEKWBc8a5U2PTSCs+dJjUTJdlHsWQ==}
     engines: {node: '>= 14'}
+
+  /zod-form-data@2.0.1(zod@3.21.4):
+    resolution: {integrity: sha512-4jcsj3vFyFGINLLHEmehfOPKdcw+HqV65RwsV2IdyLHp9wpvGJRVXWg1yY8sq0ASEbQfTVBRtI7LcDGv3Qpj8g==}
+    peerDependencies:
+      zod: ^3.11.x
+    dependencies:
+      zod: 3.21.4
+    dev: false
+
+  /zod@3.21.4:
+    resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
+    dev: false

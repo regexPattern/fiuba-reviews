@@ -4,8 +4,10 @@ import type { LayoutServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 
 export const load = (async ({ params }) => {
+	const codigoMateria = Number(params.codigoMateria) || 0;
+
 	const materia = await prisma.materia.findUnique({
-		where: { codigo: Number(params.codigoMateria) }
+		where: { codigo: codigoMateria }
 	});
 
 	if (materia === null) {
@@ -13,9 +15,7 @@ export const load = (async ({ params }) => {
 	}
 
 	const catedras = await prisma.catedra.findMany({
-		where: {
-			codigo_materia: Number(params.codigoMateria)
-		},
+		where: { codigo_materia: codigoMateria },
 		include: {
 			catedradocente: {
 				include: {
@@ -47,9 +47,11 @@ export const load = (async ({ params }) => {
 
 	return {
 		materia,
-		catedras: catedrasConPromedio.map((c) => ({
-			...c,
-			codigo_materia: params.codigoMateria
-		}))
+		catedras: catedrasConPromedio
+			.map((c) => ({
+				...c,
+				codigo_materia: params.codigoMateria
+			}))
+			.sort((a, b) => b.promedio - a.promedio)
 	};
 }) satisfies LayoutServerLoad;

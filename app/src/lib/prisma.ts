@@ -1,3 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
-export default new PrismaClient();
+const prisma = new PrismaClient();
+
+export const cuatrimestres = await prisma.cuatrimestre.findMany();
+
+export default prisma;

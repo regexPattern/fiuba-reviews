@@ -25,3 +25,16 @@ export function promedioDocente(calificaciones: calificacion[]): number {
 
 	return total / calificaciones.length;
 }
+
+export function compararCuatrimestre(a: string, b: string): number {
+	const [cuatriA, anioA] = a.split("Q");
+	const [cuatriB, anioB] = b.split("Q");
+
+	if (anioA < anioB) {
+		return 1;
+	} else if (anioA > anioB) {
+		return -1;
+	} else {
+		return cuatriA <= cuatriB ? 1 : -1;
+	}
+}

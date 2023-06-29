@@ -35,6 +35,8 @@
 		"clsx": "^1.2.1",
 		"lucide-svelte": "^0.252.0",
 		"tailwind-merge": "^1.13.2",
-		"tailwindcss-animate": "^1.0.6"
+		"tailwindcss-animate": "^1.0.6",
+		"zod": "^3.21.4",
+		"zod-form-data": "^2.0.1"
 	}
 }
