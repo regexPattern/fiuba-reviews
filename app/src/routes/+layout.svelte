@@ -4,4 +4,7 @@
 </script>
 
 <PageHeader />
-<slot />
+
+<div class="container">
+	<slot />
+</div>

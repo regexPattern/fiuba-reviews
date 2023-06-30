@@ -7,7 +7,7 @@ const config: Config = {
 	theme: {
 		container: {
 			center: true,
-			padding: "2rem",
+			padding: "1rem",
 			screens: {
 				"2xl": "1400px"
 			}
@@ -54,7 +54,7 @@ const config: Config = {
 				sm: "calc(var(--radius) - 4px)"
 			},
 			fontFamily: {
-				sans: [...fontFamily.sans]
+				sans: ["Inter", ...fontFamily.sans]
 			}
 		}
 	},

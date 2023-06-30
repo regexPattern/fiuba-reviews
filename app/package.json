@@ -34,6 +34,7 @@
 		"class-variance-authority": "^0.6.1",
 		"clsx": "^1.2.1",
 		"lucide-svelte": "^0.252.0",
+		"radix-svelte": "^0.8.0",
 		"tailwind-merge": "^1.13.2",
 		"tailwindcss-animate": "^1.0.6",
 		"zod": "^3.21.4",

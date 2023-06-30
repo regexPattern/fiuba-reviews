@@ -18,6 +18,9 @@ const config = {
 			$components: "src/lib/components",
 			"$components/*": "src/lib/components/*"
 		}
+	},
+	shadcn: {
+		componentPath: "./src/lib/components/ui"
 	}
 };
 export default config;

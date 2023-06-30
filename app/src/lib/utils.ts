@@ -6,7 +6,20 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-export function promedioDocente(calificaciones: calificacion[]): number {
+export function comparar_cuatrimestre(a: string, b: string): number {
+	const [cuatri_a, anio_a] = a.split("Q");
+	const [cuatri_b, anio_b] = b.split("Q");
+
+	if (anio_a < anio_b) {
+		return 1;
+	} else if (anio_a > anio_b) {
+		return -1;
+	} else {
+		return cuatri_a <= cuatri_b ? 1 : -1;
+	}
+}
+
+export function calcular_promedio_docente(calificaciones: calificacion[]): number {
 	const total = calificaciones
 		.map(
 			(c) =>
@@ -26,15 +39,6 @@ export function promedioDocente(calificaciones: calificacion[]): number {
 	return total / calificaciones.length;
 }
 
-export function compararCuatrimestre(a: string, b: string): number {
-	const [cuatriA, anioA] = a.split("Q");
-	const [cuatriB, anioB] = b.split("Q");
-
-	if (anioA < anioB) {
-		return 1;
-	} else if (anioA > anioB) {
-		return -1;
-	} else {
-		return cuatriA <= cuatriB ? 1 : -1;
-	}
+export function generar_nombre_catedra(docentes: { nombre: string }[]): string {
+	return docentes.sort().join(", ");
 }

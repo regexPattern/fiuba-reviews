@@ -1,13 +1,15 @@
 import prisma from "$lib/prisma";
-import { promedioDocente } from "$lib/utils";
+import { calcular_promedio_docente } from "$lib/utils";
 import type { LayoutServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 
 export const load = (async ({ params }) => {
-	const codigoMateria = Number(params.codigoMateria) || 0;
+	const codigo_materia = Number(params.codigo_materia) || 0;
 
 	const materia = await prisma.materia.findUnique({
-		where: { codigo: codigoMateria }
+		where: {
+			codigo: codigo_materia
+		}
 	});
 
 	if (materia === null) {
@@ -15,7 +17,9 @@ export const load = (async ({ params }) => {
 	}
 
 	const catedras = await prisma.catedra.findMany({
-		where: { codigo_materia: codigoMateria },
+		where: {
+			codigo_materia
+		},
 		include: {
 			catedradocente: {
 				include: {
@@ -30,28 +34,34 @@ export const load = (async ({ params }) => {
 		}
 	});
 
-	const catedrasConPromedio = catedras.map((c) => {
+	const catedras_con_promedio = catedras.map((c) => {
 		let docentes = c.catedradocente.map(({ docente }) => ({ ...docente }));
 
 		const nombre = docentes
 			.map(({ nombre }) => nombre)
 			.sort()
-			.join("-");
+			.join(", ");
 
+		// Al momento de calcular el promedio de la catedra, no se toman en cuenta
+		// los docentes que no tienen calificaciones.
 		docentes = docentes.filter((d) => d.calificacion.length != 0);
-		const promedio =
-			docentes.reduce((acc, curr) => acc + promedioDocente(curr.calificacion), 0) / docentes.length;
 
-		return { codigo: c.codigo, nombre, promedio };
+		const promedio =
+			docentes.reduce((acc, curr) => acc + calcular_promedio_docente(curr.calificacion), 0) / docentes.length;
+
+		return {
+			codigo: c.codigo,
+			nombre,
+			promedio
+		};
 	});
+
+	const catedras_ordenadas_por_promedio = catedras_con_promedio
+		.map((c) => ({ ...c, codigo_materia: params.codigo_materia }))
+		.sort((a, b) => b.promedio - a.promedio);
 
 	return {
 		materia,
-		catedras: catedrasConPromedio
-			.map((c) => ({
-				...c,
-				codigo_materia: params.codigoMateria
-			}))
-			.sort((a, b) => b.promedio - a.promedio)
+		catedras: catedras_ordenadas_por_promedio
 	};
 }) satisfies LayoutServerLoad;
