@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+	font-family: "Inter";
+	font-weight: 100 900;
+	font-display: swap;
+	font-style: normal;
+	src: url("/fonts/inter.ttf") format("truetype");
+}

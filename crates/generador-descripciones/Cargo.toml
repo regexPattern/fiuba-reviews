@@ -1,0 +1,16 @@
+[package]
+name = "generador_descripciones"
+version = "0.1.0"
+edition = "2021"
+description = "Generador de descripciones para docentes en la base de datos"
+
+[dependencies]
+anyhow = "1.0.71"
+async-scoped = { version = "0.7.1", features = ["use-tokio"] }
+reqwest = { version = "0.11.18", features = ["json"] }
+serde = { version = "1.0.164", features = ["derive"] }
+serde_json = "1.0.99"
+sqlx = { version = "0.6.3", features = ["runtime-tokio-rustls", "postgres"] }
+tokio = { version = "1.29.1", features = ["full"] }
+tracing = "0.1.37"
+tracing-subscriber = "0.3.17"
