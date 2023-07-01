@@ -5,12 +5,16 @@ mod sql;
 
 use std::collections::{HashMap, HashSet};
 
-use comentarios::{Cuatrimestre, Comentario};
+use comentarios::{Comentario, Cuatrimestre};
+use futures::StreamExt;
 use http_cache_reqwest::{CACacheManager, Cache, CacheMode, HttpCache};
 use materias::Materia;
 use reqwest::Client;
-use reqwest_middleware::ClientBuilder;
+use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use uuid::Uuid;
+
+const HF_INFERENCE_API_KEY_ENV_VAR_NAME: &str = "HF_INFERENCE_API_KEY";
+const LIMITE_REQUESTS_CONCURRENTES_HF_INTEFERENCE_API: usize = 10;
 
 pub async fn indexar_dolly() -> anyhow::Result<String> {
     let http = ClientBuilder::new(Client::new())
@@ -65,17 +69,61 @@ pub async fn indexar_dolly() -> anyhow::Result<String> {
         }
     }
 
-    let nombres_cuatrimestres: HashSet<&str> = comentarios.keys().map(|c| c.nombre.as_str()).collect(); 
+    let nombres_cuatrimestres: HashSet<&str> =
+        comentarios.keys().map(|c| c.nombre.as_str()).collect();
+
     for nombre in nombres_cuatrimestres {
         queries.push(Cuatrimestre::sql(nombre));
     }
 
-    for (cuatrimestre, entradas) in comentarios {
+    let mut comentarios_por_docente = HashMap::new();
+
+    for (cuatrimestre, comentarios) in &comentarios {
         if let Some(codigo_docente) = codigos_docentes.get(&(
             cuatrimestre.codigo_materia,
             cuatrimestre.nombre_docente.clone(),
         )) {
-            queries.push(Comentario::sql(&cuatrimestre, codigo_docente, &entradas));
+            queries.push(Comentario::sql(cuatrimestre, codigo_docente, comentarios));
+            comentarios_por_docente.insert(codigo_docente.to_owned(), comentarios);
+        }
+    }
+
+    if let Ok(api_key) = std::env::var(HF_INFERENCE_API_KEY_ENV_VAR_NAME) {
+        queries
+            .push(agregar_descripciones_generadas(&http, &api_key, comentarios_por_docente).await?);
+    }
+
+    Ok(queries.join(""))
+}
+
+async fn agregar_descripciones_generadas(
+    http: &ClientWithMiddleware,
+    api_key: &str,
+    comentarios_por_docente: HashMap<Uuid, &Vec<String>>,
+) -> anyhow::Result<String> {
+    let futures =
+        comentarios_por_docente
+            .into_iter()
+            .map(|(codigo_docente, comentarios)| async move {
+                Comentario::sql_descripcion_ia(http, api_key, codigo_docente, comentarios).await
+            });
+
+    let stream = futures::stream::iter(futures)
+        .buffer_unordered(LIMITE_REQUESTS_CONCURRENTES_HF_INTEFERENCE_API);
+
+    let resultados: Vec<_> = stream.collect().await;
+    let mut queries = Vec::with_capacity(resultados.len());
+
+    for resultado in resultados {
+        match resultado {
+            Ok(descripcion) => {
+                if let Some(descripcion) = descripcion {
+                    queries.push(descripcion);
+                }
+            }
+            Err(err) => {
+                tracing::error!("error generando descripcion: {err}");
+            }
         }
     }
 

@@ -19,8 +19,12 @@ CREATE TABLE IF NOT EXISTS Catedra(
 
 pub const CREACION_TABLA_DOCENTES: &str = r#"
 CREATE TABLE IF NOT EXISTS Docente(
-    codigo TEXT PRIMARY KEY,
-    nombre TEXT NOT NULL
+    codigo      TEXT PRIMARY KEY,
+    nombre      TEXT NOT NULL,
+    descripcion TEXT,
+
+    -- Cantidad de comentarios del docente al momento de la ultima actualizacion de la descripcion.
+    comentarios_ultima_descripcion INT DEFAULT 0 NOT NULL
 );
 "#;
 

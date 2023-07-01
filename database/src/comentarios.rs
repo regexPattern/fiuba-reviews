@@ -3,12 +3,14 @@ use std::{collections::HashMap, hash::Hash};
 use base64::{engine::general_purpose, Engine};
 use format_serde_error::SerdeError;
 use reqwest_middleware::ClientWithMiddleware;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::sql::Sql;
 
 const URL_DESCARGA: &str = "https://dollyfiuba.com/analitics/comentarios_docentes.json";
+const URL_HF_MODELO_SUMARIZACION: &str =
+    "https://api-inference.huggingface.co/models/facebook/bart-large-cnn";
 
 pub const CREACION_TABLA_CUATRIMESTRES: &str = r#"
 CREATE TABLE IF NOT EXISTS Cuatrimestre(
@@ -73,10 +75,13 @@ impl Cuatrimestre {
     }
 
     pub fn sql(nombre: &str) -> String {
-        format!(r#"
+        format!(
+            r#"
 INSERT INTO Cuatrimestre(nombre)
 VALUES ('{}');
-        "#, nombre.sanitizar())
+        "#,
+            nombre.sanitizar()
+        )
     }
 }
 
@@ -103,5 +108,57 @@ VALUES ('{}', '{}', '{}');
             })
             .collect::<Vec<_>>()
             .join("")
+    }
+
+    pub async fn sql_descripcion_ia(
+        http: &ClientWithMiddleware,
+        api_key: &str,
+        codigo_docente: Uuid,
+        comentarios: &Vec<String>,
+    ) -> anyhow::Result<Option<String>> {
+        #[derive(Serialize)]
+        struct Inputs {
+            inputs: String,
+        }
+
+        #[derive(Deserialize)]
+        struct Resumen {
+            #[serde(alias = "summary_text")]
+            descripcion: String,
+        }
+
+        if comentarios.is_empty() {
+            return Ok(None);
+        }
+
+        tracing::info!("generando descripcion de docente {codigo_docente}");
+
+        let res = http
+            .post(URL_HF_MODELO_SUMARIZACION)
+            .bearer_auth(api_key)
+            .json(&Inputs {
+                inputs: comentarios.join("."),
+            })
+            .send()
+            .await?;
+
+        let data = res.text().await?;
+
+        let mut resumenes: Vec<Resumen> =
+            serde_json::from_str(&data).map_err(|err| SerdeError::new(data, err))?;
+
+        let Resumen { descripcion } = resumenes.remove(0);
+
+        let query = format!(
+            r#"
+UPDATE Docente
+SET descripcion = '{}', comentarios_ultima_descripcion = {}
+WHERE codigo = '{codigo_docente}';
+"#,
+            descripcion.sanitizar(),
+            comentarios.len()
+        );
+
+        Ok(Some(query))
     }
 }
