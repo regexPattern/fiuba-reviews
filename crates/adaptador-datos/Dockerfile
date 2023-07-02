@@ -10,8 +10,6 @@ COPY --from=planner /fiuba-reviews/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 
 COPY . .
-ARG HF_INFERENCE_API_KEY
-ENV HF_INFERENCE_API_KEY $HF_INFERENCE_API_KEY
 RUN cargo run --release
 
 FROM postgres:15.2
