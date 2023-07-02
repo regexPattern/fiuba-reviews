@@ -1,19 +1,16 @@
-#![allow(unused)]
 mod hugging_face;
 
 use std::sync::Arc;
 
-use anyhow::Context;
 use async_scoped::TokioScope;
-use futures::{
-    future::{self, Future},
-    stream::{FuturesUnordered, StreamExt},
-};
 use reqwest::Client;
 use sqlx::PgPool;
-use tokio::{sync::Semaphore, task::JoinSet};
+use tokio::sync::Semaphore;
 
-const MAX_INFERENCE_API_REQUESTS_CONCURRENTES: usize = 10;
+// Hugging Face tiene un limite bastante generoso de request simultaneas, pero en general he notado
+// que alrededor de 20 es lo suficientemente bueno como para que no te retorne error el servidor
+// por tantas requests por segundo.
+const MAX_INFERENCE_API_REQUESTS_CONCURRENTES: usize = 20;
 
 // Proporcion entre la cantidad de comentarios actuales y la cantidad de comentarios que tenia un
 // docente al momento de la ultima actualizacion de su descripcion. Por ejemplo, para un valor de
@@ -35,6 +32,8 @@ pub async fn actualizar(conexion: &PgPool, api_key: String) -> anyhow::Result<Op
     let cliente_http = Client::new();
 
     let docentes = Docente::obtener_de_db(&conexion).await?;
+    let cantidad_docentes = docentes.len();
+
     let semaphore = Arc::new(Semaphore::new(MAX_INFERENCE_API_REQUESTS_CONCURRENTES));
 
     let (_, tasks) = TokioScope::scope_and_block(|s| {
@@ -46,20 +45,36 @@ pub async fn actualizar(conexion: &PgPool, api_key: String) -> anyhow::Result<Op
 
             s.spawn(async move {
                 let _permiso = permiso.acquire_owned().await.unwrap();
-                let value = docente.query_sql(cliente_http, conexion, api_key).await;
-                value
+                let codigo_docente = docente.codigo.clone();
+
+                let resultado_descripcion =
+                    docente.query_sql(cliente_http, conexion, api_key).await;
+
+                tracing::info!("actualizada la descripcion de docente '{codigo_docente}'");
+
+                (codigo_docente, resultado_descripcion)
             });
         }
     });
 
-    let mut updated_values = Vec::with_capacity(10);
+    let mut tuplas_actualizaciones = Vec::with_capacity(cantidad_docentes);
+
     for task in tasks {
-        if let Some(update_tuple) = task.unwrap()? {
-            updated_values.push(update_tuple);
+        let (codigo_docente, resultado_descripcion) = task.unwrap();
+        match resultado_descripcion {
+            Ok(tupla_actualizacion) => {
+                if let Some(valores) = tupla_actualizacion {
+                    tuplas_actualizaciones.push(valores);
+                }
+            }
+            Err(err) => {
+                tracing::error!("error generando descripcion para docente '{codigo_docente}'");
+                tracing::error!("descripcion error: {err}");
+            }
         }
     }
 
-    if updated_values.is_empty() {
+    if tuplas_actualizaciones.is_empty() {
         return Ok(None);
     }
 
@@ -73,7 +88,7 @@ FROM (VALUES
 ) as a(codigo, descripcion, comentarios_ultima_descripcion)
 WHERE a.codigo = d.codigo;
 "#,
-        updated_values.join(",")
+        tuplas_actualizaciones.join(",")
     );
 
     Ok(Some(query_sql))
@@ -86,16 +101,7 @@ impl Docente {
         conexion: PgPool,
         api_key: &str,
     ) -> anyhow::Result<Option<String>> {
-        let comentarios = self
-            .obtener_comentarios_de_db(conexion)
-            .await
-            .map_err(|err| {
-                tracing::error!(
-                    "error obteniendo comentarios de la base de datos para '{}'",
-                    self.codigo
-                );
-                err
-            })?;
+        let comentarios = self.obtener_comentarios_de_db(conexion).await?;
 
         if !self.require_nueva_descripcion(comentarios.len() as i32) {
             return Ok(None);
@@ -103,17 +109,7 @@ impl Docente {
 
         let descripcion =
             hugging_face::generar_descripcion(cliente_http, &self.codigo, &comentarios, &api_key)
-                .await
-                .map_err(|err| {
-                    tracing::error!(
-                        "error generando la descripcion para docente '{}'",
-                        self.codigo,
-                    );
-                    err
-                })
-                .unwrap();
-
-        tracing::info!("actualizada descripcion de '{}'", self.codigo);
+                .await?;
 
         let query = format!(
             r#"('{}', '{}', {})"#,
