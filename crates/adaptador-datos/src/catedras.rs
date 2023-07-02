@@ -11,14 +11,14 @@ use uuid::Uuid;
 use crate::{materias::Materia, sql::Sql};
 
 pub const CREACION_TABLA_CATEDRAS: &str = r#"
-CREATE TABLE IF NOT EXISTS Catedra(
+CREATE TABLE IF NOT EXISTS catedras(
     codigo         TEXT PRIMARY KEY,
-    codigo_materia INTEGER REFERENCES Materia(codigo) NOT NULL
+    codigo_materia INTEGER REFERENCES materias(codigo) NOT NULL
 );
 "#;
 
 pub const CREACION_TABLA_DOCENTES: &str = r#"
-CREATE TABLE IF NOT EXISTS Docente(
+CREATE TABLE IF NOT EXISTS docentes(
     codigo      TEXT PRIMARY KEY,
     nombre      TEXT NOT NULL,
     descripcion TEXT,
@@ -29,17 +29,17 @@ CREATE TABLE IF NOT EXISTS Docente(
 "#;
 
 pub const CREACION_TABLA_CATEDRA_DOCENTE: &str = r#"
-CREATE TABLE IF NOT EXISTS CatedraDocente(
-    codigo_catedra TEXT REFERENCES Catedra(codigo),
-    codigo_docente TEXT REFERENCES Docente(codigo),
+CREATE TABLE IF NOT EXISTS catedra_docentes(
+    codigo_catedra TEXT REFERENCES catedras(codigo),
+    codigo_docente TEXT REFERENCES docentes(codigo),
     CONSTRAINT catedra_docente_pkey PRIMARY KEY (codigo_catedra, codigo_docente)
 );
 "#;
 
 pub const CREACION_TABLA_CALIFICACION: &str = r#"
-CREATE TABLE IF NOT EXISTS Calificacion(
+CREATE TABLE IF NOT EXISTS calificaciones(
     codigo                UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    codigo_docente        TEXT REFERENCES Docente(codigo) NOT NULL,
+    codigo_docente        TEXT REFERENCES docentes(codigo) NOT NULL,
     acepta_critica        DOUBLE PRECISION NOT NULL,
     asistencia            DOUBLE PRECISION NOT NULL,
     buen_trato            DOUBLE PRECISION NOT NULL,
@@ -142,7 +142,7 @@ impl Catedra {
     pub fn query_sql(&self, codigo_materia: u32) -> String {
         format!(
             r#"
-INSERT INTO Catedra(codigo, codigo_materia)
+INSERT INTO catedras(codigo, codigo_materia)
 VALUES ('{}', {});
 "#,
             self.codigo, codigo_materia,
@@ -152,7 +152,7 @@ VALUES ('{}', {});
     pub fn relacion_con_docente_query_sql(&self, codigo_docente: &Uuid) -> String {
         format!(
             r#"
-INSERT INTO CatedraDocente(codigo_catedra, codigo_docente)
+INSERT INTO catedra_docentes(codigo_catedra, codigo_docente)
 VALUES ('{}', '{}');
 "#,
             self.codigo, codigo_docente
@@ -164,7 +164,7 @@ impl Calificacion {
     pub fn query_sql(&self, nombre_docente: &str, codigo_docente: Uuid) -> String {
         let docente = format!(
             r#"
-INSERT INTO Docente(codigo, nombre) VALUES ('{codigo_docente}', '{}');
+INSERT INTO docentes(codigo, nombre) VALUES ('{codigo_docente}', '{}');
 "#,
             nombre_docente.sanitizar()
         );
