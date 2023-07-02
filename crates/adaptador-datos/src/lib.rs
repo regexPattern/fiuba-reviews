@@ -1,0 +1,140 @@
+mod catedras;
+mod comentarios;
+mod materias;
+mod sql;
+
+use std::collections::{HashMap, HashSet};
+
+use comentarios::{Comentario, Cuatrimestre};
+<<<<<<< Updated upstream:crates/adaptador-datos-dolly/src/lib.rs
+=======
+use futures::StreamExt;
+>>>>>>> Stashed changes:database/src/lib.rs
+use http_cache_reqwest::{CACacheManager, Cache, CacheMode, HttpCache};
+use materias::Materia;
+use reqwest::Client;
+use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
+use uuid::Uuid;
+
+const HF_INFERENCE_API_KEY_ENV_VAR_NAME: &str = "HF_INFERENCE_API_KEY";
+const LIMITE_REQUESTS_CONCURRENTES_HF_INTEFERENCE_API: usize = 10;
+
+pub async fn indexar_dolly() -> anyhow::Result<String> {
+    let http = ClientBuilder::new(Client::new())
+        .with(Cache(HttpCache {
+            mode: CacheMode::ForceCache,
+            manager: CACacheManager::default(),
+            options: None,
+        }))
+        .build();
+
+    let mut queries: Vec<String> = vec![
+        materias::CREACION_TABLA.into(),
+        catedras::CREACION_TABLA_CATEDRAS.into(),
+        catedras::CREACION_TABLA_DOCENTES.into(),
+        comentarios::CREACION_TABLA_CUATRIMESTRES.into(),
+        comentarios::CREACION_TABLA_COMENTARIOS.into(),
+        catedras::CREACION_TABLA_CATEDRA_DOCENTE.into(),
+        catedras::CREACION_TABLA_CALIFICACION.into(),
+    ];
+
+    let materias = Materia::descargar(&http).await?;
+    let comentarios = Cuatrimestre::descargar(&http).await?;
+
+    let mut codigos_docentes = HashMap::new();
+
+    for materia in materias {
+        queries.push(materia.query_sql());
+
+        let catedras = match materia.catedras(&http).await {
+            Ok(catedras) => catedras,
+            Err(err) => {
+                tracing::error!("error descargando catedras de materia {}", materia.codigo);
+                tracing::debug!("descripcion error: {err}");
+                continue;
+            }
+        };
+
+        for catedra in catedras {
+            queries.push(catedra.query_sql(materia.codigo));
+
+            for (nombre_docente, calificacion) in &catedra.docentes {
+                let codigo_docente = codigos_docentes
+                    .entry((materia.codigo, nombre_docente.clone()))
+                    .or_insert_with(|| {
+                        let codigo_docente = Uuid::new_v4();
+                        queries.push(calificacion.query_sql(nombre_docente, codigo_docente));
+                        codigo_docente
+                    });
+
+                queries.push(catedra.relacion_con_docente_query_sql(codigo_docente));
+            }
+        }
+    }
+
+    let nombres_cuatrimestres: HashSet<&str> =
+        comentarios.keys().map(|c| c.nombre.as_str()).collect();
+
+    for nombre in nombres_cuatrimestres {
+        queries.push(Cuatrimestre::sql(nombre));
+    }
+
+<<<<<<< Updated upstream:crates/adaptador-datos-dolly/src/lib.rs
+=======
+    let mut comentarios_por_docente = HashMap::new();
+
+>>>>>>> Stashed changes:database/src/lib.rs
+    for (cuatrimestre, comentarios) in &comentarios {
+        if let Some(codigo_docente) = codigos_docentes.get(&(
+            cuatrimestre.codigo_materia,
+            cuatrimestre.nombre_docente.clone(),
+        )) {
+            queries.push(Comentario::sql(cuatrimestre, codigo_docente, comentarios));
+<<<<<<< Updated upstream:crates/adaptador-datos-dolly/src/lib.rs
+=======
+            comentarios_por_docente.insert(codigo_docente.to_owned(), comentarios);
+        }
+    }
+
+    if let Ok(api_key) = std::env::var(HF_INFERENCE_API_KEY_ENV_VAR_NAME) {
+        queries
+            .push(agregar_descripciones_generadas(&http, &api_key, comentarios_por_docente).await?);
+    }
+
+    Ok(queries.join(""))
+}
+
+async fn agregar_descripciones_generadas(
+    http: &ClientWithMiddleware,
+    api_key: &str,
+    comentarios_por_docente: HashMap<Uuid, &Vec<String>>,
+) -> anyhow::Result<String> {
+    let futures =
+        comentarios_por_docente
+            .into_iter()
+            .map(|(codigo_docente, comentarios)| async move {
+                Comentario::sql_descripcion_ia(http, api_key, codigo_docente, comentarios).await
+            });
+
+    let stream = futures::stream::iter(futures)
+        .buffer_unordered(LIMITE_REQUESTS_CONCURRENTES_HF_INTEFERENCE_API);
+
+    let resultados: Vec<_> = stream.collect().await;
+    let mut queries = Vec::with_capacity(resultados.len());
+
+    for resultado in resultados {
+        match resultado {
+            Ok(descripcion) => {
+                if let Some(descripcion) = descripcion {
+                    queries.push(descripcion);
+                }
+            }
+            Err(err) => {
+                tracing::error!("error generando descripcion: {err}");
+            }
+>>>>>>> Stashed changes:database/src/lib.rs
+        }
+    }
+
+    Ok(queries.join(""))
+}
