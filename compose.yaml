@@ -1,5 +1,12 @@
 name: fiuba-reviews
 services:
+  generador-descripciones:
+    build:
+      context: ./crates/generador-descripciones
+    depends_on:
+      base-de-datos:
+        condition: service_healthy
+
   base-de-datos:
     build:
       context: ./crates/adaptador-datos

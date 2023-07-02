@@ -93,7 +93,7 @@ impl Hash for Catedra {
 impl Materia {
     pub async fn catedras(
         &self,
-        http: &ClientWithMiddleware,
+        cliente_http: &ClientWithMiddleware,
     ) -> anyhow::Result<impl Iterator<Item = Catedra>> {
         #[derive(Deserialize)]
         struct Catedras {
@@ -109,7 +109,7 @@ impl Materia {
 
         tracing::info!("descargando catedras de materia {}", self.codigo);
 
-        let res = http
+        let res = cliente_http
             .get(format!("{}/{}", URL_DESCARGA_CATEDRAS, self.codigo))
             .send()
             .await?;

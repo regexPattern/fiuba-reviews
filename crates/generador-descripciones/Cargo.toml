@@ -2,10 +2,14 @@
 name = "generador_descripciones"
 version = "0.1.0"
 edition = "2021"
+description = "Generador de descripciones para docentes en la base de datos"
 
 [dependencies]
 anyhow = "1.0.71"
+async-scoped = { version = "0.7.1", features = ["use-tokio"] }
 format_serde_error = "0.3.0"
+futures = "0.3.28"
+lazy_static = "1.4.0"
 reqwest = { version = "0.11.18", features = ["json"] }
 serde = { version = "1.0.164", features = ["derive"] }
 serde_json = "1.0.99"
