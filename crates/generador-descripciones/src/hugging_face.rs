@@ -1,6 +1,5 @@
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
-use format_serde_error::SerdeError;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
@@ -14,8 +13,9 @@ pub async fn generar_descripcion(
     api_key: &str,
 ) -> anyhow::Result<String> {
     #[derive(Serialize)]
-    struct Payload {
+    struct Params {
         inputs: String,
+        options: HashMap<String, bool>,
     }
 
     #[derive(Deserialize)]
@@ -24,23 +24,25 @@ pub async fn generar_descripcion(
         descripcion: String,
     }
 
-    tracing::info!("generando descripcion para docente '{}'", codigo_docente);
+    tracing::debug!("generando descripcion para docente '{}'", codigo_docente);
 
     let res = cliente_http
         .post(HF_INFERENCE_API_URL)
         .bearer_auth(api_key)
-        .json(&Payload {
+        .json(&Params {
             inputs: comentarios_docente.join("."),
+            options: [("wait_for_model".to_string(), true)].into(),
         })
         .send()
         .await?;
 
     let data = res.text().await?;
 
-    let mut resumenes: VecDeque<Resumen> = serde_json::from_str(&data).map_err(|err| {
-        tracing::error!("{data}");
-        err
-    })?;
+    let mut resumenes: VecDeque<Resumen> = if let Ok(resumenes) = serde_json::from_str(&data) {
+        resumenes
+    } else {
+        anyhow::bail!("error al deserializar respuesta de Inference API: {data}");
+    };
 
     if let Some(Resumen { descripcion }) = resumenes.pop_front() {
         Ok(descripcion)
