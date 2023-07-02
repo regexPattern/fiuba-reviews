@@ -1,3 +1,4 @@
+.env
 /.svelte-kit
 /build
 /package

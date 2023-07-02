@@ -13,7 +13,7 @@ use reqwest_middleware::ClientBuilder;
 use uuid::Uuid;
 
 pub async fn indexar_dolly() -> anyhow::Result<String> {
-    let http = ClientBuilder::new(Client::new())
+    let cliente_http = ClientBuilder::new(Client::new())
         .with(Cache(HttpCache {
             mode: CacheMode::ForceCache,
             manager: CACacheManager::default(),
@@ -31,15 +31,15 @@ pub async fn indexar_dolly() -> anyhow::Result<String> {
         catedras::CREACION_TABLA_CALIFICACION.into(),
     ];
 
-    let materias = Materia::descargar(&http).await?;
-    let comentarios = Cuatrimestre::descargar(&http).await?;
+    let materias = Materia::descargar(&cliente_http).await?;
+    let comentarios = Cuatrimestre::descargar(&cliente_http).await?;
 
     let mut codigos_docentes = HashMap::new();
 
     for materia in materias {
         queries.push(materia.query_sql());
 
-        let catedras = match materia.catedras(&http).await {
+        let catedras = match materia.catedras(&cliente_http).await {
             Ok(catedras) => catedras,
             Err(err) => {
                 tracing::error!("error descargando catedras de materia {}", materia.codigo);

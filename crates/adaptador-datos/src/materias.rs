@@ -32,7 +32,7 @@ pub struct Materia {
 
 impl Materia {
     pub async fn descargar(
-        http: &ClientWithMiddleware,
+        cliente_http: &ClientWithMiddleware,
     ) -> anyhow::Result<impl Iterator<Item = Self>> {
         #[derive(Deserialize)]
         struct Materias {
@@ -40,13 +40,13 @@ impl Materia {
         }
 
         tracing::info!("descargando listado de materias");
-        let res = http.get(URL_DESCARGA_MATERIAS).send().await?;
+        let res = cliente_http.get(URL_DESCARGA_MATERIAS).send().await?;
         let data = res.text().await?;
 
         let Materias { mut materias } =
             serde_json::from_str(&data).map_err(|err| SerdeError::new(data, err))?;
 
-        Self::asignas_equivalencias(http, &mut materias).await?;
+        Self::asignas_equivalencias(cliente_http, &mut materias).await?;
 
         // Ordenamos las materias para que las que no tienen equivalencia se terminen insertando
         // antes en la query SQL que las que si tienen equivalencias. Esto porque hay una relacion
@@ -63,12 +63,12 @@ impl Materia {
     }
 
     async fn asignas_equivalencias(
-        http: &ClientWithMiddleware,
+        cliente_http: &ClientWithMiddleware,
         materias: &mut [Self],
     ) -> anyhow::Result<()> {
         tracing::info!("descargando listado de equivalencias");
 
-        let res = http.get(URL_DESCARGA_EQUIVALENCIAS).send().await?;
+        let res = cliente_http.get(URL_DESCARGA_EQUIVALENCIAS).send().await?;
         let data = res.text().await?;
 
         let codigos_equivalencias: Vec<Vec<u32>> =
