@@ -1,0 +1,7 @@
+.env
+/.svelte-kit
+/build
+/crates
+/package
+node_modules
+pnpm-lock.yaml
