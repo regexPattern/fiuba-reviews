@@ -7,10 +7,10 @@ use serde::Deserialize;
 use crate::sql::Sql;
 
 pub const CREACION_TABLA: &str = r#"
-CREATE TABLE IF NOT EXISTS Materia(
+CREATE TABLE IF NOT EXISTS materias(
     codigo              INTEGER PRIMARY KEY,
     nombre              TEXT NOT NULL,
-    codigo_equivalencia INTEGER REFERENCES Materia(codigo)
+    codigo_equivalencia INTEGER REFERENCES materias(codigo)
 );
 "#;
 
@@ -100,7 +100,7 @@ impl Materia {
     pub fn query_sql(&self) -> String {
         format!(
             r#"
-INSERT INTO Materia(codigo, nombre, codigo_equivalencia)
+INSERT INTO materias(codigo, nombre, codigo_equivalencia)
 VALUES ({}, '{}', {});
 "#,
             self.codigo,
