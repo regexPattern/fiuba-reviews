@@ -33,6 +33,7 @@ export const load = (async ({ params }) => {
 	}
 
 	const docentes = catedra.catedra_docentes.map(({ docentes: d }) => {
+		let values = d.calificaciones;
 		return {
 			...d,
 			comentarios: d.comentarios.sort((a, b) =>

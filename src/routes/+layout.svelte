@@ -2,8 +2,10 @@
 	import "../app.css";
 </script>
 
-<header class="border-border bg-background sticky top-0 z-30 h-16 border-b bg-white" />
-<div class="lg:container lg:mx-auto flex flex-1">
+<header
+	class="sticky top-0 z-30 h-16 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-black"
+/>
+<div class="flex flex-1 lg:container lg:mx-auto">
 	<slot />
 </div>
 
