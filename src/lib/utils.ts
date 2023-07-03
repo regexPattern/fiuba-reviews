@@ -35,7 +35,7 @@ export function calcPromedioDocente(docente: { calificaciones: calificaciones[] 
 	return total / docente.calificaciones.length || 0;
 }
 
-export function fmtNombreCatedra(nombresDocentes: { nombre: string }[]): string {
+export function fmtNombreCatedra(nombresDocentes: { nombre: string }[]) {
 	return nombresDocentes
 		.map((d) => d.nombre)
 		.sort()
