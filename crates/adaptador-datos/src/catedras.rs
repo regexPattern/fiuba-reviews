@@ -184,7 +184,7 @@ INSERT INTO docentes(codigo, nombre) VALUES ('{codigo_docente}', '{}');
         for _ in 0..self.respuestas {
             calificaciones.push_str(&format!(
                 r#"
-INSERT INTO Calificacion(codigo_docente, acepta_critica, asistencia, buen_trato, claridad, clase_organizada, cumple_horarios, fomenta_participacion, panorama_amplio, responde_mails)
+INSERT INTO calificaciones(codigo_docente, acepta_critica, asistencia, buen_trato, claridad, clase_organizada, cumple_horarios, fomenta_participacion, panorama_amplio, responde_mails)
 VALUES ('{}', {}, {}, {}, {}, {}, {}, {}, {}, {});
 "#,
             codigo_docente,

@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use async_scoped::TokioScope;
 use reqwest::Client;
-use sqlx::PgPool;
+use sqlx::{FromRow, PgPool};
 use tokio::sync::Semaphore;
 
 // Hugging Face tiene un limite bastante generoso de request simultaneas, pero en general he notado
@@ -19,11 +19,13 @@ const MAX_INFERENCE_API_REQUESTS_CONCURRENTES: usize = 20;
 //
 const FACTOR_ACTUALIZACION_DESCRIPCION: usize = 2;
 
+#[derive(FromRow)]
 struct Docente {
     codigo: String,
     comentarios_ultima_descripcion: i32,
 }
 
+#[derive(FromRow)]
 struct Comentario {
     contenido: String,
 }
@@ -50,7 +52,7 @@ pub async fn actualizar(conexion: &PgPool, api_key: String) -> anyhow::Result<Op
                 let resultado_descripcion =
                     docente.query_sql(cliente_http, conexion, api_key).await;
 
-                tracing::info!("actualizada la descripcion de docente '{codigo_docente}'");
+                tracing::debug!("terminado el procesamiento de docente '{codigo_docente}'");
 
                 (codigo_docente, resultado_descripcion)
             });
@@ -64,6 +66,7 @@ pub async fn actualizar(conexion: &PgPool, api_key: String) -> anyhow::Result<Op
         match resultado_descripcion {
             Ok(tupla_actualizacion) => {
                 if let Some(valores) = tupla_actualizacion {
+                    tracing::info!("actualizada la descripcion de docente '{codigo_docente}'");
                     tuplas_actualizaciones.push(valores);
                 }
             }
@@ -80,7 +83,7 @@ pub async fn actualizar(conexion: &PgPool, api_key: String) -> anyhow::Result<Op
 
     let query_sql = format!(
         r#"
-UPDATE Docente as d
+UPDATE docentes as d
 SET descripcion = a.descripcion,
     comentarios_ultima_descripcion = a.comentarios_ultima_descripcion
 FROM (VALUES
@@ -122,26 +125,24 @@ impl Docente {
     }
 
     async fn obtener_de_db(conexion: &PgPool) -> anyhow::Result<Vec<Self>> {
-        Ok(sqlx::query_as!(
-            Docente,
+        Ok(sqlx::query_as::<_, Docente>(
             r#"
 SELECT codigo, comentarios_ultima_descripcion
-FROM Docente 
-"#
+FROM docentes
+"#,
         )
         .fetch_all(conexion)
         .await?)
     }
 
     async fn obtener_comentarios_de_db(&self, pool: PgPool) -> anyhow::Result<Vec<String>> {
-        let comentarios = sqlx::query_as!(
-            Comentario,
+        let comentarios = sqlx::query_as::<_, Comentario>(
             r#"
 SELECT contenido
-FROM Comentario
+FROM comentarios
 WHERE codigo_docente = $1"#,
-            self.codigo
         )
+        .bind(&self.codigo)
         .fetch_all(&pool)
         .await?;
 
