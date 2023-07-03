@@ -4,9 +4,7 @@ import { error } from "@sveltejs/kit";
 
 export const load = (async ({ params }) => {
 	const materia = await prisma.materias.findUnique({
-		where: {
-			codigo: Number(params.codigo_materia) || 0
-		},
+		where: { codigo: Number(params.codigo_materia) || 0 },
 		include: {
 			other_materias: {
 				select: {

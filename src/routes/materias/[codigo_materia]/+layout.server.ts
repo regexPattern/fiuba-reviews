@@ -7,9 +7,7 @@ export const load = (async ({ params }) => {
 	const codigoMateria = Number(params.codigo_materia) || 0;
 
 	const materia = await prisma.materias.findUnique({
-		where: {
-			codigo: codigoMateria
-		}
+		where: { codigo: codigoMateria }
 	});
 
 	if (!materia) {
@@ -17,9 +15,7 @@ export const load = (async ({ params }) => {
 	}
 
 	const catedras = await prisma.catedras.findMany({
-		where: {
-			codigo_materia: codigoMateria
-		},
+		where: { codigo_materia: codigoMateria },
 		include: {
 			catedra_docentes: {
 				include: {
@@ -35,7 +31,7 @@ export const load = (async ({ params }) => {
 	});
 
 	const catedrasConPromedio = catedras.map((c) => {
-		let docentes = c.catedra_docentes.map(({ docentes: docente }) => ({ ...docente }));
+		let docentes = c.catedra_docentes.map(({ docentes: d }) => ({ ...d }));
 
 		const nombre = utils.fmtNombreCatedra(docentes);
 		docentes = docentes.filter((d) => d.calificaciones.length != 0);
