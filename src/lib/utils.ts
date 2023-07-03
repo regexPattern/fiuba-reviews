@@ -1,6 +1,5 @@
 import type { calificaciones } from "@prisma/client";
 
-// Comparador de cuatrimestres que los ordena de mas a menos reciente.
 export function cmpCuatrimestre(a: string, b: string) {
 	const [cuatriA, anioA] = a.split("Q");
 	const [cuatriB, anioB] = b.split("Q");
@@ -14,8 +13,6 @@ export function cmpCuatrimestre(a: string, b: string) {
 	}
 }
 
-// Calculador del promedio de un docente en base a su collecion de
-// calificaciones.
 export function calcPromedioDocente(docente: { calificaciones: calificaciones[] }) {
 	const total = docente.calificaciones
 		.map((c) => {
@@ -38,8 +35,6 @@ export function calcPromedioDocente(docente: { calificaciones: calificaciones[] 
 	return total / docente.calificaciones.length || 0;
 }
 
-// Estariza el formato en el que se muestra el nombre de una catedra, generado
-// a partir de los nombres de los docentes que la componen.
 export function fmtNombreCatedra(nombresDocentes: { nombre: string }[]): string {
-	return nombresDocentes.sort().join(", ");
+	return nombresDocentes.map(d => d.nombre).sort().join(", ");
 }

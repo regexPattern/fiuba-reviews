@@ -31,7 +31,7 @@
 				</form> -->
 			</div>
 
-			{#each docente.comentario as comentario}
+			{#each docente.comentarios as comentario}
 				<p>{comentario.contenido}</p>
 			{/each}
 		</div>
