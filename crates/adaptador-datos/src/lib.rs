@@ -22,13 +22,8 @@ pub async fn indexar_dolly() -> anyhow::Result<String> {
         .build();
 
     let mut queries: Vec<String> = vec![
-        materias::CREACION_TABLA.into(),
-        catedras::CREACION_TABLA_CATEDRAS.into(),
-        catedras::CREACION_TABLA_DOCENTES.into(),
-        comentarios::CREACION_TABLA_CUATRIMESTRES.into(),
-        comentarios::CREACION_TABLA_COMENTARIOS.into(),
-        catedras::CREACION_TABLA_CATEDRA_DOCENTE.into(),
-        catedras::CREACION_TABLA_CALIFICACION.into(),
+        String::from_utf8_lossy(include_bytes!("../sql/tablas.sql")).into(),
+        format!("BEGIN;"),
     ];
 
     let materias = Materia::descargar(&cliente_http).await?;
@@ -77,9 +72,15 @@ pub async fn indexar_dolly() -> anyhow::Result<String> {
             cuatrimestre.codigo_materia,
             cuatrimestre.nombre_docente.clone(),
         )) {
-            queries.push(Comentario::query_sql(cuatrimestre, codigo_docente, comentarios));
+            queries.push(Comentario::query_sql(
+                cuatrimestre,
+                codigo_docente,
+                comentarios,
+            ));
         }
     }
+
+    queries.push("COMMIT;".into());
 
     Ok(queries.join(""))
 }

@@ -11,5 +11,6 @@
 	"pluginSearchDirs": ["."],
 	"overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }],
 	"importOrderSeparation": true,
-	"importOrderSortSpecifiers": true
+	"importOrderSortSpecifiers": true,
+	"svelteBracketNewLine": false
 }

@@ -1,81 +1,102 @@
-import prisma from "$lib/prisma";
-import * as utils from "$lib/utils";
+import db from "$lib/db";
+import * as schema from "$lib/db/schema";
 import type { PageServerLoad } from "./$types";
-import type { Actions } from "./$types";
-import { error, fail } from "@sveltejs/kit";
-import { z } from "zod";
-import { zfd } from "zod-form-data";
+import { eq, sql } from "drizzle-orm";
 
 export const load = (async ({ params }) => {
-	const catedra = await prisma.catedras.findUnique({
-		where: { codigo: params.codigo_catedra },
-		select: {
-			catedra_docentes: {
-				select: {
-					docentes: {
-						include: {
-							calificaciones: true,
-							comentarios: {
-								select: {
-									contenido: true,
-									cuatrimestre: true
-								}
-							}
-						}
-					}
-				}
+	const docentes = await db
+		.select({
+			codigo: schema.docente.codigo,
+			nombre: schema.docente.nombre,
+			descripcion: schema.docente.descripcion,
+			respuestas: sql<number>`COUNT(${schema.calificacion})`,
+			calificaciones: {
+				aceptaCritica: sql<number>`AVG(${schema.calificacion.aceptaCritica})`,
+				asistencia: sql<number>`AVG(${schema.calificacion.asistencia})`,
+				buenTrato: sql<number>`AVG(${schema.calificacion.buenTrato})`,
+				claridad: sql<number>`AVG(${schema.calificacion.claridad})`,
+				claseOrganizada: sql<number>`AVG(${schema.calificacion.claseOrganizada})`,
+				cumpleHorarios: sql<number>`AVG(${schema.calificacion.cumpleHorarios})`,
+				fomentaParticipacion: sql<number>`AVG(${schema.calificacion.fomentaParticipacion})`,
+				panoramaAmplio: sql<number>`AVG(${schema.calificacion.panoramaAmplio})`,
+				respondeMails: sql<number>`AVG(${schema.calificacion.respondeMails})`
 			}
-		}
-	});
+		})
+		.from(schema.docente)
+		.innerJoin(schema.calificacion, eq(schema.calificacion.codigoDocente, schema.docente.codigo))
+		.innerJoin(
+			schema.catedraDocente,
+			eq(schema.catedraDocente.codigoDocente, schema.docente.codigo)
+		)
+		.innerJoin(schema.catedra, eq(schema.catedra.codigo, schema.catedraDocente.codigoCatedra))
+		.where(eq(schema.catedra.codigo, params.codigo_catedra))
+		.groupBy(schema.docente.codigo);
 
-	if (!catedra) {
-		throw error(404, { message: "Catedra no encontrada" });
+	const comentarios = await db
+		.select({
+			codigo: schema.comentario.codigo,
+			codigoDocente: schema.comentario.codigoDocente,
+			cuatrimestre: schema.comentario.cuatrimestre,
+			contenido: schema.comentario.contenido
+		})
+		.from(schema.comentario)
+		.innerJoin(schema.docente, eq(schema.docente.codigo, schema.comentario.codigoDocente))
+		.innerJoin(
+			schema.catedraDocente,
+			eq(schema.catedraDocente.codigoDocente, schema.docente.codigo)
+		)
+		.where(eq(schema.catedraDocente.codigoCatedra, params.codigo_catedra));
+
+	const codigoDocenteAComentarios: Map<
+		string,
+		{ codigo: string; cuatrimestre: string; contenido: string }[]
+	> = new Map();
+
+	for (const comentario of comentarios) {
+		const comentariosDeDocente = codigoDocenteAComentarios.get(comentario.codigoDocente) || [];
+
+		comentariosDeDocente.push({
+			codigo: comentario.codigo,
+			cuatrimestre: comentario.cuatrimestre,
+			contenido: comentario.contenido
+		});
+
+		codigoDocenteAComentarios.set(comentario.codigoDocente, comentariosDeDocente);
 	}
 
-	const docentes = catedra.catedra_docentes.map(({ docentes: d }) => {
+	const docentesConPromedioYComentarios = docentes.map((d) => {
+		const calificaciones = Object.values(d.calificaciones);
+		const promedioDocente =
+			calificaciones.reduce((acc, curr) => acc + curr, 0) / calificaciones.length;
+
 		return {
 			...d,
-			comentarios: d.comentarios.sort((a, b) =>
-				utils.cmpCuatrimestre(a.cuatrimestre, b.cuatrimestre)
-			),
-			promedio: utils.calcPromedioDocente(d)
+			promedio: promedioDocente || 0,
+			comentarios: codigoDocenteAComentarios.get(d.codigo) || []
 		};
 	});
 
-	const cuatrimestres = await prisma.cuatrimestres.findMany();
+	const cuatrimestres = await db.select().from(schema.cuatrimestre);
+
+	docentesConPromedioYComentarios.sort((a, b) => b.promedio - a.promedio);
+	cuatrimestres.sort(ordernarCuatrimestres);
 
 	return {
-		catedra: {
-			nombre: utils.fmtNombreCatedra(docentes),
-			docentes: docentes.sort((a, b) => b.promedio - a.promedio)
-		},
-		cuatrimestres: cuatrimestres.map((c) => c.nombre).sort(utils.cmpCuatrimestre)
+		catedras: null,
+		docentes: docentesConPromedioYComentarios,
+		cuatrimestres
 	};
 }) satisfies PageServerLoad;
 
-export const actions = {
-	default: async ({ request }) => {
-		const dataFormulario = await request.formData();
-		const parse = schema.safeParse(dataFormulario);
+function ordernarCuatrimestres<T extends { nombre: string }>(a: T, b: T) {
+	const [cuatriA, anioA] = a.nombre.split("Q");
+	const [cuatriB, anioB] = b.nombre.split("Q");
 
-		if (!parse.success) {
-			return fail(422, { errores: parse.error.issues });
-		}
+	if (anioA < anioB) {
+		return 1;
+	} else if (anioA > anioB) {
+		return -1;
+	} else {
+		return cuatriA <= cuatriB ? 1 : -1;
 	}
-} satisfies Actions;
-
-const calificacionNumerica = zfd.numeric(z.number().min(1).max(5));
-
-const schema = zfd.formData({
-	codigo_docente: zfd.text(),
-	acepta_critica: calificacionNumerica,
-	asistencia: calificacionNumerica,
-	buen_trato: calificacionNumerica,
-	claridad: calificacionNumerica,
-	clase_organizada: calificacionNumerica,
-	cumple_horarios: calificacionNumerica,
-	fomenta_participacion: calificacionNumerica,
-	panorama_amplio: calificacionNumerica,
-	responde_mails: calificacionNumerica,
-	comentario: zfd.text().optional()
-});
+}

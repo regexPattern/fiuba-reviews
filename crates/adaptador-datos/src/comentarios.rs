@@ -10,21 +10,6 @@ use crate::sql::Sql;
 
 const URL_DESCARGA: &str = "https://dollyfiuba.com/analitics/comentarios_docentes.json";
 
-pub const CREACION_TABLA_CUATRIMESTRES: &str = r#"
-CREATE TABLE IF NOT EXISTS cuatrimestres(
-    nombre TEXT PRIMARY KEY
-);
-"#;
-
-pub const CREACION_TABLA_COMENTARIOS: &str = r#"
-CREATE TABLE IF NOT EXISTS comentarios(
-    codigo         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    codigo_docente TEXT REFERENCES docentes(codigo) NOT NULL,
-    cuatrimestre   TEXT REFERENCES cuatrimestres(nombre) NOT NULL,
-    contenido      TEXT NOT NULL
-);
-"#;
-
 #[derive(Deserialize, PartialEq, Eq, Hash)]
 pub struct Cuatrimestre {
     #[serde(alias = "cuat")]
@@ -75,7 +60,7 @@ impl Cuatrimestre {
     pub fn sql(nombre: &str) -> String {
         format!(
             r#"
-INSERT INTO cuatrimestres(nombre)
+INSERT INTO cuatrimestre(nombre)
 VALUES ('{}');
         "#,
             nombre.sanitizar()
@@ -96,7 +81,7 @@ impl Comentario {
             .map(|contenido| {
                 format!(
                     r#"
-INSERT INTO comentarios(cuatrimestre, codigo_docente, contenido)
+INSERT INTO comentario(cuatrimestre, codigo_docente, contenido)
 VALUES ('{}', '{}', '{}');
 "#,
                     cuatrimestre.nombre.sanitizar(),

@@ -2,37 +2,25 @@
 	import type { ActionData, PageData } from "./$types";
 
 	export let data: PageData;
-	export let form: ActionData | undefined;
+	// export let form: ActionData | undefined;
 </script>
 
-<div class="flex flex-col space-y-8 divide-y">
-	{#each data.catedra.docentes as docente (docente.codigo)}
-		<div>
-			<p>{docente.promedio.toFixed(1)} - {docente.nombre}</p>
-			<p class="border border-blue-500">{docente.descripcion}</p>
+<div class="flex flex-col gap-12">
+	{#each data.docentes as docente (docente.codigo)}
+		<div class="space-y-3">
+			<div class="flex items-center gap-2">
+				<span class="rounded-xl border p-1.5 font-medium">{docente.promedio.toFixed(1)}</span>
+				<p class="text-2xl font-medium">{docente.nombre}</p>
+			</div>
 
-			<div class="border-2 p-4">
-				{#if form?.errores}
-					{#each form.errores as issue}
-						<li>{issue.path} - {issue.message}</li>
-					{/each}
-				{/if}
-				<!-- <form method="POST" use:enhance class="flex flex-col">
-					<input type="hidden" name="codigo" value={docente.codigo} />
-
-					<select name="cuatrimestre">
-						{#each data.cuatrimestres as c}
-							<option value={c}>{c}</option>
-						{/each}
-					</select>
-
-					<textarea name="comentario" class="border-2" />
-					<button type="submit">Enviar</button>
-				</form> -->
+			<div
+				class="flex flex-col gap-2 rounded-lg border border-slate-200 bg-slate-100 p-4 dark:border-slate-700 dark:bg-slate-900"
+			>
+				<p>{docente.descripcion}</p>
 			</div>
 
 			{#each docente.comentarios as comentario}
-				<p>{comentario.contenido}</p>
+				<p>&bull; {comentario.contenido}</p>
 			{/each}
 		</div>
 	{/each}
