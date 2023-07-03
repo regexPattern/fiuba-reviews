@@ -6,10 +6,8 @@ description = "Adaptador de datos de DollyFIUBA"
 
 [dependencies]
 anyhow = "1.0.70"
-async-scoped = { version = "0.7.1", features = ["use-tokio"] }
 base64 = "0.21.0"
 format_serde_error = "0.3.0"
-futures = "0.3.28"
 http-cache = "0.11.0"
 http-cache-reqwest = "0.9.0"
 reqwest = "0.11.16"
