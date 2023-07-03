@@ -6,7 +6,7 @@ import { error } from "@sveltejs/kit";
 export const load = (async ({ params }) => {
 	const codigoMateria = Number(params.codigo_materia) || 0;
 
-	const materia = await prisma.materia.findUnique({
+	const materia = await prisma.materias.findUnique({
 		where: {
 			codigo: codigoMateria
 		}
@@ -16,17 +16,17 @@ export const load = (async ({ params }) => {
 		throw error(404, { message: "Materia no encontrada" });
 	}
 
-	const catedras = await prisma.catedra.findMany({
+	const catedras = await prisma.catedras.findMany({
 		where: {
 			codigo_materia: codigoMateria
 		},
 		include: {
-			catedradocente: {
+			catedra_docentes: {
 				include: {
-					docente: {
+					docentes: {
 						select: {
 							nombre: true,
-							calificacion: true
+							calificaciones: true
 						}
 					}
 				}
@@ -35,10 +35,10 @@ export const load = (async ({ params }) => {
 	});
 
 	const catedrasConPromedio = catedras.map((c) => {
-		let docentes = c.catedradocente.map(({ docente }) => ({ ...docente }));
+		let docentes = c.catedra_docentes.map(({ docentes: docente }) => ({ ...docente }));
 
 		const nombre = utils.fmtNombreCatedra(docentes);
-		docentes = docentes.filter((d) => d.calificacion.length != 0);
+		docentes = docentes.filter((d) => d.calificaciones.length != 0);
 
 		const promedio =
 			docentes.reduce((acc, curr) => acc + utils.calcPromedioDocente(curr), 0) / docentes.length ||
