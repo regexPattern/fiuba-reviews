@@ -1,4 +1,3 @@
-import { INFERENCE_API_KEY } from "$env/static/private";
 import prisma from "$lib/prisma";
 import * as utils from "$lib/utils";
 import type { PageServerLoad } from "./$types";
@@ -8,17 +7,15 @@ import { z } from "zod";
 import { zfd } from "zod-form-data";
 
 export const load = (async ({ params }) => {
-	const catedra = await prisma.catedra.findUnique({
-		where: {
-			codigo: params.codigo_catedra
-		},
+	const catedra = await prisma.catedras.findUnique({
+		where: { codigo: params.codigo_catedra },
 		select: {
-			catedradocente: {
+			catedra_docentes: {
 				select: {
-					docente: {
+					docentes: {
 						include: {
-							calificacion: true,
-							comentario: {
+							calificaciones: true,
+							comentarios: {
 								select: {
 									contenido: true,
 									cuatrimestre: true
@@ -35,20 +32,17 @@ export const load = (async ({ params }) => {
 		throw error(404, { message: "Catedra no encontrada" });
 	}
 
-	const docentes = catedra.catedradocente.map(({ docente }) => {
-		const necesitaActualizarDesc =
-			docente.comentario.length > docente.comentarios_ultima_actualizacion * 1.75;
-
+	const docentes = catedra.catedra_docentes.map(({ docentes: d }) => {
 		return {
-			...docente,
-			comentarios: docente.comentario.sort((a, b) =>
+			...d,
+			comentarios: d.comentarios.sort((a, b) =>
 				utils.cmpCuatrimestre(a.cuatrimestre, b.cuatrimestre)
 			),
-			promedio: utils.calcPromedioDocente(docente)
+			promedio: utils.calcPromedioDocente(d)
 		};
 	});
 
-	const cuatrimestres = await prisma.cuatrimestre.findMany();
+	const cuatrimestres = await prisma.cuatrimestres.findMany();
 
 	return {
 		catedra: {
@@ -70,23 +64,8 @@ export const actions = {
 	}
 } satisfies Actions;
 
-// Generador de descripcion par docente basado en sus comentarios.
-async function genDescripcionDocente(comentarios: { contenido: string }[]) {
-	const comentariosUnificados = comentarios.map((c) => c.contenido).join("\n");
-
-	const res = await fetch("https://api-inference.huggingface.co/models/facebook/bart-large-cnn", {
-		headers: { Authorization: `Bearer ${INFERENCE_API_KEY}` },
-		method: "POST",
-		body: JSON.stringify({ inputs: comentariosUnificados })
-	});
-
-	const json = await res.json();
-	return (json.get(0)?.summary_text as string) || null;
-}
-
-// Schema de validacion del formulario de calificacion y comentario para un
-// docente.
 const calificacionNumerica = zfd.numeric(z.number().min(1).max(5));
+
 const schema = zfd.formData({
 	codigo_docente: zfd.text(),
 	acepta_critica: calificacionNumerica,

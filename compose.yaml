@@ -18,11 +18,11 @@ services:
     build:
       context: ./crates/generador-descripciones
     environment:
-      WAIT_HOSTS: base-de-datos:5432
-      WAIT_TIMEOUT: 180
-      WAIT_SLEEP_INTERVAL: 5
-      WAIT_LOGGER_LEVEL: error
       DATABASE_URL: postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@base-de-datos:5432
       HF_INFERENCE_API_KEY: $HF_INFERENCE_API_KEY
       RUST_LOG: generador_descripciones=info,sqlx=error
+      WAIT_HOSTS: base-de-datos:5432
+      WAIT_LOGGER_LEVEL: error
+      WAIT_SLEEP_INTERVAL: 5
+      WAIT_TIMEOUT: 180
     restart: no
