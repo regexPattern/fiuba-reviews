@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use async_scoped::TokioScope;
 use reqwest::Client;
-use sqlx::{FromRow, PgPool};
+use sqlx::{types::Uuid, FromRow, PgPool};
 use tokio::sync::Semaphore;
 
 // Hugging Face tiene un limite bastante generoso de request simultaneas, pero en general he notado
@@ -25,7 +25,7 @@ const MAX_ERRORES_CONSECUTIVOS: usize = 10;
 
 #[derive(FromRow)]
 struct Docente {
-    codigo: String,
+    codigo: Uuid,
     comentarios_ultima_descripcion: i32,
 }
 
