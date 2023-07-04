@@ -10,48 +10,6 @@ use uuid::Uuid;
 
 use crate::{materias::Materia, sql::Sql};
 
-pub const CREACION_TABLA_CATEDRAS: &str = r#"
-CREATE TABLE IF NOT EXISTS catedras(
-    codigo         TEXT PRIMARY KEY,
-    codigo_materia INTEGER REFERENCES materias(codigo) NOT NULL
-);
-"#;
-
-pub const CREACION_TABLA_DOCENTES: &str = r#"
-CREATE TABLE IF NOT EXISTS docentes(
-    codigo      TEXT PRIMARY KEY,
-    nombre      TEXT NOT NULL,
-    descripcion TEXT,
-
-    -- Cantidad de comentarios del docente al momento de la ultima actualizacion de la descripcion.
-    comentarios_ultima_descripcion INT DEFAULT 0 NOT NULL
-);
-"#;
-
-pub const CREACION_TABLA_CATEDRA_DOCENTE: &str = r#"
-CREATE TABLE IF NOT EXISTS catedra_docentes(
-    codigo_catedra TEXT REFERENCES catedras(codigo),
-    codigo_docente TEXT REFERENCES docentes(codigo),
-    CONSTRAINT catedra_docente_pkey PRIMARY KEY (codigo_catedra, codigo_docente)
-);
-"#;
-
-pub const CREACION_TABLA_CALIFICACION: &str = r#"
-CREATE TABLE IF NOT EXISTS calificaciones(
-    codigo                UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    codigo_docente        TEXT REFERENCES docentes(codigo) NOT NULL,
-    acepta_critica        DOUBLE PRECISION NOT NULL,
-    asistencia            DOUBLE PRECISION NOT NULL,
-    buen_trato            DOUBLE PRECISION NOT NULL,
-    claridad              DOUBLE PRECISION NOT NULL,
-    clase_organizada      DOUBLE PRECISION NOT NULL,
-    cumple_horarios       DOUBLE PRECISION NOT NULL,
-    fomenta_participacion DOUBLE PRECISION NOT NULL,
-    panorama_amplio       DOUBLE PRECISION NOT NULL,
-    responde_mails        DOUBLE PRECISION NOT NULL
-);
-"#;
-
 const URL_DESCARGA_CATEDRAS: &str = "https://dollyfiuba.com/analitics/cursos";
 
 #[derive(Debug)]
@@ -142,7 +100,7 @@ impl Catedra {
     pub fn query_sql(&self, codigo_materia: u32) -> String {
         format!(
             r#"
-INSERT INTO catedras(codigo, codigo_materia)
+INSERT INTO catedra(codigo, codigo_materia)
 VALUES ('{}', {});
 "#,
             self.codigo, codigo_materia,
@@ -152,7 +110,7 @@ VALUES ('{}', {});
     pub fn relacion_con_docente_query_sql(&self, codigo_docente: &Uuid) -> String {
         format!(
             r#"
-INSERT INTO catedra_docentes(codigo_catedra, codigo_docente)
+INSERT INTO catedra_docente(codigo_catedra, codigo_docente)
 VALUES ('{}', '{}');
 "#,
             self.codigo, codigo_docente
@@ -164,7 +122,7 @@ impl Calificacion {
     pub fn query_sql(&self, nombre_docente: &str, codigo_docente: Uuid) -> String {
         let docente = format!(
             r#"
-INSERT INTO docentes(codigo, nombre) VALUES ('{codigo_docente}', '{}');
+INSERT INTO docente(codigo, nombre) VALUES ('{codigo_docente}', '{}');
 "#,
             nombre_docente.sanitizar()
         );
@@ -184,7 +142,7 @@ INSERT INTO docentes(codigo, nombre) VALUES ('{codigo_docente}', '{}');
         for _ in 0..self.respuestas {
             calificaciones.push_str(&format!(
                 r#"
-INSERT INTO calificaciones(codigo_docente, acepta_critica, asistencia, buen_trato, claridad, clase_organizada, cumple_horarios, fomenta_participacion, panorama_amplio, responde_mails)
+INSERT INTO calificacion(codigo_docente, acepta_critica, asistencia, buen_trato, claridad, clase_organizada, cumple_horarios, fomenta_participacion, panorama_amplio, responde_mails)
 VALUES ('{}', {}, {}, {}, {}, {}, {}, {}, {}, {});
 "#,
             codigo_docente,
