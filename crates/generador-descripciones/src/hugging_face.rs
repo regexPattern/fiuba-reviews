@@ -2,13 +2,14 @@ use std::collections::{HashMap, VecDeque};
 
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use sqlx::types::Uuid;
 
 const HF_INFERENCE_API_URL: &str =
     "https://api-inference.huggingface.co/models/facebook/bart-large-cnn";
 
 pub async fn generar_descripcion(
     cliente_http: Client,
-    codigo_docente: &str,
+    codigo_docente: &Uuid,
     comentarios_docente: &[String],
     api_key: &str,
 ) -> anyhow::Result<String> {
