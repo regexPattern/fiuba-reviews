@@ -1,29 +1,13 @@
-import prisma from "$lib/prisma";
+import db from "$lib/db";
+import * as schema from "$lib/db/schema";
 import type { PageServerLoad } from "./$types";
-import { error } from "@sveltejs/kit";
+import { eq } from "drizzle-orm";
 
 export const load = (async ({ params }) => {
-	const materia = await prisma.materias.findUnique({
-		where: { codigo: Number(params.codigo_materia) || 0 },
-		include: {
-			other_materias: {
-				select: {
-					nombre: true,
-					codigo: true
-				}
-			}
-		}
-	});
+	const equivalencias = await db
+		.select({ nombre: schema.materia.nombre, codigo: schema.materia.codigo })
+		.from(schema.materia)
+		.where(eq(schema.materia.codigoEquivalencia, Number(params.codigo_materia)));
 
-	if (!materia) {
-		throw error(404, { message: "Materia no encontrada" });
-	}
-
-	return {
-		materia: {
-			codigo: materia.codigo,
-			nombre: materia.nombre,
-			equivalencias: materia.other_materias
-		}
-	};
+  return { equivalencias };
 }) satisfies PageServerLoad;

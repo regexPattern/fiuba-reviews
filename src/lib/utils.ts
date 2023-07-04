@@ -1,4 +1,4 @@
-import type { calificaciones } from "@prisma/client";
+import type { calificacion } from "@prisma/client";
 
 export function cmpCuatrimestre(a: string, b: string) {
 	const [cuatriA, anioA] = a.split("Q");
@@ -13,8 +13,8 @@ export function cmpCuatrimestre(a: string, b: string) {
 	}
 }
 
-export function calcPromedioDocente(docente: { calificaciones: calificaciones[] }) {
-	const total = docente.calificaciones
+export function calcPromedioDocente(docente: { calificacion: calificacion[] }) {
+	const total = docente.calificacion
 		.map((c) => {
 			const params = [
 				c.acepta_critica,
@@ -32,7 +32,7 @@ export function calcPromedioDocente(docente: { calificaciones: calificaciones[] 
 		})
 		.reduce((acc, curr) => acc + curr, 0);
 
-	return total / docente.calificaciones.length || 0;
+	return total / docente.calificacion.length || 0;
 }
 
 export function fmtNombreCatedra(nombresDocentes: { nombre: string }[]) {

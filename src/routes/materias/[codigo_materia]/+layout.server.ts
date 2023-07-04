@@ -1,56 +1,70 @@
-import prisma from "$lib/prisma";
-import * as utils from "$lib/utils";
+import db from "$lib/db";
+import * as schema from "$lib/db/schema";
 import type { LayoutServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
+import { eq, sql } from "drizzle-orm";
 
 export const load = (async ({ params }) => {
-	const codigoMateria = Number(params.codigo_materia) || 0;
-
-	const materia = await prisma.materias.findUnique({
-		where: { codigo: codigoMateria }
-	});
+	const materia = (
+		await db
+			.select({ codigo: schema.materia.codigo, nombre: schema.materia.nombre })
+			.from(schema.materia)
+			.where(eq(schema.materia.codigo, Number(params.codigo_materia)))
+			.limit(1)
+	)[0];
 
 	if (!materia) {
 		throw error(404, { message: "Materia no encontrada" });
 	}
 
-	const catedras = await prisma.catedras.findMany({
-		where: { codigo_materia: codigoMateria },
-		include: {
-			catedra_docentes: {
-				include: {
-					docentes: {
-						select: {
-							nombre: true,
-							calificaciones: true
-						}
-					}
-				}
-			}
-		}
-	});
+	const catedrasConDocentesYPromedio = await db
+		.select({
+			codigo: schema.catedra.codigo,
+			nombreDocente: schema.docente.nombre,
+			promedioDocente: sql<number>`
+				AVG((${schema.calificacion.aceptaCritica} +
+						 ${schema.calificacion.asistencia} +
+						 ${schema.calificacion.buenTrato} +
+						 ${schema.calificacion.claridad} +
+						 ${schema.calificacion.claseOrganizada} +
+						 ${schema.calificacion.cumpleHorarios} +
+						 ${schema.calificacion.fomentaParticipacion} +
+						 ${schema.calificacion.panoramaAmplio} +
+						 ${schema.calificacion.respondeMails}) / 9)
+			`
+		})
+		.from(schema.catedra)
+		.innerJoin(
+			schema.catedraDocente,
+			eq(schema.catedraDocente.codigoCatedra, schema.catedra.codigo)
+		)
+		.innerJoin(schema.docente, eq(schema.docente.codigo, schema.catedraDocente.codigoDocente))
+		.innerJoin(schema.calificacion, eq(schema.calificacion.codigoDocente, schema.docente.codigo))
+		.where(eq(schema.catedra.codigoMateria, materia.codigo))
+		.groupBy(sql`${schema.catedra.codigo}, ${schema.docente.nombre}`);
 
-	const catedrasConPromedio = catedras.map((c) => {
-		let docentes = c.catedra_docentes.map(({ docentes: d }) => ({ ...d }));
+	const codigoCatedraADocentes: Map<string, { nombre: string; promedio: number }[]> = new Map();
 
-		const nombre = utils.fmtNombreCatedra(docentes);
-		docentes = docentes.filter((d) => d.calificaciones.length != 0);
+	for (const catedra of catedrasConDocentesYPromedio) {
+		const docentes = codigoCatedraADocentes.get(catedra.codigo) ?? [];
+		docentes.push({ nombre: catedra.nombreDocente, promedio: catedra.promedioDocente });
+		codigoCatedraADocentes.set(catedra.codigo, docentes);
+	}
 
-		const promedio =
-			docentes.reduce((acc, curr) => acc + utils.calcPromedioDocente(curr), 0) / docentes.length ||
-			0;
+	const catedras: { codigo: string; nombre: string; promedio: number }[] = [];
 
-		return {
-			codigo: c.codigo,
-			nombre,
+	codigoCatedraADocentes.forEach((docentes, codigoCatedra) => {
+		const nombreCatedra = docentes.map((d) => d.nombre).join(", ");
+		const promedio = docentes.reduce((acc, d) => acc + d.promedio, 0) / docentes.length || 0;
+
+		catedras.push({
+			codigo: codigoCatedra,
+			nombre: nombreCatedra,
 			promedio
-		};
+		});
 	});
 
-	return {
-		materia,
-		catedras: catedrasConPromedio
-			.map((c) => ({ ...c, codigo_materia: params.codigo_materia }))
-			.sort((a, b) => b.promedio - a.promedio)
-	};
+	catedras.sort((a, b) => b.promedio - a.promedio);
+
+	return { materia, catedras };
 }) satisfies LayoutServerLoad;

@@ -5,6 +5,6 @@
 </script>
 
 <h1>{data.materia.codigo} - {data.materia.nombre}</h1>
-{#each data.materia.equivalencias as equivalencia}
+<!-- {#each data.equivalencias as equivalencia}
 	<p>{equivalencia.codigo} - {equivalencia.nombre}</p>
-{/each}
+{/each} -->

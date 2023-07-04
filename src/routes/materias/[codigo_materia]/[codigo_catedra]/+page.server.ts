@@ -7,15 +7,15 @@ import { z } from "zod";
 import { zfd } from "zod-form-data";
 
 export const load = (async ({ params }) => {
-	const catedra = await prisma.catedras.findUnique({
+	const catedra = await prisma.catedra.findUnique({
 		where: { codigo: params.codigo_catedra },
 		select: {
-			catedra_docentes: {
+			catedra_docente: {
 				select: {
-					docentes: {
+					docente: {
 						include: {
-							calificaciones: true,
-							comentarios: {
+							calificacion: true,
+							comentario: {
 								select: {
 									contenido: true,
 									cuatrimestre: true
@@ -32,18 +32,17 @@ export const load = (async ({ params }) => {
 		throw error(404, { message: "Catedra no encontrada" });
 	}
 
-	const docentes = catedra.catedra_docentes.map(({ docentes: d }) => {
-		let values = d.calificaciones;
+	const docentes = catedra.catedra_docente.map(({ docente: d }) => {
 		return {
 			...d,
-			comentarios: d.comentarios.sort((a, b) =>
+			comentarios: d.comentario.sort((a, b) =>
 				utils.cmpCuatrimestre(a.cuatrimestre, b.cuatrimestre)
 			),
 			promedio: utils.calcPromedioDocente(d)
 		};
 	});
 
-	const cuatrimestres = await prisma.cuatrimestres.findMany();
+	const cuatrimestres = await prisma.cuatrimestre.findMany();
 
 	return {
 		catedra: {
