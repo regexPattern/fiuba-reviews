@@ -18,7 +18,7 @@ services:
     build:
       context: ./crates/generador-descripciones
     environment:
-      DATABASE_URL: postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@base-de-datos:5432
+      DATABASE_URL: $DATABASE_URL
       HF_INFERENCE_API_KEY: $HF_INFERENCE_API_KEY
       RUST_LOG: generador_descripciones=info,sqlx=error
       WAIT_HOSTS: base-de-datos:5432

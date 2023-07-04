@@ -16,8 +16,12 @@ const MAX_INFERENCE_API_REQUESTS_CONCURRENTES: usize = 20;
 // docente al momento de la ultima actualizacion de su descripcion. Por ejemplo, para un valor de
 // 2, se va a habilitar la regeneracion de la descripcion del docente cuando el numero de
 // comentarios actuales del misma sea mas del doble del que tuvo durante la ultima actualizacion.
-//
 const FACTOR_ACTUALIZACION_DESCRIPCION: usize = 2;
+
+// Interrumpir la generacion tras cierto numeros de intento consecutivos. Esto usualmente pasa si
+// alcanzamos el maximo de request por hora de Hugging Face, con lo que no tiene sentido seguir
+// gastando network haciendo mas requests.
+const MAX_ERRORES_CONSECUTIVOS: usize = 10;
 
 #[derive(FromRow)]
 struct Docente {
@@ -60,6 +64,7 @@ pub async fn actualizar(conexion: &PgPool, api_key: String) -> anyhow::Result<Op
     });
 
     let mut tuplas_actualizaciones = Vec::with_capacity(cantidad_docentes);
+    let mut numero_errores = 0;
 
     for task in tasks {
         let (codigo_docente, resultado_descripcion) = task.unwrap();
@@ -69,11 +74,18 @@ pub async fn actualizar(conexion: &PgPool, api_key: String) -> anyhow::Result<Op
                     tracing::info!("actualizada la descripcion de docente '{codigo_docente}'");
                     tuplas_actualizaciones.push(valores);
                 }
+                numero_errores = 0;
             }
             Err(err) => {
                 tracing::error!("error generando descripcion para docente '{codigo_docente}'");
                 tracing::error!("descripcion error: {err}");
+                numero_errores += 1;
             }
+        }
+
+        if numero_errores == MAX_ERRORES_CONSECUTIVOS {
+            tracing::info!("generacion interrumpida tras {numero_errores} errores consecutivos");
+            break;
         }
     }
 
@@ -83,13 +95,13 @@ pub async fn actualizar(conexion: &PgPool, api_key: String) -> anyhow::Result<Op
 
     let query_sql = format!(
         r#"
-UPDATE docentes as d
-SET descripcion = a.descripcion,
-    comentarios_ultima_descripcion = a.comentarios_ultima_descripcion
+UPDATE docente AS d
+SET descripcion = v.descripcion,
+    comentarios_ultima_descripcion = v.comentarios_ultima_descripcion
 FROM (VALUES
     {}
-) as a(codigo, descripcion, comentarios_ultima_descripcion)
-WHERE a.codigo = d.codigo;
+) AS v(codigo, descripcion, comentarios_ultima_descripcion)
+WHERE v.codigo = d.codigo;
 "#,
         tuplas_actualizaciones.join(",")
     );
@@ -128,7 +140,7 @@ impl Docente {
         Ok(sqlx::query_as::<_, Docente>(
             r#"
 SELECT codigo, comentarios_ultima_descripcion
-FROM docentes
+FROM docente
 "#,
         )
         .fetch_all(conexion)
@@ -139,7 +151,7 @@ FROM docentes
         let comentarios = sqlx::query_as::<_, Comentario>(
             r#"
 SELECT contenido
-FROM comentarios
+FROM comentario
 WHERE codigo_docente = $1"#,
         )
         .bind(&self.codigo)

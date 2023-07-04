@@ -6,14 +6,6 @@ use serde::Deserialize;
 
 use crate::sql::Sql;
 
-pub const CREACION_TABLA: &str = r#"
-CREATE TABLE IF NOT EXISTS materias(
-    codigo              INTEGER PRIMARY KEY,
-    nombre              TEXT NOT NULL,
-    codigo_equivalencia INTEGER REFERENCES materias(codigo)
-);
-"#;
-
 const URL_DESCARGA_EQUIVALENCIAS: &str = "https://raw.githubusercontent.com/lugfi/dolly/f47f553a89dc7c7cbf8192277c9f2e3e1e826bf0/data/equivalencias.json";
 const URL_DESCARGA_MATERIAS: &str =
     "https://raw.githubusercontent.com/lugfi/dolly/master/data/comun.json";
@@ -100,7 +92,7 @@ impl Materia {
     pub fn query_sql(&self) -> String {
         format!(
             r#"
-INSERT INTO materias(codigo, nombre, codigo_equivalencia)
+INSERT INTO materia(codigo, nombre, codigo_equivalencia)
 VALUES ({}, '{}', {});
 "#,
             self.codigo,
