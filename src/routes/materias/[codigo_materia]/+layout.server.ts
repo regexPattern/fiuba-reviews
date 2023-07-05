@@ -1,4 +1,4 @@
-import db, { queryPromedioDocente } from "$lib/db";
+import db from "$lib/db";
 import * as schema from "$lib/db/schema";
 import type { LayoutServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
@@ -17,29 +17,41 @@ export const load = (async ({ params }) => {
 		throw error(404, { message: "Materia no encontrada" });
 	}
 
-	const catedrasConDocentesYPromedio = await db
+	const docentesDeCatedrasConPromedio = await db
 		.select({
-			codigo: schema.catedra.codigo,
-			nombreDocente: schema.docente.nombre,
-			promedioDocente: queryPromedioDocente<number | null>()
+			codigoCatedra: schema.catedra.codigo,
+			nombre: schema.docente.nombre,
+			promedio: sql<number | null>`
+        AVG((${schema.calificacion.aceptaCritica} +
+        ${schema.calificacion.asistencia} +
+        ${schema.calificacion.buenTrato} +
+        ${schema.calificacion.claridad} +
+        ${schema.calificacion.claseOrganizada} +
+        ${schema.calificacion.cumpleHorarios} +
+        ${schema.calificacion.fomentaParticipacion} +
+        ${schema.calificacion.panoramaAmplio} +
+        ${schema.calificacion.respondeMails}) / 9)
+      `
 		})
-		.from(schema.catedra)
+		.from(schema.docente)
+		.leftJoin(schema.calificacion, eq(schema.calificacion.codigoDocente, schema.docente.codigo))
 		.innerJoin(
 			schema.catedraDocente,
-			eq(schema.catedraDocente.codigoCatedra, schema.catedra.codigo)
+			eq(schema.catedraDocente.codigoDocente, schema.docente.codigo)
 		)
-		.innerJoin(schema.docente, eq(schema.docente.codigo, schema.catedraDocente.codigoDocente))
-		.leftJoin(schema.calificacion, eq(schema.calificacion.codigoDocente, schema.docente.codigo))
+		.innerJoin(schema.catedra, eq(schema.catedra.codigo, schema.catedraDocente.codigoCatedra))
 		.where(eq(schema.catedra.codigoMateria, materia.codigo))
-		.groupBy(sql`${schema.catedra.codigo}, ${schema.docente.nombre}`);
+		.groupBy(sql`${schema.catedra.codigo}, ${schema.docente.codigo}`);
 
 	const codigoCatedraADocentes: Map<string, { nombre: string; promedio: number | null }[]> =
 		new Map();
 
-	for (const catedra of catedrasConDocentesYPromedio) {
-		const docentes = codigoCatedraADocentes.get(catedra.codigo) ?? [];
-		docentes.push({ nombre: catedra.nombreDocente, promedio: catedra.promedioDocente });
-		codigoCatedraADocentes.set(catedra.codigo, docentes);
+	for (const docente of docentesDeCatedrasConPromedio) {
+		const docentesDeCatedra = codigoCatedraADocentes.get(docente.codigoCatedra) ?? [];
+
+		docentesDeCatedra.push(docente);
+
+		codigoCatedraADocentes.set(docente.codigoCatedra, docentesDeCatedra);
 	}
 
 	const catedras: { codigo: string; nombre: string; promedio: number }[] = [];
@@ -48,13 +60,13 @@ export const load = (async ({ params }) => {
 		const nombreCatedra = docentes.map((d) => d.nombre).join(", ");
 
 		const docentesConCalificaciones = docentes.filter((d) => d.promedio != null).length;
-		const promedio =
+		const promedioCatedra =
 			docentes.reduce((acc, d) => acc + (d.promedio || 0), 0) / docentesConCalificaciones || 0;
 
 		catedras.push({
 			codigo: codigoCatedra,
 			nombre: nombreCatedra,
-			promedio
+			promedio: promedioCatedra
 		});
 	});
 

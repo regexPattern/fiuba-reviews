@@ -1,4 +1,4 @@
-import db, { queryPromedioDocente } from "$lib/db";
+import db from "$lib/db";
 import * as schema from "$lib/db/schema";
 import type { PageServerLoad } from "./$types";
 import { eq, sql } from "drizzle-orm";
@@ -9,18 +9,28 @@ export const load = (async ({ params }) => {
 			codigo: schema.docente.codigo,
 			nombre: schema.docente.nombre,
 			descripcion: schema.docente.descripcion,
-			promedio: queryPromedioDocente<number>()
+			respuestas: sql<number>`COUNT(${schema.calificacion})`,
+			calificaciones: {
+				aceptaCritica: sql<number>`AVG(${schema.calificacion.aceptaCritica})`,
+				asistencia: sql<number>`AVG(${schema.calificacion.asistencia})`,
+				buenTrato: sql<number>`AVG(${schema.calificacion.buenTrato})`,
+				claridad: sql<number>`AVG(${schema.calificacion.claridad})`,
+				claseOrganizada: sql<number>`AVG(${schema.calificacion.claseOrganizada})`,
+				cumpleHorarios: sql<number>`AVG(${schema.calificacion.cumpleHorarios})`,
+				fomentaParticipacion: sql<number>`AVG(${schema.calificacion.fomentaParticipacion})`,
+				panoramaAmplio: sql<number>`AVG(${schema.calificacion.panoramaAmplio})`,
+				respondeMails: sql<number>`AVG(${schema.calificacion.respondeMails})`
+			}
 		})
-		.from(schema.catedra)
+		.from(schema.docente)
+		.innerJoin(schema.calificacion, eq(schema.calificacion.codigoDocente, schema.docente.codigo))
 		.innerJoin(
 			schema.catedraDocente,
-			eq(schema.catedraDocente.codigoCatedra, schema.catedra.codigo)
+			eq(schema.catedraDocente.codigoDocente, schema.docente.codigo)
 		)
-		.innerJoin(schema.docente, eq(schema.docente.codigo, schema.catedraDocente.codigoDocente))
-		.innerJoin(schema.calificacion, eq(schema.calificacion.codigoDocente, schema.docente.codigo))
-		.innerJoin(schema.comentario, eq(schema.comentario.codigoDocente, schema.docente.codigo))
+		.innerJoin(schema.catedra, eq(schema.catedra.codigo, schema.catedraDocente.codigoCatedra))
 		.where(eq(schema.catedra.codigo, params.codigo_catedra))
-		.groupBy(sql`${schema.docente.codigo}, ${schema.docente.nombre}`);
+		.groupBy(schema.docente.codigo);
 
 	const comentarios = await db
 		.select({
@@ -43,25 +53,38 @@ export const load = (async ({ params }) => {
 	> = new Map();
 
 	for (const comentario of comentarios) {
-		const comentariosDocente = codigoDocenteAComentarios.get(comentario.codigoDocente) || [];
-		comentariosDocente.push({
+		const comentariosDeDocente = codigoDocenteAComentarios.get(comentario.codigoDocente) || [];
+
+		comentariosDeDocente.push({
 			codigo: comentario.codigo,
 			cuatrimestre: comentario.cuatrimestre,
 			contenido: comentario.contenido
 		});
-		codigoDocenteAComentarios.set(comentario.codigoDocente, comentariosDocente);
+
+		codigoDocenteAComentarios.set(comentario.codigoDocente, comentariosDeDocente);
 	}
 
-	const docentesConComentarios = docentes.map((d) => ({
-		...d,
-		comentarios: codigoDocenteAComentarios.get(d.codigo) || []
-	}));
+	const docentesConPromedioYComentarios = docentes.map((d) => {
+		const calificaciones = Object.values(d.calificaciones);
+		const promedioDocente =
+			calificaciones.reduce((acc, curr) => acc + curr, 0) / calificaciones.length;
+
+		return {
+			...d,
+			promedio: promedioDocente || 0,
+			comentarios: codigoDocenteAComentarios.get(d.codigo) || []
+		};
+	});
 
 	const cuatrimestres = await db.select().from(schema.cuatrimestre);
 
+	docentesConPromedioYComentarios.sort((a, b) => b.promedio - a.promedio);
+	cuatrimestres.sort(ordernarCuatrimestres);
+
 	return {
-		docentes: docentesConComentarios,
-		cuatrimestres: cuatrimestres.sort(ordernarCuatrimestres)
+		catedras: null,
+		docentes: docentesConPromedioYComentarios,
+		cuatrimestres
 	};
 }) satisfies PageServerLoad;
 
