@@ -1,34 +1,49 @@
 <script lang="ts">
-	import { browser } from "$app/environment";
+	import SearchBar from "$lib/components/SearchBar.svelte";
+	import ThemePicker from "$lib/components/ThemePicker.svelte";
+	import { ModeWatcher } from "mode-watcher";
+
 	import "../app.css";
+	import type { LayoutData } from "./$types";
 
-	let modoOscuro = false;
-
-	function alternarModoOscuro() {
-		modoOscuro = !modoOscuro;
-		modoOscuro
-			? document.documentElement.classList.add("dark")
-			: document.documentElement.classList.remove("dark");
-	}
-
-	if (browser) {
-		if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-			document.documentElement.classList.add("dark");
-			modoOscuro = true;
-		} else {
-			document.documentElement.classList.remove("dark");
-			modoOscuro = false;
-		}
-	}
+	export let data: LayoutData;
 </script>
 
-<header
-	class="border-border sticky top-0 z-30 h-16 border-b bg-background supports-[backdrop-filter]:bg-background/[0.75] supports-[backdrop-filter]:backdrop-blur">
-	<button on:click={alternarModoOscuro}>Click</button>
+<svelte:head>
+	<title>FIUBA Reviews</title>
+</svelte:head>
+
+<ModeWatcher />
+
+<header class="sticky top-0 z-[40] border-b bg-background/75 backdrop-blur-lg">
+	<div class="container flex h-16 items-center justify-start gap-2 p-3 sm:justify-between">
+		<a href="/" class="flex-1 font-semibold sm:p-0">
+			<span class="hidden sm:inline">FIUBA<span class="font-medium">&nbsp;Reviews</span></span>
+			<span class="sm:hidden">F<span class="font-medium">R</span></span>
+		</a>
+
+		<SearchBar class="w-full sm:w-64" materias={data.materias} />
+		<ThemePicker class="h-10 w-10 shrink-0" />
+
+		<a
+			href="https://github.com/regexPattern/fiuba-reviews"
+			target="_blank"
+			rel="noopener noreferrer"
+			class="flex h-10 w-10 shrink-0 items-center justify-center"
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				x="0px"
+				y="0px"
+				viewBox="0 0 24 24"
+				class="h-[26px] w-[26px] fill-black dark:fill-white"
+			>
+				<path
+					d="M10.9,2.1c-4.6,0.5-8.3,4.2-8.8,8.7c-0.5,4.7,2.2,8.9,6.3,10.5C8.7,21.4,9,21.2,9,20.8v-1.6c0,0-0.4,0.1-0.9,0.1 c-1.4,0-2-1.2-2.1-1.9c-0.1-0.4-0.3-0.7-0.6-1C5.1,16.3,5,16.3,5,16.2C5,16,5.3,16,5.4,16c0.6,0,1.1,0.7,1.3,1c0.5,0.8,1.1,1,1.4,1 c0.4,0,0.7-0.1,0.9-0.2c0.1-0.7,0.4-1.4,1-1.8c-2.3-0.5-4-1.8-4-4c0-1.1,0.5-2.2,1.2-3C7.1,8.8,7,8.3,7,7.6C7,7.2,7,6.6,7.3,6 c0,0,1.4,0,2.8,1.3C10.6,7.1,11.3,7,12,7s1.4,0.1,2,0.3C15.3,6,16.8,6,16.8,6C17,6.6,17,7.2,17,7.6c0,0.8-0.1,1.2-0.2,1.4 c0.7,0.8,1.2,1.8,1.2,3c0,2.2-1.7,3.5-4,4c0.6,0.5,1,1.4,1,2.3v2.6c0,0.3,0.3,0.6,0.7,0.5c3.7-1.5,6.3-5.1,6.3-9.3 C22,6.1,16.9,1.4,10.9,2.1z"
+				/>
+			</svg>
+		</a>
+	</div>
 </header>
 
-<div class="flex flex-1 lg:container lg:mx-auto">
-	<slot />
-</div>
-
-<footer class="h-16 border-t p-4">TESTING</footer>
+<slot />

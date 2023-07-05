@@ -1,35 +1,32 @@
-use anyhow::Context;
-use sqlx::postgres::PgPoolOptions;
+use std::env;
 
-const DATABASE_URL: &str = "DATABASE_URL";
-const HF_INFERENCE_API_KEY: &str = "HF_INFERENCE_API_KEY";
+use sqlx::PgPool;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
 
-    let url_conexion = obtener_variable_de_entorno(DATABASE_URL)?;
-    let api_key = obtener_variable_de_entorno(HF_INFERENCE_API_KEY)?;
+    let _ = dotenvy::dotenv();
 
-    tracing::info!("estableciendo conexion con la base de datos");
-    let conexion = PgPoolOptions::new()
-        .max_connections(5)
-        .connect(&url_conexion)
-        .await?;
+    let connection_url = env::var("DATABASE_URL")
+        .expect("variable de entorno DATABASE_URL necesaria para conectar con la base de datos");
 
-    let query_sql = generador_descripciones::actualizar(&conexion, api_key).await?;
+    let inference_api_key = env::var("INFERENCE_API_KEY").expect("variable de entorno INFERENCE_API_KEY necesaria para conectar con Hugging Face Inference API");
 
-    if let Some(query_sql) = query_sql {
-        tracing::info!("actualizando registros en la base de datos");
-        sqlx::query(&query_sql).execute(&conexion).await?;
+    let conexion_db = PgPool::connect(&connection_url).await.unwrap();
+
+    let query_actualizacion =
+        generador_descripciones::query_actualizacion(&conexion_db, inference_api_key).await?;
+
+    if let Some(query_actualizacion) = query_actualizacion {
+        sqlx::query(&query_actualizacion)
+            .execute(&conexion_db)
+            .await?;
+
+        tracing::info!("base de datos actualizada");
     } else {
-        tracing::info!("todos los registros estan actualizados");
+        tracing::info!("ningun docente se ha actualizado");
     }
 
     Ok(())
-}
-
-fn obtener_variable_de_entorno(variable: &str) -> anyhow::Result<String> {
-    Ok(std::env::var(variable)
-        .with_context(|| format!("variable de entorno {variable} no configurada"))?)
 }

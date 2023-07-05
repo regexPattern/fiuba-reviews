@@ -1,5 +1,5 @@
 {
-	"name": "app",
+	"name": "fiuba-reviews",
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
@@ -12,29 +12,34 @@
 		"format": "prettier --plugin-search-dir . --write ."
 	},
 	"devDependencies": {
-		"@rgossiaux/svelte-headlessui": "^2.0.0",
-		"@sveltejs/adapter-auto": "^2.1.0",
-		"@sveltejs/kit": "^1.21.0",
-		"@trivago/prettier-plugin-sort-imports": "^4.1.1",
-		"@types/node": "^20.3.3",
-		"autoprefixer": "^10.4.14",
-		"drizzle-kit": "^0.19.3",
-		"postcss": "^8.4.24",
+		"@sveltejs/adapter-auto": "^2.1.1",
+		"@sveltejs/kit": "^1.27.3",
+		"@trivago/prettier-plugin-sort-imports": "^4.3.0",
+		"autoprefixer": "^10.4.16",
+		"drizzle-kit": "^0.20.1",
+		"postcss": "^8.4.31",
+		"postcss-load-config": "^4.0.1",
 		"prettier": "^2.8.8",
 		"prettier-plugin-svelte": "^2.10.1",
-		"prettier-plugin-tailwindcss": "^0.3.0",
-		"svelte": "^4.0.4",
-		"svelte-check": "^3.4.4",
-		"tailwindcss": "^3.3.2",
-		"tslib": "^2.6.0",
-		"typescript": "^5.1.6",
-		"vite": "^4.3.9"
+		"prettier-plugin-tailwindcss": "^0.4.1",
+		"shadcn-svelte": "^0.3.6",
+		"svelte": "^4.2.2",
+		"svelte-check": "^3.5.2",
+		"tailwindcss": "^3.3.5",
+		"tslib": "^2.6.2",
+		"typescript": "^5.2.2",
+		"vite": "^4.5.0"
 	},
 	"type": "module",
 	"dependencies": {
-		"drizzle-orm": "^0.27.0",
-		"postgres": "^3.3.5",
-		"zod": "^3.21.4",
-		"zod-form-data": "^2.0.1"
+		"bits-ui": "^0.9.7",
+		"clsx": "^2.0.0",
+		"cmdk-sv": "^0.0.7",
+		"drizzle-orm": "^0.29.0",
+		"lucide-svelte": "^0.292.0",
+		"mode-watcher": "^0.1.1",
+		"postgres": "^3.4.3",
+		"tailwind-merge": "^2.0.0",
+		"tailwind-variants": "^0.1.18"
 	}
 }

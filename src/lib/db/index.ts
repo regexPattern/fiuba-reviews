@@ -1,8 +1,9 @@
-import * as schema from "./schema";
-import { sql } from "drizzle-orm";
+import { DATABASE_URL } from "$env/static/private";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
-const client = postgres("postgres://postgres:postgres@localhost:5432");
+import * as schema from "./schema";
 
-export default drizzle(client, { logger: false, schema });
+const client = postgres(DATABASE_URL);
+
+export default drizzle(client, { schema });
