@@ -1,3 +1,4 @@
+import { getTableColumns } from "drizzle-orm";
 import {
 	doublePrecision,
 	foreignKey,
@@ -39,7 +40,7 @@ export const catedraDocente = pgTable(
 	{
 		codigoCatedra: uuid("codigo_catedra")
 			.notNull()
-			.references(() => catedras.codigo),
+			.references(() => catedra.codigo),
 		codigoDocente: uuid("codigo_docente")
 			.notNull()
 			.references(() => docente.codigo)

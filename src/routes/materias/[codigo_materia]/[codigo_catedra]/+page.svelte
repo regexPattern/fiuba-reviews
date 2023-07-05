@@ -2,11 +2,11 @@
 	import type { ActionData, PageData } from "./$types";
 
 	export let data: PageData;
-	export let form: ActionData | undefined;
+	// export let form: ActionData | undefined;
 </script>
 
 <div class="flex flex-col gap-12">
-	{#each data.catedra.docentes as docente (docente.codigo)}
+	{#each data.docentes as docente (docente.codigo)}
 		<div class="space-y-3">
 			<div class="flex items-center gap-2">
 				<span class="rounded-xl border p-1.5 font-medium">{docente.promedio.toFixed(1)}</span>

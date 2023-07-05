@@ -9,3 +9,17 @@
 	font-style: normal;
 	src: url("/fonts/inter.ttf") format("truetype");
 }
+
+@layer base {
+	:root {
+		--foreground: 229 84% 5%;
+		--background: 0 0% 100%;
+		--border: 214 32% 91%;
+	}
+
+	.dark {
+		--foreground: 210 40% 98%;
+		--background: 222 47% 11%;
+		--border: 215 25% 27%;
+	}
+}

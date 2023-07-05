@@ -6,6 +6,11 @@ const config: Config = {
 	content: ["./src/**/*.{html,js,svelte,ts}"],
 	theme: {
 		extend: {
+			colors: {
+				foreground: "hsl(var(--foreground) / <alpha-value>)",
+				background: "hsl(var(--background) / <alpha-value>)",
+				border: "hsl(var(--border) / <alpha-value>)",
+			},
 			fontFamily: {
 				sans: ["Inter", ...fontFamily.sans]
 			}

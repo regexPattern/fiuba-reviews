@@ -1,4 +1,4 @@
-import db from "$lib/db";
+import db, { queryPromedioDocente } from "$lib/db";
 import * as schema from "$lib/db/schema";
 import type { LayoutServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
@@ -21,17 +21,7 @@ export const load = (async ({ params }) => {
 		.select({
 			codigo: schema.catedra.codigo,
 			nombreDocente: schema.docente.nombre,
-			promedioDocente: sql<number>`
-				AVG((${schema.calificacion.aceptaCritica} +
-						 ${schema.calificacion.asistencia} +
-						 ${schema.calificacion.buenTrato} +
-						 ${schema.calificacion.claridad} +
-						 ${schema.calificacion.claseOrganizada} +
-						 ${schema.calificacion.cumpleHorarios} +
-						 ${schema.calificacion.fomentaParticipacion} +
-						 ${schema.calificacion.panoramaAmplio} +
-						 ${schema.calificacion.respondeMails}) / 9)
-			`
+			promedioDocente: queryPromedioDocente<number | null>()
 		})
 		.from(schema.catedra)
 		.innerJoin(
@@ -39,11 +29,12 @@ export const load = (async ({ params }) => {
 			eq(schema.catedraDocente.codigoCatedra, schema.catedra.codigo)
 		)
 		.innerJoin(schema.docente, eq(schema.docente.codigo, schema.catedraDocente.codigoDocente))
-		.innerJoin(schema.calificacion, eq(schema.calificacion.codigoDocente, schema.docente.codigo))
+		.leftJoin(schema.calificacion, eq(schema.calificacion.codigoDocente, schema.docente.codigo))
 		.where(eq(schema.catedra.codigoMateria, materia.codigo))
 		.groupBy(sql`${schema.catedra.codigo}, ${schema.docente.nombre}`);
 
-	const codigoCatedraADocentes: Map<string, { nombre: string; promedio: number }[]> = new Map();
+	const codigoCatedraADocentes: Map<string, { nombre: string; promedio: number | null }[]> =
+		new Map();
 
 	for (const catedra of catedrasConDocentesYPromedio) {
 		const docentes = codigoCatedraADocentes.get(catedra.codigo) ?? [];
@@ -55,7 +46,10 @@ export const load = (async ({ params }) => {
 
 	codigoCatedraADocentes.forEach((docentes, codigoCatedra) => {
 		const nombreCatedra = docentes.map((d) => d.nombre).join(", ");
-		const promedio = docentes.reduce((acc, d) => acc + d.promedio, 0) / docentes.length || 0;
+
+		const docentesConCalificaciones = docentes.filter((d) => d.promedio != null).length;
+		const promedio =
+			docentes.reduce((acc, d) => acc + (d.promedio || 0), 0) / docentesConCalificaciones || 0;
 
 		catedras.push({
 			codigo: codigoCatedra,

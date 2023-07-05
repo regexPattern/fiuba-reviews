@@ -9,5 +9,5 @@ export const load = (async ({ params }) => {
 		.from(schema.materia)
 		.where(eq(schema.materia.codigoEquivalencia, Number(params.codigo_materia)));
 
-  return { equivalencias };
+	return { equivalencias };
 }) satisfies PageServerLoad;
