@@ -12,5 +12,5 @@
 	"overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }],
 	"importOrderSeparation": true,
 	"importOrderSortSpecifiers": true,
-	"svelteBracketNewLine": false
+	"svelteBracketNewLine": true
 }

@@ -5,14 +5,22 @@ const config: Config = {
 	darkMode: "class",
 	content: ["./src/**/*.{html,js,svelte,ts}"],
 	theme: {
+		container: {
+			center: true,
+			padding: "1rem"
+		},
 		extend: {
 			colors: {
-				foreground: "hsl(var(--foreground) / <alpha-value>)",
-				background: "hsl(var(--background) / <alpha-value>)",
-				border: "hsl(var(--border) / <alpha-value>)",
+				foreground: "rgba(var(--foreground), <alpha-value>)",
+				background: "rgba(var(--background), <alpha-value>)",
+				border: "rgba(var(--border), <alpha-value>)",
+				fiuba: "rgba(var(--fiuba), <alpha-value>)"
 			},
 			fontFamily: {
 				sans: ["Inter", ...fontFamily.sans]
+			},
+			screens: {
+				xs: "375px"
 			}
 		}
 	},

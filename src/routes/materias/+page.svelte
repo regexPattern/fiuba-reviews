@@ -15,7 +15,7 @@
 		<button type="submit" class="font-semibold">Buscar</button>
 	</form>
 
-	<ul class="divide-border border-border mt-4 flex flex-col divide-y rounded border shadow-sm">
+	<ul class="mt-4 flex flex-col divide-y divide-border rounded border border-border shadow-sm">
 		{#each data.materias as m}
 			<li class="bg-card p-1 [&:first-child]:rounded-t">
 				<a href={`/materias/${m.codigoEquivalencia || m.codigo}`}>{m.codigo} - {m.nombre}</a>

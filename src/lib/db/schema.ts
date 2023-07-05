@@ -1,4 +1,3 @@
-import { getTableColumns } from "drizzle-orm";
 import {
 	doublePrecision,
 	foreignKey,

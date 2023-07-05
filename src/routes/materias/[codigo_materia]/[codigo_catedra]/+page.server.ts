@@ -3,6 +3,8 @@ import * as schema from "$lib/db/schema";
 import type { PageServerLoad } from "./$types";
 import { eq, sql } from "drizzle-orm";
 
+export const prerender = true;
+
 export const load = (async ({ params }) => {
 	const docentes = await db
 		.select({

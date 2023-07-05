@@ -3,6 +3,8 @@ import { catedra, materia } from "$lib/db/schema";
 import type { PageServerLoad } from "./$types";
 import { asc, eq, exists, isNotNull, or } from "drizzle-orm";
 
+export const prerender = true;
+
 export const load = (async () => {
 	const materias = await db
 		.select()

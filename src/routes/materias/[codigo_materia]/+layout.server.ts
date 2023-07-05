@@ -4,6 +4,8 @@ import type { LayoutServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 import { eq, sql } from "drizzle-orm";
 
+export const prerender = true;
+
 export const load = (async ({ params }) => {
 	const materia = (
 		await db
