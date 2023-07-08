@@ -15,11 +15,22 @@
 				</p>
 			</div>
 
-			<div
-				class="-bg-slate-100 flex flex-col gap-2 rounded-lg border p-3 dark:border-slate-700 dark:bg-slate-800"
-			>
-				<p>{docente.descripcion}</p>
-			</div>
+			{#if docente.descripcion}
+				<div
+					class="divide divide-y divide-slate-300 rounded-lg border border-slate-300 dark:divide-slate-700 dark:border-slate-700"
+				>
+					<p class="rounded-t-lg bg-slate-100 p-3 dark:bg-slate-800">
+						{docente.descripcion}
+					</p>
+					<small
+						class="block rounded-b-lg bg-slate-100 p-3 text-right text-xs dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+					>
+						Resumen generado por IA. <a href="/" class="underline underline-offset-2 after:content-['↗']"
+							>Más información</a
+						>.
+					</small>
+				</div>
+			{/if}
 
 			<ul class="list-inside list-disc space-y-4">
 				{#each docente.comentarios as comentario}

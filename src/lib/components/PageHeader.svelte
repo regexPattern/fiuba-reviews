@@ -29,7 +29,7 @@
 <header
 	class="sticky top-0 z-30 h-16 border-b border-border bg-background supports-[backdrop-filter]:bg-background/[0.65] supports-[backdrop-filter]:backdrop-blur"
 >
-	<div class="container flex h-full items-center justify-between">
+	<div class="flex h-full items-center justify-between px-4 lg:container">
 		<h1 class="text-xl tracking-tighter">
 			<span class="font-semibold text-fiuba">FIUBA</span>
 			<span class="font-medium">Reviews</span>

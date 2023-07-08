@@ -64,6 +64,7 @@
 				<a
 					href="https://github.com/regexPattern/fiuba-reviews"
 					class="with-ring p-2 focus:ring-fiuba dark:focus:text-slate-200"
+					on:click={cerrarMenu}
 					target="_blank"
 				>
 					<GithubIcon />
