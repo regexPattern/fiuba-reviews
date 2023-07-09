@@ -26,10 +26,18 @@
 	src: url("/fonts/Inter-600.ttf") format("truetype");
 }
 
+@font-face {
+	font-family: "Inter";
+	font-weight: 700;
+	font-display: swap;
+	font-style: normal;
+	src: url("/fonts/Inter-700.ttf") format("truetype");
+}
+
 @layer base {
 	:root {
 		--foreground: 2, 6, 23;
-		--background: 248, 250, 252;
+		--background: 255, 255, 255;
 		--border: 226, 232, 240;
 		--fiuba: 0, 138, 204;
 	}
@@ -39,11 +47,12 @@
 		--background: 15, 23, 42;
 		--border: 51, 65, 85;
 		--fiuba: 0, 138, 204;
+		color-scheme: dark;
 	}
 }
 
 @layer utilities {
-	.with-ring {
-		@apply rounded focus:outline-none focus:ring-2;
+	.bordered-overlay {
+		@apply border-slate-200 dark:border-slate-700;
 	}
 }

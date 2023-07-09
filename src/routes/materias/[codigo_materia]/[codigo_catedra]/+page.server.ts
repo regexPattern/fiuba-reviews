@@ -3,8 +3,6 @@ import * as schema from "$lib/db/schema";
 import type { PageServerLoad } from "./$types";
 import { eq, sql } from "drizzle-orm";
 
-export const prerender = true;
-
 export const load = (async ({ params }) => {
 	const docentes = await db
 		.select({
@@ -80,8 +78,12 @@ export const load = (async ({ params }) => {
 
 	const cuatrimestres = await db.select().from(schema.cuatrimestre);
 
-	docentesConPromedioYComentarios.sort((a, b) => b.promedio - a.promedio);
-	cuatrimestres.sort(ordernarCuatrimestres);
+	docentesConPromedioYComentarios.sort((a, b) => a.nombre.localeCompare(b.nombre));
+	cuatrimestres.sort((a, b) => ordernarCuatrimestres(a.nombre, b.nombre));
+
+	for (const d of docentesConPromedioYComentarios) {
+		d.comentarios.sort((a, b) => ordernarCuatrimestres(a.cuatrimestre, b.cuatrimestre));
+	}
 
 	return {
 		catedras: null,
@@ -90,9 +92,9 @@ export const load = (async ({ params }) => {
 	};
 }) satisfies PageServerLoad;
 
-function ordernarCuatrimestres<T extends { nombre: string }>(a: T, b: T) {
-	const [cuatriA, anioA] = a.nombre.split("Q");
-	const [cuatriB, anioB] = b.nombre.split("Q");
+function ordernarCuatrimestres(a: string, b: string) {
+	const [cuatriA, anioA] = a.split("Q");
+	const [cuatriB, anioB] = b.split("Q");
 
 	if (anioA < anioB) {
 		return 1;

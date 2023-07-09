@@ -1,10 +1,10 @@
 <script lang="ts">
-	import PageHeader from "$components/PageHeader.svelte";
+	import Header from "$components/Header.svelte";
 	import "../app.css";
 </script>
 
-<PageHeader />
+<Header />
 
-<div class="flex flex-1 lg:container lg:mx-auto">
+<div class="flex flex-1 md:container md:mx-auto">
 	<slot />
 </div>

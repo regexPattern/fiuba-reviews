@@ -4,8 +4,6 @@ import type { LayoutServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 import { eq, sql } from "drizzle-orm";
 
-export const prerender = true;
-
 export const load = (async ({ params }) => {
 	const materia = (
 		await db
@@ -59,7 +57,10 @@ export const load = (async ({ params }) => {
 	const catedras: { codigo: string; nombre: string; promedio: number }[] = [];
 
 	codigoCatedraADocentes.forEach((docentes, codigoCatedra) => {
-		const nombreCatedra = docentes.map((d) => d.nombre).join(", ");
+		const nombreCatedra = docentes
+			.map((d) => d.nombre)
+			.sort()
+			.join(", ");
 
 		const docentesConCalificaciones = docentes.filter((d) => d.promedio != null).length;
 		const promedioCatedra =

@@ -1,5 +1,6 @@
 .env
 /.svelte-kit
+/.vercel
 /build
 /crates
 /package

@@ -6,7 +6,10 @@ const config: Config = {
 	content: ["./src/**/*.{html,js,svelte,ts}"],
 	theme: {
 		container: {
-			center: true,
+			center: true
+		},
+		content: {
+			link: "url('/icons/link.svg')"
 		},
 		extend: {
 			colors: {
