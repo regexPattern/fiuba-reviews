@@ -7,7 +7,7 @@ use sqlx::{types::Uuid, FromRow, PgPool};
 use tokio::sync::Semaphore;
 use tracing::Instrument;
 
-const MAX_SOLICITUDES_CONCURRENTES: usize = 10;
+const MAX_SOLICITUDES_CONCURRENTES: usize = 5;
 const PROPORCION_COMENTARIOS_ACTUALIZACION: usize = 2;
 const MIN_COMENTARIOS_ACTUALIZACION: usize = 3;
 

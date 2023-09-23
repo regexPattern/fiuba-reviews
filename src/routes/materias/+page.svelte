@@ -1,25 +1,65 @@
 <script lang="ts">
+	import { Input } from "$lib/components/ui/input";
+
 	import type { PageData } from "./$types";
 
 	export let data: PageData;
 
-	let filtro: string;
+	let searchQuery = "";
+	let timeout: NodeJS.Timeout | undefined;
+
+	function debounce(e: KeyboardEvent) {
+		clearTimeout(timeout);
+		timeout = setTimeout(() => {
+			if (e.target instanceof HTMLInputElement) {
+				searchQuery = e.target.value;
+			}
+		}, 300);
+	}
+
+	$: materias =
+		searchQuery.length == 0
+			? data.materias
+			: data.materias.filter((m) => {
+					return (
+						m.codigo.includes(searchQuery) ||
+						m.codigoEquivalencia?.includes(searchQuery) ||
+						m.nombre.includes(searchQuery.toUpperCase())
+					);
+			  });
 </script>
 
-<main class="my-4">
-	<h1 class="scroll-m-20 text-4xl font-bold tracking-tight lg:text-5xl">Materias</h1>
-	<p class="text-muted-foreground mt-2 text-xl">Busca entre todas las materias de la FIUBA.</p>
+<div class="space-y-4 p-4">
+	<h1 class="text-4xl font-bold tracking-tight lg:text-5xl">Materias</h1>
+	<p class="leading-7">Buscá entre todas las materias de la facultad y sus equivalencias.</p>
 
-	<form class="mt-2 flex flex-col gap-2 shadow-sm sm:flex-row" on:submit|preventDefault={() => {}}>
-		<input type="text" placeholder="Código o nombre de materia" bind:value={filtro} />
-		<button type="submit" class="font-semibold">Buscar</button>
-	</form>
+	<Input
+		placeholder="Código o nombre de materia"
+		class="mx-auto mt-2 block w-full"
+		on:keyup={debounce}
+	/>
 
-	<ul class="mt-4 flex flex-col divide-y divide-border rounded border border-border shadow-sm">
-		{#each data.materias as m}
-			<li class="bg-card p-1 [&:first-child]:rounded-t">
-				<a href={`/materias/${m.codigoEquivalencia || m.codigo}`}>{m.codigo} - {m.nombre}</a>
+	<ul class="grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-3 lg:grid-cols-3 lg:gap-4">
+		{#each materias as m}
+			{@const slug = m.codigoEquivalencia ?? m.codigo}
+
+			<li class="flex flex-col rounded border [&>*]:p-4">
+				<a href={`/materias/${slug}`} class="flex-1 rounded">
+					<span class="font-medium">{m.codigo}</span>
+					<span class="text-muted-foreground">&bullet;</span>
+					<span>{m.nombre}</span>
+				</a>
+				<div class="text-sm text-muted-foreground">
+					<span>
+						{m.cantidadCatedras}
+						{m.cantidadCatedras == 1 ? "cátedra" : "cátedras"}
+					</span>
+					{#if m.codigoEquivalencia}
+						<span>&bullet;</span>
+						<span>Equivalente a {m.codigoEquivalencia}</span>
+					{/if}
+				</div>
 			</li>
 		{/each}
 	</ul>
-</main>
+</div>

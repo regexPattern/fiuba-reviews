@@ -15,12 +15,15 @@ export const materia = pgTable(
 		nombre: text("nombre").notNull(),
 		codigoEquivalencia: integer("codigo_equivalencia")
 	},
-	(table) => ({
-		materiaCodigoEquivalenciaFkey: foreignKey({
-			columns: [table.codigoEquivalencia],
-			foreignColumns: [table.codigo]
-		})
-	})
+	(table) => {
+		return {
+			materiaCodigoEquivalenciaFkey: foreignKey({
+				columns: [table.codigoEquivalencia],
+				foreignColumns: [table.codigo],
+				name: "materia_codigo_equivalencia_fkey"
+			})
+		};
+	}
 );
 
 export const catedra = pgTable("catedra", {
@@ -30,32 +33,26 @@ export const catedra = pgTable("catedra", {
 		.references(() => materia.codigo)
 });
 
-export const cuatrimestre = pgTable("cuatrimestre", {
-	nombre: text("nombre").primaryKey().notNull()
-});
-
-export const catedraDocente = pgTable(
-	"catedra_docente",
-	{
-		codigoCatedra: uuid("codigo_catedra")
-			.notNull()
-			.references(() => catedra.codigo),
-		codigoDocente: uuid("codigo_docente")
-			.notNull()
-			.references(() => docente.codigo)
-	},
-	(table) => {
-		return {
-			catedraDocentePkey: primaryKey(table.codigoCatedra, table.codigoDocente)
-		};
-	}
-);
-
 export const docente = pgTable("docente", {
 	codigo: uuid("codigo").primaryKey().notNull(),
 	nombre: text("nombre").notNull(),
 	descripcion: text("descripcion"),
-	comentariosUltimaDescripcion: integer("comentarios_ultima_descripcion").notNull()
+	comentariosUltimaDescripcion: integer("comentarios_ultima_descripcion").default(0).notNull()
+});
+
+export const comentario = pgTable("comentario", {
+	codigo: uuid("codigo").defaultRandom().primaryKey().notNull(),
+	codigoDocente: uuid("codigo_docente")
+		.notNull()
+		.references(() => docente.codigo),
+	cuatrimestre: text("cuatrimestre")
+		.notNull()
+		.references(() => cuatrimestre.nombre),
+	contenido: text("contenido").notNull()
+});
+
+export const cuatrimestre = pgTable("cuatrimestre", {
+	nombre: text("nombre").primaryKey().notNull()
 });
 
 export const calificacion = pgTable("calificacion", {
@@ -74,13 +71,22 @@ export const calificacion = pgTable("calificacion", {
 	respondeMails: doublePrecision("responde_mails").notNull()
 });
 
-export const comentario = pgTable("comentario", {
-	codigo: uuid("codigo").defaultRandom().primaryKey().notNull(),
-	codigoDocente: uuid("codigo_docente")
-		.notNull()
-		.references(() => docente.codigo),
-	cuatrimestre: text("cuatrimestre")
-		.notNull()
-		.references(() => cuatrimestre.nombre),
-	contenido: text("contenido").notNull()
-});
+export const catedraDocente = pgTable(
+	"catedra_docente",
+	{
+		codigoCatedra: uuid("codigo_catedra")
+			.notNull()
+			.references(() => catedra.codigo),
+		codigoDocente: uuid("codigo_docente")
+			.notNull()
+			.references(() => docente.codigo)
+	},
+	(table) => {
+		return {
+			catedraDocentePkey: primaryKey({
+				columns: [table.codigoCatedra, table.codigoDocente],
+				name: "catedra_docente_pkey"
+			})
+		};
+	}
+);

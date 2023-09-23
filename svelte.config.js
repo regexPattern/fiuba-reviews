@@ -1,18 +1,12 @@
-import adapter from "@sveltejs/adapter-vercel";
+import adapter from "@sveltejs/adapter-auto";
 import { vitePreprocess } from "@sveltejs/kit/vite";
 
-/** @type {import('@sveltejs/kit').Config}*/
+/** @type {import("@sveltejs/kit").Config} */
 const config = {
-	preprocess: vitePreprocess(),
+	preprocess: [vitePreprocess({})],
 	kit: {
-		adapter: adapter(),
-		alias: {
-			$components: "src/lib/components",
-			"$components/*": "src/lib/components/*"
-		}
-	},
-	shadcn: {
-		componentPath: "./src/lib/components/ui"
+		adapter: adapter()
 	}
 };
+
 export default config;

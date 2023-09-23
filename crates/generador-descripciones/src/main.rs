@@ -6,6 +6,8 @@ use sqlx::PgPool;
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
 
+    let _ = dotenvy::dotenv();
+
     let connection_url = env::var("DATABASE_URL")
         .expect("variable de entorno DATABASE_URL necesaria para conectar con la base de datos");
 

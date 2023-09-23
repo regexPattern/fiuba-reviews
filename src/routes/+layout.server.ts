@@ -2,11 +2,11 @@ import db from "$lib/db";
 import { materia } from "$lib/db/schema";
 import { sql } from "drizzle-orm";
 
-import type { PageServerLoad } from "./$types";
+import type { LayoutServerLoad } from "./$types";
 
 export const prerender = true;
 
-export const load = (async () => {
+export const load: LayoutServerLoad = async () => {
   const materias = await db
     .select({
       nombre: materia.nombre,
@@ -17,4 +17,4 @@ export const load = (async () => {
     .orderBy(materia.codigo);
 
   return { materias };
-}) satisfies PageServerLoad;
+};
