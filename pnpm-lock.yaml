@@ -5,9 +5,6 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@fontsource-variable/inter':
-    specifier: ^5.0.15
-    version: 5.0.15
   bits-ui:
     specifier: ^0.9.7
     version: 0.9.7(svelte@4.2.2)
@@ -23,6 +20,9 @@ dependencies:
   lucide-svelte:
     specifier: ^0.292.0
     version: 0.292.0(svelte@4.2.2)
+  mode-watcher:
+    specifier: ^0.1.1
+    version: 0.1.1(svelte@4.2.2)
   postgres:
     specifier: ^3.4.3
     version: 3.4.3
@@ -734,10 +734,6 @@ packages:
 
   /@floating-ui/utils@0.1.6:
     resolution: {integrity: sha512-OfX7E2oUDYxtBvsuS4e/jSn4Q9Qb6DzgeYtsAdkPZ47znpoNsMgZw0+tVijiv3uGNR6dgNlty6r9rzIzHjtd/A==}
-    dev: false
-
-  /@fontsource-variable/inter@5.0.15:
-    resolution: {integrity: sha512-CdQPQQgOVxg6ifmbrqYZeUqtQf7p2wPn6EvJ4M+vdNnsmYZgYwPPPQDNlIOU7LCUlSGaN26v6H0uA030WKn61g==}
     dev: false
 
   /@internationalized/date@3.5.0:
@@ -2059,6 +2055,14 @@ packages:
     dependencies:
       minimist: 1.2.8
     dev: true
+
+  /mode-watcher@0.1.1(svelte@4.2.2):
+    resolution: {integrity: sha512-11B0IDiJE5lbWsCGAIpBSkD5TtzCooBHvIMNWsuTeAlBHL6HWLb55aslCcx939v8qUymjFgDtpQ70CU1JU73lg==}
+    peerDependencies:
+      svelte: ^4.0.0
+    dependencies:
+      svelte: 4.2.2
+    dev: false
 
   /mri@1.2.0:
     resolution: {integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==}

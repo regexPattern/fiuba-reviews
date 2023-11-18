@@ -13,8 +13,13 @@ const config = {
 				"2xl": "1400px"
 			}
 		},
+		fontFamily: {
+			sans: ["Geist", ...fontFamily.sans],
+			mono: ["Geist Mono", ...fontFamily.mono]
+		},
 		extend: {
 			colors: {
+				fiuba: "hsl(198deg, 61%, 57%)",
 				border: "hsl(var(--border) / <alpha-value>)",
 				input: "hsl(var(--input) / <alpha-value>)",
 				ring: "hsl(var(--ring) / <alpha-value>)",
@@ -54,8 +59,8 @@ const config = {
 				md: "calc(var(--radius) - 2px)",
 				sm: "calc(var(--radius) - 4px)"
 			},
-			fontFamily: {
-				sans: [...fontFamily.sans]
+			screens: {
+				xs: "425px"
 			}
 		}
 	}

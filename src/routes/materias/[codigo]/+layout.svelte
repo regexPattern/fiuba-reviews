@@ -1,38 +1,69 @@
 <script lang="ts">
+	import { page } from "$app/stores";
+	import { Sheet, SheetTrigger } from "$lib/components/ui/sheet";
+	import SheetContent from "$lib/components/ui/sheet/sheet-content.svelte";
+	import { cn } from "$lib/utils";
+	import { ChevronDown, Star } from "lucide-svelte";
+
 	import type { LayoutData } from "./$types";
 
 	export let data: LayoutData;
 
-	let openMenu = false;
+	let open = false;
 </script>
 
-<div class="flex flex-col md:container md:mx-auto md:flex-row">
+<svelte:head>
+	<title>{data.materia.codigo} - {data.materia.nombre} | FIUBA Reviews</title>
+</svelte:head>
+
+<div class="relative md:container md:mx-auto md:flex-row">
 	<div class="sticky top-16 md:top-auto">
-		<div class="block md:hidden">
-			<button class="w-full bg-white p-2" on:click={() => (openMenu = !openMenu)}
-				>Abrir/Cerrar</button
-			>
-		</div>
 		<aside
-			class={`max-h-64 overflow-y-scroll md:fixed md:h-[calc(100vh-4rem)] md:max-h-full md:w-80 md:shrink-0 ${
-				openMenu ? "block" : "hidden"
-			} md:block`}
+			class="fixed hidden h-[calc(100vh-4rem)] max-h-full w-80 shrink-0 overflow-y-scroll border-r bg-background md:block"
 		>
-			<ul class="overflow-y-scroll">
-				{#each data.catedras as cat}
-					<li class="flex items-center gap-1.5 p-1.5">
-						<span class="w-10 shrink-0">{cat.promedio.toFixed(2)}</span>
-						<span>&bullet;</span>
-						<a href={`/materias/${data.materia.codigo}/${cat.codigo}`} class="rounded p-1.5"
-							>{cat.nombre}</a
+			<div
+				class="sticky top-0 flex w-full items-start gap-1 border-b bg-background p-3 text-center font-medium"
+			>
+				{data.materia.codigo}
+				<span class="font-bold">&bullet;</span>
+				{data.materia.nombre}
+			</div>
+
+			<ul class="space-y-1.5 overflow-y-scroll py-2">
+				{#each data.catedras as cat (cat.codigo)}
+					<li class="flex items-center gap-2 px-5 py-2 md:pl-2 md:pr-4">
+						<span class="w-[2ch] font-medium">{cat.promedio.toFixed(1)}</span>
+						<Star class="h-3 w-3 fill-current text-yellow-500" />
+						<a
+							href={`/materias/${$page.params.codigo}/${cat.codigo}`}
+							class={cn($page.params.codigoCatedra === cat.codigo && "text-fiuba")}
 						>
+							{cat.nombre}
+						</a>
 					</li>
 				{/each}
 			</ul>
 		</aside>
+
+		<Sheet bind:open>
+			<SheetTrigger asChild>
+				<button
+					class="flex w-full items-center justify-between gap-3 border-b bg-background p-3 text-center font-medium md:hidden"
+					on:click={() => (open = !open)}
+				>
+					<span class="flex items-start gap-1">
+						{data.materia.codigo}
+						<span class="font-bold">&bullet;</span>
+						{data.materia.nombre}
+					</span>
+					<ChevronDown class="shrink-0" />
+				</button>
+			</SheetTrigger>
+			<SheetContent class="z-[120]" side="left">klasjflkasfjlkasjdflk</SheetContent>
+		</Sheet>
 	</div>
 
-	<main class="border-4 border-blue-700 bg-blue-400 md:ml-80 md:min-h-[calc(100vh-4rem)]">
+	<main class="space-y-12 p-4 md:ml-80 md:min-h-[calc(100vh-4rem)] md:p-6">
 		<slot />
 	</main>
 </div>

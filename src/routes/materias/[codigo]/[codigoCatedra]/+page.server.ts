@@ -1,16 +1,16 @@
 import db from "$lib/db";
-import { calificacion, catedra, catedraDocente, comentario, docente } from "$lib/db/schema";
+import { calificacion, catedraDocente, comentario, cuatrimestre, docente } from "$lib/db/schema";
 import { eq, sql } from "drizzle-orm";
 
 import type { PageServerLoad } from "./$types";
 
 export const load = (async ({ params }) => {
-	const individualDocentesAndComentarios = await db
-		.select({
-			docente: {
-				codigo: docente.codigo,
-				nombre: docente.nombre,
-				promedio: sql<number>`
+  const docentes = await db
+    .select({
+      codigo: docente.codigo,
+      nombre: docente.nombre,
+      descripcion: docente.descripcion,
+      promedio: sql<number>`
 (SELECT AVG((
     ${calificacion.aceptaCritica} 
     + ${calificacion.asistencia} 
@@ -23,46 +23,68 @@ export const load = (async ({ params }) => {
     + ${calificacion.respondeMails}) / 9)
   FROM ${calificacion}
   WHERE ${calificacion.codigoDocente} = ${docente.codigo}
-  GROUP BY ${docente.codigo})`
-			},
-			comentario: {
-				cuatrimestre: comentario.cuatrimestre,
-				contenido: comentario.contenido
-			}
-		})
-		.from(catedra)
-		.innerJoin(catedraDocente, eq(catedra.codigo, catedraDocente.codigoCatedra))
-		.innerJoin(docente, eq(catedraDocente.codigoDocente, docente.codigo))
-		.innerJoin(comentario, eq(docente.codigo, comentario.codigoDocente))
-		.where(eq(catedra.codigo, params.codigoCatedra))
-		.orderBy(docente.nombre);
+)`,
+      cantidadCalificaciones: sql<number>`COUNT(${calificacion.codigo})`,
+      promedios: {
+        aceptaCritica: sql<number>`AVG(${calificacion.aceptaCritica})`,
+        asistencia: sql<number>`AVG(${calificacion.asistencia})`,
+        buenTrato: sql<number>`AVG(${calificacion.buenTrato})`,
+        claridad: sql<number>`AVG(${calificacion.claridad})`,
+        claseOrganizada: sql<number>`AVG(${calificacion.claseOrganizada})`,
+        cumpleHorarios: sql<number>`AVG(${calificacion.cumpleHorarios})`,
+        fomentaParticipacion: sql<number>`AVG(${calificacion.fomentaParticipacion})`,
+        panoramaAmplio: sql<number>`AVG(${calificacion.panoramaAmplio})`,
+        respondeMails: sql<number>`AVG(${calificacion.respondeMails})`
+      }
+    })
+    .from(docente)
+    .innerJoin(catedraDocente, eq(docente.codigo, catedraDocente.codigoDocente))
+    .innerJoin(calificacion, eq(docente.codigo, calificacion.codigoDocente))
+    .where(eq(catedraDocente.codigoCatedra, params.codigoCatedra))
+    .groupBy(docente.codigo, docente.nombre)
+    .orderBy(docente.nombre);
 
-	type Docente = (typeof individualDocentesAndComentarios)[number]["docente"];
-	type Comentario = (typeof individualDocentesAndComentarios)[number]["comentario"];
+  const comentarios = await db
+    .select({
+      codigoDocente: docente.codigo,
+      codigo: comentario.codigo,
+      cuatrimestre: comentario.cuatrimestre,
+      contenido: comentario.contenido
+    })
+    .from(comentario)
+    .innerJoin(docente, eq(comentario.codigoDocente, docente.codigo))
+    .innerJoin(catedraDocente, eq(docente.codigo, catedraDocente.codigoDocente))
+    .where(eq(catedraDocente.codigoCatedra, params.codigoCatedra));
 
-	const codigoToDocente: Map<string, Docente> = new Map();
-	const codigoDocenteToComentarios: Map<string, Comentario[]> = new Map();
+  const codigoDocenteToComentario: Map<string, typeof comentarios> = new Map();
 
-	for (const { docente, comentario } of individualDocentesAndComentarios) {
-		if (!codigoToDocente.has(docente.codigo)) {
-			codigoToDocente.set(docente.codigo, docente);
-		}
+  for (const com of comentarios) {
+    const comentarios = codigoDocenteToComentario.get(com.codigoDocente) || [];
+    comentarios.push(com);
+    codigoDocenteToComentario.set(com.codigoDocente, comentarios);
+  }
 
-		const comentarios = codigoDocenteToComentarios.get(docente.codigo) || [];
-		comentarios.push(comentario);
-		codigoDocenteToComentarios.set(docente.codigo, comentarios);
-	}
+  return {
+    docentes: docentes.map((doc) => {
+      const comentarios = codigoDocenteToComentario.get(doc.codigo) || [];
+      comentarios.sort(sortComentariosByCuatrimestre);
 
-	const comentariosByDocente = [];
-
-	for (const [codigo, docente] of codigoToDocente) {
-		comentariosByDocente.push({
-			...docente,
-			comentarios: codigoDocenteToComentarios.get(codigo) || []
-		});
-	}
-
-	comentariosByDocente.sort((a, b) => a.nombre.localeCompare(b.nombre));
-
-	return { comentariosByDocente };
+      return { ...doc, comentarios };
+    })
+  };
 }) satisfies PageServerLoad;
+
+function sortComentariosByCuatrimestre<T extends { cuatrimestre: string }>(a: T, b: T) {
+  const [cuatriA, anioA] = a.cuatrimestre.split("Q");
+  const [cuatriB, anioB] = b.cuatrimestre.split("Q");
+
+  if (anioA === anioB) {
+    if (cuatriA === cuatriB) {
+      return 0;
+    } else {
+      return cuatriA > cuatriB ? -1 : 1;
+    }
+  } else {
+    return anioA > anioB ? -1 : 1;
+  }
+}
