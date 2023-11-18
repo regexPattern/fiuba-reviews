@@ -68,28 +68,28 @@
 
 <CommandDialog bind:open shouldFilter={false}>
 	<CommandInput placeholder="Código o nombre de una materia" on:input={debounceSearch} />
-	<CommandGroup heading="Materias">
-		<CommandList>
-			{#each filtered as mat (mat.codigo)}
-				{@const slug = mat.codigoEquivalencia || mat.codigo}
-				<CommandItem
-					value={mat.codigo}
-					onSelect={async () => {
-						await goto(`/materias/${slug}`);
-						open = false;
-					}}
-					class="flex items-start space-x-1.5"
-				>
-					<span class="font-mono font-semibold">{mat.codigo}</span>
-					<span class="font-bold">&bullet;</span>
-					<span>
-						{mat.nombre}
-						{#if mat.codigoEquivalencia}
-							(Equivalente a {mat.codigoEquivalencia})
-						{/if}
-					</span>
-				</CommandItem>
-			{/each}
-		</CommandList>
-	</CommandGroup>
+  <CommandGroup heading="Materias">
+    <CommandList>
+      {#each filtered as mat (mat.codigo)}
+        {@const slug = mat.codigoEquivalencia || mat.codigo}
+        <CommandItem
+          value={mat.codigo}
+          onSelect={async () => {
+            await goto(`/materias/${slug}`);
+            open = false;
+          }}
+          class="flex items-start space-x-1.5"
+          >
+          <span class="font-mono font-semibold">{mat.codigo}</span>
+          <span class="font-bold">&bullet;</span>
+          <span>
+            {mat.nombre}
+            {#if mat.codigoEquivalencia}
+              (Equivalente a {mat.codigoEquivalencia})
+            {/if}
+          </span>
+        </CommandItem>
+      {/each}
+    </CommandList>
+  </CommandGroup>
 </CommandDialog>

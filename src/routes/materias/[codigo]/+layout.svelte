@@ -29,11 +29,11 @@
 				{data.materia.nombre}
 			</div>
 
-			<ul class="space-y-1.5 overflow-y-scroll py-2">
+			<ul class="h-full space-y-1.5 overflow-y-scroll py-2">
 				{#each data.catedras as cat (cat.codigo)}
-					<li class="flex items-center gap-2 px-5 py-2 md:pl-2 md:pr-4">
-						<span class="w-[2ch] font-medium">{cat.promedio.toFixed(1)}</span>
-						<Star class="h-3 w-3 fill-current text-yellow-500" />
+					<li class="flex items-center gap-1.5 px-5 py-2 md:pl-2 md:pr-4">
+						<span class="w-[2.5ch] shrink-0 font-medium">{cat.promedio.toFixed(1)}</span>
+						<Star class="h-3 w-3 shrink-0 fill-current pr-0.5 text-yellow-500" />
 						<a
 							href={`/materias/${$page.params.codigo}/${cat.codigo}`}
 							class={cn($page.params.codigoCatedra === cat.codigo && "text-fiuba")}
@@ -48,7 +48,7 @@
 		<Sheet bind:open>
 			<SheetTrigger asChild>
 				<button
-					class="flex w-full items-center justify-between gap-3 border-b bg-background p-3 text-center font-medium md:hidden"
+					class="flex w-full items-center justify-between gap-3 border-b bg-background p-3 text-left font-medium md:hidden"
 					on:click={() => (open = !open)}
 				>
 					<span class="flex items-start gap-1">
@@ -59,7 +59,23 @@
 					<ChevronDown class="shrink-0" />
 				</button>
 			</SheetTrigger>
-			<SheetContent class="z-[120]" side="left">klasjflkasfjlkasjdflk</SheetContent>
+			<SheetContent class="z-[120] p-0 pt-8" side="left">
+				<ul class="h-full space-y-1.5 overflow-y-scroll py-2">
+					{#each data.catedras as cat (cat.codigo)}
+						<li class="flex items-center gap-1.5 px-5 py-2 md:pl-2 md:pr-4">
+							<span class="w-[3ch] shrink-0 font-medium">{cat.promedio.toFixed(1)}</span>
+							<Star class="h-3 w-3 shrink-0 fill-current text-yellow-500" />
+							<a
+								href={`/materias/${$page.params.codigo}/${cat.codigo}`}
+								class={cn($page.params.codigoCatedra === cat.codigo && "text-fiuba")}
+								on:click={() => (open = !open)}
+							>
+								{cat.nombre}
+							</a>
+						</li>
+					{/each}
+				</ul>
+			</SheetContent>
 		</Sheet>
 	</div>
 

@@ -13,17 +13,17 @@
 	<title>FIUBA Reviews</title>
 </svelte:head>
 
-<ModeWatcher />
+<ModeWatcher track={false} />
 
 <header class="sticky top-0 z-[40] border-b bg-background/75 backdrop-blur-lg">
-	<div class="container flex h-16 items-center justify-start gap-2 p-3 sm:justify-between">
-		<a href="/" class="flex-1 font-semibold sm:p-0">
+	<div class="container flex h-16 items-center justify-start p-3 sm:justify-between">
+		<a href="/" class="mr-2 flex-1 font-semibold sm:p-0">
 			<span class="hidden sm:inline">FIUBA<span class="font-medium">&nbsp;Reviews</span></span>
 			<span class="sm:hidden">F<span class="font-medium">R</span></span>
 		</a>
 
-		<SearchBar class="w-full sm:w-64" materias={data.materias} />
-		<ThemePicker class="h-10 w-10 shrink-0" />
+		<SearchBar class="mr-2 w-full sm:w-64" materias={data.materias} />
+		<ThemePicker class="mr-2 h-10 w-10 shrink-0" />
 
 		<a
 			href="https://github.com/regexPattern/fiuba-reviews"

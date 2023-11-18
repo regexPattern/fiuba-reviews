@@ -1,5 +1,5 @@
 import db from "$lib/db";
-import { calificacion, catedraDocente, comentario, cuatrimestre, docente } from "$lib/db/schema";
+import { calificacion, catedraDocente, comentario, docente } from "$lib/db/schema";
 import { eq, sql } from "drizzle-orm";
 
 import type { PageServerLoad } from "./$types";
