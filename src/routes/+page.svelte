@@ -1,33 +1,88 @@
 <script lang="ts">
+	import CommandStore from "$lib/command";
+	import AnchorTag from "$lib/components/AnchorTag.svelte";
+	import FeatureCard from "$lib/components/FeatureCard.svelte";
+	import PopularMateriaSlider from "$lib/components/PopularMateriaSlider.svelte";
 	import { Button } from "$lib/components/ui/button";
 	import "@splidejs/svelte-splide/css";
+	import { Cpu, Database, Paintbrush2 } from "lucide-svelte";
 
 	import type { PageData } from "./$types";
 
 	export let data: PageData;
 </script>
 
-<main class="mx-auto space-y-12">
-	<div class="flex flex-col items-center space-y-6 py-12 text-center">
-		<h1 class="px-2 text-7xl font-bold tracking-tighter">
+<main class="container my-12 flex max-w-screen-md flex-col items-center gap-12">
+	<div class="space-y-6 text-center">
+		<h1 class="text-6xl font-bold tracking-tighter xs:text-7xl">
 			<span class="text-fiuba">FIUBA</span> Reviews
 		</h1>
 
-		<p class="max-w-[40rem] px-8 text-lg xs:text-xl">
+		<p class="mx-auto max-w-[40rem] text-lg xs:text-xl">
 			Encontrá calificaciones y comentarios de los docentes de la facultad, subidos por otros
 			estudiantes de la FIUBA. Basado en el legendario
-			<a href="http://dollyfiuba.com" target="_blank" rel="noopener noreferrer" class="underline"
-				>Dolly FIUBA</a
-			>
+			<AnchorTag href="http://dollyfiuba.com" class="underline">Dolly FIUBA</AnchorTag>.
 		</p>
-
-		<Button variant="outline" class="w-64 flex justify-between p-2 font-normal text-muted-foreground">
-			<span>Buscar materias</span>
-			<kbd class="ml-4 rounded border bg-muted px-1.5 py-0.5 font-mono text-xs">
-				<span class="mr-[3px]">⌘</span>K
-			</kbd>
-		</Button>
 	</div>
+
+	<Button class="px-3 py-2 shadow-lg" on:click={() => ($CommandStore = true)}>
+		<span>Buscar materias</span>
+		<kbd class="ml-2 rounded border px-1.5 py-0.5 font-mono text-xs">
+			<span class="mr-[3px]">⌘</span>K
+		</kbd>
+	</Button>
+
+	<section class="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-4 lg:gap-6">
+		<FeatureCard
+			icon={Database}
+			title="Mismos datos"
+			desc="Tomamos los datos originales de Dolly para que podás acceder a los mismos comenatarios recolectados durante años. Bajo el capó, toda la estructura de los datos fue adaptada a Postgres."
+		/>
+		<FeatureCard
+			icon={Paintbrush2}
+			title="Nuevo diseño"
+			desc="Se recontruyó completamente la interfaz de la página web y se le dió un estilo totalmente diferente, con modo claro y oscuro, y un estilo minimalista moderno."
+		/>
+		<FeatureCard
+			icon={Cpu}
+			title="Inteligencia Artificial"
+			desc="Utilizando inteligencia artificial, generamos un resumen de lo que dicen los comentarios de los docentes más populares para que te ahorrés tiempo al evaluarlos."
+		/>
+	</section>
+
+	<section class="w-full space-y-4 overflow-x-hidden">
+		<h2 class="text-center text-4xl font-semibold tracking-tight">Materias Más Populares</h2>
+		<p class="text-center text-muted-foreground">
+			Las {data.materias.length} materias con mayor cantidad de comentarios.
+		</p>
+		<PopularMateriaSlider materias={data.materias.slice(0, 10)} />
+		<PopularMateriaSlider materias={data.materias.slice(10, 20)} />
+	</section>
+
+	<section class="space-y-4 text-center text-muted-foreground">
+		<h2 class="text-4xl font-semibold tracking-tight text-foreground">Acerca del Proyecto</h2>
+		<p>
+			Como alumno de FIUBA, había estado usando Dolly para conocer opiniones de las diferentes
+			cátedras y docentes desde que entré a la facultad, para así seleccionar mis prioridades de
+			cátedras antes de iniciar la inscripción de cada cuatrimestre.
+		</p>
+		<p>
+			Tras varios años usando Dolly, creí que la aplicación podía mejorarse en algunos aspectos.
+			Como valoro el trabajo que han hecho los chicos de Dolly durante todos estos años, y es una
+			aplicación bastante popular en la facultad, que ha sido usada por muchos alumnos durante
+			varios años, decidí no arrancar desde cero, sino que utilizar los datos que Dolly ya tenía
+			<AnchorTag href="https://github.com/lugfi/dolly/issues/80"
+				>(con el permiso de los chicos creadores de Dolly)</AnchorTag
+			>.
+		</p>
+		<p>
+			Así surge este proyecto, que <span class="text-foreground underline"
+				>NO pretende ser un reemplazo a la aplicación original</span
+			>, sino que más bien una propuesta de posibles cambios que se pueden hacer para, desde mi
+			perspectiva, mejorar la experiencia de esta muy útil aplicación creada por la misma comunidad
+			de estudiantes.
+		</p>
+	</section>
 
 	<div
 		class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"

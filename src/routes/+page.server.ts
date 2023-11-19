@@ -22,7 +22,7 @@ export const load: PageServerLoad = async () => {
     .innerJoin(comentario, eq(catedraDocente.codigoDocente, comentario.codigoDocente))
     .groupBy(materia.codigo)
     .orderBy(({ cantidadComentarios }) => desc(cantidadComentarios))
-    .limit(10);
+    .limit(20);
 
   return { materias };
 };
