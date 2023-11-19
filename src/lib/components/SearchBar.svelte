@@ -60,7 +60,7 @@
 	class={cn("flex justify-between p-2 font-normal text-muted-foreground", className)}
 	on:click={() => (open = !open)}
 >
-	<span>Buscar<span class="hidden xs:inline">&nbsp;materias</span></span>
+	<span>Buscar materias</span>
 	<kbd class="ml-4 rounded border bg-muted px-1.5 py-0.5 font-mono text-xs">
 		<span class="mr-[3px]">⌘</span>K
 	</kbd>

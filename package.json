@@ -32,6 +32,8 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@splidejs/splide-extension-auto-scroll": "^0.5.3",
+		"@splidejs/svelte-splide": "^0.2.9",
 		"bits-ui": "^0.9.8",
 		"clsx": "^2.0.0",
 		"cmdk-sv": "^0.0.7",
