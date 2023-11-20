@@ -52,7 +52,7 @@
 				</PopoverContent>
 			</Popover>
 
-			<Button class="items-center gap-1.5">
+			<Button class="items-center gap-1.5" href={`/calificar/${doc.codigo}`}>
 				Calificar <PlusCircle class="h-[1.2rem] w-[1.2rem]" />
 			</Button>
 		</div>

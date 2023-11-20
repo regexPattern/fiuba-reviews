@@ -6,7 +6,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import type { LayoutServerLoad } from "./$types";
 
 export const load = (async ({ params }) => {
-  const codigoMateria = parseInt(params.codigo, 10);
+  const codigoMateria = parseInt(params.codigoMateria, 10);
 
   const materias = await db
     .select({
