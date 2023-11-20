@@ -21,7 +21,9 @@
 		<p class="mx-auto max-w-[40rem] text-lg xs:text-xl">
 			Encontrá calificaciones y comentarios de los docentes de la facultad, subidos por otros
 			estudiantes de la FIUBA. Basado en el legendario
-			<AnchorTag href="http://dollyfiuba.com" class="underline">Dolly FIUBA</AnchorTag>.
+			<AnchorTag href="http://dollyfiuba.com" class="underline after:content-link"
+				>Dolly FIUBA</AnchorTag
+			>.
 		</p>
 	</div>
 
@@ -62,16 +64,11 @@
 	<section class="space-y-4 text-center text-muted-foreground">
 		<h2 class="text-4xl font-semibold tracking-tight text-foreground">Acerca del Proyecto</h2>
 		<p>
-			Como alumno de FIUBA, había estado usando Dolly para conocer opiniones de las diferentes
-			cátedras y docentes desde que entré a la facultad, para así seleccionar mis prioridades de
-			cátedras antes de iniciar la inscripción de cada cuatrimestre.
-		</p>
-		<p>
 			Tras varios años usando Dolly, creí que la aplicación podía mejorarse en algunos aspectos.
 			Como valoro el trabajo que han hecho los chicos de Dolly durante todos estos años, y es una
 			aplicación bastante popular en la facultad, que ha sido usada por muchos alumnos durante
 			varios años, decidí no arrancar desde cero, sino que utilizar los datos que Dolly ya tenía
-			<AnchorTag href="https://github.com/lugfi/dolly/issues/80"
+			<AnchorTag href="https://github.com/lugfi/dolly/issues/80" class="after:content-link"
 				>(con el permiso de los chicos creadores de Dolly)</AnchorTag
 			>.
 		</p>

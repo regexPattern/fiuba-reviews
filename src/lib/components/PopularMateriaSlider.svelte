@@ -28,7 +28,7 @@
 >
 	{#each materias as mat (mat.codigo)}
 		<SplideSlide
-			class="rounded-lg border bg-slate-50 text-center text-sm text-muted-foreground dark:bg-slate-900"
+			class="rounded-lg border bg-slate-50 text-center text-sm text-muted-foreground dark:bg-slate-900 m-0.5"
 		>
 			<AnchorTag href={`/materias/${mat.codigo}`} class="flex flex-col p-3">
 				<span class="font-medium text-foreground">{mat.codigo} &bull; {mat.nombre}</span>

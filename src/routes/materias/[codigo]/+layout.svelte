@@ -79,7 +79,7 @@
 		</Sheet>
 	</div>
 
-	<main class="space-y-12 p-4 md:ml-80 md:min-h-[calc(100vh-4rem)] md:p-6">
+	<main class="flex flex-col gap-12 p-4 md:ml-80 md:min-h-[calc(100vh-4rem)] md:p-6">
 		<slot />
 	</main>
 </div>

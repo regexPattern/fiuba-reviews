@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AnchorTag from "$lib/components/AnchorTag.svelte";
 	import PromediosDocente from "$lib/components/PromediosDocente.svelte";
 	import { Button } from "$lib/components/ui/button";
 	import { Popover, PopoverContent, PopoverTrigger } from "$lib/components/ui/popover";
@@ -24,14 +25,12 @@
 				</p>
 				<div class="text-sm text-slate-500">
 					Resumen generado por IA.
-					<a
+					<AnchorTag
 						href="https://github.com/regexPattern/fiuba-reviews"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="underline"
+						class="after:content-link"
 					>
 						Más información.
-					</a>
+					</AnchorTag>
 				</div>
 			</div>
 		{/if}
