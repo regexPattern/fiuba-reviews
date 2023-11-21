@@ -19,7 +19,7 @@
 <div class="relative md:container md:mx-auto md:flex-row">
 	<div class="sticky top-16 md:top-auto">
 		<aside
-			class="fixed hidden h-[calc(100vh-4rem)] max-h-full w-80 shrink-0 overflow-y-scroll border-r bg-background md:block"
+			class="fixed hidden max-h-[calc(100vh-4rem)] w-80 shrink-0 overflow-y-scroll border-r bg-background md:block"
 		>
 			<div
 				class="sticky top-0 flex w-full items-start gap-1 border-b bg-background p-3 text-center font-medium"

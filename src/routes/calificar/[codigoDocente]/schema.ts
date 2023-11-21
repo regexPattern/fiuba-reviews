@@ -1,14 +1,19 @@
 import { z } from "zod";
 
+const parametroCalificacion = z
+  .number()
+  .min(1, { message: "Valor mínimo 1" })
+  .max(5, { message: "Valor máximo 5" });
+
 export default z.object({
-	acepta_critica: z.number().min(0).max(5),
-	asistencia: z.number().min(0).max(5),
-	buen_trato: z.number().min(0).max(5),
-	claridad: z.number().min(0).max(5),
-	clase_organizada: z.number().min(0).max(5),
-	cumple_horario: z.number().min(0).max(5),
-	fomenta_participacion: z.number().min(0).max(5),
-	panorama_amplio: z.number().min(0).max(5),
-	responde_mails: z.number().min(0).max(5),
-	comentario: z.string()
+  acepta_critica: parametroCalificacion,
+  asistencia: parametroCalificacion,
+  buen_trato: parametroCalificacion,
+  claridad: parametroCalificacion,
+  clase_organizada: parametroCalificacion,
+  cumple_horario: parametroCalificacion,
+  fomenta_participacion: parametroCalificacion,
+  panorama_amplio: parametroCalificacion,
+  responde_mails: parametroCalificacion,
+  comentario: z.string()
 });
