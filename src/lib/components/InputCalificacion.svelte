@@ -6,19 +6,17 @@
 	export let label: string;
 </script>
 
-<FormItem class="">
-	<div class="flex flex-wrap justify-between gap-1">
-		<Label for={id} class="flex shrink-0 items-center">{label}</Label>
-		<Select>
-			<SelectTrigger class="w-32">
-				<SelectValue placeholder="Seleccionar" />
-			</SelectTrigger>
-			<SelectContent {id}>
-				{#each Array.from({ length: 5 }, (_, i) => i + 1) as val}
-					<SelectItem value={val}>{val}</SelectItem>
-				{/each}
-			</SelectContent>
-		</Select>
-	</div>
+<FormItem class="space-y-2">
+	<Label for={id} class="flex shrink-0 items-center">{label}</Label>
+	<Select>
+		<SelectTrigger>
+			<SelectValue placeholder="Seleccionar" />
+		</SelectTrigger>
+		<SelectContent {id}>
+			{#each Array.from({ length: 5 }, (_, i) => i + 1) as val}
+				<SelectItem value={val}>{val}</SelectItem>
+			{/each}
+		</SelectContent>
+	</Select>
 	<Validation />
 </FormItem>

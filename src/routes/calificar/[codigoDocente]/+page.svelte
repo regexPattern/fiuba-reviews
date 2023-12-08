@@ -7,9 +7,11 @@
 		FormField,
 		FormItem,
 		Label,
+		Select,
 		Textarea,
 		Validation
 	} from "$lib/components/ui/form";
+	import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "$lib/components/ui/select";
 	import { ChevronLeft, Loader2 } from "lucide-svelte";
 
 	import type { PageData } from "./$types";
@@ -27,13 +29,14 @@
 	<h1 class="text-5xl font-bold tracking-tight">{data.nombreDocente}</h1>
 	<Form
 		{schema}
+		method="POST"
 		form={data.form}
 		options={{ delayMs: 1000, timeoutMs: 1000 }}
+		class="space-y-6"
 		let:config
 		let:delayed
-		class="space-y-6"
 	>
-		<div class="space-y-3">
+		<div class="space-y-6">
 			<FormField {config} name="acepta_critica">
 				<InputCalificacion id="acepta-critica" label="Acepta Crítica" />
 			</FormField>
@@ -62,13 +65,31 @@
 				<InputCalificacion id="responde-mails" label="Responde Mails" />
 			</FormField>
 		</div>
-		<FormField {config} name="comentario">
-			<FormItem>
-				<Label for="comentario">Comentario (Opcional)</Label>
-				<Textarea id="comentario" />
-				<Validation />
-			</FormItem>
-		</FormField>
+		<div class="space-y-3">
+			<FormField {config} name="comentario">
+				<FormItem>
+					<Label for="comentario">Comentario (Opcional)</Label>
+					<Textarea id="comentario" />
+					<Validation />
+				</FormItem>
+			</FormField>
+			<FormField {config} name="cuatrimestre">
+				<FormItem>
+					<Label for="cuatrimestre">Cuatrimestre</Label>
+					<Select>
+						<SelectTrigger>
+							<SelectValue placeholder="Seleccionar" />
+						</SelectTrigger>
+						<SelectContent id="cuatrimestre">
+							{#each data.cuatrimestres as cuatrimestre}
+								<SelectItem value={cuatrimestre.nombre}>{cuatrimestre.nombre}</SelectItem>
+							{/each}
+						</SelectContent>
+					</Select>
+					<Validation />
+				</FormItem>
+			</FormField>
+		</div>
 		<FormButton type="submit" class="items-center gap-1" disabled={delayed}>
 			<span>Enviar</span>
 			{#if delayed}
