@@ -12,7 +12,7 @@
 		Validation
 	} from "$lib/components/ui/form";
 	import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "$lib/components/ui/select";
-	import { ChevronLeft, Loader2 } from "lucide-svelte";
+	import { CheckCircle2, ChevronLeft, Loader2, XCircle } from "lucide-svelte";
 
 	import type { PageData } from "./$types";
 	import schema from "./schema";
@@ -34,7 +34,9 @@
 		options={{ delayMs: 1000, timeoutMs: 1000 }}
 		class="space-y-6"
 		let:config
-		let:delayed
+		let:formValues
+		let:submitting
+		let:message
 	>
 		<div class="space-y-6">
 			<FormField {config} name="acepta_critica">
@@ -76,7 +78,7 @@
 			<FormField {config} name="cuatrimestre">
 				<FormItem>
 					<Label for="cuatrimestre">Cuatrimestre</Label>
-					<Select>
+					<Select disabled={!formValues.comentario}>
 						<SelectTrigger>
 							<SelectValue placeholder="Seleccionar" />
 						</SelectTrigger>
@@ -90,11 +92,26 @@
 				</FormItem>
 			</FormField>
 		</div>
-		<FormButton type="submit" class="items-center gap-1" disabled={delayed}>
-			<span>Enviar</span>
-			{#if delayed}
-				<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+
+		<div class="flex items-center gap-4">
+			<FormButton type="submit" class="items-center gap-1" disabled={submitting}>
+				<span>Enviar</span>
+				{#if submitting}
+					<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+				{/if}
+			</FormButton>
+
+			{#if message?.type === "success"}
+				<div class="flex items-center gap-2 text-emerald-500">
+					{message.text}
+					<CheckCircle2 size={20} />
+				</div>
+			{:else if message?.type === "error"}
+				<div class="flex items-center gap-2 text-destructive">
+          {message.text}
+					<XCircle size={20} />
+        </div>
 			{/if}
-		</FormButton>
+		</div>
 	</Form>
 </main>

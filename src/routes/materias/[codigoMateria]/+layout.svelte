@@ -49,7 +49,10 @@
 			<SheetTrigger asChild>
 				<button
 					class="flex w-full items-center justify-between gap-3 border-b bg-background p-3 text-left font-medium md:hidden"
-					on:click={() => (open = !open)}
+					on:click={() => {
+						open = !open;
+						window.scroll({ top: 0, behavior: "instant" });
+					}}
 				>
 					<span class="flex items-start gap-1">
 						{data.materia.codigo}

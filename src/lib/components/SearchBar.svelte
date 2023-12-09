@@ -78,7 +78,7 @@
 						await goto(`/materias/${slug}`);
 						$CommandStore = false;
 					}}
-					class="flex items-start space-x-1.5"
+					class="flex cursor-pointer items-start space-x-1.5"
 				>
 					<span class="font-mono font-semibold">{mat.codigo}</span>
 					<span class="font-bold">&bullet;</span>

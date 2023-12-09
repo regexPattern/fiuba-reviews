@@ -3,7 +3,7 @@ import { catedra, catedraDocente, cuatrimestre, docente, materia } from "$lib/db
 import { sortCuatrimestres } from "$lib/utils";
 import { error, fail } from "@sveltejs/kit";
 import { eq } from "drizzle-orm";
-import { superValidate } from "sveltekit-superforms/server";
+import { message, superValidate } from "sveltekit-superforms/server";
 
 import type { PageServerLoad } from "./$types";
 import type { Actions } from "./$types";
@@ -51,12 +51,15 @@ export const actions: Actions = {
 				).length > 0;
 		}
 
-		console.log(form);
-
 		if (!form.valid) {
 			return fail(400, { form });
 		}
 
-		return { form };
+    console.log(form);
+
+		return message(form, {
+			type: "success",
+			text: "Calificación registrada con éxito"
+		});
 	}
 };

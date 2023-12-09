@@ -16,8 +16,6 @@ export const load = (async ({ params }) => {
 }) satisfies PageServerLoad;
 
 async function fetchDocentesInfo(codigoCatedra: string) {
-	await new Promise((resolve) => setTimeout(resolve, 3000));
-
 	const docentes = await db
 		.select({
 			codigo: docente.codigo,

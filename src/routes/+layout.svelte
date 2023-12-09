@@ -14,7 +14,7 @@
 	<title>FIUBA Reviews</title>
 </svelte:head>
 
-<ModeWatcher track={false} />
+<ModeWatcher />
 
 <header class="sticky top-0 z-[40] border-b bg-background/75 backdrop-blur-lg">
 	<div class="container flex h-16 items-center justify-start p-3 sm:justify-between">
