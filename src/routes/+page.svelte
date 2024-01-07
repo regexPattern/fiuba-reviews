@@ -13,14 +13,14 @@
 
 <main class="container my-12 flex max-w-screen-md flex-col items-center gap-12">
 	<div class="space-y-6 text-center">
-		<h1 class="text-6xl font-bold tracking-tighter xs:text-7xl">
+		<h1 class="xs:text-7xl text-6xl font-bold tracking-tighter">
 			<span class="text-fiuba">FIUBA</span> Reviews
 		</h1>
 
-		<p class="mx-auto max-w-[40rem] text-lg xs:text-xl">
+		<p class="xs:text-xl mx-auto max-w-[40rem] text-lg">
 			Encontrá calificaciones y comentarios de los docentes de la facultad, subidos por otros
 			estudiantes de la FIUBA. Basado en el legendario
-			<Link href="http://dollyfiuba.com" class="underline after:content-link">Dolly FIUBA</Link>.
+			<Link href="http://dollyfiuba.com" class="after:content-link underline">Dolly FIUBA</Link>.
 		</p>
 	</div>
 
@@ -33,7 +33,7 @@
 		<Feature
 			icon={Database}
 			title="Mismos datos"
-			desc="Tomamos los datos originales de Dolly para que podás acceder a los mismos comenatarios recolectados durante años. Bajo el capó, toda la estructura de los datos fue adaptada a Postgres."
+			desc="Tomamos los datos originales de Dolly para que podás acceder a los mismos comentarios recolectados durante años. Bajo el capó, toda la estructura de los datos fue adaptada a Postgres."
 		/>
 		<Feature
 			icon={Paintbrush2}
@@ -49,15 +49,15 @@
 
 	<section class="w-full space-y-4 overflow-x-hidden">
 		<h2 class="text-center text-4xl font-semibold tracking-tight">Materias Más Populares</h2>
-		<p class="text-center text-muted-foreground">
+		<p class="text-muted-foreground text-center">
 			Las {data.materias.length} materias con mayor cantidad de comentarios.
 		</p>
 		<MateriasPopulares materias={data.materias.slice(0, 10)} />
 		<MateriasPopulares materias={data.materias.slice(10, 20)} />
 	</section>
 
-	<section class="space-y-4 text-center text-muted-foreground">
-		<h2 class="text-4xl font-semibold tracking-tight text-foreground">Acerca del Proyecto</h2>
+	<section class="text-muted-foreground space-y-4 text-center">
+		<h2 class="text-foreground text-4xl font-semibold tracking-tight">Acerca del Proyecto</h2>
 		<p>
 			Tras varios años usando Dolly, creí que la aplicación podía mejorarse en algunos aspectos.
 			Como valoro el trabajo que han hecho los chicos de Dolly durante todos estos años, y es una
@@ -83,7 +83,7 @@
 		aria-hidden="true"
 	>
 		<div
-			class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-fiuba to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
+			class="from-fiuba relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
 			style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
 		/>
 
