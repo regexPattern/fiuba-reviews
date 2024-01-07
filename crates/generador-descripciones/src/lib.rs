@@ -70,7 +70,6 @@ WHERE com.codigo_docente IN (
         let semaphore = Arc::clone(&semaphore);
         let inference_api_key = Arc::clone(&inference_api_key);
 
-        // 
         let span = tracing::debug_span!("docente", codigo = codigo_docente.to_string());
 
         handles.push(tokio::spawn(

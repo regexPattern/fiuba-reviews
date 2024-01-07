@@ -4,6 +4,8 @@ import { eq, sql } from "drizzle-orm";
 
 import type { PageServerLoad } from "./$types";
 
+export const prerender = true;
+
 export const load = (async () => {
 	const materias = await db
 		.select({
@@ -14,7 +16,7 @@ export const load = (async () => {
         SELECT COUNT(*)
         FROM ${catedra}
         WHERE ${catedra.codigoMateria} = ${materia.codigo}
-      )`,
+      )`
 		})
 		.from(materia)
 		.innerJoin(catedra, eq(materia.codigo, catedra.codigoMateria))

@@ -3,6 +3,7 @@
 	import Promedios from "$lib/components/listado-promedios-docente.svelte";
 	import { Button } from "$lib/components/ui/button";
 	import { Popover, PopoverContent, PopoverTrigger } from "$lib/components/ui/popover";
+	import { Skeleton } from "$lib/components/ui/skeleton";
 	import { ChevronDown, PlusCircle, Star } from "lucide-svelte";
 
 	import type { PageData } from "./$types";
@@ -12,14 +13,16 @@
 
 {#await data.streamed.docentes}
 	<div class="space-y-4">
-		<p class="text-center text-xl">Cargando docentes...</p>
-		<img
-			src="/images/pablo-escobar-waiting.gif"
-			width="498px"
-			height="331px"
-			alt="Imagen de carga de Pablo Escobar esperando"
-			class="mx-auto"
-		/>
+		<Skeleton class="h-10 w-72" />
+		<div class="flex flex-col gap-2 xs:flex-row [&>*]:h-10 [&>*]:w-full [&>*]:xs:w-44">
+			<Skeleton />
+			<Skeleton />
+		</div>
+		<div class="space-y-2">
+			{#each Array(10) as _}
+				<Skeleton class="h-10" />
+			{/each}
+		</div>
 	</div>
 {:then docentes}
 	{#each docentes as doc (doc.codigo)}
@@ -37,38 +40,41 @@
 					</p>
 					<div class="text-sm text-slate-500">
 						Resumen generado por IA.
-						<Link href="https://github.com/regexPattern/fiuba-reviews" class="after:content-link">
+						<Link
+							href="https://github.com/regexPattern/fiuba-reviews#generaci%C3%B3n-de-descripciones-con-inteligencia-artificial"
+							class="after:content-link"
+						>
 							Más información.
 						</Link>
 					</div>
 				</div>
 			{/if}
 
-      <div class="flex flex-col gap-2 xs:flex-row xs:items-center">
-        {#if doc.promedio}
-          <Popover>
-            <PopoverTrigger asChild let:builder>
-              <Button builders={[builder]} variant="outline" class="items-center gap-1.5">
-                <Star class="h-4 w-4 fill-current text-yellow-500" />
-                <span>Promedio: {doc.promedio.toFixed(1)}</span>
-                <ChevronDown class="h-[1.2rem] w-[1.2rem]" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent class="w-max">
-              <Promedios cantidadCalificaciones={doc.cantidadCalificaciones} {...doc.promedios} />
-            </PopoverContent>
-          </Popover>
-        {:else}
-          <Button variant="outline" class="items-center gap-1.5">
-                <Star class="h-4 w-4 fill-current text-yellow-500" />
-                <span>Sin calificaciones</span>
-          </Button>
-        {/if}
+			<div class="flex flex-col gap-2 xs:flex-row xs:items-center">
+				{#if doc.promedio}
+					<Popover>
+						<PopoverTrigger asChild let:builder>
+							<Button builders={[builder]} variant="outline" class="items-center gap-1.5">
+								<Star class="h-4 w-4 fill-current text-yellow-500" />
+								<span>Promedio: {doc.promedio.toFixed(1)}</span>
+								<ChevronDown class="h-[1.2rem] w-[1.2rem]" />
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent class="w-max">
+							<Promedios cantidadCalificaciones={doc.cantidadCalificaciones} {...doc.promedios} />
+						</PopoverContent>
+					</Popover>
+				{:else}
+					<Button variant="outline" class="items-center gap-1.5">
+						<Star class="h-4 w-4 fill-none text-yellow-500" />
+						<span>Sin calificaciones</span>
+					</Button>
+				{/if}
 
-        <Button class="items-center gap-1.5" href={`/calificar/${doc.codigo}`}>
-          Calificar <PlusCircle class="h-[1.2rem] w-[1.2rem]" />
-        </Button>
-      </div>
+				<Button class="items-center gap-1.5" href={`/calificar/${doc.codigo}`}>
+					Calificar <PlusCircle class="h-[1.2rem] w-[1.2rem]" />
+				</Button>
+			</div>
 
 			<div class="flex flex-col gap-2 divide-y">
 				{#each doc.comentarios as com (com.codigo)}

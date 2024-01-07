@@ -2,6 +2,7 @@
 	import { page } from "$app/stores";
 	import { Sheet, SheetTrigger } from "$lib/components/ui/sheet";
 	import SheetContent from "$lib/components/ui/sheet/sheet-content.svelte";
+	import { Skeleton } from "$lib/components/ui/skeleton";
 	import { cn } from "$lib/utils";
 	import { ChevronDown, Star } from "lucide-svelte";
 
@@ -19,31 +20,39 @@
 <div class="relative md:container md:mx-auto md:flex-row">
 	<div class="sticky top-16 md:top-auto">
 		<aside
-			class="fixed hidden max-h-[calc(100vh-4rem)] w-80 shrink-0 overflow-y-scroll border-r bg-background md:block"
+			class="fixed hidden max-h-full min-h-[calc(100vh-4rem)] w-80 shrink-0 overflow-y-auto border-r bg-background md:block"
 		>
 			<div
-				class="sticky top-0 flex w-full items-start gap-1 border-b bg-background p-3 text-center font-medium"
+				class="sticky top-0 z-50 flex w-full items-start gap-1.5 border-b bg-background p-3 text-center font-medium"
 			>
 				{data.materia.codigo}
 				<span class="font-bold">&bullet;</span>
 				{data.materia.nombre}
 			</div>
 
-			<ul class="h-full space-y-1.5 overflow-y-scroll py-2">
-				{#each data.catedras as cat (cat.codigo)}
-					<li class="flex items-center gap-1.5 px-5 py-2 md:pl-2 md:pr-4">
-						<span class={`w-[2.5ch] shrink-0 font-medium ${!cat.promedio ? "text-center" : ""}`}>
-							{cat.promedio?.toFixed(1) || "-"}
-						</span>
-						<Star class="h-3 w-3 shrink-0 fill-current pr-0.5 text-yellow-500" />
-						<a
-							href={`/materias/${$page.params.codigoMateria}/${cat.codigo}`}
-							class={cn($page.params.codigoCatedra === cat.codigo && "text-fiuba")}
-						>
-							{cat.nombre}
-						</a>
-					</li>
-				{/each}
+			<ul class="h-full space-y-1.5 py-2">
+				{#await data.streamed.catedras}
+					{#each Array(10) as _}
+						<li class="px-2 py-0.5">
+							<Skeleton class="h-10" />
+						</li>
+					{/each}
+				{:then catedras}
+					{#each catedras as cat (cat.codigo)}
+						<li class="flex items-center gap-1.5 px-5 py-2 md:pl-2 md:pr-4">
+							<span class={`w-[2.5ch] shrink-0 font-medium ${!cat.promedio ? "text-center" : ""}`}>
+								{cat.promedio?.toFixed(1) || "-"}
+							</span>
+							<Star class="h-3 w-3 shrink-0 fill-current pr-0.5 text-yellow-500" />
+							<a
+								href={`/materias/${$page.params.codigoMateria}/${cat.codigo}`}
+								class={cn($page.params.codigoCatedra === cat.codigo && "text-fiuba")}
+							>
+								{cat.nombre}
+							</a>
+						</li>
+					{/each}
+				{/await}
 			</ul>
 		</aside>
 
@@ -66,21 +75,29 @@
 			</SheetTrigger>
 			<SheetContent class="z-[120] p-0 pt-8" side="left">
 				<ul class="h-full space-y-1.5 overflow-y-scroll py-2">
-					{#each data.catedras as cat (cat.codigo)}
-						<li class="flex items-center gap-1.5 px-5 py-2 md:pl-2 md:pr-4">
-							<span class={`w-[3ch] shrink-0 font-medium ${!cat.promedio ? "text-center" : ""}`}
-								>{cat.promedio?.toFixed(1) || "-"}</span
-							>
-							<Star class="h-3 w-3 shrink-0 fill-current text-yellow-500" />
-							<a
-								href={`/materias/${$page.params.codigoMateria}/${cat.codigo}`}
-								class={cn($page.params.codigoCatedra === cat.codigo && "text-fiuba")}
-								on:click={() => (open = !open)}
-							>
-								{cat.nombre}
-							</a>
-						</li>
-					{/each}
+					{#await data.streamed.catedras}
+						{#each Array(10) as _}
+							<li class="px-2 py-0.5">
+								<Skeleton class="h-10" />
+							</li>
+						{/each}
+					{:then catedras}
+						{#each catedras as cat (cat.codigo)}
+							<li class="flex items-center gap-1.5 px-5 py-2 md:pl-2 md:pr-4">
+								<span class={`w-[3ch] shrink-0 font-medium ${!cat.promedio ? "text-center" : ""}`}
+									>{cat.promedio?.toFixed(1) || "-"}</span
+								>
+								<Star class="h-3 w-3 shrink-0 fill-current text-yellow-500" />
+								<a
+									href={`/materias/${$page.params.codigoMateria}/${cat.codigo}`}
+									class={cn($page.params.codigoCatedra === cat.codigo && "text-fiuba")}
+									on:click={() => (open = !open)}
+								>
+									{cat.nombre}
+								</a>
+							</li>
+						{/each}
+					{/await}
 				</ul>
 			</SheetContent>
 		</Sheet>

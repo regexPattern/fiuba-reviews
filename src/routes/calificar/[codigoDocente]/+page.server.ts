@@ -9,8 +9,6 @@ import type { PageServerLoad } from "./$types";
 import type { Actions } from "./$types";
 import schema from "./schema";
 
-export const prerender = false;
-
 export const load: PageServerLoad = async ({ params }) => {
 	const docentes = await db
 		.select({

@@ -33,7 +33,7 @@
 		<Feature
 			icon={Database}
 			title="Mismos datos"
-			desc="Tomamos los datos originales de Dolly para que podás acceder a los mismos comenatarios recolectados durante años. Bajo el capó, toda la estructura de los datos fue adaptada a Postgres."
+			desc="Tomamos los datos originales de Dolly para que podás acceder a los mismos comentarios recolectados durante años. Bajo el capó, toda la estructura de los datos fue adaptada a Postgres."
 		/>
 		<Feature
 			icon={Paintbrush2}
@@ -59,20 +59,18 @@
 	<section class="space-y-4 text-center text-muted-foreground">
 		<h2 class="text-4xl font-semibold tracking-tight text-foreground">Acerca del Proyecto</h2>
 		<p>
-			Tras varios años usando Dolly, creí que la aplicación podía mejorarse en algunos aspectos.
-			Como valoro el trabajo que han hecho los chicos de Dolly durante todos estos años, y es una
-			aplicación bastante popular en la facultad, que ha sido usada por muchos alumnos durante
-			varios años, decidí no arrancar desde cero, sino que utilizar los datos que Dolly ya tenía
-			<Link href="https://github.com/lugfi/dolly/issues/80" class="after:content-link"
-				>(con el permiso de los chicos creadores de Dolly)</Link
-			>.
+			Desde que entré a la facultad he usado Dolly para saber en qué cátedras inscribirme para el
+			cuatrimestre entrante. Sin embargo, me parecía que la página podría beneficiarse de algunos
+			cambios para mejorar la experiencia. Así que decidí crear una nueva aplicación utilizando los
+			datos que Dolly ya tenía
+			<Link href="https://github.com/lugfi/dolly/issues/80" class="after:content-link">
+				(con el permiso de sus creadores)
+			</Link>
+			.
 		</p>
 		<p>
-			Así surge este proyecto, que <span class="text-foreground underline"
-				>NO pretende ser un reemplazo a la aplicación original</span
-			>, sino que más bien una propuesta de posibles cambios que se pueden hacer para, desde mi
-			perspectiva, mejorar la experiencia de esta muy útil aplicación creada por la misma comunidad
-			de estudiantes.
+			Este proyecto no pretende ser un reemplazo a la aplicación original, sino más bien una
+			propuesta de posibles cambios que me gustaría ver en la en la aplicación original.
 		</p>
 	</section>
 

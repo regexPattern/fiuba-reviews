@@ -1,7 +1,7 @@
 import db from "$lib/db";
 import { calificacion, catedra, catedraDocente, docente, materia } from "$lib/db/schema";
 import { error } from "@sveltejs/kit";
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 
 import type { LayoutServerLoad } from "./$types";
 
@@ -22,7 +22,16 @@ export const load = (async ({ params }) => {
 		throw error(404, { message: "Materia no encontrada" });
 	}
 
-	const catedras = await db
+	return {
+		materia: materias[0],
+		streamed: {
+			catedras: fetchCatedrasMateria(codigoMateria)
+		}
+	};
+}) satisfies LayoutServerLoad;
+
+async function fetchCatedrasMateria(codigoMateria: number) {
+	return await db
 		.select({
 			codigo: catedra.codigo,
 			nombre: sql<string>`STRING_AGG(${docente.nombre}, '-' ORDER BY ${docente.nombre} ASC)`,
@@ -49,6 +58,4 @@ AVG((
 		.where(eq(catedra.codigoMateria, codigoMateria))
 		.groupBy(catedra.codigo)
 		.orderBy(({ promedio }) => sql`${promedio} DESC NULLS LAST`);
-
-	return { materia: materias[0], catedras };
-}) satisfies LayoutServerLoad;
+}

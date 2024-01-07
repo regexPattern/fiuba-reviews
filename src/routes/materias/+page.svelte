@@ -41,10 +41,10 @@
 		{#each filtered as mat}
 			{@const url = mat.codigoEquivalencia ?? mat.codigo}
 			<li
-				class="text-muted-foreground rounded-lg border bg-slate-50 text-center text-sm dark:bg-slate-900"
+				class="rounded-lg border bg-slate-50 text-center text-sm text-muted-foreground dark:bg-slate-900"
 			>
 				<Link href={`/materias/${url}`} class="flex flex-col p-3">
-					<span class="text-foreground font-medium">{mat.codigo} &bull; {mat.nombre}</span>
+					<span class="font-medium text-foreground">{mat.codigo} &bull; {mat.nombre}</span>
 					{#if mat.codigoEquivalencia}
 						<span>Equivalente a {mat.codigoEquivalencia}</span>
 					{/if}
