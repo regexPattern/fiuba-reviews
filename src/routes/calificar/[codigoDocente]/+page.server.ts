@@ -55,8 +55,6 @@ export const actions: Actions = {
 			return fail(400, { form });
 		}
 
-    console.log(form);
-
 		return message(form, {
 			type: "success",
 			text: "Calificación registrada con éxito"
