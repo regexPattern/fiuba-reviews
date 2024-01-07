@@ -18,8 +18,7 @@
 		</h1>
 
 		<p class="xs:text-xl mx-auto max-w-[40rem] text-lg">
-			Encontrá calificaciones y comentarios de los docentes de la facultad, subidos por otros
-			estudiantes de la FIUBA. Basado en el legendario
+			Encontrá calificaciones y comentarios de los docentes de la facultad, subidos por otros estudiantes de la FIUBA. Basado en el legendario
 			<Link href="http://dollyfiuba.com" class="after:content-link underline">Dolly FIUBA</Link>.
 		</p>
 	</div>
