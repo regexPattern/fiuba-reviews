@@ -56,16 +56,16 @@ export const flyAndScale = (
 };
 
 export function sortCuatrimestres(a: string, b: string) {
-  const [cuatriA, anioA] = a.split("Q");
-  const [cuatriB, anioB] = b.split("Q");
+	const [cuatriA, anioA] = a.split("Q");
+	const [cuatriB, anioB] = b.split("Q");
 
-  if (anioA === anioB) {
-    if (cuatriA === cuatriB) {
-      return 0;
-    } else {
-      return cuatriA > cuatriB ? -1 : 1;
-    }
-  } else {
-    return anioA > anioB ? -1 : 1;
-  }
+	if (anioA === anioB) {
+		if (cuatriA === cuatriB) {
+			return 0;
+		} else {
+			return cuatriA > cuatriB ? -1 : 1;
+		}
+	} else {
+		return anioA > anioB ? -1 : 1;
+	}
 }

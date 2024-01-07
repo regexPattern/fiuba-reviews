@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Select as SelectPrimitive } from "bits-ui";
 	import { cn, flyAndScale } from "$lib/utils";
+	import { Select as SelectPrimitive } from "bits-ui";
 	import { scale } from "svelte/transition";
 
 	type $$Props = SelectPrimitive.ContentProps;

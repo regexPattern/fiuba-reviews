@@ -26,7 +26,7 @@ export const load = (async ({ params }) => {
 		.select({
 			codigo: catedra.codigo,
 			nombre: sql<string>`STRING_AGG(${docente.nombre}, '-' ORDER BY ${docente.nombre} ASC)`,
-			promedio: sql<number>`
+			promedio: sql<number | null>`
 AVG((
   SELECT AVG((
     ${calificacion.aceptaCritica} 
@@ -48,7 +48,7 @@ AVG((
 		.innerJoin(docente, eq(docente.codigo, catedraDocente.codigoDocente))
 		.where(eq(catedra.codigoMateria, codigoMateria))
 		.groupBy(catedra.codigo)
-		.orderBy(({ promedio }) => desc(promedio));
+		.orderBy(({ promedio }) => sql`${promedio} DESC NULLS LAST`);
 
 	return { materia: materias[0], catedras };
 }) satisfies LayoutServerLoad;

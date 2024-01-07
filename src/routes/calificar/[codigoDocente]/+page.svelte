@@ -1,6 +1,6 @@
 <script lang="ts">
-	import AnchorTag from "$lib/components/AnchorTag.svelte";
-	import InputCalificacion from "$lib/components/InputCalificacion.svelte";
+	import Input from "$lib/components/input-calificacion.svelte";
+	import Link from "$lib/components/link.svelte";
 	import {
 		Form,
 		FormButton,
@@ -21,10 +21,10 @@
 </script>
 
 <main class="mx-auto max-w-screen-sm space-y-6 p-4">
-	<AnchorTag
+	<Link
 		href={`/materias/${data.codigoMateria}/${data.codigoCatedra}`}
 		class="flex items-center gap-1 underline"
-		><ChevronLeft class="w-4" />Ir a cátedra del docente</AnchorTag
+		><ChevronLeft class="w-4" />Ir a cátedra del docente</Link
 	>
 	<h1 class="text-5xl font-bold tracking-tight">{data.nombreDocente}</h1>
 	<Form
@@ -40,31 +40,31 @@
 	>
 		<div class="space-y-6">
 			<FormField {config} name="acepta_critica">
-				<InputCalificacion id="acepta-critica" label="Acepta Crítica" />
+				<Input id="acepta-critica" label="Acepta Crítica" />
 			</FormField>
 			<FormField {config} name="asistencia">
-				<InputCalificacion id="asistencia" label="Asistencia" />
+				<Input id="asistencia" label="Asistencia" />
 			</FormField>
 			<FormField {config} name="buen_trato">
-				<InputCalificacion id="buen-trato" label="Buen Trato" />
+				<Input id="buen-trato" label="Buen Trato" />
 			</FormField>
 			<FormField {config} name="claridad">
-				<InputCalificacion id="claridad" label="Claridad" />
+				<Input id="claridad" label="Claridad" />
 			</FormField>
 			<FormField {config} name="clase_organizada">
-				<InputCalificacion id="clase-organizada" label="Clase Organizada" />
+				<Input id="clase-organizada" label="Clase Organizada" />
 			</FormField>
 			<FormField {config} name="cumple_horario">
-				<InputCalificacion id="cumple-horario" label="Cumple Horario" />
+				<Input id="cumple-horario" label="Cumple Horario" />
 			</FormField>
 			<FormField {config} name="fomenta_participacion">
-				<InputCalificacion id="fomenta-participacion-horario" label="Fomenta Participación" />
+				<Input id="fomenta-participacion-horario" label="Fomenta Participación" />
 			</FormField>
 			<FormField {config} name="panorama_amplio">
-				<InputCalificacion id="panorama-amplio" label="Panorama Amplio" />
+				<Input id="panorama-amplio" label="Panorama Amplio" />
 			</FormField>
 			<FormField {config} name="responde_mails">
-				<InputCalificacion id="responde-mails" label="Responde Mails" />
+				<Input id="responde-mails" label="Responde Mails" />
 			</FormField>
 		</div>
 		<div class="space-y-3">
@@ -108,9 +108,9 @@
 				</div>
 			{:else if message?.type === "error"}
 				<div class="flex items-center gap-2 text-destructive">
-          {message.text}
+					{message.text}
 					<XCircle size={20} />
-        </div>
+				</div>
 			{/if}
 		</div>
 	</Form>

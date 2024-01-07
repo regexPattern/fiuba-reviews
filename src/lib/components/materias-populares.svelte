@@ -2,7 +2,7 @@
 	import { AutoScroll } from "@splidejs/splide-extension-auto-scroll";
 	import { Splide, SplideSlide } from "@splidejs/svelte-splide";
 
-	import AnchorTag from "./AnchorTag.svelte";
+	import Link from "./link.svelte";
 
 	export let materias: {
 		codigo: number;
@@ -30,11 +30,11 @@
 		<SplideSlide
 			class="m-0.5 rounded-lg border bg-slate-50 text-center text-sm text-muted-foreground dark:bg-slate-900"
 		>
-			<AnchorTag href={`/materias/${mat.codigo}`} class="flex flex-col p-3">
+			<Link href={`/materias/${mat.codigo}`} class="flex flex-col p-3">
 				<span class="font-medium text-foreground">{mat.codigo} &bull; {mat.nombre}</span>
 				<span>{mat.cantidadCatedras} cátedras</span>
 				<span>{mat.cantidadComentarios} comentarios</span>
-			</AnchorTag>
+			</Link>
 		</SplideSlide>
 	{/each}
 </Splide>

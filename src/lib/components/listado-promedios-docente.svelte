@@ -52,5 +52,5 @@
 	</tbody>
 </table>
 <span class="block text-center text-sm text-muted-foreground"
-	>{cantidadCalificaciones} calificaciones</span
+	>{cantidadCalificaciones} calificaci{cantidadCalificaciones > 1 ? "ones" : "ón"}</span
 >

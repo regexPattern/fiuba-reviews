@@ -1,11 +1,10 @@
 <script lang="ts">
-	import CommandStore from "$lib/command";
-	import AnchorTag from "$lib/components/AnchorTag.svelte";
-	import FeatureCard from "$lib/components/FeatureCard.svelte";
-	import PopularMateriaSlider from "$lib/components/PopularMateriaSlider.svelte";
+	import Feature from "$lib/components/feature-fiuba-reviews.svelte";
+	import Link from "$lib/components/link.svelte";
+	import MateriasPopulares from "$lib/components/materias-populares.svelte";
 	import { Button } from "$lib/components/ui/button";
 	import "@splidejs/svelte-splide/css";
-	import { Cpu, Database, Paintbrush2 } from "lucide-svelte";
+	import { Cpu, Database, Paintbrush2, Search } from "lucide-svelte";
 
 	import type { PageData } from "./$types";
 
@@ -21,31 +20,27 @@
 		<p class="mx-auto max-w-[40rem] text-lg xs:text-xl">
 			Encontrá calificaciones y comentarios de los docentes de la facultad, subidos por otros
 			estudiantes de la FIUBA. Basado en el legendario
-			<AnchorTag href="http://dollyfiuba.com" class="underline after:content-link"
-				>Dolly FIUBA</AnchorTag
-			>.
+			<Link href="http://dollyfiuba.com" class="underline after:content-link">Dolly FIUBA</Link>.
 		</p>
 	</div>
 
-	<Button class="px-3 py-2 shadow-lg" on:click={() => ($CommandStore = true)}>
+	<Button href="/materias" class="space-x-1 px-3 py-2 shadow-lg">
 		<span>Buscar materias</span>
-		<kbd class="ml-2 rounded border px-1.5 py-0.5 font-mono text-xs">
-			<span class="mr-[3px]">⌘</span>K
-		</kbd>
+		<Search class="h-4 w-4" />
 	</Button>
 
 	<section class="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-4 lg:gap-6">
-		<FeatureCard
+		<Feature
 			icon={Database}
 			title="Mismos datos"
 			desc="Tomamos los datos originales de Dolly para que podás acceder a los mismos comenatarios recolectados durante años. Bajo el capó, toda la estructura de los datos fue adaptada a Postgres."
 		/>
-		<FeatureCard
+		<Feature
 			icon={Paintbrush2}
 			title="Nuevo diseño"
 			desc="Se recontruyó completamente la interfaz de la página web y se le dió un estilo totalmente diferente, con modo claro y oscuro, y un estilo minimalista moderno."
 		/>
-		<FeatureCard
+		<Feature
 			icon={Cpu}
 			title="Inteligencia Artificial"
 			desc="Utilizando inteligencia artificial, generamos un resumen de lo que dicen los comentarios de los docentes más populares para que te ahorrés tiempo al evaluarlos."
@@ -57,8 +52,8 @@
 		<p class="text-center text-muted-foreground">
 			Las {data.materias.length} materias con mayor cantidad de comentarios.
 		</p>
-		<PopularMateriaSlider materias={data.materias.slice(0, 10)} />
-		<PopularMateriaSlider materias={data.materias.slice(10, 20)} />
+		<MateriasPopulares materias={data.materias.slice(0, 10)} />
+		<MateriasPopulares materias={data.materias.slice(10, 20)} />
 	</section>
 
 	<section class="space-y-4 text-center text-muted-foreground">
@@ -68,8 +63,8 @@
 			Como valoro el trabajo que han hecho los chicos de Dolly durante todos estos años, y es una
 			aplicación bastante popular en la facultad, que ha sido usada por muchos alumnos durante
 			varios años, decidí no arrancar desde cero, sino que utilizar los datos que Dolly ya tenía
-			<AnchorTag href="https://github.com/lugfi/dolly/issues/80" class="after:content-link"
-				>(con el permiso de los chicos creadores de Dolly)</AnchorTag
+			<Link href="https://github.com/lugfi/dolly/issues/80" class="after:content-link"
+				>(con el permiso de los chicos creadores de Dolly)</Link
 			>.
 		</p>
 		<p>
@@ -81,6 +76,8 @@
 		</p>
 	</section>
 
+	<!-- Elemento que se renderiza tras el contenido de la página principal para
+       mostrar el efecto de background blur con un blob de colores. -->
 	<div
 		class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
 		aria-hidden="true"

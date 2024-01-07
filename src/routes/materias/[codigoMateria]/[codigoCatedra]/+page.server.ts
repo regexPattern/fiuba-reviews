@@ -21,7 +21,7 @@ async function fetchDocentesInfo(codigoCatedra: string) {
 			codigo: docente.codigo,
 			nombre: docente.nombre,
 			descripcion: docente.descripcion,
-			promedio: sql<number>`
+			promedio: sql<number | null>`
 (SELECT AVG((
     ${calificacion.aceptaCritica} 
     + ${calificacion.asistencia} 
@@ -50,7 +50,7 @@ async function fetchDocentesInfo(codigoCatedra: string) {
 		})
 		.from(docente)
 		.innerJoin(catedraDocente, eq(docente.codigo, catedraDocente.codigoDocente))
-		.innerJoin(calificacion, eq(docente.codigo, calificacion.codigoDocente))
+		.leftJoin(calificacion, eq(docente.codigo, calificacion.codigoDocente))
 		.where(eq(catedraDocente.codigoCatedra, codigoCatedra))
 		.groupBy(docente.codigo, docente.nombre)
 		.orderBy(docente.nombre);
