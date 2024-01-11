@@ -16,7 +16,7 @@ docker compose up
 
 Los contenedores están configurados de tal manera que la aplicación web inicie a compilarse hasta que el servidor de la base de datos esté activo.
 
-Tené en cuenta que durante el primer levantamiento del contenedor de la base de datos los tiempos de espera pueden prolongarse, ya que primero se tienen que insertar los datos de la aplicación original en la nueva base de datos, proceso detallado en la sección "[Adapación de los datos originales]()". Lo mismo aplica si se elimina el volumen del contenedor.
+Tené en cuenta que durante el primer levantamiento del contenedor de la base de datos los tiempos de espera pueden prolongarse, ya que primero se tienen que insertar los datos de la aplicación original en la nueva base de datos, proceso detallado en la sección "[Adapación de los datos originales](https://github.com/regexPattern/fiuba-reviews/tree/main#adaptación-de-los-datos-originales)". Lo mismo aplica si se elimina el volumen del contenedor.
 
 Por otra parte, la aplicación web se va a tener que recompilar cada vez que se inicie el contenedor, esto debido a que Docker Compose no tiene una forma de esperar a que uno de los servicios de red esté corriendo o pase su healthcheck para iniciar el build de la imagen de otro servicio.
 
