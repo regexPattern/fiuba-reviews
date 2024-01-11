@@ -1,23 +1,40 @@
 # FIUBA Reviews
 
-Reimplementación de https://dollyfiuba.com con adaptación de los datos existentes.
+Aplicación web para leer y publicar opiniones de los docentes de FIUBA que han sido agregadas por los mismos estudiantes, para que así tengas una mejor idea de que profesores te podrían gustar más y que cátedra elegir el cuatrimestre que viene. Reimplementación de [Dolly FIUBA](https://dollyfiuba.com) con adaptación de datos existentes.
 
-El proyecto consiste de dos partes principales: el cliente web y la base de datos (que incluye el adaptador de datos y el generador de descripciones).
+## Desarrollo
 
-Para correrlo, se debe correr primero la base de datos (para automatizar esto está el archivo [`compose.yaml`](https://github.com/regexPattern/fiuba-reviews/blob/main/compose.yaml)), para que luego la aplicación web pueda renderizarse con los datos de la misma. A continuación se detalla cómo iniciar ambos componentes, y más información de los mismos:
+La aplicación se divide en dos partes: el cliente web y la base de datos.
 
-## Cliente web
+### Cliente Web
 
-Es una aplicación web escrita en SvelteKit. Entre otras especificaciones técnicas podría destacar:
-- [TailwindCSS](https://tailwindcss.com/) para facilitar el estilizado.
-- [DrizzleORM](https://orm.drizzle.team/) para hacer las queries a la base de datos sin tener un ORM tan abstracto.
-- [shadcn-svelte](https://www.shadcn-svelte.com/) como libreria de componentes comunes para que quede más bonito.
+Aplicación escrita en [SvelteKit](https://kit.svelte.dev/).
 
-La aplicación requiere que la variable de entorno `DATABASE_URL` esté configurada al correr el servidor.
+#### Requisitos
 
-## Base de datos
+1. Tener [NodeJS](https://nodejs.org/en) instalado.
+2. Instalar las dependencias del proyecto con el comando `npm install`.
+3. La aplicación requiere que la variable de entorno `DATABASE_URL` esté configurada para que el servidor pueda conectarse a la base de datos. Esto también se puede hacer mediante alguno de los formatos de archivos `.env` que soporta ViteJS ([listado de formatos](https://vitejs.dev/guide/env-and-mode.html#env-files)).
 
-La aplicación utiliza Postgres como motor de base de datos, sin embargo lo más relevante desde el aspecto técnico es cómo se popula la base de datos con los datos de la aplicación de Dolly original, y cómo se logró hacer este proceso reproducible. Personalmente me resulta la parte más emocionante de la aplicación, tanto por su proceso de implementación como por el resultado.
+Para iniciar en modo de desarrollo se utiliza el siguiente comando:
+
+```bash
+npm run dev
+```
+
+Para poder establecer conexión con la base de datos indicada con la variable de entorno anterior, el servidor de la base de datos debe estar activo. Ver la sección de la [base de datos]() para detalles sobre cómo iniciar este servidor.
+
+### Base de datos
+
+La aplicación utiliza Postgres como motor de base de datos. Lo importante acá es que se utilizan los datos de la aplicación original, por lo que se requiere de una forma de adaptar los datos de la misma para almacenarlos en la nueva base de datos instanciada al momento de correr la aplicación de manera local. Dicho proceso se detalla en la sección [ASDFAFD](). Para automatizar todo esto se dockerizaron estos servicios. Basta con correr el archivo [`compose.yaml`](https://github.com/regexPattern/fiuba-reviews/blob/main/compose.yaml) para iniciar el servidor de la base de datos. Para esto se necesita tener [Docker](https://www.docker.com/) instalado y correr el siguiente comando:
+
+```bash
+docker compose up
+```
+
+El primer lanzamiento toma su tiempo, ya que se tienen que descargar todos los datos de la aplicación inicial para luego escribirlos en la base de datos y finalmente iniciar el servidor de la misma.
+
+## Features
 
 ### Adaptación de los datos originales
 
@@ -36,6 +53,12 @@ Es así que aprovechando la sustancial mejora de los modelos de sumarización en
 Hay algunos aspectos del funcionamiento de esta utilidad que vale la pena estacar:
 - Se require que las variables de entorno `DATABASE_URL` e `INFERENCE_API_KEY` estén configuradas (es posible definirlas en un archivo `.env` si se desea). Respecto a la segunda variable, esta es la API key de Inference API, que permite acceder a los modelos de Hugging Face disponibles. Podés encontrar más información sobre como crear una llave personal [acá](https://huggingface.co/docs/api-inference/quicktour).
 - Al momento de elaboración de este proyecto, el tier gratuito de Inference API tiene un límite de requests consecutivas, por lo que es posible que se tenga que correr la utilidad múltiples veces para terminar de actualizar la base de datos con los resúmenes de todos los docentes.
+ 
+## Motivación
+
+Dolly FIUBA ha sido utilizada por una gran cantidad de estudiantes de la facultad (entre los que me incluyo yo) durante muchos años y ha recopilado una grandísima cantidad de comentarios, de una igualmente grande cantidad de docentes, cátedras y materias. Es una aplicación que me resulta de inmensa utilidad. Sin embargo, con el pasar de los cuatrimestres y el extenso uso que le daba, inicié a notar detalles de en la interfaz de la aplicación que no me gustaban tanto, y decidí intentar construir un nuevo frontend para la misma, que implementara las ideas que tenía para mejorarla.
+
+Para correrlo, se debe correr primero la base de datos (para automatizar esto está el archivo [`compose.yaml`](https://github.com/regexPattern/fiuba-reviews/blob/main/compose.yaml)), para que luego la aplicación web pueda renderizarse con los datos de la misma. A continuación se detalla cómo iniciar ambos componentes, y más información de los mismos:
 
 ## Moraleja y detalles aún más técnicos
 
