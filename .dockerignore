@@ -2,7 +2,7 @@
 /crates
 /node_modules
 .dockerignore
-.env*
+.env.development
 .gitignore
 .prettierignore
 .prettierrc
