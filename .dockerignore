@@ -1,0 +1,12 @@
+/.git
+/crates
+/node_modules
+.dockerignore
+.env*
+.gitignore
+.prettierignore
+.prettierrc
+.vercelignore
+Dockerfile
+README.md
+compose.yaml

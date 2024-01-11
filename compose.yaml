@@ -1,5 +1,15 @@
 name: fiuba-reviews
 services:
+  cliente-web:
+    build: .
+    depends_on:
+      - base-de-datos
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@base-de-datos:5432
+      WAIT_HOSTS: base-de-datos:5432
+    ports:
+      - 4173:4173
+
   base-de-datos:
     build:
       context: ./crates/adaptador-datos
