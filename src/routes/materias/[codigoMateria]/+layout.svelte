@@ -19,17 +19,17 @@
 <div class="relative md:container md:mx-auto md:flex-row">
 	<div class="sticky top-16 md:top-auto">
 		<aside
-			class="fixed hidden max-h-[calc(100vh-4rem)] w-80 shrink-0 overflow-y-scroll border-r bg-background md:block"
+			class="fixed hidden max-h-full min-h-[calc(100vh-4rem)] w-80 shrink-0 overflow-y-auto border-r bg-background md:block"
 		>
 			<div
-				class="sticky top-0 flex w-full items-start gap-1 border-b bg-background p-3 text-center font-medium"
+				class="sticky top-0 z-50 flex w-full items-start gap-1.5 border-b bg-background p-3 text-center font-medium"
 			>
 				{data.materia.codigo}
 				<span class="font-bold">&bullet;</span>
 				{data.materia.nombre}
 			</div>
 
-			<ul class="h-full space-y-1.5 overflow-y-scroll py-2">
+			<ul class="h-full space-y-1.5 py-2">
 				{#each data.catedras as cat (cat.codigo)}
 					<li class="flex items-center gap-1.5 px-5 py-2 md:pl-2 md:pr-4">
 						<span class={`w-[2.5ch] shrink-0 font-medium ${!cat.promedio ? "text-center" : ""}`}>
