@@ -23,6 +23,7 @@ Por otra parte, la aplicación web se va a tener que recompilar cada vez que se 
 ## Desarrollo
 
 La aplicación está escrita en [SvelteKit](https://kit.svelte.dev/). Entre otras especificaciones técnicas podría destacar:
+
 - [TailwindCSS](https://tailwindcss.com/) para facilitar el estilizado.
 - [DrizzleORM](https://orm.drizzle.team/) para hacer las queries a la base de datos sin tener un ORM tan abstracto.
 - [shadcn-svelte](https://www.shadcn-svelte.com/) como libreria de componentes comunes para que quede más bonito.
