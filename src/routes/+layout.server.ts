@@ -4,8 +4,6 @@ import { eq, sql } from "drizzle-orm";
 
 import type { LayoutServerLoad } from "./$types";
 
-export const prerender = true;
-
 export const load: LayoutServerLoad = async () => {
 	const materias = await db
 		.select({

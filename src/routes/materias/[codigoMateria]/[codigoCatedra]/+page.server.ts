@@ -5,8 +5,6 @@ import { eq, sql } from "drizzle-orm";
 
 import type { PageServerLoad } from "./$types";
 
-export const prerender = false;
-
 export const load = (async ({ params }) => {
 	return {
 		streamed: {

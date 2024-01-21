@@ -14,7 +14,7 @@ export const load = (async () => {
         SELECT COUNT(*)
         FROM ${catedra}
         WHERE ${catedra.codigoMateria} = ${materia.codigo}
-      )`,
+      )`
 		})
 		.from(materia)
 		.innerJoin(catedra, eq(materia.codigo, catedra.codigoMateria))
