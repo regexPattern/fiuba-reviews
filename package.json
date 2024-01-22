@@ -42,6 +42,7 @@
 		"lucide-svelte": "^0.292.0",
 		"mode-watcher": "^0.1.1",
 		"postgres": "^3.4.3",
+		"svelte-sonner": "^0.3.11",
 		"sveltekit-superforms": "^1.10.2",
 		"tailwind-merge": "^2.0.0",
 		"tailwind-variants": "^0.1.18",

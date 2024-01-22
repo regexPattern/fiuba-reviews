@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Link from "$lib/components/link.svelte";
 	import Promedios from "$lib/components/listado-promedios-docente.svelte";
+	import PlaceholderCatedra from "$lib/components/placeholder-catedra.svelte";
 	import { Button } from "$lib/components/ui/button";
 	import { Popover, PopoverContent, PopoverTrigger } from "$lib/components/ui/popover";
-	import { Skeleton } from "$lib/components/ui/skeleton";
 	import { ChevronDown, PlusCircle, Star } from "lucide-svelte";
 
 	import type { PageData } from "./$types";
@@ -12,18 +12,7 @@
 </script>
 
 {#await data.streamed.docentes}
-	<div class="space-y-4">
-		<Skeleton class="h-10 w-72" />
-		<div class="flex flex-col gap-2 xs:flex-row [&>*]:h-10 [&>*]:w-full [&>*]:xs:w-44">
-			<Skeleton />
-			<Skeleton />
-		</div>
-		<div class="space-y-2">
-			{#each Array(10) as _}
-				<Skeleton class="h-10" />
-			{/each}
-		</div>
-	</div>
+	<PlaceholderCatedra />
 {:then docentes}
 	{#each docentes as doc (doc.codigo)}
 		<!-- TODO: Tengo que hacer que los ids de los docentes tengan alguna utilidad para ser usados como links. -->
@@ -71,7 +60,7 @@
 					</Button>
 				{/if}
 
-				<Button class="items-center gap-1.5" href={`/calificar/${doc.codigo}`}>
+				<Button class="items-center gap-1.5" href={`/docentes/${doc.codigo}`}>
 					Calificar <PlusCircle class="h-[1.2rem] w-[1.2rem]" />
 				</Button>
 			</div>

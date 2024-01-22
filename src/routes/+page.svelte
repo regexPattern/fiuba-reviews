@@ -1,10 +1,10 @@
 <script lang="ts">
+	import BuscadorMaterias from "$lib/components/buscador-materias.svelte";
 	import Feature from "$lib/components/feature-fiuba-reviews.svelte";
 	import Link from "$lib/components/link.svelte";
 	import MateriasPopulares from "$lib/components/materias-populares.svelte";
-	import { Button } from "$lib/components/ui/button";
 	import "@splidejs/svelte-splide/css";
-	import { Cpu, Database, Paintbrush2, Search } from "lucide-svelte";
+	import { Cpu, Database, Paintbrush2 } from "lucide-svelte";
 
 	import type { PageData } from "./$types";
 
@@ -24,10 +24,7 @@
 		</p>
 	</div>
 
-	<Button href="/materias" class="space-x-1 px-3 py-2 shadow-lg">
-		<span>Buscar materias</span>
-		<Search class="h-4 w-4" />
-	</Button>
+	<BuscadorMaterias label="Buscar materias" materias={data.materias} />
 
 	<section class="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-4 lg:gap-6">
 		<Feature
@@ -50,10 +47,10 @@
 	<section class="w-full space-y-4 overflow-x-hidden">
 		<h2 class="text-center text-4xl font-semibold tracking-tight">Materias Más Populares</h2>
 		<p class="text-center text-muted-foreground">
-			Las {data.materias.length} materias con mayor cantidad de comentarios.
+			Las {data.materiasPopulares.length} materias con mayor cantidad de comentarios.
 		</p>
-		<MateriasPopulares materias={data.materias.slice(0, 10)} />
-		<MateriasPopulares materias={data.materias.slice(10, 20)} />
+		<MateriasPopulares materias={data.materiasPopulares.slice(0, 10)} />
+		<MateriasPopulares materias={data.materiasPopulares.slice(10, 20)} />
 	</section>
 
 	<section class="space-y-4 text-center text-muted-foreground">
