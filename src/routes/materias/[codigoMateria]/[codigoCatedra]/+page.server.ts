@@ -5,10 +5,16 @@ import { eq, sql } from "drizzle-orm";
 
 import type { PageServerLoad } from "./$types";
 
+// Con esta versión de SvelteKit no hay forma de manejar Promise rejections
+// de data que esta siendo streameada, así que en esta función no le pongo
+// atención a los errores que puedan ocurrir, solo me importa que ocurra uno
+// o no. Desafortunamente esto también signfica que no tengo forma de
+// retornar un Redirect desde el servidor.
+//
 export const load = (async ({ params }) => {
 	return {
 		streamed: {
-			docentes: fetchDocentesInfo(params.codigoCatedra)
+			docentes: fetchDocentesInfo(params.codigoCatedra).catch(() => [])
 		}
 	};
 }) satisfies PageServerLoad;

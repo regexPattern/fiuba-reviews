@@ -7,7 +7,7 @@ import type { PageServerLoad } from "./$types";
 export const prerender = true;
 
 export const load: PageServerLoad = async () => {
-	const materias = await db
+	const materiasPopulares = await db
 		.select({
 			codigo: materia.codigo,
 			nombre: materia.nombre,
@@ -26,5 +26,5 @@ export const load: PageServerLoad = async () => {
 		.orderBy(({ cantidadComentarios }) => desc(cantidadComentarios))
 		.limit(20);
 
-	return { materias };
+	return { materiasPopulares };
 };
