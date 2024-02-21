@@ -60,7 +60,7 @@ Para esto la herramienta [`adaptador-datos`](https://github.com/regexPattern/fiu
 
 Con la ayuda del modelo de sumarización [BART](https://huggingface.co/facebook/bart-large-cnn) se generaron resúmenes de los comentarios de los docentes, para que quien use la aplicación pueda darse una idea general de qué opinan los demás estudiantes sobre un docente que no conoce.
 
-Para facilitar esta tarea de generar dichas descripciones se desarrolló una segunda utilidad, [`generador-descripciones`](https://github.com/regexPattern/fiuba-reviews/tree/main/crates/generador-descripciones), que utiliza el modelo  a través de [Inference API](https://huggingface.co/inference-api).
+Para facilitar esta tarea de generar dichas descripciones se desarrolló una segunda utilidad, [`generador-descripciones`](https://github.com/regexPattern/fiuba-reviews/tree/main/crates/generador-descripciones), que utiliza el modelo a través de [Inference API](https://huggingface.co/inference-api).
 
 Para correr esta utilidad vas a necesitar [generar una llave para Inference API](https://huggingface.co/docs/api-inference/quicktour) y configurar las variables de entorno `DATABASE_URL` e `INFERENCE_API_KEY` al momento de ejecutar el programa. Luego corré los siguientes comandos (reemplazando los valores correspondientes):
 
