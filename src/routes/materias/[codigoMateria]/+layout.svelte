@@ -20,7 +20,7 @@
 <div class="relative md:container md:mx-auto md:flex-row">
 	<div class="sticky top-16 z-30 md:top-auto">
 		<aside
-			class="fixed hidden max-h-full min-h-[calc(100vh-4rem)] w-80 shrink-0 overflow-y-auto border-r bg-background md:block"
+			class="fixed hidden h-[calc(100vh-4rem)] w-80 shrink-0 overflow-y-auto border-r bg-background md:block"
 		>
 			<div
 				class="sticky top-0 flex w-full items-start gap-1.5 border-b bg-background p-3 text-center font-medium"
@@ -30,7 +30,7 @@
 				{data.materia.nombre}
 			</div>
 
-			<ul class="h-full space-y-1.5 py-2">
+			<ul class="space-y-1.5 py-2">
 				{#await data.streamed.catedras}
 					{#each Array(10) as _}
 						<li class="px-2 py-0.5">

@@ -6,7 +6,7 @@ Esta aplicación no pretende ser un reemplazo a la aplicación original, sino qu
 
 ## Utilización
 
-Podés acceder a la versión live de la aplicación desde https://fiuba-reviews.vercel.app.
+Podés acceder a la versión live de la aplicación desde https://fiuba-reviews.com.
 
 Si por el contrario querés correr un build local, tomá en cuenta que al momento de compilar la página, debe existir la variable de entorno `DATABASE_URL`. Usa el archivo [`compose.yaml`](https://github.com/regexPattern/fiuba-reviews/blob/main/compose.yaml) para arrancar la base de datos usando Docker Compose.
 
@@ -52,7 +52,7 @@ Además de la aplicación web central, se desarrollaron dos herramientas, escrit
 
 ### Adaptación de los datos originales
 
-Con la intensión aprovechar todos los datos que Dolly ha recopilado durante años, se adaptaron los datos de la aplicación original en vez de iniciar desde cero.
+Con la intensión de aprovechar todos los datos que Dolly ha recopilado durante años, se adaptaron los datos de la aplicación original en vez de iniciar desde cero.
 
 Para esto la herramienta [`adaptador-datos`](https://github.com/regexPattern/fiuba-reviews/tree/main/crates/adaptador-datos) hace scraping de los datos de la aplicación original, y genera un archivo SQL que se carga a la base de datos de manera automática cuando se construye por primera vez la imagen de Docker de la misma.
 
