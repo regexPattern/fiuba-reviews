@@ -22,7 +22,7 @@
 <header class="sticky top-0 z-[40] border-b bg-background/75 backdrop-blur-lg">
 	<div class="container flex h-16 items-center justify-start gap-2 p-3 sm:justify-between">
 		<div class="mr-2 flex-1">
-			<Link href="/" class="contents">
+			<Link href="/" class="contents" aria-label="Página de inicio">
 				<svg
 					class="hidden h-4 sm:block"
 					viewBox="0 0 234 28"
@@ -61,6 +61,7 @@
 		<Link
 			href="https://github.com/regexPattern/fiuba-reviews"
 			class="flex h-10 w-10 shrink-0 items-center justify-center"
+			aria-label="Repositorio del proyecto"
 		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
