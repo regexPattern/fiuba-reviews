@@ -11,6 +11,10 @@
 	export let data: PageData;
 </script>
 
+<svelte:head>
+	<title>FIUBA Reviews</title>
+</svelte:head>
+
 <main class="container my-12 flex max-w-screen-md flex-col items-center gap-12">
 	<div class="space-y-6 text-center">
 		<h1 class="text-6xl font-bold tracking-tighter xs:text-7xl">

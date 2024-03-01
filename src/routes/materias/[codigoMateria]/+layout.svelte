@@ -20,10 +20,10 @@
 <div class="relative md:container md:mx-auto md:flex-row">
 	<div class="sticky top-16 z-30 md:top-auto">
 		<aside
-			class="bg-background fixed hidden h-[calc(100vh-4rem)] w-80 shrink-0 overflow-y-auto border-r md:block"
+			class="fixed hidden h-[calc(100vh-4rem)] w-80 shrink-0 overflow-y-auto border-r bg-background md:block"
 		>
 			<div
-				class="bg-background sticky top-0 flex w-full items-start gap-1.5 border-b p-3 text-center font-medium"
+				class="sticky top-0 flex w-full items-start gap-1.5 border-b bg-background p-3 text-center font-medium"
 			>
 				{data.materia.codigo}
 				<span class="font-bold">&bullet;</span>
@@ -59,7 +59,7 @@
 		<Sheet bind:open>
 			<SheetTrigger asChild>
 				<button
-					class="bg-background z-20 flex w-full items-center justify-between gap-3 border-b p-3 text-left font-medium md:hidden"
+					class="z-20 flex w-full items-center justify-between gap-3 border-b bg-background p-3 text-left font-medium md:hidden"
 					on:click={() => {
 						open = !open;
 						window.scroll({ top: 0, behavior: "instant" });

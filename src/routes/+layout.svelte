@@ -11,11 +11,9 @@
 </script>
 
 <svelte:head>
-	<title>FIUBA Reviews</title>
 	<meta
 		name="description"
-		content="Encontrá calificaciones y comentarios de
-    los docentes de la facultad, subidos por otros estudiantes de la FIUBA."
+		content="Encontrá calificaciones y comentarios de los docentes de la facultad, subidos por otros estudiantes de la FIUBA."
 	/>
 </svelte:head>
 
