@@ -1,15 +1,16 @@
-mod inference_api;
+pub mod gpt;
 
 use std::{collections::HashMap, sync::Arc};
 
+use gpt::Modelo;
 use reqwest::Client;
 use sqlx::{types::Uuid, FromRow, PgPool};
 use tokio::sync::Semaphore;
 use tracing::Instrument;
 
 const MAX_SOLICITUDES_CONCURRENTES: usize = 5;
-const PROPORCION_COMENTARIOS_ACTUALIZACION: usize = 2;
 const MIN_COMENTARIOS_ACTUALIZACION: usize = 3;
+const PROPORCION_COMENTARIOS_ACTUALIZACION: usize = 2;
 
 #[derive(FromRow)]
 struct Comentario {
@@ -17,70 +18,35 @@ struct Comentario {
     contenido: String,
 }
 
-pub async fn query_actualizacion(
-    conexion_db: &PgPool,
-    inference_api_key: String,
-) -> anyhow::Result<Option<String>> {
+pub async fn update_query<M>(conexion_db: &PgPool, modelo: M) -> anyhow::Result<Option<String>>
+where
+    M: Modelo + Send + Sync + 'static,
+{
     let cliente_http = Client::new();
-    let inference_api_key = Arc::new(inference_api_key);
+    let modelo = Arc::new(modelo);
 
-    tracing::info!("conexion establecida con la base de datos");
-
-    let comentarios: Vec<Comentario> = sqlx::query_as(const_format::formatcp!(
-        r#"
-SELECT com.codigo_docente, com.contenido
-FROM comentario com
-WHERE com.codigo_docente IN (
-  SELECT doc.codigo
-  FROM docente doc
-  INNER JOIN comentario com
-  ON com.codigo_docente = doc.codigo
-  GROUP BY doc.codigo
-  HAVING COUNT(com) > (doc.comentarios_ultima_descripcion * {})
-  AND COUNT(com) > {}
-);
-"#,
-        PROPORCION_COMENTARIOS_ACTUALIZACION,
-        MIN_COMENTARIOS_ACTUALIZACION
-    ))
-    .fetch_all(conexion_db)
-    .await?;
-
-    tracing::info!("comentarios obtenidos de la base de datos");
-
-    let mut comentarios_por_docente: HashMap<Uuid, Vec<String>> = HashMap::new();
-
-    for comentario in comentarios {
-        let comentarios_de_docente = comentarios_por_docente
-            .entry(comentario.codigo_docente)
-            .or_default();
-
-        comentarios_de_docente.push(comentario.contenido);
-    }
-
+    let comentarios_por_docente = comentarios_por_docente(conexion_db).await?;
     let cantidad_docentes = comentarios_por_docente.len();
-
-    tracing::info!("encontrados {cantidad_docentes} docentes que requiren actualizacion");
 
     let semaphore = Arc::new(Semaphore::new(MAX_SOLICITUDES_CONCURRENTES));
     let mut handles = Vec::with_capacity(cantidad_docentes);
 
-    for (codigo_docente, comentarios) in comentarios_por_docente {
+    for (codigo_docente, comentarios) in comentarios_por_docente.into_iter().take(10) {
         let cliente_http = Client::clone(&cliente_http);
-        let semaphore = Arc::clone(&semaphore);
-        let inference_api_key = Arc::clone(&inference_api_key);
+        let modelo = Arc::clone(&modelo);
 
+        let semaphore = Arc::clone(&semaphore);
         let span = tracing::debug_span!("docente", codigo = codigo_docente.to_string());
 
         handles.push(tokio::spawn(
             async move {
                 let _permit = semaphore.acquire().await?;
-                generar_tupla_values(
+                tupla_values(
                     cliente_http,
                     &semaphore,
                     codigo_docente,
                     &comentarios,
-                    &inference_api_key,
+                    modelo,
                 )
                 .await
             }
@@ -122,26 +88,71 @@ WHERE doc.codigo::text = val.codigo_docente;
     Ok(query)
 }
 
-async fn generar_tupla_values(
+async fn comentarios_por_docente(
+    conexion_db: &PgPool,
+) -> anyhow::Result<HashMap<Uuid, Vec<String>>> {
+    let comentarios: Vec<Comentario> = sqlx::query_as(const_format::formatcp!(
+        r#"
+SELECT com.codigo_docente, com.contenido
+FROM comentario com
+WHERE com.codigo_docente IN (
+  SELECT doc.codigo
+  FROM docente doc
+  INNER JOIN comentario com
+  ON com.codigo_docente = doc.codigo
+  GROUP BY doc.codigo
+  HAVING COUNT(com) > (doc.comentarios_ultima_descripcion * {})
+  AND COUNT(com) > {}
+);
+"#,
+        PROPORCION_COMENTARIOS_ACTUALIZACION,
+        MIN_COMENTARIOS_ACTUALIZACION
+    ))
+    .fetch_all(conexion_db)
+    .await?;
+
+    tracing::info!("comentarios obtenidos de la base de datos");
+
+    let mut comentarios_por_docente: HashMap<Uuid, Vec<String>> = HashMap::new();
+
+    for comentario in comentarios {
+        let comentarios_de_docente = comentarios_por_docente
+            .entry(comentario.codigo_docente)
+            .or_default();
+
+        comentarios_de_docente.push(comentario.contenido);
+    }
+
+    let cantidad_docentes = comentarios_por_docente.len();
+    tracing::info!("encontrados {cantidad_docentes} docentes que requiren actualizacion");
+
+    Ok(comentarios_por_docente)
+}
+
+async fn tupla_values<M>(
     cliente_http: Client,
     semaphore: &Semaphore,
     codigo_docente: Uuid,
     comentarios: &[String],
-    inference_api_key: &str,
-) -> anyhow::Result<String> {
+    modelo: Arc<M>,
+) -> anyhow::Result<String>
+where
+    M: Modelo + Send + Sync + 'static,
+{
     let cantidad_comentarios_actual = comentarios.len();
-    let descripcion =
-        inference_api::generar_descripcion(cliente_http, comentarios, inference_api_key)
-            .await
-            .map_err(|err| {
-                semaphore.close();
-                err
-            })?;
+
+    let resumen_comentarios = modelo
+        .resumen_comentarios(cliente_http, comentarios)
+        .await
+        .map_err(|err| {
+            semaphore.close();
+            err
+        })?;
 
     let tupla_values = format!(
         "('{}', '{}', {})",
         codigo_docente,
-        descripcion.replace('\'', "''"),
+        resumen_comentarios.replace('\'', "''"),
         cantidad_comentarios_actual
     );
 
