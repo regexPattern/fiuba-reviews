@@ -7,7 +7,7 @@ pub use open_ia::OpenAIClient;
 use reqwest::Client;
 
 pub trait Modelo {
-    fn resumen_comentarios(
+    fn resumir_comentarios(
         &self,
         cliente_http: Client,
         comentarios: &[String],

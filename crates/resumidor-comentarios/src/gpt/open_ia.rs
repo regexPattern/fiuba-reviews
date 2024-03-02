@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use reqwest::Client;
+use reqwest::{Client, StatusCode};
 use serde::{Deserialize, Serialize};
 
 use super::Modelo;
@@ -26,7 +26,7 @@ impl OpenAIClient {
 }
 
 impl Modelo for OpenAIClient {
-    async fn resumen_comentarios(
+    async fn resumir_comentarios(
         &self,
         cliente_http: Client,
         comentarios: &[String],
@@ -57,7 +57,24 @@ Genera un resumen de los mismos. No me digás que los resultados son variados, a
             .send()
             .await?;
 
-        let mut res: OpenAIApiResponse = res.json().await?;
+        let status = res.status();
+
+        tracing::debug!(
+            "recibida respuesta de OpenAI API con status {}",
+            status.as_u16()
+        );
+
+        if status != StatusCode::OK {
+            let err = res.text().await?;
+            tracing::error!("{err}");
+            return Err(anyhow::anyhow!(err));
+        }
+
+        let mut res: OpenAIApiResponse = res
+            .json()
+            .await
+            .expect("formato de respuesta exitosa de OpenAI API es diferente al esperado");
+
         let res = res
             .choices
             .pop_front()

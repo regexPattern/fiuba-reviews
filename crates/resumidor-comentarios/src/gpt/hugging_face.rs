@@ -27,12 +27,12 @@ impl HuggingFaceClient {
 }
 
 impl Modelo for HuggingFaceClient {
-    async fn resumen_comentarios(
+    async fn resumir_comentarios(
         &self,
         cliente_http: Client,
         comentarios: &[String],
     ) -> anyhow::Result<String> {
-        let payload = ApiPayload {
+        let payload = InferenceApiPayload {
             inputs: comentarios.join("."),
             options: [("wait_for_model".to_string(), true)].into(),
         };
@@ -64,7 +64,11 @@ impl Modelo for HuggingFaceClient {
             return Err(err);
         }
 
-        let mut res: VecDeque<ApiResponse> = res.json().await?;
+        let mut res: VecDeque<InferenceApiResponse> = res
+            .json()
+            .await
+            .expect("formato de respuesta exitosa de Inference API es diferente al esperado");
+
         let res = res
             .pop_front()
             .ok_or(anyhow::anyhow!("respuesta no incluye ningun resumen"))?;
@@ -76,12 +80,12 @@ impl Modelo for HuggingFaceClient {
 }
 
 #[derive(Debug, Serialize)]
-struct ApiPayload {
+struct InferenceApiPayload {
     inputs: String,
     options: HashMap<String, bool>,
 }
 
 #[derive(Debug, Deserialize)]
-struct ApiResponse {
+struct InferenceApiResponse {
     summary_text: String,
 }

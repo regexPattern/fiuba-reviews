@@ -20,7 +20,7 @@ async fn main() -> anyhow::Result<()> {
 
     tracing::info!("conexion establecida con la base de datos");
 
-    let query = resumidor_comentarios::update_query(&conexion_db, modelo).await?;
+    let query = resumidor_comentarios::query_actualizacion(&conexion_db, modelo).await?;
 
     if let Some(query_actualizacion) = query {
         sqlx::query(&query_actualizacion)

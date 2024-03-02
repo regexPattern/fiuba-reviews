@@ -18,7 +18,10 @@ struct Comentario {
     contenido: String,
 }
 
-pub async fn update_query<M>(conexion_db: &PgPool, modelo: M) -> anyhow::Result<Option<String>>
+pub async fn query_actualizacion<M>(
+    conexion_db: &PgPool,
+    modelo: M,
+) -> anyhow::Result<Option<String>>
 where
     M: Modelo + Send + Sync + 'static,
 {
@@ -141,8 +144,8 @@ where
 {
     let cantidad_comentarios_actual = comentarios.len();
 
-    let resumen_comentarios = modelo
-        .resumen_comentarios(cliente_http, comentarios)
+    let descripcion = modelo
+        .resumir_comentarios(cliente_http, comentarios)
         .await
         .map_err(|err| {
             semaphore.close();
@@ -152,7 +155,7 @@ where
     let tupla_values = format!(
         "('{}', '{}', {})",
         codigo_docente,
-        resumen_comentarios.replace('\'', "''"),
+        descripcion.replace('\'', "''"),
         cantidad_comentarios_actual
     );
 

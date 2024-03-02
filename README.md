@@ -56,19 +56,8 @@ Con la intensión de aprovechar todos los datos que Dolly ha recopilado durante 
 
 Para esto la herramienta [`adaptador-datos`](https://github.com/regexPattern/fiuba-reviews/tree/main/crates/adaptador-datos) hace scraping de los datos de la aplicación original, y genera un archivo SQL que se carga a la base de datos de manera automática cuando se construye por primera vez la imagen de Docker de la misma.
 
-### Generación de descripciones con inteligencia artificial
+### Resumen de comentarios con inteligencia artificial
 
-Con la ayuda del modelo de sumarización [BART](https://huggingface.co/facebook/bart-large-cnn) se generaron resúmenes de los comentarios de los docentes, para que quien use la aplicación pueda darse una idea general de qué opinan los demás estudiantes sobre un docente que no conoce.
+Con la ayuda modelos de inteligencia artificial del tipo GPT se generaron resúmenes de los comentarios de los docentes, para que quien use la aplicación pueda darse una idea general de qué opinan los demás estudiantes sobre un docente que no conoce. La versión de la aplicación que está activa en línea utiliza una versión del modelo [GPT-3.5 Turbo](https://platform.openai.com/docs/models/gpt-3-5-turbo) de OpenAI.
 
-Para facilitar esta tarea de generar dichas descripciones se desarrolló una segunda utilidad, [`generador-descripciones`](https://github.com/regexPattern/fiuba-reviews/tree/main/crates/generador-descripciones), que utiliza el modelo a través de [Inference API](https://huggingface.co/inference-api).
-
-Para correr esta utilidad vas a necesitar [generar una llave para Inference API](https://huggingface.co/docs/api-inference/quicktour) y configurar las variables de entorno `DATABASE_URL` e `INFERENCE_API_KEY` al momento de ejecutar el programa. Luego corré los siguientes comandos (reemplazando los valores correspondientes):
-
-```bash
-export DATABASE_URL=...
-export INFERENCE_API_KEY=...
-
-cargo run --release
-```
-
-Cuando se inicia una nueva base de datos utilizando el adaptador, ningún docente cuenta su descripción generada a partir del resumen de todos los comentarios asociados al mismo, ya que estos datos no están en la aplicación original de Dolly cuando se descargan los datos, ni se pueden generar automáticamente al momento de crear el script SQL con el que se inicia la base de datos ya que Inference API tiene un límite de solicitudes por hora, por lo que esta segunda utilidad tiene que ser corrida manualmente cada cierto tiempo para incrementalmente ir actualizando los registros de los docentes.
+Para facilitar la tarea de generación de los resúmenes y actualización de la base de datos se desarrolló una segunda utilidad, [`resumidor-comentarios`](https://github.com/regexPattern/fiuba-reviews/tree/main/crates/resumidor-comentarios), que se conecta a la API web del modelo de inteligencia artificial deseado y actualiza la base de datos. Si querés usar esta utilidad, tenés que hacerlo de manera manual y requiere de cierta configuración previa. Referite al [README.md](https://github.com/regexPattern/fiuba-reviews/tree/main/crates/resumidor-comentarios/README.md) de la misma para más información sobre cómo ejecutarla y agregar modelos nuevos.
