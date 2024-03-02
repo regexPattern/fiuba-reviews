@@ -3,36 +3,24 @@ use std::collections::{HashMap, VecDeque};
 use reqwest::{Client, StatusCode};
 use serde::{Deserialize, Serialize};
 
-use super::Modelo;
+use super::ModeloGpt;
 
-const API_KEY_ENV_VAR: &str = "INFERENCE_API_KEY";
 const INFERENCE_API_ENDPOINT: &str =
     "https://api-inference.huggingface.co/models/facebook/bart-large-cnn";
 
 #[derive(Debug)]
 pub struct HuggingFaceClient {
-    api_key: String,
+    pub api_key: String,
 }
 
-impl HuggingFaceClient {
-    pub fn new() -> Self {
-        Self {
-            api_key: std::env::var(API_KEY_ENV_VAR).expect(const_format::concatcp!(
-                "variable de entorno `",
-                API_KEY_ENV_VAR,
-                "` necesaria para conectar con Hugging Face Inference API"
-            )),
-        }
-    }
-}
-
-impl Modelo for HuggingFaceClient {
-    async fn resumen_comentarios(
+impl ModeloGpt for HuggingFaceClient {
+    async fn resumir_comentarios(
         &self,
         cliente_http: Client,
+        _nombre_docente: &str,
         comentarios: &[String],
     ) -> anyhow::Result<String> {
-        let payload = ApiPayload {
+        let prompt = InferenceApiPrompt {
             inputs: comentarios.join("."),
             options: [("wait_for_model".to_string(), true)].into(),
         };
@@ -42,7 +30,7 @@ impl Modelo for HuggingFaceClient {
         let res = cliente_http
             .post(INFERENCE_API_ENDPOINT)
             .bearer_auth(&self.api_key)
-            .json(&payload)
+            .json(&prompt)
             .send()
             .await?;
 
@@ -64,7 +52,11 @@ impl Modelo for HuggingFaceClient {
             return Err(err);
         }
 
-        let mut res: VecDeque<ApiResponse> = res.json().await?;
+        let mut res: VecDeque<InferenceApiResponse> = res
+            .json()
+            .await
+            .expect("formato de respuesta exitosa de Inference API es diferente al esperado");
+
         let res = res
             .pop_front()
             .ok_or(anyhow::anyhow!("respuesta no incluye ningun resumen"))?;
@@ -76,12 +68,12 @@ impl Modelo for HuggingFaceClient {
 }
 
 #[derive(Debug, Serialize)]
-struct ApiPayload {
+struct InferenceApiPrompt {
     inputs: String,
     options: HashMap<String, bool>,
 }
 
 #[derive(Debug, Deserialize)]
-struct ApiResponse {
+struct InferenceApiResponse {
     summary_text: String,
 }

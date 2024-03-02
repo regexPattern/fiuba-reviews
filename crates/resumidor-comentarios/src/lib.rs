@@ -2,7 +2,7 @@ pub mod gpt;
 
 use std::{collections::HashMap, sync::Arc};
 
-use gpt::Modelo;
+use gpt::ModeloGpt;
 use reqwest::Client;
 use sqlx::{types::Uuid, FromRow, PgPool};
 use tokio::sync::Semaphore;
@@ -15,28 +15,33 @@ const PROPORCION_COMENTARIOS_ACTUALIZACION: usize = 2;
 #[derive(FromRow)]
 struct Comentario {
     codigo_docente: Uuid,
+    nombre_docente: String,
     contenido: String,
 }
 
-pub async fn update_query<M>(conexion_db: &PgPool, modelo: M) -> anyhow::Result<Option<String>>
+pub async fn query_actualizacion<M>(
+    conexion: &PgPool,
+    modelo_gpt: M,
+    forzar_actualizacion: bool,
+) -> anyhow::Result<Option<String>>
 where
-    M: Modelo + Send + Sync + 'static,
+    M: ModeloGpt + Send + Sync + 'static,
 {
     let cliente_http = Client::new();
-    let modelo = Arc::new(modelo);
+    let modelo_gpt = Arc::new(modelo_gpt);
 
-    let comentarios_por_docente = comentarios_por_docente(conexion_db).await?;
+    let comentarios_por_docente = comentarios_por_docente(conexion, forzar_actualizacion).await?;
     let cantidad_docentes = comentarios_por_docente.len();
 
     let semaphore = Arc::new(Semaphore::new(MAX_SOLICITUDES_CONCURRENTES));
     let mut handles = Vec::with_capacity(cantidad_docentes);
 
-    for (codigo_docente, comentarios) in comentarios_por_docente.into_iter().take(10) {
+    for (codigo, (nombre, comentarios)) in comentarios_por_docente {
         let cliente_http = Client::clone(&cliente_http);
-        let modelo = Arc::clone(&modelo);
+        let modelo = Arc::clone(&modelo_gpt);
 
         let semaphore = Arc::clone(&semaphore);
-        let span = tracing::debug_span!("docente", codigo = codigo_docente.to_string());
+        let span = tracing::debug_span!("docente", codigo = codigo.to_string());
 
         handles.push(tokio::spawn(
             async move {
@@ -44,7 +49,8 @@ where
                 tupla_values(
                     cliente_http,
                     &semaphore,
-                    codigo_docente,
+                    codigo,
+                    &nombre,
                     &comentarios,
                     modelo,
                 )
@@ -56,8 +62,8 @@ where
 
     let mut values_a_actualizar = Vec::with_capacity(handles.len());
 
-    for handle in handles {
-        if let Ok(tupla_values) = handle.await.unwrap() {
+    for task in handles {
+        if let Ok(tupla_values) = task.await.unwrap() {
             values_a_actualizar.push(tupla_values);
         }
     }
@@ -70,16 +76,18 @@ where
 
     let query = if !values_a_actualizar.is_empty() {
         Some(format!(
-            r#"
-UPDATE docente AS doc
-SET descripcion = val.descripcion,
-    comentarios_ultima_descripcion = val.comentarios_ultima_descripcion
-FROM (VALUES
-    {})
-AS val(codigo_docente, descripcion, comentarios_ultima_descripcion)
-WHERE doc.codigo::text = val.codigo_docente;
-"#,
-            values_a_actualizar.join(",\n    ")
+            "\
+UPDATE docente AS d
+SET resumen_comentarios = val.resumen_comentarios,
+    comentarios_ultimo_resumen = val.comentarios_ultimo_resumen
+FROM (
+    VALUES
+        {}
+)
+AS val(codigo_docente, resumen_comentarios, comentarios_ultimo_resumen)
+WHERE d.codigo::text = val.codigo_docente;
+",
+            values_a_actualizar.join(",\n        ")
         ))
     } else {
         None
@@ -89,38 +97,44 @@ WHERE doc.codigo::text = val.codigo_docente;
 }
 
 async fn comentarios_por_docente(
-    conexion_db: &PgPool,
-) -> anyhow::Result<HashMap<Uuid, Vec<String>>> {
-    let comentarios: Vec<Comentario> = sqlx::query_as(const_format::formatcp!(
-        r#"
-SELECT com.codigo_docente, com.contenido
-FROM comentario com
-WHERE com.codigo_docente IN (
-  SELECT doc.codigo
-  FROM docente doc
-  INNER JOIN comentario com
-  ON com.codigo_docente = doc.codigo
-  GROUP BY doc.codigo
-  HAVING COUNT(com) > (doc.comentarios_ultima_descripcion * {})
-  AND COUNT(com) > {}
-);
-"#,
+    conexion: &PgPool,
+    forzar_actualizacion: bool,
+) -> anyhow::Result<HashMap<Uuid, (String, Vec<String>)>> {
+    let comentarios: Vec<Comentario> = sqlx::query_as(&format!(
+        "\
+SELECT d.codigo AS codigo_docente, d.nombre AS nombre_docente, c.contenido
+FROM comentario c
+INNER JOIN docente d
+ON c.codigo_docente = d.codigo
+WHERE c.codigo_docente IN (
+  SELECT d.codigo
+  FROM docente d
+  INNER JOIN comentario c
+  ON c.codigo_docente = d.codigo
+  GROUP BY d.codigo
+  HAVING COUNT(c) > (d.comentarios_ultimo_resumen * {})
+  AND COUNT(c) > {}
+);",
         PROPORCION_COMENTARIOS_ACTUALIZACION,
-        MIN_COMENTARIOS_ACTUALIZACION
+        if forzar_actualizacion {
+            1
+        } else {
+            MIN_COMENTARIOS_ACTUALIZACION
+        }
     ))
-    .fetch_all(conexion_db)
+    .fetch_all(conexion)
     .await?;
 
     tracing::info!("comentarios obtenidos de la base de datos");
 
-    let mut comentarios_por_docente: HashMap<Uuid, Vec<String>> = HashMap::new();
+    let mut comentarios_por_docente: HashMap<Uuid, (String, Vec<String>)> = HashMap::new();
 
-    for comentario in comentarios {
+    for com in comentarios {
         let comentarios_de_docente = comentarios_por_docente
-            .entry(comentario.codigo_docente)
-            .or_default();
+            .entry(com.codigo_docente)
+            .or_insert((com.nombre_docente, Vec::new()));
 
-        comentarios_de_docente.push(comentario.contenido);
+        comentarios_de_docente.1.push(com.contenido);
     }
 
     let cantidad_docentes = comentarios_por_docente.len();
@@ -133,16 +147,17 @@ async fn tupla_values<M>(
     cliente_http: Client,
     semaphore: &Semaphore,
     codigo_docente: Uuid,
+    nombre_docente: &str,
     comentarios: &[String],
-    modelo: Arc<M>,
+    modelo_gpt: Arc<M>,
 ) -> anyhow::Result<String>
 where
-    M: Modelo + Send + Sync + 'static,
+    M: ModeloGpt + Send + Sync + 'static,
 {
     let cantidad_comentarios_actual = comentarios.len();
 
-    let resumen_comentarios = modelo
-        .resumen_comentarios(cliente_http, comentarios)
+    let resumen_comentarios = modelo_gpt
+        .resumir_comentarios(cliente_http, nombre_docente, comentarios)
         .await
         .map_err(|err| {
             semaphore.close();
