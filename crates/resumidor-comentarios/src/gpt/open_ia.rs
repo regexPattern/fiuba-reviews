@@ -5,24 +5,11 @@ use serde::{Deserialize, Serialize};
 
 use super::Modelo;
 
-const API_KEY_ENV_VAR: &str = "OPENAI_API_KEY";
 const CHAT_COMPLETION_API_ENDPOINT: &str = "https://api.openai.com/v1/chat/completions";
 
 #[derive(Debug)]
 pub struct OpenAIClient {
-    api_key: String,
-}
-
-impl OpenAIClient {
-    pub fn new() -> Self {
-        Self {
-            api_key: std::env::var(API_KEY_ENV_VAR).expect(const_format::concatcp!(
-                "variable de entorno `",
-                API_KEY_ENV_VAR,
-                "` necesaria para conectar con OpenAI API",
-            )),
-        }
-    }
+    pub api_key: String,
 }
 
 impl Modelo for OpenAIClient {

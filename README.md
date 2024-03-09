@@ -52,12 +52,12 @@ Además de la aplicación web central, se desarrollaron dos herramientas, escrit
 
 ### Adaptación de los datos originales
 
-Con la intensión de aprovechar todos los datos que Dolly ha recopilado durante años, se adaptaron los datos de la aplicación original en vez de iniciar desde cero.
+Para aprovechar todos los datos que Dolly ha recopilado durante años, se adaptaron los datos de la aplicación original en vez de iniciar desde cero.
 
 Para esto la herramienta [`adaptador-datos`](https://github.com/regexPattern/fiuba-reviews/tree/main/crates/adaptador-datos) hace scraping de los datos de la aplicación original, y genera un archivo SQL que se carga a la base de datos de manera automática cuando se construye por primera vez la imagen de Docker de la misma.
 
 ### Resumen de comentarios con inteligencia artificial
 
-Con la ayuda modelos de inteligencia artificial del tipo GPT se generaron resúmenes de los comentarios de los docentes, para que quien use la aplicación pueda darse una idea general de qué opinan los demás estudiantes sobre un docente que no conoce. La versión de la aplicación que está activa en línea utiliza una versión del modelo [GPT-3.5 Turbo](https://platform.openai.com/docs/models/gpt-3-5-turbo) de OpenAI.
+Se generaron resúmenes de los comentarios de los docentes con la ayuda modelos de inteligencia artificial, para que quien use la aplicación pueda darse una idea general de qué opinan los demás estudiantes sobre un docente que no conoce. La versión de la aplicación que está activa en línea utiliza [GPT-3.5 Turbo](https://platform.openai.com/docs/models/gpt-3-5-turbo) de OpenAI.
 
-Para facilitar la tarea de generación de los resúmenes y actualización de la base de datos se desarrolló una segunda utilidad, [`resumidor-comentarios`](https://github.com/regexPattern/fiuba-reviews/tree/main/crates/resumidor-comentarios), que se conecta a la API web del modelo de inteligencia artificial deseado y actualiza la base de datos. Si querés usar esta utilidad, tenés que hacerlo de manera manual y requiere de cierta configuración previa. Referite al [README.md](https://github.com/regexPattern/fiuba-reviews/tree/main/crates/resumidor-comentarios/README.md) de la misma para más información sobre cómo ejecutarla y agregar modelos nuevos.
+Para facilitar la tarea de generación de los resúmenes y actualización de la base de datos se desarrolló la utilidad [`resumidor-comentarios`](https://github.com/regexPattern/fiuba-reviews/tree/main/crates/resumidor-comentarios). Esta herramienta debe ser utilizada de manera manual, y puede ser adaptada para soportar varios modelos de inteligencia artificial.

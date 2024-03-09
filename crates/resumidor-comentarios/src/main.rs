@@ -1,20 +1,19 @@
 use resumidor_comentarios::gpt::OpenAIClient;
 use sqlx::PgPool;
-
-const DATABASE_URL_ENV_VAR: &str = "DATABASE_URL";
+use std::env;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
     let _ = dotenvy::dotenv();
 
-    let modelo = OpenAIClient::new();
+    let modelo = OpenAIClient {
+        api_key: env::var("OPENAI_API_KEY")
+            .expect("variable de entorno `OPENAI_API_KEY` necesaria para conectar con OpenAI API"),
+    };
 
-    let database_url = std::env::var(DATABASE_URL_ENV_VAR).expect(const_format::concatcp!(
-        "variable de entorno `",
-        DATABASE_URL_ENV_VAR,
-        "` necesaria para conectar con la base de datos"
-    ));
+    let database_url = env::var("DATABASE_URL")
+        .expect("variable de entorno `DATABASE_URL` necesaria para conectar con la base de datos");
 
     let conexion_db = PgPool::connect(&database_url).await.unwrap();
 

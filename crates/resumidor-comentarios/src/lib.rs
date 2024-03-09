@@ -10,7 +10,7 @@ use tracing::Instrument;
 
 const MAX_SOLICITUDES_CONCURRENTES: usize = 5;
 const MIN_COMENTARIOS_ACTUALIZACION: usize = 3;
-const PROPORCION_COMENTARIOS_ACTUALIZACION: usize = 2;
+const PROPORCION_COMENTARIOS_ACTUALIZACION: usize = 2 / 1;
 
 #[derive(FromRow)]
 struct Comentario {
@@ -34,7 +34,7 @@ where
     let semaphore = Arc::new(Semaphore::new(MAX_SOLICITUDES_CONCURRENTES));
     let mut handles = Vec::with_capacity(cantidad_docentes);
 
-    for (codigo_docente, comentarios) in comentarios_por_docente.into_iter().take(10) {
+    for (codigo_docente, comentarios) in comentarios_por_docente {
         let cliente_http = Client::clone(&cliente_http);
         let modelo = Arc::clone(&modelo);
 

@@ -5,25 +5,12 @@ use serde::{Deserialize, Serialize};
 
 use super::Modelo;
 
-const API_KEY_ENV_VAR: &str = "INFERENCE_API_KEY";
 const INFERENCE_API_ENDPOINT: &str =
     "https://api-inference.huggingface.co/models/facebook/bart-large-cnn";
 
 #[derive(Debug)]
 pub struct HuggingFaceClient {
     api_key: String,
-}
-
-impl HuggingFaceClient {
-    pub fn new() -> Self {
-        Self {
-            api_key: std::env::var(API_KEY_ENV_VAR).expect(const_format::concatcp!(
-                "variable de entorno `",
-                API_KEY_ENV_VAR,
-                "` necesaria para conectar con Hugging Face Inference API"
-            )),
-        }
-    }
 }
 
 impl Modelo for HuggingFaceClient {
