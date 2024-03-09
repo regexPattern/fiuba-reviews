@@ -4,7 +4,7 @@ Utilidad para generar y actualizar los resúmenes de los comentarios de los doce
 
 ## Diseño
 
-Cuando se inicia una nueva base de datos utilizando el [adaptador](https://github.com/regexPattern/fiuba-reviews/tree/main#adaptaci%C3%B3n-de-los-datos-originales), ningún docente cuenta con su resumen de comentarios ya generado, debido a que esta información no se obtiene directamente del scraping que se hace a los datos originales de Dolly.
+Cuando se inicia una nueva base de datos utilizando el [adaptador](https://github.com/regexPattern/fiuba-reviews?tab=readme-ov-file#adaptaci%C3%B3n-de-los-datos-originales), ningún docente cuenta con su resumen de comentarios ya generado, debido a que esta información no se obtiene directamente del scraping que se hace a los datos originales de Dolly.
 
 Por lo tanto, los resúmenes deben ser generados una vez se hayan obtenido los comentarios de todos los docentes. Sin embargo, este proceso no puede ser automatizado al momento de popular la base de datos inicial porque no es un proceso que se pueda planificar de manera programática, debido a posibles errores que puedan ocurrir durante la generación de los resúmenes que dejarían el SQL de inicialización de la base de datos en un estado incompleto o inválido. Por ejemplo, podría ocurrir que no se completen los resúmenes de todos los docentes debido a algún rate-limiter que tenga la API del modelo usado.
 
