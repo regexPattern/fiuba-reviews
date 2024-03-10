@@ -4,78 +4,57 @@ use base64::{engine::general_purpose, Engine};
 use format_serde_error::SerdeError;
 use reqwest_middleware::ClientWithMiddleware;
 use serde::Deserialize;
-use uuid::Uuid;
 
-use crate::sql::Sql;
+use crate::{docentes, sql::Sql};
 
 const URL_DESCARGA: &str = "https://dollyfiuba.com/analitics/comentarios_docentes.json";
 
-#[derive(Deserialize, PartialEq, Eq, Hash)]
-pub struct Cuatrimestre {
-    #[serde(alias = "cuat")]
-    pub nombre: String,
+#[derive(Debug)]
+pub struct Comentario;
 
-    #[serde(alias = "mat")]
-    pub codigo_materia: u32,
-
-    #[serde(alias = "doc")]
-    pub nombre_docente: String,
+#[derive(Deserialize, PartialEq, Eq, Hash, Debug)]
+pub struct MetaDataComentario {
+    pub codigo_docente: String,
+    pub nombre_cuatrimestre: String,
 }
 
-impl Cuatrimestre {
-    pub async fn descargar(
-        client: &ClientWithMiddleware,
-    ) -> anyhow::Result<HashMap<Self, Vec<String>>> {
+impl Comentario {
+    pub async fn descargar_todos(
+        cliente_http: &ClientWithMiddleware,
+    ) -> anyhow::Result<HashMap<MetaDataComentario, Vec<String>>> {
         #[derive(Deserialize)]
-        struct Payload {
+        struct RespuestaDolly {
             #[serde(flatten)]
-            cuatrimestre: Cuatrimestre,
+            metadata: MetaDataComentariosDolly,
             comentarios: Vec<Option<String>>,
         }
 
         tracing::info!("descargando listado de comentarios");
-        let res = client.get(URL_DESCARGA).send().await?;
+
+        let res = cliente_http.get(URL_DESCARGA).send().await?;
         let data = res.text().await?;
 
-        let cuatrimestres: Vec<Payload> =
+        let respuestas: Vec<RespuestaDolly> =
             serde_json::from_str(&data).map_err(|err| SerdeError::new(data, err))?;
 
-        Ok(cuatrimestres
+        Ok(respuestas
             .into_iter()
-            .map(|cuatrimestre| {
-                let comentarios_decoded: Vec<_> = cuatrimestre
+            .map(|respuesta| {
+                let comentarios: Vec<_> = respuesta
                     .comentarios
                     .into_iter()
                     .flatten()
-                    .filter_map(|c| {
-                        String::from_utf8(general_purpose::STANDARD.decode(c).ok()?).ok()
+                    .filter_map(|comentario| {
+                        String::from_utf8(general_purpose::STANDARD.decode(comentario).ok()?).ok()
                     })
                     .collect();
 
-                (cuatrimestre.cuatrimestre, comentarios_decoded)
+                (MetaDataComentario::from(respuesta.metadata), comentarios)
             })
             .collect())
     }
 
-    pub fn sql(nombre: &str) -> String {
-        format!(
-            r#"
-INSERT INTO cuatrimestre(nombre)
-VALUES ('{}');
-        "#,
-            nombre.sanitizar()
-        )
-    }
-}
-
-pub struct Comentario;
-
-impl Comentario {
-    pub fn query_sql(
-        cuatrimestre: &Cuatrimestre,
-        codigo_docente: &Uuid,
-        comentarios: &[String],
-    ) -> String {
+    pub fn query_sql(metadata: &MetaDataComentario, comentarios: &[String]) -> String {
         comentarios
             .iter()
             .map(|contenido| {
@@ -84,12 +63,45 @@ impl Comentario {
 INSERT INTO comentario(cuatrimestre, codigo_docente, contenido)
 VALUES ('{}', '{}', '{}');
 "#,
-                    cuatrimestre.nombre.sanitizar(),
-                    codigo_docente,
-                    contenido.sanitizar()
+                    metadata.nombre_cuatrimestre.sanitizar_sql(),
+                    metadata.codigo_docente.sanitizar_sql(),
+                    contenido.sanitizar_sql()
                 )
             })
             .collect::<Vec<_>>()
             .join("")
+    }
+    pub fn cuatrimestre_query_sql(nombre_cuatrimestre: &str) -> String {
+        format!(
+            r#"
+INSERT INTO cuatrimestre(nombre)
+VALUES ('{}');
+        "#,
+            nombre_cuatrimestre.sanitizar_sql()
+        )
+    }
+}
+
+#[derive(Deserialize)]
+struct MetaDataComentariosDolly {
+    #[serde(alias = "cuat")]
+    nombre_cuatrimestre: String,
+
+    #[serde(alias = "mat")]
+    codigo_materia: u32,
+
+    #[serde(alias = "doc")]
+    nombre_docente: String,
+}
+
+impl From<MetaDataComentariosDolly> for MetaDataComentario {
+    fn from(metadata: MetaDataComentariosDolly) -> Self {
+        Self {
+            codigo_docente: docentes::generar_codigo_docente(
+                metadata.codigo_materia,
+                &metadata.nombre_docente,
+            ),
+            nombre_cuatrimestre: metadata.nombre_cuatrimestre,
+        }
     }
 }

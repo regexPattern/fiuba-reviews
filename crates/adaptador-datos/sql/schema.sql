@@ -10,12 +10,10 @@ CREATE TABLE IF NOT EXISTS catedra(
 );
 
 CREATE TABLE IF NOT EXISTS docente(
-    codigo      UUID PRIMARY KEY,
-    nombre      TEXT NOT NULL,
-    descripcion TEXT,
-
-    -- Cantidad de comentarios del docente al momento de la ultima actualizacion de la descripcion.
-    comentarios_ultima_descripcion INT DEFAULT 0 NOT NULL
+    codigo                     TEXT PRIMARY KEY,
+    nombre                     TEXT NOT NULL,
+    resumen_comentarios        TEXT,
+    comentarios_ultimo_resumen INT DEFAULT 0 NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS cuatrimestre(
@@ -24,20 +22,20 @@ CREATE TABLE IF NOT EXISTS cuatrimestre(
 
 CREATE TABLE IF NOT EXISTS comentario(
     codigo         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    codigo_docente UUID REFERENCES docente(codigo) NOT NULL,
+    codigo_docente TEXT REFERENCES docente(codigo) NOT NULL,
     cuatrimestre   TEXT REFERENCES cuatrimestre(nombre) NOT NULL,
     contenido      TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS catedra_docente(
     codigo_catedra UUID REFERENCES catedra(codigo),
-    codigo_docente UUID REFERENCES docente(codigo),
+    codigo_docente TEXT REFERENCES docente(codigo),
     CONSTRAINT catedra_docente_pkey PRIMARY KEY (codigo_catedra, codigo_docente)
 );
 
 CREATE TABLE IF NOT EXISTS calificacion(
     codigo                UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    codigo_docente        UUID REFERENCES docente(codigo) NOT NULL,
+    codigo_docente        TEXT REFERENCES docente(codigo) NOT NULL,
     acepta_critica        DOUBLE PRECISION NOT NULL,
     asistencia            DOUBLE PRECISION NOT NULL,
     buen_trato            DOUBLE PRECISION NOT NULL,
