@@ -1,12 +1,33 @@
-use std::io::Write;
+use clap::{Parser, Subcommand};
+
+#[derive(Parser)]
+struct Cli {
+    #[clap(subcommand)]
+    command: Command,
+}
+
+#[derive(Subcommand)]
+enum Command {
+    Init,
+    Update {
+        #[arg(long)]
+        dump: bool,
+    },
+}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    let cli = Cli::parse();
+
     tracing_subscriber::fmt::init();
 
-    let query_sql = adaptador_datos::indexar_dolly().await?;
-    let mut archivo_init_sql = std::fs::File::create("init.sql")?;
-    archivo_init_sql.write_all(query_sql.as_bytes())?;
+    match cli.command {
+        Command::Init => {
+            let query = adaptador_datos::init_query().await?;
+            println!("{query}");
+        }
+        Command::Update { dump: _dump } => todo!(),
+    };
 
     Ok(())
 }

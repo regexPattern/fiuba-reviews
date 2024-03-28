@@ -1,49 +1,51 @@
-CREATE TABLE IF NOT EXISTS materia(
-    codigo              INTEGER PRIMARY KEY,
-    nombre              TEXT NOT NULL,
-    codigo_equivalencia INTEGER REFERENCES materia(codigo)
+CREATE TABLE materia (
+    codigo integer PRIMARY KEY,
+    nombre text NOT NULL,
+    codigo_equivalencia integer REFERENCES materia (codigo)
 );
 
-CREATE TABLE IF NOT EXISTS catedra(
-    codigo         UUID PRIMARY KEY,
-    codigo_materia INTEGER REFERENCES materia(codigo) NOT NULL
+CREATE TABLE catedra (
+    codigo uuid PRIMARY KEY,
+    codigo_materia integer REFERENCES materia (codigo) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS docente(
-    codigo                     TEXT PRIMARY KEY,
-    nombre                     TEXT NOT NULL,
-    resumen_comentarios        TEXT,
-    comentarios_ultimo_resumen INT DEFAULT 0 NOT NULL
+CREATE TABLE docente (
+    codigo text PRIMARY KEY,
+    nombre text NOT NULL,
+    codigo_materia integer REFERENCES materia (codigo),
+    resumen_comentarios text,
+    comentarios_ultimo_resumen int DEFAULT 0 NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS cuatrimestre(
-    nombre TEXT PRIMARY KEY
+CREATE TABLE catedra_docente (
+    codigo_catedra uuid REFERENCES catedra (codigo),
+    codigo_docente text REFERENCES docente (codigo),
+    PRIMARY KEY (codigo_catedra, codigo_docente)
 );
 
-CREATE TABLE IF NOT EXISTS comentario(
-    codigo         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    codigo_docente TEXT REFERENCES docente(codigo) NOT NULL,
-    cuatrimestre   TEXT REFERENCES cuatrimestre(nombre) NOT NULL,
-    contenido      TEXT NOT NULL
+CREATE TABLE cuatrimestre (
+    nombre text PRIMARY KEY
 );
 
-CREATE TABLE IF NOT EXISTS catedra_docente(
-    codigo_catedra UUID REFERENCES catedra(codigo),
-    codigo_docente TEXT REFERENCES docente(codigo),
-    CONSTRAINT catedra_docente_pkey PRIMARY KEY (codigo_catedra, codigo_docente)
+CREATE TABLE comentario (
+    codigo uuid DEFAULT gen_random_uuid () PRIMARY KEY,
+    codigo_docente text REFERENCES docente (codigo) NOT NULL,
+    cuatrimestre text REFERENCES cuatrimestre (nombre) NOT NULL,
+    contenido text NOT NULL,
+    es_de_dolly boolean default false NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS calificacion(
-    codigo                UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    codigo_docente        TEXT REFERENCES docente(codigo) NOT NULL,
-    acepta_critica        DOUBLE PRECISION NOT NULL,
-    asistencia            DOUBLE PRECISION NOT NULL,
-    buen_trato            DOUBLE PRECISION NOT NULL,
-    claridad              DOUBLE PRECISION NOT NULL,
-    clase_organizada      DOUBLE PRECISION NOT NULL,
-    cumple_horarios       DOUBLE PRECISION NOT NULL,
-    fomenta_participacion DOUBLE PRECISION NOT NULL,
-    panorama_amplio       DOUBLE PRECISION NOT NULL,
-    responde_mails        DOUBLE PRECISION NOT NULL
+CREATE TABLE calificacion (
+    codigo uuid DEFAULT gen_random_uuid () PRIMARY KEY,
+    codigo_docente text REFERENCES docente (codigo) NOT NULL,
+    acepta_critica double precision NOT NULL,
+    asistencia double precision NOT NULL,
+    buen_trato double precision NOT NULL,
+    claridad double precision NOT NULL,
+    clase_organizada double precision NOT NULL,
+    cumple_horarios double precision NOT NULL,
+    fomenta_participacion double precision NOT NULL,
+    panorama_amplio double precision NOT NULL,
+    responde_mails double precision NOT NULL
 );
 
