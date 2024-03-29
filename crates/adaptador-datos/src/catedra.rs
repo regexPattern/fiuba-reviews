@@ -37,15 +37,6 @@ impl Catedra {
     }
 }
 
-pub fn sql_bulk_insert(inserts: &[String]) -> String {
-    format!(
-        "INSERT INTO catedra
-VALUES
-    {};",
-        inserts.join(",\n\t")
-    )
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

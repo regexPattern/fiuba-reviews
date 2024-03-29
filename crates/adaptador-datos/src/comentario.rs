@@ -55,38 +55,12 @@ pub async fn descargar_todos(
     Ok(comentarios)
 }
 
-pub fn sql_comentario(
-    comentario: &str,
-    codigo_docente: &Uuid,
-    nombre_cuatrimestre: &str,
-) -> String {
-    format!(
-        "('{}', '{}', '{}', '{}')",
-        Uuid::new_v4(),
-        codigo_docente,
-        nombre_cuatrimestre,
-        comentario.replace("'", "''")
-    )
+pub fn sql_comentario(comentario: &str, codigo_docente: &Uuid, cuatrimestre: &str) -> String {
+    let codigo = Uuid::new_v4();
+    let contenido = comentario.replace("'", "''");
+    format!("('{codigo}', '{codigo_docente}', '{cuatrimestre}', '{contenido}')")
 }
 
 pub fn sql_cuatrimestre(nombre_cuatrimestre: &str) -> String {
     format!("('{}')", nombre_cuatrimestre.replace("'", "''"))
-}
-
-pub fn sql_bulk_insert_cuatrimestres(inserts: &[String]) -> String {
-    format!(
-        "INSERT INTO cuatrimestre (nombre)
-VALUES
-    {};",
-        inserts.join(",\n\t")
-    )
-}
-
-pub fn sql_bulk_insert_comentarios(inserts: &[String]) -> String {
-    format!(
-        "INSERT INTO comentario (codigo, codigo_docente, cuatrimestre, contenido)
-VALUES
-    {};",
-        inserts.join(",\n\t")
-    )
 }
