@@ -48,4 +48,3 @@ CREATE TABLE calificacion (
     panorama_amplio double precision NOT NULL,
     responde_mails double precision NOT NULL
 );
-

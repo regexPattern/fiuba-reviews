@@ -4,20 +4,21 @@ use uuid::Uuid;
 
 use crate::docente::Calificacion;
 
-#[cfg_attr(test, derive(Clone, PartialEq, Debug))]
+#[derive(Debug)]
+#[cfg_attr(test, derive(Clone, PartialEq))]
 pub struct Catedra {
     pub codigo: Uuid,
     pub docentes: HashMap<String, Calificacion>,
 }
 
 impl Catedra {
-    pub fn consumir_repetidas(mut catedras: Vec<Self>) -> Vec<Self> {
+    pub fn eliminar_repetidas(catedras: &mut Vec<Self>) {
         catedras.sort_by(|a, b| a.docentes.len().cmp(&b.docentes.len()).reverse());
 
         let mut nombres_docentes_catedras_unicas = Vec::with_capacity(catedras.len());
         let mut codigos_catedras_unicas = HashSet::with_capacity(catedras.len());
 
-        for catedra in &catedras {
+        for catedra in catedras.iter() {
             let nombres_docentes: HashSet<_> = catedra.docentes.keys().collect();
             if !nombres_docentes_catedras_unicas
                 .iter()
@@ -28,11 +29,21 @@ impl Catedra {
             }
         }
 
-        catedras
-            .into_iter()
-            .filter(|c| codigos_catedras_unicas.contains(&c.codigo))
-            .collect()
+        catedras.retain(|c| codigos_catedras_unicas.contains(&c.codigo));
     }
+
+    pub fn sql(&self, codigo_materia: i16) -> String {
+        format!("('{}', {})", self.codigo, codigo_materia)
+    }
+}
+
+pub fn sql_bulk_insert(inserts: &[String]) -> String {
+    format!(
+        "INSERT INTO catedra
+VALUES
+    {};",
+        inserts.join(",\n\t")
+    )
 }
 
 #[cfg(test)]
@@ -58,9 +69,9 @@ mod tests {
         let c2 = catedra_from_docentes(docentes.clone());
         let c3 = catedra_from_docentes([("Sassano".to_string(), Default::default())].into());
 
-        let catedras = vec![c1.clone(), c2.clone(), c3.clone()];
+        let mut catedras = vec![c1.clone(), c2.clone(), c3.clone()];
 
-        let catedras = Catedra::consumir_repetidas(catedras);
+        Catedra::eliminar_repetidas(&mut catedras);
 
         assert_eq!(catedras.len(), 2);
         assert!(catedras.contains(&c1) || catedras.contains(&c2));
@@ -81,11 +92,9 @@ mod tests {
 
         let c2 = catedra_from_docentes(docentes.clone());
 
-        let catedras = vec![c1.clone(), c2.clone()];
+        let mut catedras = vec![c1.clone(), c2.clone()];
 
-        let catedras = Catedra::consumir_repetidas(catedras);
-
-        dbg!(&catedras);
+        Catedra::eliminar_repetidas(&mut catedras);
 
         assert_eq!(catedras.len(), 1);
         assert!(catedras.contains(&c2));

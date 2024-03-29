@@ -17,14 +17,14 @@ pub struct Materia {
     #[serde_as(as = "serde_with::DisplayFromStr")]
     pub codigo: i16,
 
-    pub nombre: String,
+    nombre: String,
 
     #[serde(skip)]
-    pub codigo_equivalencia: Option<i16>,
+    codigo_equivalencia: Option<i16>,
 }
 
 impl Materia {
-    pub async fn descargar_todas(cliente: &ClientWithMiddleware) -> anyhow::Result<Vec<Self>> {
+    pub async fn descargar_todas(cliente_http: &ClientWithMiddleware) -> anyhow::Result<Vec<Self>> {
         #[derive(Deserialize)]
         struct RespuestaDolly {
             materias: Vec<Materia>,
@@ -32,13 +32,13 @@ impl Materia {
 
         tracing::info!("descargando listado de materias");
 
-        let res = cliente.get(URL_DESCARGA_MATERIAS).send().await?;
+        let res = cliente_http.get(URL_DESCARGA_MATERIAS).send().await?;
         let data = res.text().await?;
 
         let RespuestaDolly { mut materias } =
             serde_json::from_str(&data).map_err(|err| SerdeError::new(data, err))?;
 
-        Self::asignas_equivalencias(cliente, &mut materias).await?;
+        Self::asignas_equivalencias(cliente_http, &mut materias).await?;
 
         materias.sort_by(
             |a, b| match (a.codigo_equivalencia, b.codigo_equivalencia) {
@@ -78,7 +78,7 @@ impl Materia {
         let RespuestaDolly { catedras } =
             serde_json::from_str(&data).map_err(|err| SerdeError::new(data, err))?;
 
-        let catedras = catedras
+        let mut catedras = catedras
             .into_iter()
             .map(|c| Catedra {
                 codigo: Uuid::new_v4(),
@@ -86,21 +86,9 @@ impl Materia {
             })
             .collect();
 
-        let _catedars = Catedra::consumir_repetidas(catedras);
+        Catedra::eliminar_repetidas(&mut catedras);
 
-        Ok([].into())
-    }
-
-    pub fn sql(&self) -> String {
-        format!(
-            "({}, '{}', {}, {})",
-            self.codigo,
-            self.nombre,
-            self.codigo_equivalencia
-                .map(|c| c.to_string())
-                .unwrap_or("NULL".into()),
-            false
-        )
+        Ok(catedras)
     }
 
     async fn asignas_equivalencias(
@@ -138,4 +126,24 @@ impl Materia {
 
         Ok(())
     }
+
+    pub fn sql(&self) -> String {
+        format!(
+            "({}, '{}', {})",
+            self.codigo,
+            self.nombre.replace("'", "''"),
+            self.codigo_equivalencia
+                .map(|c| c.to_string())
+                .unwrap_or("NULL".into())
+        )
+    }
+}
+
+pub fn sql_bulk_insert(inserts: &[String]) -> String {
+    format!(
+        "INSERT INTO materia
+VALUES
+    {};",
+        inserts.join(",\n\t")
+    )
 }
