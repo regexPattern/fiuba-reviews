@@ -63,6 +63,6 @@ impl Sql for Uuid {
 
 impl Sql for Vec<String> {
     fn sanitize(&self) -> String {
-        self.join(",\n\t")
+        self.join(",\n    ")
     }
 }

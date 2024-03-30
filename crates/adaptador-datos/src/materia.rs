@@ -65,9 +65,10 @@ pub async fn descargar_todas(cliente_http: &ClientWithMiddleware) -> anyhow::Res
 
 pub fn bulk_insert(insert_tuples: &Vec<String>) -> String {
     format!(
-        "INSERT INTO materia (codigo, nombre, codigo_equivalencia)
+        "\
+INSERT INTO materia (codigo, nombre, codigo_equivalencia)
 VALUES
-\t{}
+    {}
 ON CONFLICT (codigo)
 DO NOTHING;",
         insert_tuples.sanitize()

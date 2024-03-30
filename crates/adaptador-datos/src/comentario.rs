@@ -63,20 +63,20 @@ pub fn sql_cuatrimestre(nombre_cuatrimestre: &str) -> String {
 }
 
 pub fn sql_comentario(comentario: &str, codigo_docente: &Uuid, cuatrimestre: &str) -> String {
-    let codigo = Uuid::new_v4().sanitize();
     let codigo_docente = codigo_docente.sanitize();
     let cuatrimestre = cuatrimestre.sanitize();
     let contenido = comentario.sanitize();
     let es_de_dolly = true;
 
-    format!("({codigo}, {codigo_docente}, {cuatrimestre}, {contenido}, {es_de_dolly})")
+    format!("({codigo_docente}, {cuatrimestre}, {contenido}, {es_de_dolly})")
 }
 
 pub fn bulk_insert_cuatrimestre(insert_tuples: &Vec<String>) -> String {
     format!(
-        "INSERT INTO cuatrimestre (nombre)
+        "\
+INSERT INTO cuatrimestre (nombre)
 VALUES
-\t{}
+    {}
 ON CONFLICT (nombre)
 DO NOTHING;",
         insert_tuples.sanitize()
@@ -85,9 +85,13 @@ DO NOTHING;",
 
 pub fn bulk_insert_comentarios(insert_tuples: &Vec<String>) -> String {
     format!(
-        "INSERT INTO comentario (codigo, codigo_docente, cuatrimestre, contenido, es_de_dolly)
+        "\
+DELETE FROM comentario
+WHERE es_de_dolly = true;
+
+INSERT INTO comentario (codigo_docente, cuatrimestre, contenido, es_de_dolly)
 VALUES
-\t{};",
+    {};",
         insert_tuples.sanitize()
     )
 }

@@ -33,9 +33,12 @@ pub fn eliminar_repetidas(catedras: &mut Vec<Catedra>) {
 
 pub fn bulk_insert(insert_tuples: &Vec<String>) -> String {
     format!(
-        "INSERT INTO catedra (codigo, codigo_materia)
+        "\
+DELETE FROM catedra;
+
+INSERT INTO catedra (codigo, codigo_materia)
 VALUES
-\t{};",
+    {};",
         insert_tuples.sanitize()
     )
 }

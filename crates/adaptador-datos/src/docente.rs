@@ -48,7 +48,7 @@ pub fn sql_calificacion(calificacion: &Calificacion, codigo_docente: &Uuid) -> S
         let responde_mails = calificacion.responde_mails.unwrap_or_default();
 
         calificaciones.push(format!(
-            "({codigo_docente}, \
+            "({codigo_docente}::uuid, \
             {acepta_critica}, \
             {asistencia}, \
             {buen_trato}, \
@@ -66,9 +66,10 @@ pub fn sql_calificacion(calificacion: &Calificacion, codigo_docente: &Uuid) -> S
 
 pub fn bulk_insert_docentes(insert_tuples: &Vec<String>) -> String {
     format!(
-        "INSERT INTO docente (codigo, nombre, codigo_materia)
+        "\
+INSERT INTO docente (codigo, nombre, codigo_materia)
 VALUES
-\t{}
+    {}
 ON CONFLICT (nombre, codigo_materia)
 DO NOTHING;",
         insert_tuples.sanitize()
@@ -77,28 +78,29 @@ DO NOTHING;",
 
 pub fn bulk_insert_rel_catedras_docentes(insert_tuples: &Vec<String>) -> String {
     format!(
-        "INSERT INTO catedra_docente (codigo_catedra, codigo_docente)
+        "\
+INSERT INTO catedra_docente (codigo_catedra, codigo_docente)
 VALUES
-\t{};",
+    {};",
         insert_tuples.sanitize()
     )
 }
 
 pub fn bulk_insert_calificaciones(insert_tuples: &Vec<String>) -> String {
     format!(
-        "INSERT INTO calificacion (\
-        codigo_docente, \
-        acepta_critica, \
-        asistencia, \
-        buen_trato, \
-        claridad, \
-        clase_organizada, \
-        cumple_horarios, \
-        fomenta_participacion, \
-        panorama_amplio, \
-        responde_mails)
-VALUES
-\t{};",
-        insert_tuples.sanitize()
+        "\
+WITH temp_calificacion(codigo_docente) AS (
+    VALUES
+        {}
+)
+INSERT INTO calificacion
+SELECT gen_random_uuid(), t.*
+FROM temp_calificacion t
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM calificacion c
+    WHERE c.codigo_docente = t.codigo_docente
+);",
+        insert_tuples.sanitize().replace("\n", "\n    ")
     )
 }

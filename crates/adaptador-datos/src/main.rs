@@ -23,15 +23,15 @@ async fn main() -> anyhow::Result<()> {
 
     tracing_subscriber::fmt::init();
 
+    let query = adaptador_datos::generar_query().await?;
+
     match cli.command {
         None => {
-            let query = adaptador_datos::init_query().await?;
             let mut archivo = File::create("init.sql")?;
             archivo.write_all(query.as_bytes())?;
         }
         Some(Command::Update { output }) => {
             let db = PgPool::connect("postgres://postgres:postgres@localhost:5432").await?;
-            let query = adaptador_datos::update_query(&db).await?;
 
             if output {
                 let mut archivo = File::create("update.sql")?;
