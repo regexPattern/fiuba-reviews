@@ -8,22 +8,22 @@ use http_cache::{CACacheManager, CacheMode, HttpCache};
 use http_cache_reqwest::Cache;
 use reqwest::Client;
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
+use sqlx::{Pool, Postgres};
 use std::{
     collections::{HashMap, HashSet},
     sync::Arc,
 };
 use uuid::Uuid;
 
-use materia::Materia;
-use sql::InsertTuplesBuffer;
+use sql::BulkInsertTuples;
 
 pub async fn init_query() -> anyhow::Result<String> {
     let cliente_http = Arc::new(crear_cliente_http());
 
-    let materias = Materia::descargar_todas(&cliente_http).await?;
+    let materias = materia::descargar_todas(&cliente_http).await?;
     let comentarios = comentario::descargar_todos(&cliente_http).await?;
 
-    let mut data = InsertTuplesBuffer {
+    let mut bulk_inserts = BulkInsertTuples {
         materias: Vec::with_capacity(materias.len()),
         comentarios: Vec::with_capacity(comentarios.len()),
         cuatrimestres: comentarios
@@ -36,31 +36,29 @@ pub async fn init_query() -> anyhow::Result<String> {
         ..Default::default()
     };
 
-    let mut handles: Vec<_> = Vec::with_capacity(materias.len());
+    let mut handles = Vec::with_capacity(materias.len());
 
-    for mat in materias {
-        data.materias.push(mat.sql());
+    for mat in materias.into_iter().take(1) {
+        bulk_inserts.materias.push(mat.sql());
 
         let cliente_http = Arc::clone(&cliente_http);
-        handles.push(tokio::spawn(
-            async move { mat.indexar(&cliente_http).await },
-        ));
+        handles.push(tokio::spawn(async move { mat.scape(&cliente_http).await }));
     }
 
-    let mut codigos_docentes: HashMap<(i16, String), Uuid> = HashMap::new();
+    let mut codigos_docentes = HashMap::new();
 
     for task in handles {
         if let Ok(mut materia) = task.await.unwrap() {
             codigos_docentes.extend(std::mem::take(&mut materia.codigos_docentes));
-            data.extend(materia);
+            bulk_inserts.extend(materia);
         }
     }
 
     for (meta, comentarios) in comentarios {
         if let Some(codigo_docente) =
-            codigos_docentes.get(&(meta.codigo_materia, meta.nombre_docente))
+            codigos_docentes.get(&(meta.nombre_docente, meta.codigo_materia))
         {
-            data.comentarios.extend(
+            bulk_inserts.comentarios.extend(
                 comentarios.iter().map(|c| {
                     comentario::sql_comentario(c, codigo_docente, &meta.nombre_cuatrimestre)
                 }),
@@ -68,7 +66,51 @@ pub async fn init_query() -> anyhow::Result<String> {
         }
     }
 
-    Ok(["BEGIN;\n", &data.sql(), "\nCOMMIT;\n"].join("\n"))
+    Ok([
+        &String::from_utf8_lossy(include_bytes!("../sql/schema.sql")).to_string(),
+        "BEGIN;",
+        &bulk_inserts.sql(),
+        "COMMIT;",
+    ]
+    .join("\n\n"))
+}
+
+pub async fn update_query(db: &Pool<Postgres>) -> anyhow::Result<String> {
+    let cliente_http = Arc::new(crear_cliente_http());
+
+    let materias = materia::descargar_todas(&cliente_http).await?;
+    let comentarios = comentario::descargar_todos(&cliente_http).await?;
+
+    #[derive(sqlx::FromRow)]
+    struct Docente {
+        codigo: Uuid,
+        nombre: String,
+        codigo_materia: i16,
+    }
+
+    let codigos_docentes = sqlx::query_as::<_, Docente>(
+        "SELECT codigo, nombre, cast(codigo_materia AS smallint) FROM docente",
+    )
+    .fetch_all(db)
+    .await?;
+
+    let codigos_docentes: HashMap<_, _> = codigos_docentes
+        .into_iter()
+        .map(|d| ((d.nombre, d.codigo_materia), d.codigo))
+        .collect();
+
+    dbg!(codigos_docentes);
+
+    /*
+        - materias (no puedo dropearlos) -> on conclict
+        - droppeo todas las catedra_docentes y catedras
+        - docentes (no puedo dropearlos/comentarios y calificaciones mias dependen) -> on conflict de (nombre, codigo_materia)
+        - calificaciones -> no me interesan realmente, me voy a quedar con todas las mias, pero igual deberia incorporar las nuevas de dolly para algun nuevo docente -> on conflict (codigo_docente) esquivo, de lo contrario insertolincorporar las nuevas de dolly para algun nuevo docente -> on conflict (codigo_docente) esquivo, de lo contrario inserto
+        - cuatrimestres (no puedo dropearlos/comentarios mios dependen) -> on conflict (nombre)
+        - dropeo todos los comentarios que sean de dolly, para insertar los nuevos voy a necesitar el codigo de los docentes que ya existen y mapearlo con el (nombre_docente, codigo_materia) de los nuevos
+    */
+
+    Ok("SELECT * FROM materia;".into())
 }
 
 fn crear_cliente_http() -> ClientWithMiddleware {

@@ -1,10 +1,12 @@
 use serde::Deserialize;
 use uuid::Uuid;
 
+use crate::sql::Sql;
+
 #[derive(Deserialize, Debug)]
 #[cfg_attr(test, derive(Default, Clone, PartialEq))]
 pub struct Calificacion {
-    respuestas: usize,
+    pub respuestas: usize,
     acepta_critica: Option<f64>,
     asistencia: Option<f64>,
     buen_trato: Option<f64>,
@@ -16,39 +18,87 @@ pub struct Calificacion {
     responde_mails: Option<f64>,
 }
 
-pub fn sql(codigo_docente: &Uuid, nombre_docente: &str, codigo_materia: i16) -> String {
-    format!(
-        "('{}', '{}', {})",
-        codigo_docente,
-        nombre_docente.replace("'", "''"),
-        codigo_materia,
-    )
+pub fn sql_docente(codigo_docente: &Uuid, nombre_docente: &str, codigo_materia: i16) -> String {
+    let codigo = codigo_docente.sanitize();
+    let nombre = nombre_docente.sanitize();
+    format!("({codigo}, {nombre}, {codigo_materia})")
 }
 
 pub fn sql_rel_catedra_docente(codigo_catedra: &Uuid, codigo_docente: &Uuid) -> String {
-    format!("('{}', '{}')", codigo_catedra, codigo_docente)
+    let codigo_catedra = codigo_catedra.sanitize();
+    let codigo_docente = codigo_docente.sanitize();
+    format!("({codigo_catedra}, {codigo_docente})")
 }
 
-impl Calificacion {
-    pub fn sql(&self, codigo_docente: &Uuid) -> String {
-        let buffer: Vec<()> = Vec::new();
+pub fn sql_calificacion(calificacion: &Calificacion, codigo_docente: &Uuid) -> String {
+    assert!(calificacion.respuestas > 0);
 
-        for _ in 0..self.respuestas {
-            // TODO: insertar cada calificacion como individual...
-        }
+    let codigo_docente = codigo_docente.sanitize();
+    let mut calificaciones = Vec::with_capacity(calificacion.respuestas);
 
-        format!(
-            "('{}', {}, {}, {}, {}, {}, {}, {}, {}, {})",
-            codigo_docente,
-            self.acepta_critica.unwrap_or_default(),
-            self.asistencia.unwrap_or_default(),
-            self.buen_trato.unwrap_or_default(),
-            self.claridad.unwrap_or_default(),
-            self.clase_organizada.unwrap_or_default(),
-            self.cumple_horarios.unwrap_or_default(),
-            self.fomenta_participacion.unwrap_or_default(),
-            self.panorama_amplio.unwrap_or_default(),
-            self.responde_mails.unwrap_or_default(),
-        )
+    for _ in 0..calificacion.respuestas {
+        let acepta_critica = calificacion.acepta_critica.unwrap_or_default();
+        let asistencia = calificacion.asistencia.unwrap_or_default();
+        let buen_trato = calificacion.buen_trato.unwrap_or_default();
+        let claridad = calificacion.claridad.unwrap_or_default();
+        let clase_organizada = calificacion.clase_organizada.unwrap_or_default();
+        let cumple_horarios = calificacion.cumple_horarios.unwrap_or_default();
+        let fomenta_participacion = calificacion.fomenta_participacion.unwrap_or_default();
+        let panorama_amplio = calificacion.panorama_amplio.unwrap_or_default();
+        let responde_mails = calificacion.responde_mails.unwrap_or_default();
+
+        calificaciones.push(format!(
+            "({codigo_docente}, \
+            {acepta_critica}, \
+            {asistencia}, \
+            {buen_trato}, \
+            {claridad}, \
+            {clase_organizada}, \
+            {cumple_horarios}, \
+            {fomenta_participacion}, \
+            {panorama_amplio}, \
+            {responde_mails})"
+        ))
     }
+
+    calificaciones.sanitize()
+}
+
+pub fn bulk_insert_docentes(insert_tuples: &Vec<String>) -> String {
+    format!(
+        "INSERT INTO docente (codigo, nombre, codigo_materia)
+VALUES
+\t{}
+ON CONFLICT (nombre, codigo_materia)
+DO NOTHING;",
+        insert_tuples.sanitize()
+    )
+}
+
+pub fn bulk_insert_rel_catedras_docentes(insert_tuples: &Vec<String>) -> String {
+    format!(
+        "INSERT INTO catedra_docente (codigo_catedra, codigo_docente)
+VALUES
+\t{};",
+        insert_tuples.sanitize()
+    )
+}
+
+pub fn bulk_insert_calificaciones(insert_tuples: &Vec<String>) -> String {
+    format!(
+        "INSERT INTO calificacion (\
+        codigo_docente, \
+        acepta_critica, \
+        asistencia, \
+        buen_trato, \
+        claridad, \
+        clase_organizada, \
+        cumple_horarios, \
+        fomenta_participacion, \
+        panorama_amplio, \
+        responde_mails)
+VALUES
+\t{};",
+        insert_tuples.sanitize()
+    )
 }

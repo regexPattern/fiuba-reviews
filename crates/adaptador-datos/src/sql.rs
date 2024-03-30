@@ -1,7 +1,12 @@
-use crate::materia::ResIndexadoMateria;
+use uuid::Uuid;
+
+use crate::{
+    catedra, comentario, docente,
+    materia::{self, MateriaScrapeResult},
+};
 
 #[derive(Default, Debug)]
-pub struct InsertTuplesBuffer {
+pub struct BulkInsertTuples {
     pub materias: Vec<String>,
     pub catedras: Vec<String>,
     pub docentes: Vec<String>,
@@ -11,8 +16,12 @@ pub struct InsertTuplesBuffer {
     pub comentarios: Vec<String>,
 }
 
-impl InsertTuplesBuffer {
-    pub fn extend(&mut self, materia: ResIndexadoMateria) {
+pub trait Sql {
+    fn sanitize(&self) -> String;
+}
+
+impl BulkInsertTuples {
+    pub fn extend(&mut self, materia: MateriaScrapeResult) {
         self.catedras.extend(materia.catedras);
         self.docentes.extend(materia.docentes);
         self.rel_catedras_docentes
@@ -22,38 +31,38 @@ impl InsertTuplesBuffer {
 
     pub fn sql(&self) -> String {
         [
-            String::from_utf8_lossy(include_bytes!("../sql/schema.sql")).to_string(),
-            self.materias
-                .bulk_insert("materia", "(codigo, nombre, codigo_equivalencia)"),
-            self.catedras
-                .bulk_insert("catedra", "(codigo, codigo_materia)"),
-            self.docentes
-                .bulk_insert("docente", "(codigo, nombre, codigo_materia)"),
-            self.rel_catedras_docentes
-                .bulk_insert("catedra_docente", "(codigo_catedra, codigo_docente)"),
-            self.calificaciones.bulk_insert("calificacion", "(codigo_docente, acepta_critica, asistencia, buen_trato, claridad, clase_organizada, cumple_horarios, fomenta_participacion, panorama_amplio, responde_mails)"),
-            self.cuatrimestres.bulk_insert("cuatrimestre", "(nombre)"),
-            self.comentarios.bulk_insert("comentario", "(codigo, codigo_docente, cuatrimestre, contenido)")
+            materia::bulk_insert(&self.materias),
+            catedra::bulk_insert(&self.catedras),
+            docente::bulk_insert_docentes(&self.docentes),
+            docente::bulk_insert_rel_catedras_docentes(&self.rel_catedras_docentes),
+            docente::bulk_insert_calificaciones(&self.calificaciones),
+            comentario::bulk_insert_cuatrimestre(&self.cuatrimestres),
+            comentario::bulk_insert_comentarios(&self.comentarios),
         ]
-        .join("\n")
+        .join("\n\n")
     }
 }
 
-trait BulkInsertable {
-    fn bulk_insert(&self, nombre_tabla: &str, nombres_columnas: &str) -> String;
+impl Sql for &str {
+    fn sanitize(&self) -> String {
+        format!("'{}'", self.replace("'", "''"))
+    }
 }
 
-impl BulkInsertable for Vec<String> {
-    fn bulk_insert(&self, tabla: &str, columnas: &str) -> String {
-        format!(
-            "
-INSERT INTO {} {}
-VALUES
-\t{};
-            ",
-            tabla,
-            columnas,
-            self.join(",\n\t")
-        )
+impl Sql for String {
+    fn sanitize(&self) -> String {
+        self.as_str().sanitize()
+    }
+}
+
+impl Sql for Uuid {
+    fn sanitize(&self) -> String {
+        format!("'{}'", self)
+    }
+}
+
+impl Sql for Vec<String> {
+    fn sanitize(&self) -> String {
+        self.join(",\n\t")
     }
 }
