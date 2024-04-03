@@ -12,8 +12,8 @@ struct Cli {
 #[derive(Subcommand)]
 enum Command {
     Update {
-        #[arg(short, long)]
-        output: bool,
+        #[clap(short, long)]
+        commit: bool,
     },
 }
 
@@ -23,24 +23,38 @@ async fn main() -> anyhow::Result<()> {
 
     tracing_subscriber::fmt::init();
 
-    let query = adaptador_datos::generar_query().await?;
+    let query = match cli.command {
+        None => adaptador_datos::init_query().await?,
+        Some(Command::Update { commit }) => {
+            let db_url = std::env::var("DATABASE_URL").expect(
+                "variable de entorno `DATABASE_URL` necesaria para conectar con la base de datos",
+            );
 
-    match cli.command {
-        None => {
-            let mut archivo = File::create("init.sql")?;
-            archivo.write_all(query.as_bytes())?;
-        }
-        Some(Command::Update { output }) => {
-            let db = PgPool::connect("postgres://postgres:postgres@localhost:5432").await?;
+            let db = PgPool::connect(&db_url).await?;
+            tracing::info!("conexion establecida con la base de datos");
 
-            if output {
-                let mut archivo = File::create("update.sql")?;
-                archivo.write_all(query.as_bytes())?;
-            } else {
-                sqlx::query(&query).execute(&db).await?;
+            let query = adaptador_datos::update_query(&db).await?;
+
+            if commit {
+                tracing::info!("actualizando base de datos");
+
+                if let Err(err) = sqlx::query(&query).execute(&db).await {
+                    tracing::error!("error actualizando la base de datos");
+                    tracing::debug!("descripcion error: {}", err);
+                } else {
+                    tracing::info!("base de datos actualizada exitosamente");
+                    return Ok(());
+                }
             }
+
+            query
         }
     };
+
+    let mut archivo = File::create("init.sql")?;
+    archivo.write_all(query.as_bytes())?;
+
+    tracing::info!("query guardada en archivo `init.sql`");
 
     Ok(())
 }

@@ -8,14 +8,49 @@ use http_cache::{CACacheManager, CacheMode, HttpCache};
 use http_cache_reqwest::Cache;
 use reqwest::Client;
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
+use sqlx::{FromRow, PgPool};
 use std::{
     collections::{HashMap, HashSet},
     sync::Arc,
 };
+use tokio::sync::Semaphore;
+use uuid::Uuid;
 
 use sql::BulkInsertTuples;
 
-pub async fn generar_query() -> anyhow::Result<String> {
+const MAX_SOLICITUDES_CONCURRENTES: usize = 5;
+
+pub async fn init_query() -> anyhow::Result<String> {
+    generar_query(HashMap::new()).await
+}
+
+pub async fn update_query(db: &PgPool) -> anyhow::Result<String> {
+    let mut codigos_docentes: HashMap<i16, HashMap<String, Uuid>> = HashMap::new();
+
+    #[derive(FromRow)]
+    struct Docente {
+        codigo: Uuid,
+        nombre: String,
+        codigo_materia: i16,
+    }
+
+    let docentes_existentes =
+        sqlx::query_as::<_, Docente>("SELECT codigo, nombre, codigo_materia FROM docente;")
+            .fetch_all(db)
+            .await
+            .unwrap();
+
+    for doc in docentes_existentes {
+        let docentes_materia = codigos_docentes.entry(doc.codigo_materia).or_default();
+        docentes_materia.insert(doc.nombre, doc.codigo);
+    }
+
+    generar_query(codigos_docentes).await
+}
+
+async fn generar_query(
+    mut codigos_docentes: HashMap<i16, HashMap<String, Uuid>>,
+) -> anyhow::Result<String> {
     let cliente_http = Arc::new(crear_cliente_http());
 
     let materias = materia::descargar_todas(&cliente_http).await?;
@@ -35,12 +70,19 @@ pub async fn generar_query() -> anyhow::Result<String> {
     };
 
     let mut handles = Vec::with_capacity(materias.len());
+    let semaphore = Arc::new(Semaphore::new(MAX_SOLICITUDES_CONCURRENTES));
 
-    for mat in materias.into_iter().take(1) {
+    for mat in materias {
         bulk_inserts.materias.push(mat.sql());
 
         let cliente_http = Arc::clone(&cliente_http);
-        handles.push(tokio::spawn(async move { mat.scape(&cliente_http).await }));
+        let semaphore = Arc::clone(&semaphore);
+        let codigos_docentes = codigos_docentes.remove(&mat.codigo).unwrap_or_default();
+
+        handles.push(tokio::spawn(async move {
+            let _permit = semaphore.acquire().await;
+            mat.scrape(&cliente_http, codigos_docentes).await
+        }));
     }
 
     let mut codigos_docentes = HashMap::new();
@@ -51,6 +93,9 @@ pub async fn generar_query() -> anyhow::Result<String> {
             bulk_inserts.extend(materia);
         }
     }
+
+    tracing::info!("adaptando datos de materias descargadas");
+    tracing::info!("adaptando comentarios de docentes");
 
     for (meta, comentarios) in comentarios {
         if let Some(codigo_docente) =
@@ -63,6 +108,8 @@ pub async fn generar_query() -> anyhow::Result<String> {
             );
         }
     }
+
+    tracing::info!("generando query sql");
 
     Ok([
         &String::from_utf8_lossy(include_bytes!("../sql/schema.sql")).to_string(),

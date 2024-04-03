@@ -94,7 +94,7 @@ WITH temp_calificacion(codigo_docente) AS (
         {}
 )
 INSERT INTO calificacion
-SELECT gen_random_uuid(), t.*
+SELECT gen_random_uuid (), t.*
 FROM temp_calificacion t
 WHERE NOT EXISTS (
     SELECT 1

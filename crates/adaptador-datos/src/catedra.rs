@@ -17,14 +17,14 @@ pub fn eliminar_repetidas(catedras: &mut Vec<Catedra>) {
     let mut nombres_docentes_catedras_unicas = Vec::with_capacity(catedras.len());
     let mut codigos_catedras_unicas = HashSet::with_capacity(catedras.len());
 
-    for catedra in catedras.iter() {
-        let nombres_docentes: HashSet<_> = catedra.docentes.keys().collect();
+    for cat in catedras.iter() {
+        let nombres_docentes: HashSet<_> = cat.docentes.keys().collect();
         if !nombres_docentes_catedras_unicas
             .iter()
             .any(|n| nombres_docentes.is_subset(n))
         {
             nombres_docentes_catedras_unicas.push(nombres_docentes);
-            codigos_catedras_unicas.insert(catedra.codigo);
+            codigos_catedras_unicas.insert(cat.codigo);
         }
     }
 

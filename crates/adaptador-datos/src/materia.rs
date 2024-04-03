@@ -19,7 +19,7 @@ const URL_DESCARGA_CATEDRAS: &str = "https://dollyfiuba.com/analitics/cursos";
 #[derive(Deserialize, Debug)]
 pub struct Materia {
     #[serde_as(as = "serde_with::DisplayFromStr")]
-    codigo: i16,
+    pub codigo: i16,
 
     nombre: String,
 
@@ -76,15 +76,18 @@ DO NOTHING;",
 }
 
 impl Materia {
-    pub async fn scape(
+    pub async fn scrape(
         &self,
         cliente_http: &ClientWithMiddleware,
+        mut codigos_docentes: HashMap<String, Uuid>,
     ) -> anyhow::Result<MateriaScrapeResult> {
+        tracing::info!("descagando datos de materia {}", self.codigo);
+
         let catedras = self
             .descargar_catedras(&cliente_http)
             .await
             .inspect_err(|err| {
-                tracing::error!("error descargando catedras de materia {}", self.codigo);
+                tracing::error!("error descargando datos de materia {}", self.codigo);
                 tracing::debug!("descripcion error: {err}");
             })?;
 
@@ -92,8 +95,6 @@ impl Materia {
             catedras: Vec::with_capacity(catedras.len()),
             ..Default::default()
         };
-
-        let mut codigos_docentes = HashMap::new();
 
         for cat in catedras {
             materia.catedras.push(cat.sql(self.codigo));
@@ -153,8 +154,6 @@ impl Materia {
         struct CatedraDolly {
             docentes: HashMap<String, Calificacion>,
         }
-
-        tracing::info!("descargando catedras de materia {}", self.codigo);
 
         let res = cliente_http
             .get(format!("{}/{}", URL_DESCARGA_CATEDRAS, self.codigo))
