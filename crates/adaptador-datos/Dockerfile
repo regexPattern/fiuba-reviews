@@ -1,4 +1,4 @@
-FROM lukemathwalker/cargo-chef:latest-rust-1.70 AS chef
+FROM lukemathwalker/cargo-chef:latest-rust-1.76 AS chef
 WORKDIR /adaptador-datos
 
 FROM chef as planner

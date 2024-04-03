@@ -1,9 +1,8 @@
 [package]
-name = "adaptador_datos"
-version = "0.2.0"
+name = "adaptador-datos"
+version = "2.0.0"
 edition = "2021"
 rust-version = "1.76"
-description = "Adaptador de datos de DollyFIUBA"
 
 [dependencies]
 anyhow = "1.0.70"
