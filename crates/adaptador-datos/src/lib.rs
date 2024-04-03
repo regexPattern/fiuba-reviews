@@ -21,7 +21,10 @@ use sql::BulkInsertTuples;
 const MAX_SOLICITUDES_CONCURRENTES: usize = 5;
 
 pub async fn query_inicializacion() -> anyhow::Result<String> {
-    generar_query(HashMap::new()).await
+    Ok(
+        String::from_utf8_lossy(include_bytes!("../sql/schema.sql")).to_string()
+        + &generar_query(HashMap::new()).await?
+    )
 }
 
 pub async fn query_actualizacion(conexion: &PgPool) -> anyhow::Result<String> {
@@ -45,10 +48,7 @@ pub async fn query_actualizacion(conexion: &PgPool) -> anyhow::Result<String> {
         docentes_materia.insert(doc.nombre, doc.codigo);
     }
 
-    Ok(
-        String::from_utf8_lossy(include_bytes!("../sql/schema.sql")).to_string()
-            + &generar_query(codigos_docentes).await?,
-    )
+    generar_query(codigos_docentes).await
 }
 
 async fn generar_query(
