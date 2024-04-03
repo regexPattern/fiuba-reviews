@@ -1,19 +1,22 @@
 import {
+	boolean,
 	doublePrecision,
 	foreignKey,
 	integer,
 	pgTable,
 	primaryKey,
+	smallint,
 	text,
+	unique,
 	uuid
 } from "drizzle-orm/pg-core";
 
 export const materia = pgTable(
 	"materia",
 	{
-		codigo: integer("codigo").primaryKey().notNull(),
+		codigo: smallint("codigo").primaryKey().notNull(),
 		nombre: text("nombre").notNull(),
-		codigoEquivalencia: integer("codigo_equivalencia")
+		codigoEquivalencia: smallint("codigo_equivalencia")
 	},
 	(table) => {
 		return {
@@ -28,32 +31,31 @@ export const materia = pgTable(
 
 export const catedra = pgTable("catedra", {
 	codigo: uuid("codigo").primaryKey().notNull(),
-	codigoMateria: integer("codigo_materia")
+	codigoMateria: smallint("codigo_materia")
 		.notNull()
 		.references(() => materia.codigo)
 });
 
-export const docente = pgTable("docente", {
-	codigo: uuid("codigo").primaryKey().notNull(),
-	nombre: text("nombre").notNull(),
-	descripcion: text("descripcion"),
-	comentariosUltimaDescripcion: integer("comentarios_ultima_descripcion").default(0).notNull()
-});
-
-export const comentario = pgTable("comentario", {
-	codigo: uuid("codigo").defaultRandom().primaryKey().notNull(),
-	codigoDocente: uuid("codigo_docente")
-		.notNull()
-		.references(() => docente.codigo),
-	cuatrimestre: text("cuatrimestre")
-		.notNull()
-		.references(() => cuatrimestre.nombre),
-	contenido: text("contenido").notNull()
-});
-
-export const cuatrimestre = pgTable("cuatrimestre", {
-	nombre: text("nombre").primaryKey().notNull()
-});
+export const docente = pgTable(
+	"docente",
+	{
+		codigo: uuid("codigo").primaryKey().notNull(),
+		nombre: text("nombre").notNull(),
+		codigoMateria: smallint("codigo_materia")
+			.notNull()
+			.references(() => materia.codigo),
+		resumenComentarios: text("resumen_comentarios"),
+		comentariosUltimoResumen: integer("comentarios_ultimo_resumen").default(0).notNull()
+	},
+	(table) => {
+		return {
+			docenteNombreCodigoMateriaKey: unique("docente_nombre_codigo_materia_key").on(
+				table.nombre,
+				table.codigoMateria
+			)
+		};
+	}
+);
 
 export const calificacion = pgTable("calificacion", {
 	codigo: uuid("codigo").defaultRandom().primaryKey().notNull(),
@@ -71,12 +73,28 @@ export const calificacion = pgTable("calificacion", {
 	respondeMails: doublePrecision("responde_mails").notNull()
 });
 
+export const comentario = pgTable("comentario", {
+	codigo: uuid("codigo").defaultRandom().primaryKey().notNull(),
+	codigoDocente: uuid("codigo_docente")
+		.notNull()
+		.references(() => docente.codigo),
+	cuatrimestre: text("cuatrimestre")
+		.notNull()
+		.references(() => cuatrimestre.nombre),
+	contenido: text("contenido").notNull(),
+	esDeDolly: boolean("es_de_dolly").default(false).notNull()
+});
+
+export const cuatrimestre = pgTable("cuatrimestre", {
+	nombre: text("nombre").primaryKey().notNull()
+});
+
 export const catedraDocente = pgTable(
 	"catedra_docente",
 	{
 		codigoCatedra: uuid("codigo_catedra")
 			.notNull()
-			.references(() => catedra.codigo),
+			.references(() => catedra.codigo, { onDelete: "cascade" }),
 		codigoDocente: uuid("codigo_docente")
 			.notNull()
 			.references(() => docente.codigo)

@@ -1,32 +1,49 @@
+use clap::Parser;
 use resumidor_comentarios::gpt::OpenAIClient;
 use sqlx::PgPool;
-use std::env;
+use std::{env, io::Write};
+
+#[derive(Parser)]
+struct Cli {
+    #[clap(short, long)]
+    commit: bool,
+}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt::init();
+    let cli = Cli::parse();
     let _ = dotenvy::dotenv();
 
-    let modelo = OpenAIClient {
+    tracing_subscriber::fmt::init();
+
+    let modelo_gpt = OpenAIClient {
         api_key: env::var("OPENAI_API_KEY")
             .expect("variable de entorno `OPENAI_API_KEY` necesaria para conectar con OpenAI API"),
     };
 
-    let database_url = env::var("DATABASE_URL")
+    let base_de_datos_url = env::var("DATABASE_URL")
         .expect("variable de entorno `DATABASE_URL` necesaria para conectar con la base de datos");
 
-    let conexion_db = PgPool::connect(&database_url).await.unwrap();
-
+    let conexion = PgPool::connect(&base_de_datos_url).await?;
     tracing::info!("conexion establecida con la base de datos");
 
-    let query = resumidor_comentarios::query_actualizacion(&conexion_db, modelo).await?;
+    let query = resumidor_comentarios::query_actualizacion(&conexion, modelo_gpt).await?;
 
-    if let Some(query_actualizacion) = query {
-        sqlx::query(&query_actualizacion)
-            .execute(&conexion_db)
-            .await?;
+    if let Some(query) = query {
+        if cli.commit {
+            if let Err(err) = sqlx::query(&query).execute(&conexion).await {
+                tracing::error!("error actualizando la base de datos");
+                tracing::debug!("descripcion error: {}", err);
+            } else {
+                tracing::info!("base de datos actualizada exitosamente");
+                return Ok(());
+            }
+        }
 
-        tracing::info!("base de datos actualizada");
+        let mut archivo = std::fs::File::create("update.sql")?;
+        archivo.write_all(query.as_bytes())?;
+
+        tracing::info!("query guardada en archivo `update.sql`");
     } else {
         tracing::info!("ningún docente se ha actualizado");
     }

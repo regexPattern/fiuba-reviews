@@ -1,8 +1,8 @@
 mod hugging_face;
-mod open_ia;
+mod open_ai;
 
 pub use hugging_face::HuggingFaceClient;
-pub use open_ia::OpenAIClient;
+pub use open_ai::OpenAIClient;
 
 use reqwest::Client;
 

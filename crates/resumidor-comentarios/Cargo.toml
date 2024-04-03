@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.71"
+clap = { version = "4.5.4", features = ["derive"] }
 const_format = "0.2.32"
 dotenvy = "0.15.7"
 reqwest = { version = "0.11.18", features = ["json"] }

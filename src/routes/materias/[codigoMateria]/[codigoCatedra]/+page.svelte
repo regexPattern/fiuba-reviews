@@ -20,12 +20,12 @@
 		<section id={urlSafeName} class="space-y-4">
 			<h2 class="text-4xl font-bold tracking-tight">{doc.nombre}</h2>
 
-			{#if doc.descripcion}
+			{#if doc.resumen_comentarios}
 				<div
 					class="divide-y divide-border rounded-lg border bg-secondary dark:divide-slate-700 dark:border-slate-700 [&>*]:p-3"
 				>
 					<p class={`text-secondary-foreground before:content-['"'] after:content-['"']`}>
-						{doc.descripcion}
+						{doc.resumen_comentarios}
 					</p>
 					<div class="text-sm text-slate-500">
 						Resumen generado por IA.
