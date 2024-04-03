@@ -45,7 +45,7 @@ impl BulkInsertTuples {
 
 impl Sql for &str {
     fn sanitize(&self) -> String {
-        format!("'{}'", self.replace("'", "''"))
+        format!("'{}'", self.replace('\'', "''"))
     }
 }
 

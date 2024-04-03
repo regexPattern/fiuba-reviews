@@ -6,12 +6,13 @@ use sqlx::PgPool;
 #[derive(Parser)]
 struct Cli {
     #[clap(subcommand)]
-    command: Option<Command>,
+    comando: Comando,
 }
 
 #[derive(Subcommand)]
-enum Command {
-    Update {
+enum Comando {
+    Inicializar,
+    Actualizar {
         #[clap(short, long)]
         commit: bool,
     },
@@ -23,22 +24,22 @@ async fn main() -> anyhow::Result<()> {
 
     tracing_subscriber::fmt::init();
 
-    let query = match cli.command {
-        None => adaptador_datos::init_query().await?,
-        Some(Command::Update { commit }) => {
-            let db_url = std::env::var("DATABASE_URL").expect(
+    let (nombre_archivo, query) = match cli.comando {
+        Comando::Inicializar => ("init.sql", adaptador_datos::query_inicializacion().await?),
+        Comando::Actualizar { commit } => {
+            let base_de_datos_url = std::env::var("DATABASE_URL").expect(
                 "variable de entorno `DATABASE_URL` necesaria para conectar con la base de datos",
             );
 
-            let db = PgPool::connect(&db_url).await?;
+            let conexion = PgPool::connect(&base_de_datos_url).await?;
             tracing::info!("conexion establecida con la base de datos");
 
-            let query = adaptador_datos::update_query(&db).await?;
+            let query = adaptador_datos::query_actualizacion(&conexion).await?;
 
             if commit {
                 tracing::info!("actualizando base de datos");
 
-                if let Err(err) = sqlx::query(&query).execute(&db).await {
+                if let Err(err) = sqlx::query(&query).execute(&conexion).await {
                     tracing::error!("error actualizando la base de datos");
                     tracing::debug!("descripcion error: {}", err);
                 } else {
@@ -47,14 +48,14 @@ async fn main() -> anyhow::Result<()> {
                 }
             }
 
-            query
+            ("update.sql", query)
         }
     };
 
-    let mut archivo = File::create("init.sql")?;
+    let mut archivo = File::create(nombre_archivo)?;
     archivo.write_all(query.as_bytes())?;
 
-    tracing::info!("query guardada en archivo `init.sql`");
+    tracing::info!("query guardada en archivo `{}`", nombre_archivo);
 
     Ok(())
 }

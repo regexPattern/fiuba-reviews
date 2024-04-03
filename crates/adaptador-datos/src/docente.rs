@@ -101,6 +101,6 @@ WHERE NOT EXISTS (
     FROM calificacion c
     WHERE c.codigo_docente = t.codigo_docente
 );",
-        insert_tuples.sanitize().replace("\n", "\n    ")
+        insert_tuples.sanitize().replace('\n', "\n    ")
     )
 }

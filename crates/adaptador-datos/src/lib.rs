@@ -20,11 +20,11 @@ use sql::BulkInsertTuples;
 
 const MAX_SOLICITUDES_CONCURRENTES: usize = 5;
 
-pub async fn init_query() -> anyhow::Result<String> {
+pub async fn query_inicializacion() -> anyhow::Result<String> {
     generar_query(HashMap::new()).await
 }
 
-pub async fn update_query(db: &PgPool) -> anyhow::Result<String> {
+pub async fn query_actualizacion(conexion: &PgPool) -> anyhow::Result<String> {
     let mut codigos_docentes: HashMap<i16, HashMap<String, Uuid>> = HashMap::new();
 
     #[derive(FromRow)]
@@ -36,7 +36,7 @@ pub async fn update_query(db: &PgPool) -> anyhow::Result<String> {
 
     let docentes_existentes =
         sqlx::query_as::<_, Docente>("SELECT codigo, nombre, codigo_materia FROM docente;")
-            .fetch_all(db)
+            .fetch_all(conexion)
             .await
             .unwrap();
 
@@ -45,7 +45,10 @@ pub async fn update_query(db: &PgPool) -> anyhow::Result<String> {
         docentes_materia.insert(doc.nombre, doc.codigo);
     }
 
-    generar_query(codigos_docentes).await
+    Ok(
+        String::from_utf8_lossy(include_bytes!("../sql/schema.sql")).to_string()
+            + &generar_query(codigos_docentes).await?,
+    )
 }
 
 async fn generar_query(
@@ -111,13 +114,7 @@ async fn generar_query(
 
     tracing::info!("generando query sql");
 
-    Ok([
-        &String::from_utf8_lossy(include_bytes!("../sql/schema.sql")).to_string(),
-        "BEGIN;",
-        &bulk_inserts.sql(),
-        "COMMIT;",
-    ]
-    .join("\n\n"))
+    Ok(["BEGIN;", &bulk_inserts.sql(), "COMMIT;"].join("\n\n"))
 }
 
 fn crear_cliente_http() -> ClientWithMiddleware {

@@ -84,10 +84,10 @@ impl Materia {
         tracing::info!("descagando datos de materia {}", self.codigo);
 
         let catedras = self
-            .descargar_catedras(&cliente_http)
+            .descargar_catedras(cliente_http)
             .await
             .inspect_err(|err| {
-                tracing::error!("error descargando datos de materia {}", self.codigo);
+                tracing::warn!("omitiendo materia {}", self.codigo);
                 tracing::debug!("descripcion error: {err}");
             })?;
 
@@ -104,19 +104,19 @@ impl Materia {
                     let codigo = Uuid::new_v4();
                     materia
                         .docentes
-                        .push(docente::sql_docente(&codigo, &nombre, self.codigo));
+                        .push(docente::sql_docente(&codigo, nombre, self.codigo));
 
                     codigo
                 });
 
                 materia
                     .rel_catedras_docentes
-                    .push(docente::sql_rel_catedra_docente(&cat.codigo, &codigo));
+                    .push(docente::sql_rel_catedra_docente(&cat.codigo, codigo));
 
                 if calificacion.respuestas > 0 {
                     materia
                         .calificaciones
-                        .push(docente::sql_calificacion(&calificacion, &codigo));
+                        .push(docente::sql_calificacion(&calificacion, codigo));
                 }
             }
         }
