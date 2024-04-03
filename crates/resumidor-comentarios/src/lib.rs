@@ -19,16 +19,16 @@ struct Comentario {
 }
 
 pub async fn query_actualizacion<M>(
-    conexion_db: &PgPool,
-    modelo: M,
+    conexion: &PgPool,
+    modelo_gpt: M,
 ) -> anyhow::Result<Option<String>>
 where
     M: Modelo + Send + Sync + 'static,
 {
     let cliente_http = Client::new();
-    let modelo = Arc::new(modelo);
+    let modelo_gpt = Arc::new(modelo_gpt);
 
-    let comentarios_por_docente = comentarios_por_docente(conexion_db).await?;
+    let comentarios_por_docente = comentarios_por_docente(conexion).await?;
     let cantidad_docentes = comentarios_por_docente.len();
 
     let semaphore = Arc::new(Semaphore::new(MAX_SOLICITUDES_CONCURRENTES));
@@ -36,7 +36,7 @@ where
 
     for (codigo_docente, comentarios) in comentarios_por_docente {
         let cliente_http = Client::clone(&cliente_http);
-        let modelo = Arc::clone(&modelo);
+        let modelo = Arc::clone(&modelo_gpt);
 
         let semaphore = Arc::clone(&semaphore);
         let span = tracing::debug_span!("docente", codigo = codigo_docente.to_string());
@@ -59,8 +59,8 @@ where
 
     let mut values_a_actualizar = Vec::with_capacity(handles.len());
 
-    for handle in handles {
-        if let Ok(tupla_values) = handle.await.unwrap() {
+    for task in handles {
+        if let Ok(tupla_values) = task.await.unwrap() {
             values_a_actualizar.push(tupla_values);
         }
     }
@@ -73,16 +73,18 @@ where
 
     let query = if !values_a_actualizar.is_empty() {
         Some(format!(
-            r#"
+            "\
 UPDATE docente AS doc
-SET descripcion = val.descripcion,
-    comentarios_ultima_descripcion = val.comentarios_ultima_descripcion
-FROM (VALUES
-    {})
-AS val(codigo_docente, descripcion, comentarios_ultima_descripcion)
+SET resumen_comentarios = val.resumen_comentarios,
+    comentarios_ultimo_resumen = val.comentarios_ultimo_resumen
+FROM (
+    VALUES
+        {}
+)
+AS val(codigo_docente, resumen_comentarios, comentarios_ultimo_resumen)
 WHERE doc.codigo::text = val.codigo_docente;
-"#,
-            values_a_actualizar.join(",\n    ")
+",
+            values_a_actualizar.join(",\n        ")
         ))
     } else {
         None
@@ -91,11 +93,9 @@ WHERE doc.codigo::text = val.codigo_docente;
     Ok(query)
 }
 
-async fn comentarios_por_docente(
-    conexion_db: &PgPool,
-) -> anyhow::Result<HashMap<Uuid, Vec<String>>> {
+async fn comentarios_por_docente(conexion: &PgPool) -> anyhow::Result<HashMap<Uuid, Vec<String>>> {
     let comentarios: Vec<Comentario> = sqlx::query_as(const_format::formatcp!(
-        r#"
+        "\
 SELECT com.codigo_docente, com.contenido
 FROM comentario com
 WHERE com.codigo_docente IN (
@@ -104,14 +104,14 @@ WHERE com.codigo_docente IN (
   INNER JOIN comentario com
   ON com.codigo_docente = doc.codigo
   GROUP BY doc.codigo
-  HAVING COUNT(com) > (doc.comentarios_ultima_descripcion * {})
+  HAVING COUNT(com) > (doc.comentarios_ultimo_resumen * {})
   AND COUNT(com) > {}
 );
-"#,
+",
         PROPORCION_COMENTARIOS_ACTUALIZACION,
         MIN_COMENTARIOS_ACTUALIZACION
     ))
-    .fetch_all(conexion_db)
+    .fetch_all(conexion)
     .await?;
 
     tracing::info!("comentarios obtenidos de la base de datos");
@@ -137,14 +137,14 @@ async fn tupla_values<M>(
     semaphore: &Semaphore,
     codigo_docente: Uuid,
     comentarios: &[String],
-    modelo: Arc<M>,
+    modelo_gpt: Arc<M>,
 ) -> anyhow::Result<String>
 where
     M: Modelo + Send + Sync + 'static,
 {
     let cantidad_comentarios_actual = comentarios.len();
 
-    let descripcion = modelo
+    let resumen_comentarios = modelo_gpt
         .resumir_comentarios(cliente_http, comentarios)
         .await
         .map_err(|err| {
@@ -155,7 +155,7 @@ where
     let tupla_values = format!(
         "('{}', '{}', {})",
         codigo_docente,
-        descripcion.replace('\'', "''"),
+        resumen_comentarios.replace('\'', "''"),
         cantidad_comentarios_actual
     );
 

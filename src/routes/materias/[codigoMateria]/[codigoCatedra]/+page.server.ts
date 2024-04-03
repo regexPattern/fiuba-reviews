@@ -24,17 +24,17 @@ async function fetchDocentesInfo(codigoCatedra: string) {
 		.select({
 			codigo: docente.codigo,
 			nombre: docente.nombre,
-			descripcion: docente.descripcion,
+			resumen_comentarios: docente.resumenComentarios,
 			promedio: sql<number | null>`
 (SELECT AVG((
-    ${calificacion.aceptaCritica} 
-    + ${calificacion.asistencia} 
-    + ${calificacion.buenTrato} 
-    + ${calificacion.claridad} 
-    + ${calificacion.claseOrganizada} 
-    + ${calificacion.cumpleHorarios} 
-    + ${calificacion.fomentaParticipacion} 
-    + ${calificacion.panoramaAmplio} 
+    ${calificacion.aceptaCritica}
+    + ${calificacion.asistencia}
+    + ${calificacion.buenTrato}
+    + ${calificacion.claridad}
+    + ${calificacion.claseOrganizada}
+    + ${calificacion.cumpleHorarios}
+    + ${calificacion.fomentaParticipacion}
+    + ${calificacion.panoramaAmplio}
     + ${calificacion.respondeMails}) / 9)
   FROM ${calificacion}
   WHERE ${calificacion.codigoDocente} = ${docente.codigo}
