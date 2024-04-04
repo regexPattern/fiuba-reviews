@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use reqwest::{Client, StatusCode};
 use serde::{Deserialize, Serialize};
 
-use super::Modelo;
+use super::ModeloGpt;
 
 const CHAT_COMPLETION_API_ENDPOINT: &str = "https://api.openai.com/v1/chat/completions";
 
@@ -12,25 +12,42 @@ pub struct OpenAIClient {
     pub api_key: String,
 }
 
-impl Modelo for OpenAIClient {
+impl ModeloGpt for OpenAIClient {
     async fn resumir_comentarios(
         &self,
         cliente_http: Client,
+        nombre_docente: &str,
         comentarios: &[String],
     ) -> anyhow::Result<String> {
-        let payload = OpenAIApiPayload {
+        let prompt = OpenAIApiPrompt {
             model: "gpt-3.5-turbo",
             messages: [
                 PromptMessage {
                     role: "system",
                     content:
-r"Los siguientes parrafos son comentarios de estudiantes sobre un profesor o profesora especifico.
-Genera un resumen de los mismos. No me digás que los resultados son variados, andá directo al grano."
+"Vas a recibir el nombre o apellido de un profesor o profesora seguido de un listado de
+comentarios suyos hechos por sus alumnos.
+
+Genera un resumen de los mismos. Prioriza darle peso a las ideas que se repiten en varios
+comentarios en vez de ideas que a lo mejor se repiten varias veces pero únicamente dentro de un
+comentario largo. No tomes en cuenta comentarios sobre la vida personal del docente como su
+religión o su postura política.
+
+Si el docente tiene pocos comentarios no muy extensos, hace un resumen corto. Si el docente tiene
+muchos comentarios muy extensos, limitate a un máximo de alrededor de 120 palabras.
+
+El resumen debe sonar natural, como si lo estuviera diciendo una persona en una conversación
+casual, es decir, que por ejemplo, no hay necesidad de introducirlo diciendo que esto es un resumen
+ni nada por el estilo."
                     .to_string(),
                 },
                 PromptMessage {
                     role: "user",
-                    content: comentarios.join("\n\n"),
+                    content: format!("\
+Nombre docente: {nombre_docente}
+
+Listado de comentarios:
+- {}", comentarios.join("\n\n- ")),
                 },
             ],
         };
@@ -40,7 +57,7 @@ Genera un resumen de los mismos. No me digás que los resultados son variados, a
         let res = cliente_http
             .post(CHAT_COMPLETION_API_ENDPOINT)
             .bearer_auth(&self.api_key)
-            .json(&payload)
+            .json(&prompt)
             .send()
             .await?;
 
@@ -74,7 +91,7 @@ Genera un resumen de los mismos. No me digás que los resultados son variados, a
 }
 
 #[derive(Debug, Serialize)]
-struct OpenAIApiPayload {
+struct OpenAIApiPrompt {
     model: &'static str,
     messages: [PromptMessage; 2],
 }

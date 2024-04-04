@@ -11,8 +11,12 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Comando {
+    /// Construye nueva base de datos con todos los registros de Dolly.
     Inicializar,
+
+    /// Actualiza una base de datos ya existente, incorporando solo los nuevos registros de Dolly.
     Actualizar {
+        /// Ejecutar la query directamente en la base de datos.
         #[clap(short, long)]
         commit: bool,
     },

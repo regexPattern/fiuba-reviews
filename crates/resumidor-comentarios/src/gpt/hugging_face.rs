@@ -3,23 +3,24 @@ use std::collections::{HashMap, VecDeque};
 use reqwest::{Client, StatusCode};
 use serde::{Deserialize, Serialize};
 
-use super::Modelo;
+use super::ModeloGpt;
 
 const INFERENCE_API_ENDPOINT: &str =
     "https://api-inference.huggingface.co/models/facebook/bart-large-cnn";
 
 #[derive(Debug)]
 pub struct HuggingFaceClient {
-    api_key: String,
+    pub api_key: String,
 }
 
-impl Modelo for HuggingFaceClient {
+impl ModeloGpt for HuggingFaceClient {
     async fn resumir_comentarios(
         &self,
         cliente_http: Client,
+        _nombre_docente: &str,
         comentarios: &[String],
     ) -> anyhow::Result<String> {
-        let payload = InferenceApiPayload {
+        let prompt = InferenceApiPrompt {
             inputs: comentarios.join("."),
             options: [("wait_for_model".to_string(), true)].into(),
         };
@@ -29,7 +30,7 @@ impl Modelo for HuggingFaceClient {
         let res = cliente_http
             .post(INFERENCE_API_ENDPOINT)
             .bearer_auth(&self.api_key)
-            .json(&payload)
+            .json(&prompt)
             .send()
             .await?;
 
@@ -67,7 +68,7 @@ impl Modelo for HuggingFaceClient {
 }
 
 #[derive(Debug, Serialize)]
-struct InferenceApiPayload {
+struct InferenceApiPrompt {
     inputs: String,
     options: HashMap<String, bool>,
 }

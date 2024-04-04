@@ -5,8 +5,13 @@ use std::{env, io::Write};
 
 #[derive(Parser)]
 struct Cli {
+    /// Ejecutar la query directamente en la base de datos.
     #[clap(short, long)]
     commit: bool,
+
+    /// Regenerar resumenes de comentarios para todos los docentes.
+    #[clap(short, long)]
+    force: bool,
 }
 
 #[tokio::main]
@@ -27,7 +32,8 @@ async fn main() -> anyhow::Result<()> {
     let conexion = PgPool::connect(&base_de_datos_url).await?;
     tracing::info!("conexion establecida con la base de datos");
 
-    let query = resumidor_comentarios::query_actualizacion(&conexion, modelo_gpt).await?;
+    let query =
+        resumidor_comentarios::query_actualizacion(&conexion, modelo_gpt, cli.force).await?;
 
     if let Some(query) = query {
         if cli.commit {
