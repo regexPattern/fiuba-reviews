@@ -39,7 +39,7 @@
 		<Feature
 			icon={Paintbrush2}
 			title="Nuevo diseño"
-			desc="Se recontruyó completamente la interfaz de la página web y se le dió un estilo totalmente diferente, con modo claro y oscuro, y un estilo minimalista moderno."
+			desc="Se reconstruyó completamente la interfaz de la página web y se le dió un estilo totalmente diferente, con modo claro y oscuro, y un estilo minimalista moderno."
 		/>
 		<Feature
 			icon={Cpu}
@@ -71,7 +71,8 @@
 		</p>
 		<p>
 			Este proyecto no pretende ser un reemplazo a la aplicación original, sino más bien una
-			propuesta de posibles cambios que me gustaría ver en la en la aplicación original.
+			propuesta de posibles cambios que me gustaría ver implementados o funcionalidades adicionales
+			que me parece que resultan útiles para los estudiantes.
 		</p>
 	</section>
 
