@@ -81,7 +81,7 @@ impl Materia {
         cliente_http: &ClientWithMiddleware,
         mut codigos_docentes: HashMap<String, Uuid>,
     ) -> anyhow::Result<MateriaScrapeResult> {
-        tracing::info!("descagando datos de materia {}", self.codigo);
+        tracing::info!("descargando datos de materia {}", self.codigo);
 
         let catedras = self
             .descargar_catedras(cliente_http)
