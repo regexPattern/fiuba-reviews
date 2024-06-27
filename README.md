@@ -8,9 +8,7 @@ Esta aplicación no pretende ser un reemplazo a la aplicación original, sino qu
 
 Podés acceder a la versión live de la aplicación desde https://fiuba-reviews.com.
 
-Si por el contrario querés correr un build local, tomá en cuenta que al momento de compilar la página, debe existir la variable de entorno `DATABASE_URL`. Usa el archivo [`compose.yaml`](https://github.com/regexPattern/fiuba-reviews/blob/main/compose.yaml) para arrancar la base de datos usando Docker Compose.
-
-Para esto corré el siguiente comando:
+Si por el contrario querés correr un build local, tomá en cuenta que al momento de compilar la página, debe existir la variable de entorno `DATABASE_URL`. Podés usar el archivo [`compose.yaml`](https://github.com/regexPattern/fiuba-reviews/blob/main/compose.yaml) para arrancar la base de datos usando Docker Compose:
 
 ```bash
 git clone https://github.com/regexPattern/fiuba-reviews
@@ -22,13 +20,11 @@ docker compose up -d
 
 export DATABASE_URL=postgres://postgres:postgres@localhost:5432
 
-npm build
+npm run build
 npm run preview
 ```
 
-Tené en cuenta que durante el primer levantamiento del contenedor de la base de datos los tiempos de espera pueden prolongarse, ya que primero se tienen que insertar los datos de la aplicación original en la nueva base de datos, proceso detallado en la sección "[Adapación de los datos originales](https://github.com/regexPattern/fiuba-reviews/tree/main#adaptación-de-los-datos-originales)". Lo mismo aplica si se elimina el volumen del contenedor.
-
-Finalmente podés visualizar la aplicación desde http://localhost:5173.
+Tené en cuenta que si usas el Docker Compose, durante el primer levantamiento del contenedor de la base de datos los tiempos de espera pueden prolongarse, ya que primero se tienen que insertar los datos de la aplicación original en la nueva base de datos, proceso detallado en la sección "[Adapación de los datos originales](#adaptación-de-los-datos-originales)". Lo mismo aplica si se elimina el volumen del contenedor.
 
 ## Desarrollo
 
@@ -48,7 +44,7 @@ export DATABASE_URL=postgres://postgres:postgres@localhost:5432
 npm run dev
 ```
 
-Además de la aplicación web central, se desarrollaron dos herramientas, escritas en Rust, que facilitan la automatización de la adaptación de los datos originales y la generación de las descripciones de los docentes.
+Además de la aplicación web central, se desarrollaron dos herramientas que facilitan la automatización de la adaptación de los datos originales y la generación de las descripciones de los docentes.
 
 ### Adaptación de los datos originales
 
@@ -56,8 +52,10 @@ Para aprovechar todos los datos que Dolly ha recopilado durante años, se adapta
 
 Para esto la herramienta [`adaptador-datos`](https://github.com/regexPattern/fiuba-reviews/tree/main/crates/adaptador-datos) hace scraping de los datos de la aplicación original, y genera un archivo SQL que se carga a la base de datos de manera automática cuando se construye por primera vez la imagen de Docker de la misma.
 
+También cuenta con funcionalidad de actualización, para poder sincronizar la base de datos existente e incorporar los nuevos datos que se fueron agregaron a Dolly desde que esta se inicializó.
+
 ### Resumen de comentarios con inteligencia artificial
 
 Se generaron resúmenes de los comentarios de los docentes con la ayuda modelos de inteligencia artificial, para que quien use la aplicación pueda darse una idea general de qué opinan los demás estudiantes sobre un docente que no conoce. La versión de la aplicación que está activa en línea utiliza [GPT-3.5 Turbo](https://platform.openai.com/docs/models/gpt-3-5-turbo) de OpenAI.
 
-Para facilitar la tarea de generación de los resúmenes y actualización de la base de datos se desarrolló la utilidad [`resumidor-comentarios`](https://github.com/regexPattern/fiuba-reviews/tree/main/crates/resumidor-comentarios). Esta herramienta debe ser utilizada de manera manual, y puede ser adaptada para soportar varios modelos de inteligencia artificial.
+La utilidad [`resumidor-comentarios`](https://github.com/regexPattern/fiuba-reviews/tree/main/crates/resumidor-comentarios) facilita la generación de los resúmenes y actualización de la base de datos. Esta herramienta debe ser utilizada de manera manual, y puede ser adaptada para soportar varios modelos de inteligencia artificial.
