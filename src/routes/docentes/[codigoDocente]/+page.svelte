@@ -25,6 +25,7 @@
 	export let data: PageData;
 
 	const options: FormOptions<typeof schema> = {
+		resetForm: true,
 		onUpdated: ({ form }) => {
 			if (form.valid) {
 				toast.success(form.message);
