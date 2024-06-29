@@ -1,5 +1,13 @@
 import db from "$lib/db";
-import { catedra, catedraDocente, cuatrimestre, docente, materia } from "$lib/db/schema";
+import {
+	calificacion,
+	catedra,
+	catedraDocente,
+	comentario,
+	cuatrimestre,
+	docente,
+	materia
+} from "$lib/db/schema";
 import { sortCuatrimestres } from "$lib/utils";
 import schema from "$lib/zod/schema";
 import { error, fail } from "@sveltejs/kit";
@@ -8,6 +16,7 @@ import { message, setError, superValidate } from "sveltekit-superforms/server";
 
 import type { PageServerLoad } from "./$types";
 import type { Actions } from "./$types";
+import { TURNSTILE_SECRET_KEY } from "$env/static/private";
 
 export const load: PageServerLoad = async ({ params }) => {
 	let docentes;
@@ -51,7 +60,7 @@ export const load: PageServerLoad = async ({ params }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request }) => {
+	default: async ({ params, request }) => {
 		const form = await superValidate(request, schema);
 
 		if (!form.valid) {
@@ -66,19 +75,42 @@ export const actions: Actions = {
 					.from(cuatrimestre)
 					.where(eq(cuatrimestre.nombre, form.data.cuatrimestre || ""))
 					.limit(1)
-			).length === 0;
+			).length === 1;
 
-		if (form.data.cuatrimestre && form.data.cuatrimestre != "undefined" && esCuatrimestreValido) {
+		if (form.data.cuatrimestre && form.data.cuatrimestre != "undefined" && !esCuatrimestreValido) {
 			return setError(form, "cuatrimestre", `Cuatrimestre '${form.data.cuatrimestre}' no existe`);
 		}
 
+		const { success } = await validateToken(
+			form.data["cf-turnstile-response"],
+			TURNSTILE_SECRET_KEY,
+		);
+
+		if (!success) {
+			return setError(form, "Error al validar CAPTCHA");
+		}
+
 		try {
-			// No estoy insertando las calificaciones realmente, pero estoy haciendo
-			// el error handling como si lo hiciera. Uso un timeout para fingir la
-			// operación de inserción.
-			//
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-			console.log(form.data);
+			if (form.data.comentario && form.data.comentario.length > 0 && form.data.cuatrimestre) {
+				await db.insert(comentario).values({
+					codigoDocente: params.codigoDocente,
+					cuatrimestre: form.data.cuatrimestre,
+					contenido: form.data.comentario
+				});
+			}
+
+			await db.insert(calificacion).values({
+				codigoDocente: params.codigoDocente,
+				aceptaCritica: form.data["acepta-critica"],
+				asistencia: form.data["asistencia"],
+				buenTrato: form.data["buen-trato"],
+				claridad: form.data["claridad"],
+				claseOrganizada: form.data["clase-organizada"],
+				cumpleHorarios: form.data["cumple-horario"],
+				fomentaParticipacion: form.data["fomenta-participacion"],
+				panoramaAmplio: form.data["panorama-amplio"],
+				respondeMails: form.data["responde-mails"]
+			});
 		} catch {
 			return fail(500);
 		}
@@ -86,3 +118,30 @@ export const actions: Actions = {
 		return message(form, "Calificación registrada con éxito");
 	}
 };
+
+interface TokenValidateResponse {
+	"error-codes": string[];
+	success: boolean;
+	action: string;
+	cdata: string;
+}
+
+async function validateToken(token: string, secret: string) {
+	const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+		method: "POST",
+		headers: {
+			"content-type": "application/json"
+		},
+		body: JSON.stringify({
+			response: token,
+			secret: secret
+		})
+	});
+
+	const data: TokenValidateResponse = await res.json();
+
+	return {
+		success: data.success,
+		error: data["error-codes"]?.length ? data["error-codes"][0] : null
+	};
+}
