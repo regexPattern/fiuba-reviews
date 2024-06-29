@@ -1,6 +1,14 @@
-import { dev } from "$app/environment";
-import { inject } from "@vercel/analytics";
+import { browser, dev } from "$app/environment";
+import { env } from "$env/dynamic/private";
 import { injectSpeedInsights } from "@vercel/speed-insights/sveltekit";
+import posthog from "posthog-js";
 
-inject({ mode: dev ? "development" : "production" });
-injectSpeedInsights();
+export const load = async () => {
+	if (!dev && browser) {
+		posthog.init(env.POSTHOG_PROJECT_API_KEY, {
+			api_host: "https://us.i.posthog.com",
+			person_profiles: "never"
+		});
+		injectSpeedInsights();
+	}
+};
