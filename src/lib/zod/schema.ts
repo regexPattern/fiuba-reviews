@@ -17,7 +17,8 @@ export default z
 		["panorama-amplio"]: campoNumerico,
 		["responde-mails"]: campoNumerico,
 		["comentario"]: z.string(),
-		["cuatrimestre"]: z.string().optional()
+		["cuatrimestre"]: z.string().optional(),
+		["cf-turnstile-response"]: z.string(),
 	})
 	.refine((data) => (data.comentario.length > 0 ? data.cuatrimestre : true), {
 		message: "Cuatrimestre requerido",

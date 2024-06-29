@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { PUBLIC_TURNSTILE_SITE_KEY } from "$env/static/public";
 	import InputCalificacion from "$lib/components/input-calificacion.svelte";
 	import Link from "$lib/components/link.svelte";
 	import {
@@ -15,8 +16,9 @@
 	import schema from "$lib/zod/schema";
 	import type { FormOptions } from "formsnap";
 	import { ChevronLeft, Loader2 } from "lucide-svelte";
+	import { mode } from "mode-watcher";
 	import { toast } from "svelte-sonner";
-	import SuperDebug from "sveltekit-superforms/client/SuperDebug.svelte";
+	import { Turnstile } from "svelte-turnstile";
 
 	import type { PageData } from "./$types";
 
@@ -26,6 +28,10 @@
 		onUpdated: ({ form }) => {
 			if (form.valid) {
 				toast.success(form.message);
+			} else {
+				for (const e of form.errors?._errors || []) {
+					toast.error(e);
+				}
 			}
 		},
 		onError: "apply"
@@ -91,6 +97,8 @@
 				</FormItem>
 			</FormField>
 		</div>
+
+		<Turnstile siteKey={PUBLIC_TURNSTILE_SITE_KEY} theme={$mode} />
 
 		<FormButton type="submit" class="items-center gap-1" disabled={submitting}>
 			{#if submitting}
