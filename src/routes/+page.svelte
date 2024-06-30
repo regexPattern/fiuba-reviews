@@ -12,13 +12,13 @@
 </script>
 
 <svelte:head>
-	<title>FIUBA Reviews</title>
+	<title>Che FIUBA</title>
 </svelte:head>
 
 <main class="container my-12 flex max-w-screen-md flex-col items-center gap-12">
 	<div class="space-y-6 text-center">
 		<h1 class="text-6xl font-bold tracking-tighter xs:text-7xl">
-			<span class="text-fiuba">FIUBA</span> Reviews
+			<span class="text-fiuba">Che</span> FIUBA
 		</h1>
 
 		<p class="mx-auto max-w-[40rem] text-lg xs:text-xl">

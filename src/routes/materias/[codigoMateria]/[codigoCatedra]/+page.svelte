@@ -30,7 +30,7 @@
 					<div class="text-sm text-slate-500">
 						Resumen generado por IA.
 						<Link
-							href="https://github.com/regexPattern/fiuba-reviews#resumen-de-comentarios-con-inteligencia-artificial"
+							href="https://github.com/regexPattern/che-fiuba#resumen-de-comentarios-con-inteligencia-artificial"
 							class="after:content-link"
 						>
 							Más información.

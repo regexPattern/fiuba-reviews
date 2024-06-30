@@ -1,4 +1,4 @@
-# FIUBA Reviews
+# Che FIUBA
 
 Aplicación web para leer y publicar opiniones de los docentes de FIUBA, agregadas por los mismos estudiantes, para que así tengas una mejor idea de que profesores te podrían gustar más y que cátedra elegir el cuatrimestre que viene. Reimplementación de [Dolly FIUBA](https://dollyfiuba.com) con adaptación de datos existentes.
 
@@ -6,14 +6,14 @@ Esta aplicación no pretende ser un reemplazo a la aplicación original, sino qu
 
 ## Utilización
 
-Podés acceder a la versión live de la aplicación desde https://fiuba-reviews.com.
+Podés acceder a la versión live de la aplicación desde https://che-fiuba.com.
 
-Si por el contrario querés correr un build local, tomá en cuenta que al momento de compilar la página, debe existir la variable de entorno `DATABASE_URL`. Podés usar el archivo [`compose.yaml`](https://github.com/regexPattern/fiuba-reviews/blob/main/compose.yaml) para arrancar la base de datos usando Docker Compose:
+Si por el contrario querés correr un build local, tomá en cuenta que al momento de compilar la página, debe existir la variable de entorno `DATABASE_URL`. Podés usar el archivo [`compose.yaml`](https://github.com/regexPattern/che-fiuba/blob/main/compose.yaml) para arrancar la base de datos usando Docker Compose:
 
 ```bash
-git clone https://github.com/regexPattern/fiuba-reviews
+git clone https://github.com/regexPattern/che-fiuba
 
-cd fiuba-reviews
+cd che-fiuba
 npm install
 
 docker compose up -d
@@ -50,7 +50,7 @@ Además de la aplicación web central, se desarrollaron dos herramientas que fac
 
 Para aprovechar todos los datos que Dolly ha recopilado durante años, se adaptaron los datos de la aplicación original en vez de iniciar desde cero.
 
-Para esto la herramienta [`adaptador-datos`](https://github.com/regexPattern/fiuba-reviews/tree/main/crates/adaptador-datos) hace scraping de los datos de la aplicación original, y genera un archivo SQL que se carga a la base de datos de manera automática cuando se construye por primera vez la imagen de Docker de la misma.
+Para esto la herramienta [`adaptador-datos`](https://github.com/regexPattern/che-fiuba/tree/main/crates/adaptador-datos) hace scraping de los datos de la aplicación original, y genera un archivo SQL que se carga a la base de datos de manera automática cuando se construye por primera vez la imagen de Docker de la misma.
 
 También cuenta con funcionalidad de actualización, para poder sincronizar la base de datos existente e incorporar los nuevos datos que se fueron agregaron a Dolly desde que esta se inicializó.
 
@@ -58,4 +58,4 @@ También cuenta con funcionalidad de actualización, para poder sincronizar la b
 
 Se generaron resúmenes de los comentarios de los docentes con la ayuda modelos de inteligencia artificial, para que quien use la aplicación pueda darse una idea general de qué opinan los demás estudiantes sobre un docente que no conoce. La versión de la aplicación que está activa en línea utiliza [GPT-3.5 Turbo](https://platform.openai.com/docs/models/gpt-3-5-turbo) de OpenAI.
 
-La utilidad [`resumidor-comentarios`](https://github.com/regexPattern/fiuba-reviews/tree/main/crates/resumidor-comentarios) facilita la generación de los resúmenes y actualización de la base de datos. Esta herramienta debe ser utilizada de manera manual, y puede ser adaptada para soportar varios modelos de inteligencia artificial.
+La utilidad [`resumidor-comentarios`](https://github.com/regexPattern/che-fiuba/tree/main/crates/resumidor-comentarios) facilita la generación de los resúmenes y actualización de la base de datos. Esta herramienta debe ser utilizada de manera manual, y puede ser adaptada para soportar varios modelos de inteligencia artificial.
