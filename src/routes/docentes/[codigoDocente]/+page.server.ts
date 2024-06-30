@@ -1,3 +1,4 @@
+import { TURNSTILE_SECRET_KEY } from "$env/static/private";
 import db from "$lib/db";
 import {
 	calificacion,
@@ -16,7 +17,6 @@ import { message, setError, superValidate } from "sveltekit-superforms/server";
 
 import type { PageServerLoad } from "./$types";
 import type { Actions } from "./$types";
-import { TURNSTILE_SECRET_KEY } from "$env/static/private";
 
 export const load: PageServerLoad = async ({ params }) => {
 	let docentes;
@@ -83,7 +83,7 @@ export const actions: Actions = {
 
 		const { success } = await validateToken(
 			form.data["cf-turnstile-response"],
-			TURNSTILE_SECRET_KEY,
+			TURNSTILE_SECRET_KEY
 		);
 
 		if (!success) {
