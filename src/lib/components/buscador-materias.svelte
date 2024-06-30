@@ -28,7 +28,7 @@
 	export { className as class };
 
 	let search = "";
-	let debounceTimeout: NodeJS.Timeout | undefined;
+	let debounceTimeout: number | undefined;
 
 	$: if (search.length < filterQueryMinLength || !$CommandStore) {
 		filtered = [];

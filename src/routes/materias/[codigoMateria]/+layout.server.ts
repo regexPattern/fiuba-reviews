@@ -24,9 +24,7 @@ export const load = (async ({ params }) => {
 
 	return {
 		materia: materias[0],
-		streamed: {
-			catedras: fetchCatedrasMateria(codigoMateria)
-		}
+		catedras: await fetchCatedrasMateria(codigoMateria)
 	};
 }) satisfies LayoutServerLoad;
 

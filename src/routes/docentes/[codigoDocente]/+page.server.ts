@@ -18,6 +18,8 @@ import { message, setError, superValidate } from "sveltekit-superforms/server";
 import type { PageServerLoad } from "./$types";
 import type { Actions } from "./$types";
 
+export const prerender = false;
+
 export const load: PageServerLoad = async ({ params }) => {
 	let docentes;
 

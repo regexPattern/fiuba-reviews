@@ -4,8 +4,6 @@ import { desc, eq, sql } from "drizzle-orm";
 
 import type { PageServerLoad } from "./$types";
 
-export const prerender = true;
-
 export const load: PageServerLoad = async () => {
 	const materiasPopulares = await db
 		.select({

@@ -1,9 +1,9 @@
 import { browser, dev } from "$app/environment";
 import { env } from "$env/dynamic/public";
-import { injectSpeedInsights } from "@vercel/speed-insights/sveltekit";
 import posthog from "posthog-js";
+import type { LayoutLoad } from "./$types";
 
-export const load = async () => {
+export const load: LayoutLoad = async ({ data }) => {
 	if (!dev && browser) {
 		if (env.PUBLIC_POSTHOG_PROJECT_API_KEY) {
 			posthog.init(env.PUBLIC_POSTHOG_PROJECT_API_KEY, {
@@ -11,6 +11,7 @@ export const load = async () => {
 				person_profiles: "never"
 			});
 		}
-		injectSpeedInsights();
 	}
+
+	return data;
 };
