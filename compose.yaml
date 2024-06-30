@@ -1,4 +1,4 @@
-name: che-fiuba
+name: fiuba-reviews
 services:
   base-de-datos:
     build:

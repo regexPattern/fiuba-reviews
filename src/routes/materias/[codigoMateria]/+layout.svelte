@@ -14,7 +14,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.materia.codigo} - {data.materia.nombre} | Che FIUBA</title>
+	<title>{data.materia.codigo} - {data.materia.nombre} | FIUBA Reviews</title>
 </svelte:head>
 
 <div class="relative md:container md:mx-auto md:flex-row">

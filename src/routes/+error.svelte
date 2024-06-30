@@ -6,7 +6,7 @@
 </script>
 
 <svelte:head>
-	<title>{status} | Che FIUBA</title>
+	<title>{status} | FIUBA Reviews</title>
 </svelte:head>
 
 <div class="flex items-center justify-center gap-6 divide-x p-8">
