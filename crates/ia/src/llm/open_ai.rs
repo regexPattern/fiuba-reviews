@@ -4,13 +4,13 @@ use format_serde_error::SerdeError;
 use reqwest::Client;
 use serde::Deserialize;
 
-use super::ResumidorComentarios;
+use super::{ResumidorComentarios, Sanitizador};
 
 const OPENAI_API_ENDPOINT_URL: &str = "https://api.openai.com/v1/chat/completions";
 
 // Podés revisar los modelos disponibles en la documentación de OpenAI:
 // https://platform.openai.com/docs/models
-const MODELO: &str = "gpt-4-turbo";
+const MODELO: &str = "gpt-4o-mini";
 
 #[derive(Debug)]
 pub struct OpenAiApiClient {
@@ -74,6 +74,8 @@ impl ResumidorComentarios for OpenAiApiClient {
         Ok(res.message.content)
     }
 }
+
+impl Sanitizador for OpenAiApiClient {}
 
 #[derive(Debug, Deserialize)]
 struct OpenAiApiResponse {

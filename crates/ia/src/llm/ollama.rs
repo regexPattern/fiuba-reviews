@@ -2,7 +2,7 @@ use format_serde_error::SerdeError;
 use reqwest::Client;
 use serde::Deserialize;
 
-use super::ResumidorComentarios;
+use super::{ResumidorComentarios, Sanitizador};
 
 const OLLAMA_ENDPOINT_URL: &str = "http://localhost:11434/api/chat";
 
@@ -68,6 +68,8 @@ impl ResumidorComentarios for OllamaClient {
         Ok(res.message.content)
     }
 }
+
+impl Sanitizador for OllamaClient {}
 
 #[derive(Debug, Deserialize)]
 struct OllamaResponse {

@@ -1,47 +1,13 @@
-use std::{collections::HashMap, env, io::Write};
+use std::collections::HashMap;
 
-use reqwest::Client;
-use sqlx::{postgres::PgPoolOptions, types::Uuid, PgPool};
+use sqlx::{types::Uuid, PgPool};
+
+use super::Sql;
 
 const MIN_COMENTARIOS_ACTUALIZACION: usize = 3;
 const PROPORCION_COMENTARIOS_ACTUALIZACION: usize = 2;
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt::init();
-    dotenvy::dotenv()?;
-
-    let db_conn_str = env::var("DATABASE_URL")
-        .expect("variable de entorno `DATABASE_URL` necesaria para conectar con la base de datos");
-    let db = PgPoolOptions::new().connect(&db_conn_str).await?;
-
-    tracing::info!("conexion establecida con la base de datos");
-
-    let api_key = env::var("OPENAI_API_KEY")
-        .expect("variable de entorno `OPENAI_API_KEY` necesaria para conectar con OpenAI API");
-    let http_client = Client::new();
-
-    let llm = ia::llm::OpenAiApiClient {
-        api_key,
-        http_client,
-    };
-
-    let comentarios_por_docente = comentarios_de_docente(&db).await?;
-    let query = ia::actualizar_comentarios(llm, comentarios_por_docente).await?;
-
-    if let Some(query) = query {
-        let mut file = std::fs::File::create("update.sql")?;
-        file.write_all(query.as_bytes())?;
-
-        tracing::info!("query guardada en archivo `update.sql`");
-    } else {
-        tracing::info!("ningún docente se ha actualizado");
-    }
-
-    Ok(())
-}
-
-async fn comentarios_de_docente(
+pub async fn comentarios_docentes(
     db: &PgPool,
 ) -> anyhow::Result<HashMap<Uuid, (String, Vec<String>)>> {
     let comentarios: Vec<(Uuid, String, String)> = sqlx::query_as(&format!(
@@ -82,4 +48,29 @@ WHERE c.codigo_docente IN (
     tracing::info!("encontrados {cantidad_docentes} docentes que requiren actualización");
 
     Ok(comentarios_de_docente.into_iter().take(5).collect())
+}
+
+pub async fn actualizar_resumen_docentes(
+    resumenes_docentes: Vec<(Uuid, String, usize)>,
+) -> Option<String> {
+    let resumenes_docentes: Vec<_> = resumenes_docentes.into_iter().map(|r| r.sql()).collect();
+
+    if !resumenes_docentes.is_empty() {
+        Some(format!(
+            r"
+UPDATE docente AS d
+SET resumen_comentarios = val.resumen_comentarios,
+    comentarios_ultimo_resumen = val.comentarios_ultimo_resumen
+FROM (
+    VALUES
+        {}
+)
+AS val(codigo_docente, resumen_comentarios, comentarios_ultimo_resumen)
+WHERE d.codigo::text = val.codigo_docente;
+",
+            resumenes_docentes.join(",\n        ")
+        ))
+    } else {
+        None
+    }
 }

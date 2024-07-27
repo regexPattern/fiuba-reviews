@@ -1,32 +1,30 @@
 pub mod llm;
 mod sql;
 
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 
-use llm::ResumidorComentarios;
-use sql::Sql;
-use sqlx::types::Uuid;
+use llm::{ResumidorComentarios, Sanitizador};
+use sql::queries;
+use sqlx::{types::Uuid, PgPool};
 use tokio::{sync::Semaphore, task::JoinHandle};
 use tracing::Instrument;
 
 const MAX_SOLICITUDES_CONCURRENTES: usize = 5;
 
-pub async fn actualizar_comentarios<L>(
-    llm: L,
-    comentarios_de_docente: HashMap<Uuid, (String, Vec<String>)>,
-) -> anyhow::Result<Option<String>>
+pub async fn query_actualizacion_resumenes<L>(llm: L, db: &PgPool) -> anyhow::Result<Option<String>>
 where
     L: ResumidorComentarios + Send + Sync + 'static,
 {
     let llm = Arc::new(llm);
     let semaphore = Arc::new(Semaphore::new(MAX_SOLICITUDES_CONCURRENTES));
 
-    let cantidad_docentes = comentarios_de_docente.len();
+    let comentarios_docentes = queries::comentarios_docentes(db).await?;
+    let cantidad_docentes = comentarios_docentes.len();
 
     let mut handles: Vec<JoinHandle<anyhow::Result<(Uuid, String, usize)>>> =
         Vec::with_capacity(cantidad_docentes);
 
-    for (codigo_doc, (nombre_doc, comentarios)) in comentarios_de_docente {
+    for (codigo_doc, (nombre_doc, comentarios)) in comentarios_docentes {
         let llm = Arc::clone(&llm);
         let semaphore = Arc::clone(&semaphore);
         let span = tracing::debug_span!("docente", codigo = codigo_doc.to_string());
@@ -58,26 +56,25 @@ where
         cantidad_docentes
     );
 
-    let resumenes: Vec<_> = resumenes.into_iter().map(|r| r.sql()).collect();
+    Ok(queries::actualizar_resumen_docentes(resumenes).await)
+}
 
-    dbg!(&resumenes);
+pub async fn actualizar_nombres_materias<L>(
+    _llm: L,
+    _nombres_materias: Vec<(i16, String)>,
+) -> anyhow::Result<Option<String>>
+where
+    L: Sanitizador,
+{
+    Ok(Some("".into()))
+}
 
-    Ok(if !resumenes.is_empty() {
-        Some(format!(
-            r"
-UPDATE docente AS d
-SET resumen_comentarios = val.resumen_comentarios,
-    comentarios_ultimo_resumen = val.comentarios_ultimo_resumen
-FROM (
-    VALUES
-        {}
-)
-AS val(codigo_docente, resumen_comentarios, comentarios_ultimo_resumen)
-WHERE d.codigo::text = val.codigo_docente;
-",
-            resumenes.join(",\n        ")
-        ))
-    } else {
-        None
-    })
+pub async fn actualizar_nombres_docentes<L>(
+    _llm: L,
+    _nombres_docentes: Vec<(Uuid, String)>,
+) -> anyhow::Result<Option<String>>
+where
+    L: Sanitizador,
+{
+    Ok(Some("".into()))
 }

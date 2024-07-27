@@ -1,3 +1,5 @@
+pub mod queries;
+
 use sqlx::types::Uuid;
 
 pub trait Sql {
