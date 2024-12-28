@@ -97,26 +97,17 @@ Cátedras de la materia TB023 aquí...
 func TestObtenerCatedras(t *testing.T) {
 	data := `
 Comisión: CURSO: 05
-Docentes: BUCHWALD MARTÍN EZEQUIEL (Profesor/a Adjunto/a), PODBEREZSKI VICTOR DANIEL (Profesor/a Adjunto/a), GENENDER PEÑA EZEQUIEL DAVID (Jefe/a Trabajos Practicos)
+Docentes: BUCHWALD MARTÍN EZEQUIEL (Profesor Adjunto), PODBEREZSKI VICTOR DANIEL (Profesor Adjunto), GENENDER PEÑA EZEQUIEL DAVID (Jefe Trabajos Practicos)
 Horarios de la cátedra 05 aquí...
 
 Comisión: CURSO: 07
-Docentes: BUCHWALD MARTÍN EZEQUIEL (Profesor/a Adjunto/a), GENENDER PEÑA EZEQUIEL DAVID (Jefe/a Trabajos Practicos)
+Docentes: BUCHWALD MARTÍN EZEQUIEL (Profesor Adjunto), GENENDER PEÑA EZEQUIEL DAVID (Jefe Trabajos Practicos)
 Horarios de la cátedra 07 aquí...
 	`
 
 	catedras := obtenerCatedras(data)
 
 	assert.Len(t, catedras, 2)
-
-	// TODO: Tengo que ver como hago con la unificación de los nombres de los
-	// docentes, supongo que voy a tener que usar inteligencia artificial pero
-	// tengo que poder identificar los ya existentes de manera programatica,
-	// dejando sus nombres originales como hash. Como sé cuál es el nombre y
-	// cuál es el apellido de un docente?
-
-	// TODO: Tengo que manejar la posible existencia de roles con otro formato
-	// (que no estén distinguidos por género con el '/a').
 
 	assert.Equal(t, 5, catedras[0].Codigo)
 	assert.Contains(t, catedras[0].Docentes, Docente{"BUCHWALD MARTÍN EZEQUIEL", "Profesor Adjunto"})
@@ -167,14 +158,14 @@ func TestFormatosNombresDocentes(t *testing.T) {
 	// La string que se pasa es por cátedra, así que tenemos que hacer el test
 	// 4 veces con argumentos diferentes para probar todos los formatos.
 
-	data := "Docentes: RAMOS SILVIA ADRIANA (Profesor/a Adjunto/a)"
+	data := "Docentes: RAMOS SILVIA ADRIANA (Profesor Adjunto)"
 	docentes := obtenerDocentes(data)
 
 	assert.Len(t, docentes, 1)
 	assert.Equal(t, docentes[0].Nombre, "RAMOS SILVIA ADRIANA")
 	assert.Equal(t, docentes[0].Rol, "Profesor Adjunto")
 
-	data = "Docentes: BUCHWALD MARTÍN EZEQUIEL (Profesor/a Adjunto/a), PODBEREZSKI VICTOR DANIEL (Profesor/a Adjunto/a), GENENDER PEÑA EZEQUIEL DAVID (Jefe/a Trabajos Practicos)"
+	data = "Docentes: BUCHWALD MARTÍN EZEQUIEL (Profesor Adjunto), PODBEREZSKI VICTOR DANIEL (Profesor Adjunto), GENENDER PEÑA EZEQUIEL DAVID (Jefe Trabajos Practicos)"
 	docentes = obtenerDocentes(data)
 
 	assert.Len(t, docentes, 3)
@@ -189,8 +180,8 @@ func TestFormatosNombresDocentes(t *testing.T) {
 	assert.Empty(t, docentes)
 }
 
-func TestNoSeConsideranLosDocentesPorAsignar(t *testing.T) {
-	data := "Docentes: A DESIGNAR A DESIGNAR (Profesor/a Adjunto/a), BOGGI SILVINA (Profesor/a Adjunto/a), VENTURIELLO VERONICA LAURA (Ayudante 1ro/a)"
+func TestNoSeConsideranLosDocentesPorDesignar(t *testing.T) {
+	data := "Docentes: A DESIGNAR A DESIGNAR (Profesor Adjunto), BOGGI SILVINA (Profesor Adjunto), VENTURIELLO VERONICA LAURA (Ayudante 1ro)"
 	docentes := obtenerDocentes(data)
 
 	assert.Len(t, docentes, 2)
@@ -208,28 +199,31 @@ func TestSeUnificanLasCatedrasConVariantes(t *testing.T) {
 
 	data := `
 Comisión: CURSO: 23A
-Información de la cátedra 23 en horario A aquí.
+Docentes: BUCHWALD MARTÍN EZEQUIEL (Profesor Adjunto)
 
 Comisión: CURSO: 23B
-Información de la cátedra 23 en horario B aquí.
+Docentes: PODBEREZSKI VICTOR DANIEL (Profesor Adjunto)
 
 Comisión: CURSO: 23C
-Información de la cátedra 23 en horario C aquí.
+Docentes: GENENDER PEÑA EZEQUIEL DAVID (Jefe Trabajos Practicos)
 	`
 
 	catedras := obtenerCatedras(data)
 
 	assert.Len(t, catedras, 1)
-
 	assert.Equal(t, 23, catedras[0].Codigo)
-}
 
-func TestSeConcatenanLosDocentesDeLasVariantesDeUnaCatedra(t *testing.T) {
-	t.Skip()
+	assert.Contains(t, catedras[0].Docentes, Docente{"BUCHWALD MARTÍN EZEQUIEL", "Profesor Adjunto"})
+	assert.Contains(t, catedras[0].Docentes, Docente{"PODBEREZSKI VICTOR DANIEL", "Profesor Adjunto"})
+	assert.Contains(t, catedras[0].Docentes, Docente{"GENENDER PEÑA EZEQUIEL DAVID", "Jefe Trabajos Practicos"})
 }
 
 func TestNoSeConsideranLasCatedraParaCondicionales(t *testing.T) {
-	t.Skip()
+	data := "Comisión: CONDICIONALES"
+
+	catedras := obtenerCatedras(data)
+
+	assert.Len(t, catedras, 0)
 }
 
 func TestNoSeConsideraElTrabajoProfesional(t *testing.T) {

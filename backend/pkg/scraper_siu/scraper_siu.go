@@ -7,11 +7,11 @@ import (
 	"strings"
 )
 
-// Patrones inspirados en: https://github.com/FdelMazo/FIUBA-Plan/blob/master/src/siuparser.js
+// https://github.com/FdelMazo/FIUBA-Plan/blob/master/src/siuparser.js
 var reCuatri *regexp.Regexp = regexp.MustCompile(`Período lectivo: (\d{4}) - ([^\n]+)\n`)
-var reMateria *regexp.Regexp = regexp.MustCompile(`Actividad: ([^\s\(]+(?:\s[^\s\(]+)*)\s?\(([^\)]+)\)`)
+var reMateria *regexp.Regexp = regexp.MustCompile(`Actividad:\s*([^\s\(]+(?:\s[^\s\(]+)*)\s?\(([^\)]+)\)`)
 var reCatedra *regexp.Regexp = regexp.MustCompile(`Comisión:\s*(?:CURSO:\s*)?(?:(\d{1,2})([a-cA-C])?|([a-záéíóúñA-ZÁÉÍÓÚÑ/ ]+))`)
-var reDocente *regexp.Regexp = regexp.MustCompile(`([A-ZÁÉÍÓÚÑ]+(?: [A-ZÁÉÍÓÚÑ]+)*)\s?\(([^)]+)\)`)
+var reDocente *regexp.Regexp = regexp.MustCompile(`([A-ZÁÉÍÓÚÑ ]+)\s*\(([^\)]+)\)`)
 
 type cuatri struct {
 	anio   int
@@ -114,8 +114,7 @@ func obtenerMaterias(dataCuatri string) []Materia {
 		}
 
 		nombre := dataCuatri[loc[2]:loc[3]]
-
-		if strings.Contains(nombre, "TRABAJO PROFESIONAL") {
+		if strings.HasPrefix(nombre, "TRABAJO PROFESIONAL") {
 			continue
 		}
 
@@ -130,8 +129,7 @@ func obtenerMaterias(dataCuatri string) []Materia {
 
 func obtenerCatedras(dataMateria string) []Catedra {
 	locs := reCatedra.FindAllStringSubmatchIndex(dataMateria, -1)
-	catedras := make([]Catedra, 0, len(locs))
-	codigos := make(map[int]bool)
+	catedrasMap := make(map[int]*Catedra, 0)
 
 	for i := 0; i < len(locs); i++ {
 		loc := locs[i]
@@ -147,42 +145,46 @@ func obtenerCatedras(dataMateria string) []Catedra {
 
 		// El regex para obtener el nombre de la cátedra tiene cuatro grupos:
 		// 	• 1: La captura completa.
-		// 	• 2: El código de curso. Solo el código, no la letra de la
+		// 	• 2: El número de curso. Solo el número, no la letra de la
 		// 		 variante. En el caso de que una cátedra sea única y no tenga
 		// 		 código, este grupo no matchea. En este caso las cátedras
-		// 		 tienen nombre en vez de código.
+		// 		 tienen nombre en vez de número.
 		// 	• 3: La letra que representa a la variante del curso. En el caso de
 		// 		 que una cátedra sea única este grupo no matchea. Lo mismo para
 		// 		 cátedras sin variantes.
 		// 	• 4: Solo matchea para las cátedras únicas que tienen nombre en vez
-		// 		 de código. Contiene el nombre matcheado.
-		// En el caso de cátedras sin código en el SIU, FIUBA Reviews les
-		// asigna el código 1.
+		// 		 de número. Contiene el nombre matcheado.
+		// En el caso de cátedras sin código en el SIU, fiuba-reviews les
+		// asigna el número 1.
+
 		var cod int
 
 		if loc[6] != -1 {
+			if dataMateria[loc[6]:loc[7]] == "CONDICIONALES" {
+				continue
+			}
+
 			cod = 1
 		} else {
-			var err error
-			cod, err = strconv.Atoi(dataMateria[loc[2]:loc[3]])
-			if err != nil {
-				// TODO: handle this
-			}
-		}
-
-		if _, esVariante := codigos[cod]; esVariante {
-			// TODO: En este caso debería unificar los docentes de ambas
-			// variantes.
-
-			// En este caso estamos agregando una variante de una cátedra
-			// que ya existía. FIUBA Reviews las trata como una sola cátedra.
-			continue
-		} else {
-			codigos[cod] = true
+			// Cualquier formato no numérico directamente no es considerado
+			// como un código, por lo que matchea el regex con el grupo 3. Es
+			// decir, esta serialización no puede fallar.
+			cod, _ = strconv.Atoi(dataMateria[loc[2]:loc[3]])
 		}
 
 		docentes := obtenerDocentes(dataMateria[inicio:fin])
-		catedras = append(catedras, Catedra{cod, docentes})
+
+		if cat, ok := catedrasMap[cod]; ok {
+			cat.Docentes = append(cat.Docentes, docentes...)
+		} else {
+			catedrasMap[cod] = &Catedra{cod, docentes}
+		}
+	}
+
+	catedras := make([]Catedra, 0, len(catedrasMap))
+
+	for _, cat := range catedrasMap {
+		catedras = append(catedras, *cat)
 	}
 
 	return catedras
@@ -196,12 +198,11 @@ func obtenerDocentes(dataCatedra string) []Docente {
 		nombre, rol := matches[i][1], matches[i][2]
 
 		nombre = strings.TrimSpace(nombre)
-
 		if nombre == "A DESIGNAR A DESIGNAR" {
 			continue
 		}
 
-		rol = strings.ReplaceAll(strings.TrimSpace(rol), "/a", "")
+		rol = strings.TrimSpace(rol)
 
 		docentes = append(docentes, Docente{nombre, rol})
 	}
