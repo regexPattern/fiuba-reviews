@@ -1,5 +1,5 @@
 run:
-	@go run cmd/main.go
+	@go run cmd/server/main.go
 
 test:
 	@go test -v ./pkg/...

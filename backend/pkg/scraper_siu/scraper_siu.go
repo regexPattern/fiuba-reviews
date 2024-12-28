@@ -1,38 +1,30 @@
 package scraper_siu
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
 // https://github.com/FdelMazo/FIUBA-Plan/blob/master/src/siuparser.js
-var reCuatri *regexp.Regexp = regexp.MustCompile(`Período lectivo: (\d{4}) - ([^\n]+)\n`)
-var reMateria *regexp.Regexp = regexp.MustCompile(`Actividad:\s*([^\s\(]+(?:\s[^\s\(]+)*)\s?\(([^\)]+)\)`)
-var reCatedra *regexp.Regexp = regexp.MustCompile(`Comisión:\s*(?:CURSO:\s*)?(?:(\d{1,2})([a-cA-C])?|([a-záéíóúñA-ZÁÉÍÓÚÑ/ ]+))`)
-var reDocente *regexp.Regexp = regexp.MustCompile(`([A-ZÁÉÍÓÚÑ ]+)\s*\(([^\)]+)\)`)
+var reCuatri *regexp.Regexp = regexp.MustCompile(`Período lectivo: (\d{4}) - (\d).*`)
+var reMateria *regexp.Regexp = regexp.MustCompile(`Actividad: ([^\s\(]+(?:\s[^\s\(]+)*)\s?\(([^\)]+)\)`)
+var reCatedra *regexp.Regexp = regexp.MustCompile(`(?i)Comisión: (?:(?:CURSO:? ?)?(\d{1,2})([a-cA-C])?|CURSO:? ?([a-záéíóúñA-ZÁÉÍÓÚÑ ]+))`)
+var reDocente *regexp.Regexp = regexp.MustCompile(`([a-záéíóúñA-ZÁÉÍÓÚÑ ]+)\s*\(([^\)]+)\)`)
 
+// Los cuatrimestres no contienen las materias parseadas, ya que esta tarea
+// realmente solo se quiere hacer con el último cuatrimestre, para actualizar
+// los registros.
 type cuatri struct {
-	anio   int
-	numero int
-	data   string
+	anio      int
+	numero    int
+	contenido string
 }
 
-// TODO: Voy a necesitar una forma de asegurarme que pueda asociar estas
-// materias a las materias que tengo en la base de datos. En el SIU tengo los
-// códigos de las materias, en el listado de planes de FIUBA Map no (no tengo
-// los oficiales).
-//
-// Puedo ir recuperando los códigos finales de las materias a medida me vayan
-// llegando los listados de materias, para así mapearlos con los de FIUBA Map.
-// Inicialmente me puedo quedar con las cátedras que ya tenía en Dolly. Este
-// paquete no se encarga de esto, solo de la funcionalidad de extracción de
-// esta información desde el SIU.
 type Materia struct {
-	Nombre string
-	Codigo string
-	data   string
+	Nombre   string
+	Codigo   string
+	Catedras []Catedra
 }
 
 type Catedra struct {
@@ -45,19 +37,16 @@ type Docente struct {
 	Rol    string
 }
 
-func ObtenerCatedras(contenidoSiu string) []Catedra {
+func ScrapearSiu(contenidoSiu string) []Materia {
 	cuatris := obtenerCuatris(contenidoSiu)
-
-	for _, cuatri := range cuatris {
-		materias := obtenerMaterias(cuatri.data)
-		fmt.Println(materias)
-	}
-
-	return nil
+	ultimoCuat := cuatris[len(cuatris)-1]
+	return obtenerMaterias(ultimoCuat.contenido)
 }
 
 func obtenerCuatris(contenidoSiu string) []cuatri {
 	locs := reCuatri.FindAllStringSubmatchIndex(contenidoSiu, -1)
+
+	// En el SIU nunca hay más de dos cuatrimestres listados al mismo tiempo.
 	cuatris := make([]cuatri, 0, 2)
 
 	for i := 0; i < len(locs); i++ {
@@ -72,33 +61,21 @@ func obtenerCuatris(contenidoSiu string) []cuatri {
 			fin = len(contenidoSiu)
 		}
 
-		nombreStr := contenidoSiu[loc[4]:loc[5]]
-		if !strings.HasSuffix(nombreStr, "Cuatrimestre") {
-			// Estamos procesando un curso de verano.
-			continue
-		}
-
-		// Se asume que en si ya estamos en el formato correcto, el valor del
-		// cuatrimestre va a ser correcto y va tener el formato correcto (valor
-		// ASCII para '1' o '2').
-		numero := int(nombreStr[0]) - '0'
-
 		anioStr := contenidoSiu[loc[2]:loc[3]]
-		anio, err := strconv.Atoi(anioStr)
-		if err != nil {
-			continue
-		}
+		numeroStr := contenidoSiu[loc[4]:loc[5]]
 
-		data := contenidoSiu[inicio:fin]
+		anio, _ := strconv.Atoi(anioStr)
+		// El regex matchea un solo dígito.
+		numero := int(numeroStr[0]) - '0'
 
-		cuatris = append(cuatris, cuatri{anio, numero, data})
+		cuatris = append(cuatris, cuatri{anio, numero, contenidoSiu[inicio:fin]})
 	}
 
 	return cuatris
 }
 
-func obtenerMaterias(dataCuatri string) []Materia {
-	locs := reMateria.FindAllStringSubmatchIndex(dataCuatri, -1)
+func obtenerMaterias(contenidoCuatri string) []Materia {
+	locs := reMateria.FindAllStringSubmatchIndex(contenidoCuatri, -1)
 	materias := make([]Materia, 0, len(locs))
 
 	for i := 0; i < len(locs); i++ {
@@ -110,25 +87,38 @@ func obtenerMaterias(dataCuatri string) []Materia {
 		if i+1 < len(locs) {
 			fin = locs[i+1][0]
 		} else {
-			fin = len(dataCuatri)
+			fin = len(contenidoCuatri)
 		}
 
-		nombre := dataCuatri[loc[2]:loc[3]]
-		if strings.HasPrefix(nombre, "TRABAJO PROFESIONAL") {
+		nombre := strings.ToUpper(contenidoCuatri[loc[2]:loc[3]])
+		if strings.Contains(nombre, "TRABAJO PROFESIONAL") {
 			continue
 		}
 
-		codigo := dataCuatri[loc[4]:loc[5]]
-		data := dataCuatri[inicio:fin]
+		codigo := contenidoCuatri[loc[4]:loc[5]]
+		catedras := obtenerCatedras(contenidoCuatri[inicio:fin])
 
-		materias = append(materias, Materia{nombre, codigo, data})
+		materias = append(materias, Materia{nombre, codigo, catedras})
 	}
 
 	return materias
 }
 
-func obtenerCatedras(dataMateria string) []Catedra {
-	locs := reCatedra.FindAllStringSubmatchIndex(dataMateria, -1)
+func obtenerCatedrasConDocentes(contenidoMateria string) []Catedra {
+	catedras := obtenerCatedras(contenidoMateria)
+	catedrasConDocentes := make([]Catedra, 0, len(catedras))
+
+	for _, cat := range catedras {
+		if len(cat.Docentes) != 0 {
+			catedrasConDocentes = append(catedrasConDocentes, cat)
+		}
+	}
+
+	return catedrasConDocentes
+}
+
+func obtenerCatedras(contenidoMateria string) []Catedra {
+	locs := reCatedra.FindAllStringSubmatchIndex(contenidoMateria, -1)
 	catedrasMap := make(map[int]*Catedra, 0)
 
 	for i := 0; i < len(locs); i++ {
@@ -140,27 +130,27 @@ func obtenerCatedras(dataMateria string) []Catedra {
 		if i+1 < len(locs) {
 			fin = locs[i+1][0]
 		} else {
-			fin = len(dataMateria)
+			fin = len(contenidoMateria)
 		}
 
-		// El regex para obtener el nombre de la cátedra tiene cuatro grupos:
-		// 	• 1: La captura completa.
-		// 	• 2: El número de curso. Solo el número, no la letra de la
-		// 		 variante. En el caso de que una cátedra sea única y no tenga
-		// 		 código, este grupo no matchea. En este caso las cátedras
-		// 		 tienen nombre en vez de número.
-		// 	• 3: La letra que representa a la variante del curso. En el caso de
-		// 		 que una cátedra sea única este grupo no matchea. Lo mismo para
-		// 		 cátedras sin variantes.
-		// 	• 4: Solo matchea para las cátedras únicas que tienen nombre en vez
-		// 		 de número. Contiene el nombre matcheado.
-		// En el caso de cátedras sin código en el SIU, fiuba-reviews les
+		// El regex para obtener el nombre de la cátedra tiene tres grupos (sin
+		// contar la captura completa):
+		// 1: El número de curso. Solo el número, no la letra de la
+		//    variante. En el caso de que una cátedra sea única y no tenga
+		//    código, este grupo no matchea. En este caso las cátedras
+		//    tienen nombre en vez de número.
+		// 2: La letra que representa a la variante del curso. En el caso de
+		//    que una cátedra sea única este grupo no matchea. Lo mismo para
+		//    cátedras sin variantes.
+		// 3: Solo matchea para las cátedras únicas que tienen nombre en vez
+		//    de número. Contiene el nombre matcheado.
+		// En el caso de cátedras sin código en el SIU, FIUBA Reviews les
 		// asigna el número 1.
 
 		var cod int
 
 		if loc[6] != -1 {
-			if dataMateria[loc[6]:loc[7]] == "CONDICIONALES" {
+			if contenidoMateria[loc[6]:loc[7]] == "CONDICIONALES" {
 				continue
 			}
 
@@ -169,10 +159,14 @@ func obtenerCatedras(dataMateria string) []Catedra {
 			// Cualquier formato no numérico directamente no es considerado
 			// como un código, por lo que matchea el regex con el grupo 3. Es
 			// decir, esta serialización no puede fallar.
-			cod, _ = strconv.Atoi(dataMateria[loc[2]:loc[3]])
+			cod, _ = strconv.Atoi(contenidoMateria[loc[2]:loc[3]])
 		}
 
-		docentes := obtenerDocentes(dataMateria[inicio:fin])
+		// Acá docentes puede retornar `nil`, sin embargo, no vamos a hacer el
+		// filtrado de las cátedras ahora, sino que simplemente guardamos la
+		// cátedra o extendemos los docentes, y luego podemos hacer un filtrado
+		// de cátedras sin docentes.
+		docentes := obtenerDocentes(contenidoMateria[inicio:fin])
 
 		if cat, ok := catedrasMap[cod]; ok {
 			cat.Docentes = append(cat.Docentes, docentes...)
@@ -190,19 +184,24 @@ func obtenerCatedras(dataMateria string) []Catedra {
 	return catedras
 }
 
-func obtenerDocentes(dataCatedra string) []Docente {
-	matches := reDocente.FindAllStringSubmatch(dataCatedra, -1)
+func obtenerDocentes(contenidoCatedra string) []Docente {
+	matches := reDocente.FindAllStringSubmatch(contenidoCatedra, -1)
+	if len(matches) == 0 {
+		// La cátedra no tiene docentes (es un formato válido, no un error).
+		return nil
+	}
+
 	docentes := make([]Docente, 0, len(matches))
 
 	for i := 0; i < len(matches); i++ {
 		nombre, rol := matches[i][1], matches[i][2]
 
-		nombre = strings.TrimSpace(nombre)
+		nombre = strings.ToUpper(strings.TrimSpace(nombre))
 		if nombre == "A DESIGNAR A DESIGNAR" {
 			continue
 		}
 
-		rol = strings.TrimSpace(rol)
+		rol = strings.ReplaceAll(strings.TrimSpace(rol), "/a", "")
 
 		docentes = append(docentes, Docente{nombre, rol})
 	}

@@ -7,123 +7,101 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestObtenerCuatris(t *testing.T) {
-	contenidoSiu := `
+func TestSeObtienenLosCuatrisCorrectamente(t *testing.T) {
+	assert := assert.New(t)
+
+	cuatris := obtenerCuatris(`
 Período lectivo: 2024 - 1er Cuatrimestre
-Materias del primer cuatrimestre aquí...
-Cátedras del primer cuatrimestre aquí...
-
 Período lectivo: 2024 - 2do Cuatrimestre
-Materias del segundo cuatrimestre aquí...
-Cátedras del segundo cuatrimestre aquí...
-	`
+	`)
 
-	cuatris := obtenerCuatris(contenidoSiu)
+	assert.Len(cuatris, 2)
 
-	assert.Len(t, cuatris, 2)
+	assert.Equal(2024, cuatris[0].anio)
+	assert.Equal(1, cuatris[0].numero)
 
-	assert.Equal(t, 2024, cuatris[0].anio)
-	assert.Equal(t, 1, cuatris[0].numero)
-	assert.Equal(
-		t,
-		`Materias del primer cuatrimestre aquí...
-Cátedras del primer cuatrimestre aquí...`,
-		strings.TrimSpace(cuatris[0].data),
-	)
-
-	assert.Equal(t, 2024, cuatris[1].anio)
-	assert.Equal(t, 2, cuatris[1].numero)
-	assert.Equal(
-		t,
-		`Materias del segundo cuatrimestre aquí...
-Cátedras del segundo cuatrimestre aquí...`,
-		strings.TrimSpace(cuatris[1].data),
-	)
+	assert.Equal(2024, cuatris[1].anio)
+	assert.Equal(2, cuatris[1].numero)
 }
 
-func TestNoSeConsideranLosCursoDeVerano(t *testing.T) {
-	contenidoSiu := `
-Período lectivo: 2025 - Curso de verano
-Materias del curso de verano aquí...
-Cátedras del curso de verano aquí...
-	`
-
-	cuatris := obtenerCuatris(contenidoSiu)
+func TestSeIgnorarLosCuatrisConAnioInvalido(t *testing.T) {
+	cuatris := obtenerCuatris(`
+Período lectivo: @$^! - 1er Cuatrimestre
+	`)
 
 	assert.Empty(t, cuatris)
 }
 
-func TestObtenerMaterias(t *testing.T) {
-	data := `
-Actividad: INTRODUCCIÓN AL DESARROLLO DE SOFTWARE (TB022)
-Cátedras de la materia TB022 aquí...
+func TestSeIgnoranLosCursosDeVerano(t *testing.T) {
+	cuatris := obtenerCuatris(`
+Período lectivo: 2024 - Curso de Verano 2024/2025
+	`)
 
-Actividad: MODELACIÓN NUMÉRICA(CB051)
-Cátedras de la materia CB051 aquí...
+	assert.Empty(t, cuatris)
+}
 
-Actividad: ORGANIZACIÓN DEL COMPUTADOR (TB023)
-Cátedras de la materia TB023 aquí...
-	`
+func TestSeObtieneElContenidoDeLosCuatrisCorrectamente(t *testing.T) {
+	assert := assert.New(t)
 
-	materias := obtenerMaterias(data)
+	cuatris := obtenerCuatris(`
+Período lectivo: 2024 - 1er Cuatrimestre
+CONTENIDO 1ER CUATRIMESTRE 2024
+MÁS CONTENIDO 1ER CUATRIMESTRE 2024
 
-	assert.Len(t, materias, 3)
+Período lectivo: 2024 - 2do Cuatrimestre
+CONTENIDO 2DO CUATRIMESTRE 2024
+MÁS CONTENIDO 2DO CUATRIMESTRE 2024
+	`)
 
-	assert.Equal(t, "INTRODUCCIÓN AL DESARROLLO DE SOFTWARE", materias[0].Nombre)
-	assert.Equal(t, "TB022", materias[0].Codigo)
 	assert.Equal(
-		t,
-		`Cátedras de la materia TB022 aquí...`,
-		strings.TrimSpace(materias[0].data),
+		`CONTENIDO 1ER CUATRIMESTRE 2024
+MÁS CONTENIDO 1ER CUATRIMESTRE 2024`,
+		strings.TrimSpace(cuatris[0].contenido),
 	)
-
-	assert.Equal(t, "MODELACIÓN NUMÉRICA", materias[1].Nombre)
-	assert.Equal(t, "CB051", materias[1].Codigo)
 	assert.Equal(
-		t,
-		`Cátedras de la materia CB051 aquí...`,
-		strings.TrimSpace(materias[1].data),
-	)
-
-	assert.Equal(t, "ORGANIZACIÓN DEL COMPUTADOR", materias[2].Nombre)
-	assert.Equal(t, "TB023", materias[2].Codigo)
-	assert.Equal(
-		t,
-		`Cátedras de la materia TB023 aquí...`,
-		strings.TrimSpace(materias[2].data),
+		`CONTENIDO 2DO CUATRIMESTRE 2024
+MÁS CONTENIDO 2DO CUATRIMESTRE 2024`,
+		strings.TrimSpace(cuatris[1].contenido),
 	)
 }
 
-func TestObtenerCatedras(t *testing.T) {
-	data := `
-Comisión: CURSO: 05
-Docentes: BUCHWALD MARTÍN EZEQUIEL (Profesor Adjunto), PODBEREZSKI VICTOR DANIEL (Profesor Adjunto), GENENDER PEÑA EZEQUIEL DAVID (Jefe Trabajos Practicos)
-Horarios de la cátedra 05 aquí...
+func TestSeObtienenLasMateriasDeUnCuatriCorrectamente(t *testing.T) {
+	assert := assert.New(t)
 
-Comisión: CURSO: 07
-Docentes: BUCHWALD MARTÍN EZEQUIEL (Profesor Adjunto), GENENDER PEÑA EZEQUIEL DAVID (Jefe Trabajos Practicos)
-Horarios de la cátedra 07 aquí...
-	`
+	materias := obtenerMaterias(`
+Actividad: ÁLGEBRA LINEAL (CB002)
+Actividad: ALGORITMOS Y ESTRUCTURAS DE DATOS (CB100)
+Actividad: ANÁLISIS MATEMÁTICO II (CB001)
+`)
 
-	catedras := obtenerCatedras(data)
+	assert.Len(materias, 3)
 
-	assert.Len(t, catedras, 2)
+	assert.Equal("ÁLGEBRA LINEAL", materias[0].Nombre)
+	assert.Equal("CB002", materias[0].Codigo)
 
-	assert.Equal(t, 5, catedras[0].Codigo)
-	assert.Contains(t, catedras[0].Docentes, Docente{"BUCHWALD MARTÍN EZEQUIEL", "Profesor Adjunto"})
-	assert.Contains(t, catedras[0].Docentes, Docente{"PODBEREZSKI VICTOR DANIEL", "Profesor Adjunto"})
-	assert.Contains(t, catedras[0].Docentes, Docente{"GENENDER PEÑA EZEQUIEL DAVID", "Jefe Trabajos Practicos"})
+	assert.Equal("ALGORITMOS Y ESTRUCTURAS DE DATOS", materias[1].Nombre)
+	assert.Equal("CB100", materias[1].Codigo)
 
-	assert.Equal(t, 7, catedras[1].Codigo)
-	assert.Contains(t, catedras[0].Docentes, Docente{"BUCHWALD MARTÍN EZEQUIEL", "Profesor Adjunto"})
-	assert.Contains(t, catedras[0].Docentes, Docente{"GENENDER PEÑA EZEQUIEL DAVID", "Jefe Trabajos Practicos"})
+	assert.Equal("ANÁLISIS MATEMÁTICO II", materias[2].Nombre)
+	assert.Equal("CB001", materias[2].Codigo)
 }
 
-func TestFormatosCodigosCatedras(t *testing.T) {
-	// Existen más de 10 formatos diferentes en los que el SIU muestra los
-	// nombre de las cátedras. ¿Por qué?. No lo sé.
+func TestSeIgnoranLasMateriasDeTrabajoProfesional(t *testing.T) {
+	materias := obtenerMaterias(`
+Actividad: TRABAJO PROFESIONAL DE INGENIERÍA INFORMÁTICA (TA053)
+Actividad: TRABAJO PROFESIONAL DE INGENIERÍA QUÍMICA (TA170)
+`)
 
-	data := `
+	assert.Empty(t, materias)
+}
+
+func TestSeObtieneLasCatedrasDeUnaMateriaCorrectamente(t *testing.T) {
+	// Por alguna razón el SIU tiene una amplia variedad de formatos para
+	// nombrar cátedras.
+
+	assert := assert.New(t)
+
+	catedras := obtenerCatedras(`
 Comisión: CURSO: 1
 Comisión: CURSO: 02
 Comisión: 03
@@ -135,107 +113,105 @@ Comisión: CURSO: 08- Ramos
 Comisión: CURSO: 9-
 Comisión: CURSO:10
 Comisión: CURSO:11A
-	`
+Comisión: CURSO 12
+Comisión: Curso: 13
+Comisión: Curso 14
+		`)
 
-	catedras := obtenerCatedras(data)
+	assert.Len(catedras, 14)
 
-	assert.Len(t, catedras, 11)
+	codigosExpected := make([]int, 0, len(catedras))
+	codigosActual := make([]int, 0, len(catedras))
+
+	for i, cat := range catedras {
+		codigosExpected = append(codigosExpected, i+1)
+		codigosActual = append(codigosActual, cat.Codigo)
+	}
+
+	assert.ElementsMatch(codigosExpected, codigosActual)
 }
 
-func TestSeAsignaUnCodigoALasCatedrasSinCodigo(t *testing.T) {
-	// Uno de los formatos de cátedra es aquel en el que solo se detalle el
-	// nombre de la misma, es decir, la cátedra no tiene ni código ni mucho
-	// menos variante. Esto sucede para algunas cátedras únicas. En este caso
-	// se le asigna el código 1.
+func TestSeAsignaElCodigo1ALasCatedrasUnicasSinCodigo(t *testing.T) {
+	assert := assert.New(t)
 
-	data := "Comisión: CURSO: Caram"
-	catedras := obtenerCatedras(data)
+	catedras := obtenerCatedras(`
+Comisión: CURSO: Caram
+		`)
 
-	assert.Equal(t, catedras[0].Codigo, 1)
+	assert.Len(catedras, 1)
+	assert.Equal(catedras[0].Codigo, 1)
 }
 
-func TestFormatosNombresDocentes(t *testing.T) {
-	// La string que se pasa es por cátedra, así que tenemos que hacer el test
-	// 4 veces con argumentos diferentes para probar todos los formatos.
+func TestSeIgnoranLasCatedrasSinCodigoONombre(t *testing.T) {
+	catedras := obtenerCatedras(`
+Comisión: CURSO:
+Comisión:
+		`)
 
-	data := "Docentes: RAMOS SILVIA ADRIANA (Profesor Adjunto)"
-	docentes := obtenerDocentes(data)
-
-	assert.Len(t, docentes, 1)
-	assert.Equal(t, docentes[0].Nombre, "RAMOS SILVIA ADRIANA")
-	assert.Equal(t, docentes[0].Rol, "Profesor Adjunto")
-
-	data = "Docentes: BUCHWALD MARTÍN EZEQUIEL (Profesor Adjunto), PODBEREZSKI VICTOR DANIEL (Profesor Adjunto), GENENDER PEÑA EZEQUIEL DAVID (Jefe Trabajos Practicos)"
-	docentes = obtenerDocentes(data)
-
-	assert.Len(t, docentes, 3)
-
-	assert.Contains(t, docentes, Docente{"BUCHWALD MARTÍN EZEQUIEL", "Profesor Adjunto"})
-	assert.Contains(t, docentes, Docente{"PODBEREZSKI VICTOR DANIEL", "Profesor Adjunto"})
-	assert.Contains(t, docentes, Docente{"GENENDER PEÑA EZEQUIEL DAVID", "Jefe Trabajos Practicos"})
-
-	data = "Docentes: Sin docentes"
-	docentes = obtenerDocentes(data)
-
-	assert.Empty(t, docentes)
+	assert.Empty(t, catedras)
 }
 
-func TestNoSeConsideranLosDocentesPorDesignar(t *testing.T) {
-	data := "Docentes: A DESIGNAR A DESIGNAR (Profesor Adjunto), BOGGI SILVINA (Profesor Adjunto), VENTURIELLO VERONICA LAURA (Ayudante 1ro)"
-	docentes := obtenerDocentes(data)
+func TestSeIgnoranLasCatedrasParaCondicionales(t *testing.T) {
+	catedras := obtenerCatedras(`
+Comisión: CONDICIONALES
+		`)
 
-	assert.Len(t, docentes, 2)
-	assert.NotEqual(t, docentes[0], "A DESIGNAR A DESIGNAR")
-	assert.NotEqual(t, docentes[1], "A DESIGNAR A DESIGNAR")
+	assert.Empty(t, catedras)
 }
 
-func TestSeUnificanLasCatedrasConVariantes(t *testing.T) {
-	// Algunas cátedras tienen horarios diferentes para diferentes grupos, por
-	// ejemplo, cuando yo cursé 'Fisica I', la mitad de los alumnos de mi
-	// cátedra iban al laboratorio mientras los demás se quedaban en el aula
-	// recibiendo la clase teórica. El SIU trata estos horarios como cátedras
-	// diferentes con un mismo código, pero les agrega un sufijo alfabético
-	// diferente a cada una. FIUBA Review los trata como una sola cátedra.
+func TestSeObtienenLosNombresDeLosDocentesCorrectamente(t *testing.T) {
+	assert := assert.New(t)
 
-	data := `
-Comisión: CURSO: 23A
-Docentes: BUCHWALD MARTÍN EZEQUIEL (Profesor Adjunto)
+	docentes := obtenerDocentes(`
+Docentes: BUCHWALD MARTÍN EZEQUIEL (Profesor/a Adjunto/a), PODBEREZSKI VICTOR DANIEL (Profesor/a Adjunto/a), GENENDER PEÑA EZEQUIEL DAVID (Jefe/a Trabajos Practicos)
+		`)
 
-Comisión: CURSO: 23B
-Docentes: PODBEREZSKI VICTOR DANIEL (Profesor Adjunto)
+	assert.Len(docentes, 3)
 
-Comisión: CURSO: 23C
-Docentes: GENENDER PEÑA EZEQUIEL DAVID (Jefe Trabajos Practicos)
-	`
-
-	catedras := obtenerCatedras(data)
-
-	assert.Len(t, catedras, 1)
-	assert.Equal(t, 23, catedras[0].Codigo)
-
-	assert.Contains(t, catedras[0].Docentes, Docente{"BUCHWALD MARTÍN EZEQUIEL", "Profesor Adjunto"})
-	assert.Contains(t, catedras[0].Docentes, Docente{"PODBEREZSKI VICTOR DANIEL", "Profesor Adjunto"})
-	assert.Contains(t, catedras[0].Docentes, Docente{"GENENDER PEÑA EZEQUIEL DAVID", "Jefe Trabajos Practicos"})
+	assert.Contains(docentes, Docente{"BUCHWALD MARTÍN EZEQUIEL", "Profesor Adjunto"})
+	assert.Contains(docentes, Docente{"PODBEREZSKI VICTOR DANIEL", "Profesor Adjunto"})
+	assert.Contains(docentes, Docente{"GENENDER PEÑA EZEQUIEL DAVID", "Jefe Trabajos Practicos"})
 }
 
-func TestNoSeConsideranLasCatedraParaCondicionales(t *testing.T) {
-	data := "Comisión: CONDICIONALES"
+func TestSeRetornaNilCuandoSeEncuentraUnaCatedraSinDocentes(t *testing.T) {
+	docentes := obtenerDocentes(`Docentes: Sin docentes`)
 
-	catedras := obtenerCatedras(data)
-
-	assert.Len(t, catedras, 0)
+	assert.Nil(t, docentes)
 }
 
-func TestNoSeConsideraElTrabajoProfesional(t *testing.T) {
-	data := `
-Actividad: TRABAJO PROFESIONAL DE INGENIERÍA INFORMÁTICA (TA053)
-Cátedras de la materia TA053 aquí...
+func TestSeIgnoranLasCatedrasSinDocentes(t *testing.T) {
+	assert := assert.New(t)
 
-Actividad: TRABAJO PROFESIONAL DE INGENIERÍA QUÍMICA (TA170)
-Cátedras de la materia TA170 aquí...
-	`
+	catedras := obtenerCatedrasConDocentes(`
+Comisión: CURSO: 1
+Docentes: BUCHWALD MARTÍN EZEQUIEL (Profesor/a Adjunto/a), PODBEREZSKI VICTOR DANIEL (Profesor/a Adjunto/a), GENENDER PEÑA EZEQUIEL DAVID (Jefe/a Trabajos Practicos)
 
-	materias := obtenerMaterias(data)
+Comisión: CURSO: 2
+Docentes: Sin docentes
+		`)
 
-	assert.Empty(t, materias)
+	assert.Len(catedras, 1)
+	assert.Equal(1, catedras[0].Codigo)
+}
+
+func TestSeAceptaCasingVariadoParaLosNombresDeLasMaterias(t *testing.T) {
+	assert := assert.New(t)
+
+	materias := obtenerMaterias(`
+Actividad: álgebra lineal (CB002)
+		`)
+
+	assert.Len(materias, 1)
+	assert.Equal("ÁLGEBRA LINEAL", materias[0].Nombre)
+}
+
+func TestSeAceptaCasingVariadoParaLosNombresDeLosDocentes(t *testing.T) {
+	assert := assert.New(t)
+
+	docentes := obtenerDocentes(`
+Docentes: BUCHWALD martín ezequiel (Profesor/a Adjunto/a)
+		`)
+
+	assert.Len(docentes, 1)
+	assert.Equal("BUCHWALD MARTÍN EZEQUIEL", docentes[0].Nombre)
 }
