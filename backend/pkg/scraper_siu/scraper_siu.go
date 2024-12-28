@@ -22,25 +22,25 @@ type cuatri struct {
 }
 
 type Materia struct {
-	Nombre   string
-	Codigo   string
-	Catedras []Catedra
+	Nombre   string    `json:"nombre"`
+	Codigo   string    `json:"codigo"`
+	Catedras []Catedra `json:"catedras"`
 }
 
 type Catedra struct {
-	Codigo   int
-	Docentes []Docente
+	Codigo   int       `json:"codigo"`
+	Docentes []Docente `json:"docentes"`
 }
 
 type Docente struct {
-	Nombre string
-	Rol    string
+	Nombre string `json:"nombre"`
+	Rol    string `json:"rol"`
 }
 
 func ScrapearSiu(contenidoSiu string) []Materia {
 	cuatris := obtenerCuatris(contenidoSiu)
 	ultimoCuat := cuatris[len(cuatris)-1]
-	return obtenerMaterias(ultimoCuat.contenido)
+	return obtenerMateriasDeCuatri(ultimoCuat.contenido)
 }
 
 func obtenerCuatris(contenidoSiu string) []cuatri {
@@ -74,7 +74,7 @@ func obtenerCuatris(contenidoSiu string) []cuatri {
 	return cuatris
 }
 
-func obtenerMaterias(contenidoCuatri string) []Materia {
+func obtenerMateriasDeCuatri(contenidoCuatri string) []Materia {
 	locs := reMateria.FindAllStringSubmatchIndex(contenidoCuatri, -1)
 	materias := make([]Materia, 0, len(locs))
 
@@ -96,7 +96,7 @@ func obtenerMaterias(contenidoCuatri string) []Materia {
 		}
 
 		codigo := contenidoCuatri[loc[4]:loc[5]]
-		catedras := obtenerCatedras(contenidoCuatri[inicio:fin])
+		catedras := obtenerCatedrasDeMateria(contenidoCuatri[inicio:fin])
 
 		materias = append(materias, Materia{nombre, codigo, catedras})
 	}
@@ -105,7 +105,7 @@ func obtenerMaterias(contenidoCuatri string) []Materia {
 }
 
 func obtenerCatedrasConDocentes(contenidoMateria string) []Catedra {
-	catedras := obtenerCatedras(contenidoMateria)
+	catedras := obtenerCatedrasDeMateria(contenidoMateria)
 	catedrasConDocentes := make([]Catedra, 0, len(catedras))
 
 	for _, cat := range catedras {
@@ -117,9 +117,11 @@ func obtenerCatedrasConDocentes(contenidoMateria string) []Catedra {
 	return catedrasConDocentes
 }
 
-func obtenerCatedras(contenidoMateria string) []Catedra {
+func obtenerCatedrasDeMateria(contenidoMateria string) []Catedra {
 	locs := reCatedra.FindAllStringSubmatchIndex(contenidoMateria, -1)
-	catedrasMap := make(map[int]*Catedra, 0)
+
+	catedrasMap := make(map[int]*Catedra)
+	catedraDocentesMap := make(map[int]map[Docente]bool)
 
 	for i := 0; i < len(locs); i++ {
 		loc := locs[i]
@@ -162,36 +164,44 @@ func obtenerCatedras(contenidoMateria string) []Catedra {
 			cod, _ = strconv.Atoi(contenidoMateria[loc[2]:loc[3]])
 		}
 
-		// Acá docentes puede retornar `nil`, sin embargo, no vamos a hacer el
-		// filtrado de las cátedras ahora, sino que simplemente guardamos la
-		// cátedra o extendemos los docentes, y luego podemos hacer un filtrado
-		// de cátedras sin docentes.
-		docentes := obtenerDocentes(contenidoMateria[inicio:fin])
+		docentesMap := obtenerDocentesDeVariante(contenidoMateria[inicio:fin])
 
-		if cat, ok := catedrasMap[cod]; ok {
-			cat.Docentes = append(cat.Docentes, docentes...)
+		if docsCat, ok := catedraDocentesMap[cod]; ok {
+			for doc := range docentesMap {
+				docsCat[doc] = true
+			}
 		} else {
-			catedrasMap[cod] = &Catedra{cod, docentes}
+			catedraDocentesMap[cod] = docentesMap
 		}
+
+		catedrasMap[cod] = &Catedra{Codigo: cod}
 	}
 
 	catedras := make([]Catedra, 0, len(catedrasMap))
 
-	for _, cat := range catedrasMap {
+	for cod, cat := range catedrasMap {
+		docentesMap := catedraDocentesMap[cod]
+		docentes := make([]Docente, 0, len(docentesMap))
+
+		for doc := range docentesMap {
+			docentes = append(docentes, doc)
+		}
+
+		cat.Docentes = docentes
 		catedras = append(catedras, *cat)
 	}
 
 	return catedras
 }
 
-func obtenerDocentes(contenidoCatedra string) []Docente {
+func obtenerDocentesDeVariante(contenidoCatedra string) map[Docente]bool {
 	matches := reDocente.FindAllStringSubmatch(contenidoCatedra, -1)
 	if len(matches) == 0 {
 		// La cátedra no tiene docentes (es un formato válido, no un error).
 		return nil
 	}
 
-	docentes := make([]Docente, 0, len(matches))
+	docentesMap := make(map[Docente]bool)
 
 	for i := 0; i < len(matches); i++ {
 		nombre, rol := matches[i][1], matches[i][2]
@@ -203,8 +213,8 @@ func obtenerDocentes(contenidoCatedra string) []Docente {
 
 		rol = strings.ReplaceAll(strings.TrimSpace(rol), "/a", "")
 
-		docentes = append(docentes, Docente{nombre, rol})
+		docentesMap[Docente{nombre, rol}] = true
 	}
 
-	return docentes
+	return docentesMap
 }

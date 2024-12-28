@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -10,16 +11,12 @@ import (
 
 func main() {
 	bytes, _ := io.ReadAll(os.Stdin)
-	materias := scraper_siu.ScrapearSiu(string(bytes))
+	infoSiu := scraper_siu.ScrapearSiu(string(bytes))
 
-	for _, mat := range materias {
-		fmt.Println("MATERIA:", mat.Nombre)
-		for _, cat := range mat.Catedras {
-			fmt.Println("CATEDRA:", cat.Codigo)
-			for _, doc := range cat.Docentes {
-				fmt.Println(doc.Nombre, doc.Rol)
-			}
-			fmt.Println()
-		}
+	bytes, err := json.Marshal(infoSiu)
+	if err != nil {
+		fmt.Println(err)
 	}
+
+	fmt.Println(string(bytes))
 }

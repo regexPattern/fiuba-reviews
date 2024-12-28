@@ -68,7 +68,7 @@ MÁS CONTENIDO 2DO CUATRIMESTRE 2024`,
 func TestSeObtienenLasMateriasDeUnCuatriCorrectamente(t *testing.T) {
 	assert := assert.New(t)
 
-	materias := obtenerMaterias(`
+	materias := obtenerMateriasDeCuatri(`
 Actividad: ÁLGEBRA LINEAL (CB002)
 Actividad: ALGORITMOS Y ESTRUCTURAS DE DATOS (CB100)
 Actividad: ANÁLISIS MATEMÁTICO II (CB001)
@@ -87,7 +87,7 @@ Actividad: ANÁLISIS MATEMÁTICO II (CB001)
 }
 
 func TestSeIgnoranLasMateriasDeTrabajoProfesional(t *testing.T) {
-	materias := obtenerMaterias(`
+	materias := obtenerMateriasDeCuatri(`
 Actividad: TRABAJO PROFESIONAL DE INGENIERÍA INFORMÁTICA (TA053)
 Actividad: TRABAJO PROFESIONAL DE INGENIERÍA QUÍMICA (TA170)
 `)
@@ -101,7 +101,7 @@ func TestSeObtieneLasCatedrasDeUnaMateriaCorrectamente(t *testing.T) {
 
 	assert := assert.New(t)
 
-	catedras := obtenerCatedras(`
+	catedras := obtenerCatedrasDeMateria(`
 Comisión: CURSO: 1
 Comisión: CURSO: 02
 Comisión: 03
@@ -134,7 +134,7 @@ Comisión: Curso 14
 func TestSeAsignaElCodigo1ALasCatedrasUnicasSinCodigo(t *testing.T) {
 	assert := assert.New(t)
 
-	catedras := obtenerCatedras(`
+	catedras := obtenerCatedrasDeMateria(`
 Comisión: CURSO: Caram
 		`)
 
@@ -143,7 +143,7 @@ Comisión: CURSO: Caram
 }
 
 func TestSeIgnoranLasCatedrasSinCodigoONombre(t *testing.T) {
-	catedras := obtenerCatedras(`
+	catedras := obtenerCatedrasDeMateria(`
 Comisión: CURSO:
 Comisión:
 		`)
@@ -152,7 +152,7 @@ Comisión:
 }
 
 func TestSeIgnoranLasCatedrasParaCondicionales(t *testing.T) {
-	catedras := obtenerCatedras(`
+	catedras := obtenerCatedrasDeMateria(`
 Comisión: CONDICIONALES
 		`)
 
@@ -162,7 +162,7 @@ Comisión: CONDICIONALES
 func TestSeObtienenLosNombresDeLosDocentesCorrectamente(t *testing.T) {
 	assert := assert.New(t)
 
-	docentes := obtenerDocentes(`
+	docentes := obtenerDocentesDeVariante(`
 Docentes: BUCHWALD MARTÍN EZEQUIEL (Profesor/a Adjunto/a), PODBEREZSKI VICTOR DANIEL (Profesor/a Adjunto/a), GENENDER PEÑA EZEQUIEL DAVID (Jefe/a Trabajos Practicos)
 		`)
 
@@ -174,7 +174,7 @@ Docentes: BUCHWALD MARTÍN EZEQUIEL (Profesor/a Adjunto/a), PODBEREZSKI VICTOR D
 }
 
 func TestSeRetornaNilCuandoSeEncuentraUnaCatedraSinDocentes(t *testing.T) {
-	docentes := obtenerDocentes(`Docentes: Sin docentes`)
+	docentes := obtenerDocentesDeVariante(`Docentes: Sin docentes`)
 
 	assert.Nil(t, docentes)
 }
@@ -197,7 +197,7 @@ Docentes: Sin docentes
 func TestSeAceptaCasingVariadoParaLosNombresDeLasMaterias(t *testing.T) {
 	assert := assert.New(t)
 
-	materias := obtenerMaterias(`
+	materias := obtenerMateriasDeCuatri(`
 Actividad: álgebra lineal (CB002)
 		`)
 
@@ -208,10 +208,28 @@ Actividad: álgebra lineal (CB002)
 func TestSeAceptaCasingVariadoParaLosNombresDeLosDocentes(t *testing.T) {
 	assert := assert.New(t)
 
-	docentes := obtenerDocentes(`
+	docentes := obtenerDocentesDeVariante(`
 Docentes: BUCHWALD martín ezequiel (Profesor/a Adjunto/a)
 		`)
 
 	assert.Len(docentes, 1)
-	assert.Equal("BUCHWALD MARTÍN EZEQUIEL", docentes[0].Nombre)
+	assert.Contains(docentes, Docente{"BUCHWALD MARTÍN EZEQUIEL", "Profesor Adjunto"})
+}
+
+func TestSeAgregaCadaDocenteUnaSolaVezAlUnificarVariantesDeCatedras(t *testing.T) {
+	assert := assert.New(t)
+
+	catedras := obtenerCatedrasDeMateria(`
+Comisión: CURSO: 02A
+Docentes: SARRIS CLAUDIA MONICA (Profesor/a Adjunto/a), FAGES LUCIANO RODOLFO (Ayudante 1ro/a)
+
+Comisión: CURSO: 02B
+Docentes: SARRIS CLAUDIA MONICA (Profesor/a Adjunto/a), GOMEZ CIAPPONI LAUTARO (Ayudante 1ro/a)
+		`)
+
+	assert.Len(catedras[0].Docentes, 3)
+
+	assert.Contains(catedras[0].Docentes, Docente{"SARRIS CLAUDIA MONICA", "Profesor Adjunto"})
+	assert.Contains(catedras[0].Docentes, Docente{"FAGES LUCIANO RODOLFO", "Ayudante 1ro"})
+	assert.Contains(catedras[0].Docentes, Docente{"GOMEZ CIAPPONI LAUTARO", "Ayudante 1ro"})
 }
