@@ -2,6 +2,7 @@ package scraper_siu
 
 import (
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -37,6 +38,33 @@ type Catedra struct {
 type Docente struct {
 	Nombre string `json:"nombre"`
 	Rol    string `json:"rol"`
+}
+
+type By func(p1, p2 *cuatri) bool
+
+type cuatriSorter struct {
+	cuatris []cuatri
+	by      By
+}
+
+func (by By) Sort(cuatris []cuatri) {
+	cs := &cuatriSorter{
+		cuatris: cuatris,
+		by:      by,
+	}
+	sort.Sort(cs)
+}
+
+func (s *cuatriSorter) Len() int {
+	return len(s.cuatris)
+}
+
+func (s *cuatriSorter) Swap(i, j int) {
+	s.cuatris[i], s.cuatris[j] = s.cuatris[j], s.cuatris[i]
+}
+
+func (s *cuatriSorter) Less(i, j int) bool {
+	return s.by(&s.cuatris[i], &s.cuatris[j])
 }
 
 // ScrapearSiu obtiene la información de las materias del cuatrimestre más
@@ -76,6 +104,16 @@ func obtenerCuatris(contenidoSiu string) []cuatri {
 
 		cuatris = append(cuatris, cuatri{anio, numero, contenidoSiu[inicio:fin]})
 	}
+
+	By(func(p1, p2 *cuatri) bool {
+		if p1.anio < p2.anio {
+			return true
+		} else if p1.anio > p2.anio {
+			return false
+		} else {
+			return p1.numero < p2.numero
+		}
+	}).Sort(cuatris)
 
 	return cuatris
 }

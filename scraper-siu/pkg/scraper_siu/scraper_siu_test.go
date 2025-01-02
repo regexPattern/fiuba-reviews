@@ -14,10 +14,10 @@ func TestSeObtienenLosCuatrisCorrectamente(t *testing.T) {
 	require := require.New(t)
 
 	cuatris := obtenerCuatris(`
-Período lectivo: 2023 - 1er Cuatrimestre
-Período lectivo: 2023 - 2do Cuatrimestre
 Período lectivo: 2024 - 1er Cuatrimestre
 Período lectivo: 2024 - 2do Cuatrimestre
+Período lectivo: 2023 - 1er Cuatrimestre
+Período lectivo: 2023 - 2do Cuatrimestre
 	`)
 
 	require.Len(cuatris, 4)
