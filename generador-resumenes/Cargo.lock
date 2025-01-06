@@ -566,6 +566,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "generador_resumenes"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "const_format",
+ "dotenvy",
+ "format_serde_error",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -792,24 +810,6 @@ dependencies = [
  "tower",
  "tower-service",
  "tracing",
-]
-
-[[package]]
-name = "ia"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "clap",
- "const_format",
- "dotenvy",
- "format_serde_error",
- "reqwest",
- "serde",
- "serde_json",
- "sqlx",
- "tokio",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]

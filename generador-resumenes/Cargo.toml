@@ -1,5 +1,5 @@
 [package]
-name = "ia"
+name = "generador_resumenes"
 edition = "2021"
 rust-version = "1.76"
 
