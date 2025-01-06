@@ -9,7 +9,7 @@ import (
 )
 
 // Se utilizaron los regexes de FIUBA Plan como inspiración: https://github.com/FdelMazo/FIUBA-Plan/blob/master/src/siuparser.js
-var reCarrera *regexp.Regexp = regexp.MustCompile(`Propuesta: ([a-záéíóúñA-ZÁÉÍÓÚÑ ]+)`)                                                    // https://regex101.com/r/cfElw2/2
+var reCarrera *regexp.Regexp = regexp.MustCompile(`Propuesta: ([a-záéíóúñA-ZÁÉÍÓÚÑ ]+)`) // https://regex101.com/r/cfElw2/2
 var reCuatri *regexp.Regexp = regexp.MustCompile(`Período lectivo: (\d{4}) - (\d).*`)                                                       // https://regex101.com/r/b4DVgP/1
 var reMateria *regexp.Regexp = regexp.MustCompile(`Actividad: ([^\s\(]+(?:\s[^\s\(]+)*)\s?\(([^\)]+)\)`)                                    // https://regex101.com/r/L7SlFt/2
 var reCatedra *regexp.Regexp = regexp.MustCompile(`(?i)Comisión: (?:(?:CURSO:? ?)?(\d{1,2})([a-cA-C])?|CURSO:? ?([a-záéíóúñA-ZÁÉÍÓÚÑ ]+))`) // https://regex101.com/r/oli0zO/2
@@ -28,7 +28,7 @@ type Cuatri struct {
 	// cuatrimestre. Esto se hace ya que solo nos interesa parsear las materias
 	// de cuatrimestres selectos on-demand, no hay necesidad de parsear la
 	// información de todos los cuatrimestres disponibles.
-	contenido string
+	Contenido string
 }
 
 type Materia struct {
@@ -74,6 +74,9 @@ func (s *cuatriSorter) Less(i, j int) bool {
 	return s.by(&s.cuatris[i], &s.cuatris[j])
 }
 
+// ObtenerMetaData encuentra la carrera a la que corresponde la información del
+// SIU enviada y el cuatrimestre relevante de la misma (el último
+// cuatrimestre).
 func ObtenerMetaData(contenidoSiu string) (MetaData, error) {
 	var metaData MetaData
 
@@ -145,11 +148,9 @@ func obtenerCuatris(contenidoSiu string) []Cuatri {
 	return cuatris
 }
 
-func ScrapearCuatri(contenidoCuatri string) []Materia {
-	return obtenerMateriasDeCuatri(contenidoCuatri)
-}
-
-func obtenerMateriasDeCuatri(contenidoCuatri string) []Materia {
+// ObtenerMaterias scrapea el contenido del cuatrimestre y retorna la
+// información de las materias del mismo.
+func ObtenerMaterias(contenidoCuatri string) []Materia {
 	locs := reMateria.FindAllStringSubmatchIndex(contenidoCuatri, -1)
 	materias := make([]Materia, 0, len(locs))
 

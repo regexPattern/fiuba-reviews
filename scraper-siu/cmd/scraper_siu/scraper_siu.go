@@ -50,7 +50,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: Verificar que necesito agregar esta informacion.
 
-	materias := scraper_siu.ScrapearCuatri(contenidoSiu)
+	materias := scraper_siu.ObtenerMaterias(metaData.Cuatri.Contenido)
 
 	slog.Info(fmt.Sprintf("Obtenida la información de %v materias", len(materias)))
 }
