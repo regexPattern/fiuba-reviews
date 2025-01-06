@@ -1,7 +1,7 @@
 use std::{env, io::Write};
 
 use clap::{Parser, Subcommand};
-use ia::llm::OllamaClient;
+use generador_resumenes::llm::OllamaClient;
 use reqwest::Client;
 use sqlx::postgres::PgPoolOptions;
 
@@ -48,7 +48,7 @@ async fn main() -> anyhow::Result<()> {
 
     match cli.comand {
         Subcomando::Resumir => {
-            if let Some(query) = ia::query_actualizacion_resumenes(llm, &db).await? {
+            if let Some(query) = generador_resumenes::query_actualizacion_resumenes(llm, &db).await? {
                 let mut file = std::fs::File::create("update.sql")?;
                 file.write_all(query.as_bytes())?;
 
