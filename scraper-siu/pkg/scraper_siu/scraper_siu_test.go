@@ -7,11 +7,28 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
+func TestSeRetornaUnErrorCuandoNoHayCarrera(t *testing.T) {
+	_, err := obtenerCarrera(`
+Propuesta: 
+		`)
+
+	assert.EqualError(t, err, "No se encontró la carrera")
+}
+
+func TestSeObtieneLaCarreraCorrectamente(t *testing.T) {
+	carrera, _ := obtenerCarrera(`
+Propuesta: Ingeniería en Informática
+		`)
+
+	assert.Equal(t, "INGENIERÍA EN INFORMÁTICA", carrera)
+}
+
 func TestSeObtienenLosCuatrisCorrectamente(t *testing.T) {
-	require := require.New(t)
+	assert := assert.New(t)
 
 	cuatris := obtenerCuatris(`
 Período lectivo: 2024 - 1er Cuatrimestre
@@ -20,22 +37,30 @@ Período lectivo: 2023 - 1er Cuatrimestre
 Período lectivo: 2023 - 2do Cuatrimestre
 	`)
 
-	require.Len(cuatris, 4)
+	require.Len(t, cuatris, 4)
 
 	// Los cuatrimestres se retornan ordenados cronológicamente, con el más
 	// reciente al final del listado.
 
-	require.Equal(2023, cuatris[0].anio)
-	require.Equal(1, cuatris[0].numero)
+	assert.Equal(2023, cuatris[0].Anio)
+	assert.Equal(1, cuatris[0].Numero)
 
-	require.Equal(2023, cuatris[1].anio)
-	require.Equal(2, cuatris[1].numero)
+	assert.Equal(2023, cuatris[1].Anio)
+	assert.Equal(2, cuatris[1].Numero)
 
-	require.Equal(2024, cuatris[2].anio)
-	require.Equal(1, cuatris[2].numero)
+	assert.Equal(2024, cuatris[2].Anio)
+	assert.Equal(1, cuatris[2].Numero)
 
-	require.Equal(2024, cuatris[3].anio)
-	require.Equal(2, cuatris[3].numero)
+	assert.Equal(2024, cuatris[3].Anio)
+	assert.Equal(2, cuatris[3].Numero)
+}
+
+func TestSeRetornaUnErrorCuandoNoHayCuatrimestres(t *testing.T) {
+	_, err := ObtenerMetaData(`
+Propuesta: Ingeniería en Informática
+		`)
+
+	assert.EqualError(t, err, "No se encontraron cuatrimestres")
 }
 
 func TestSeIgnorarLosCuatrisConAnioInvalido(t *testing.T) {
@@ -271,7 +296,7 @@ func TestOfertaDeComisionesInformatica2C2024(t *testing.T) {
 	require := require.New(t)
 
 	contenidoSiu := leerArchivoTestOfertaDeComisiones("informatica-28-12-2024.txt")
-	materias := ScrapearSiu(string(contenidoSiu))
+	materias := ScrapearCuatri(string(contenidoSiu))
 
 	require.Len(materias, 30)
 
@@ -317,7 +342,7 @@ func TestOfertaDeComisionesQuimica2C2024(t *testing.T) {
 	require := require.New(t)
 
 	contenidoSiu := leerArchivoTestOfertaDeComisiones("quimica-28-12-2024.txt")
-	materias := ScrapearSiu(string(contenidoSiu))
+	materias := ScrapearCuatri(string(contenidoSiu))
 
 	require.Len(materias, 37)
 

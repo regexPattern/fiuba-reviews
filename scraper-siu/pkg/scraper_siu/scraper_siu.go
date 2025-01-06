@@ -1,6 +1,7 @@
 package scraper_siu
 
 import (
+	"fmt"
 	"regexp"
 	"sort"
 	"strconv"
@@ -8,14 +9,20 @@ import (
 )
 
 // Se utilizaron los regexes de FIUBA Plan como inspiración: https://github.com/FdelMazo/FIUBA-Plan/blob/master/src/siuparser.js
+var reCarrera *regexp.Regexp = regexp.MustCompile(`Propuesta: ([a-záéíóúñA-ZÁÉÍÓÚÑ ]+)`)                                                    // https://regex101.com/r/cfElw2/2
 var reCuatri *regexp.Regexp = regexp.MustCompile(`Período lectivo: (\d{4}) - (\d).*`)                                                       // https://regex101.com/r/b4DVgP/1
 var reMateria *regexp.Regexp = regexp.MustCompile(`Actividad: ([^\s\(]+(?:\s[^\s\(]+)*)\s?\(([^\)]+)\)`)                                    // https://regex101.com/r/L7SlFt/2
 var reCatedra *regexp.Regexp = regexp.MustCompile(`(?i)Comisión: (?:(?:CURSO:? ?)?(\d{1,2})([a-cA-C])?|CURSO:? ?([a-záéíóúñA-ZÁÉÍÓÚÑ ]+))`) // https://regex101.com/r/oli0zO/2
 var reDocente *regexp.Regexp = regexp.MustCompile(`([a-záéíóúñA-ZÁÉÍÓÚÑ ]+)\s*\(([^\)]+)\)`)                                                // https://regex101.com/r/IfwXK0/1
 
-type cuatri struct {
-	anio   int
-	numero int
+type MetaData struct {
+	Cuatri  Cuatri
+	Carrera string
+}
+
+type Cuatri struct {
+	Anio   int
+	Numero int
 
 	// Texto plano que contiene la información de las materias de cada
 	// cuatrimestre. Esto se hace ya que solo nos interesa parsear las materias
@@ -40,14 +47,14 @@ type Docente struct {
 	Rol    string `json:"rol"`
 }
 
-type By func(p1, p2 *cuatri) bool
+type By func(p1, p2 *Cuatri) bool
 
 type cuatriSorter struct {
-	cuatris []cuatri
+	cuatris []Cuatri
 	by      By
 }
 
-func (by By) Sort(cuatris []cuatri) {
+func (by By) Sort(cuatris []Cuatri) {
 	cs := &cuatriSorter{
 		cuatris: cuatris,
 		by:      by,
@@ -67,21 +74,41 @@ func (s *cuatriSorter) Less(i, j int) bool {
 	return s.by(&s.cuatris[i], &s.cuatris[j])
 }
 
-// ScrapearSiu obtiene la información de las materias del cuatrimestre más
-// reciente, junto con sus cátedras y docentes.
-func ScrapearSiu(contenidoSiu string) []Materia {
-	cuatris := obtenerCuatris(contenidoSiu)
-	ultimoCuatri := cuatris[len(cuatris)-1]
+func ObtenerMetaData(contenidoSiu string) (MetaData, error) {
+	var metaData MetaData
 
-	return obtenerMateriasDeCuatri(ultimoCuatri.contenido)
+	carrera, err := obtenerCarrera(contenidoSiu)
+	if err != nil {
+		return metaData, err
+	}
+
+	cuatris := obtenerCuatris(contenidoSiu)
+	if len(cuatris) == 0 {
+		return metaData, fmt.Errorf("No se encontraron cuatrimestres")
+	}
+
+	metaData.Carrera = carrera
+	metaData.Cuatri = cuatris[len(cuatris)-1]
+
+	return metaData, nil
 }
 
-func obtenerCuatris(contenidoSiu string) []cuatri {
+func obtenerCarrera(contenidoSiu string) (string, error) {
+	matches := reCarrera.FindStringSubmatch(contenidoSiu)
+
+	if len(matches) == 0 || matches[1] == "" {
+		return "", fmt.Errorf("No se encontró la carrera")
+	}
+
+	return strings.ToUpper(matches[1]), nil
+}
+
+func obtenerCuatris(contenidoSiu string) []Cuatri {
 	locs := reCuatri.FindAllStringSubmatchIndex(contenidoSiu, -1)
 
 	// En el SIU nunca hay más de dos cuatrimestres listados al mismo tiempo.
 	// De igual forma, este es un vector dinámico.
-	cuatris := make([]cuatri, 0, 2)
+	cuatris := make([]Cuatri, 0, 2)
 
 	for i := 0; i < len(locs); i++ {
 		loc := locs[i]
@@ -102,20 +129,24 @@ func obtenerCuatris(contenidoSiu string) []cuatri {
 		// El regex matchea un solo dígito directamente.
 		numero := int(numeroStr[0]) - '0'
 
-		cuatris = append(cuatris, cuatri{anio, numero, contenidoSiu[inicio:fin]})
+		cuatris = append(cuatris, Cuatri{anio, numero, contenidoSiu[inicio:fin]})
 	}
 
-	By(func(p1, p2 *cuatri) bool {
-		if p1.anio < p2.anio {
+	By(func(p1, p2 *Cuatri) bool {
+		if p1.Anio < p2.Anio {
 			return true
-		} else if p1.anio > p2.anio {
+		} else if p1.Anio > p2.Anio {
 			return false
 		} else {
-			return p1.numero < p2.numero
+			return p1.Numero < p2.Numero
 		}
 	}).Sort(cuatris)
 
 	return cuatris
+}
+
+func ScrapearCuatri(contenidoCuatri string) []Materia {
+	return obtenerMateriasDeCuatri(contenidoCuatri)
 }
 
 func obtenerMateriasDeCuatri(contenidoCuatri string) []Materia {
