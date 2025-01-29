@@ -1,5 +1,5 @@
 [package]
-name = "generador_resumenes"
+name = "resumidor"
 edition = "2021"
 rust-version = "1.76"
 
