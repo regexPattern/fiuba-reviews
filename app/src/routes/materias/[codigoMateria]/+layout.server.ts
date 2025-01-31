@@ -19,7 +19,7 @@ export const load = (async ({ params }) => {
 		.limit(1);
 
 	if (materias.length === 0) {
-		throw error(404, "Materia no encontrada.");
+		error(404, "Materia no encontrada.");
 	}
 
 	return {
