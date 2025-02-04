@@ -288,11 +288,15 @@ func leerArchivoTestOfertaDeComisiones(filename string) string {
 
 func TestOfertaDeComisionesInformatica2C2024(t *testing.T) {
 	assert := assert.New(t)
+	require := require.New(t)
 
 	contenidoSiu := leerArchivoTestOfertaDeComisiones("informatica-28-12-2024.txt")
+
+	meta, _ := ObtenerMetaData(string(contenidoSiu))
 	materias := ObtenerMaterias(string(contenidoSiu))
 
-	require.Len(t, materias, 30)
+	require.Equal(meta.Carrera, "INGENIERÍA EN INFORMÁTICA")
+	require.Len(materias, 30)
 
 	matsCantCats := make(map[string]int, len(materias))
 
@@ -334,11 +338,15 @@ func TestOfertaDeComisionesInformatica2C2024(t *testing.T) {
 
 func TestOfertaDeComisionesQuimica2C2024(t *testing.T) {
 	assert := assert.New(t)
+	require := require.New(t)
 
 	contenidoSiu := leerArchivoTestOfertaDeComisiones("quimica-28-12-2024.txt")
+
+	meta, _ := ObtenerMetaData(string(contenidoSiu))
 	materias := ObtenerMaterias(string(contenidoSiu))
 
-	require.Len(t, materias, 37)
+	require.Equal(meta.Carrera, "INGENIERÍA QUÍMICA")
+	require.Len(materias, 37)
 
 	matsCantCats := make(map[string]int, len(materias))
 
