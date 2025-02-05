@@ -1,4 +1,4 @@
-package scraper
+package scraper_siu
 
 import (
 	"fmt"
