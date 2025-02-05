@@ -77,7 +77,7 @@ func HandlerScraper(w http.ResponseWriter, r *http.Request) {
 	carrera, _, _ := transform.String(t, meta.Carrera)
 	carrera = strings.ToLower(strings.ReplaceAll(carrera, " ", "-"))
 
-	uri := fmt.Sprintf("%v-%vC-%v.txt", carrera, meta.Cuatri.Numero, meta.Cuatri.Anio)
+	uri := fmt.Sprintf("%v-%vC-%v.json", carrera, meta.Cuatri.Numero, meta.Cuatri.Anio)
 
 	_, err = s3Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:          aws.String(NOMBRE_BUCKET),
