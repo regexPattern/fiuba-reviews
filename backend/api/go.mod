@@ -1,14 +1,14 @@
-module github.com/regexPattern/fiuba-reviews/api
+module github.com/regexPattern/fiuba-reviews/backend/api
 
 go 1.23.5
 
-replace github.com/regexPattern/fiuba-reviews/scraper-siu => ../scraper-siu
+replace github.com/regexPattern/fiuba-reviews/backend/scraper_siu => ../scraper_siu
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.36.0
 	github.com/aws/aws-sdk-go-v2/config v1.29.5
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.75.3
-	github.com/regexPattern/fiuba-reviews/scraper-siu v0.0.0-00010101000000-000000000000
+	github.com/regexPattern/fiuba-reviews/backend/scraper_siu v0.0.0-00010101000000-000000000000
 	golang.org/x/text v0.22.0
 )
 

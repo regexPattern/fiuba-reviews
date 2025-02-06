@@ -1,4 +1,4 @@
-module github.com/regexPattern/fiuba-reviews/scraper-siu
+module github.com/regexPattern/fiuba-reviews/backend/scraper-siu
 
 go 1.23.5
 
