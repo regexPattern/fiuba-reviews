@@ -1,9 +1,13 @@
 import db from "$lib/db";
-import { calificacion, catedraDocente, comentario, docente } from "$lib/db/schema";
+import {
+  calificacion,
+  catedraDocente,
+  comentario,
+  docente,
+} from "$lib/db/schema";
 import { sortCuatrimestres } from "$lib/utils";
-import { eq, sql } from "drizzle-orm";
-
 import type { PageServerLoad } from "./$types";
+import { eq, sql } from "drizzle-orm";
 
 // Con esta versión de SvelteKit no hay forma de manejar Promise rejections
 // de data que esta siendo streameada, así que en esta función no le pongo
@@ -12,20 +16,20 @@ import type { PageServerLoad } from "./$types";
 // retornar un Redirect desde el servidor.
 //
 export const load = (async ({ params }) => {
-	return {
-		streamed: {
-			docentes: fetchDocentesInfo(params.codigoCatedra).catch(() => [])
-		}
-	};
+  return {
+    streamed: {
+      docentes: fetchDocentesInfo(params.codigoCatedra).catch(() => []),
+    },
+  };
 }) satisfies PageServerLoad;
 
 async function fetchDocentesInfo(codigoCatedra: string) {
-	const docentes = await db
-		.select({
-			codigo: docente.codigo,
-			nombre: docente.nombre,
-			resumen_comentarios: docente.resumenComentarios,
-			promedio: sql<number | null>`
+  const docentes = await db
+    .select({
+      codigo: docente.codigo,
+      nombre: docente.nombre,
+      resumen_comentarios: docente.resumenComentarios,
+      promedio: sql<number | null>`
 (SELECT AVG((
     ${calificacion.aceptaCritica}
     + ${calificacion.asistencia}
@@ -39,50 +43,52 @@ async function fetchDocentesInfo(codigoCatedra: string) {
   FROM ${calificacion}
   WHERE ${calificacion.codigoDocente} = ${docente.codigo}
 )`,
-			cantidadCalificaciones: sql<number>`COUNT(${calificacion.codigo})`,
-			promedios: {
-				aceptaCritica: sql<number>`AVG(${calificacion.aceptaCritica})`,
-				asistencia: sql<number>`AVG(${calificacion.asistencia})`,
-				buenTrato: sql<number>`AVG(${calificacion.buenTrato})`,
-				claridad: sql<number>`AVG(${calificacion.claridad})`,
-				claseOrganizada: sql<number>`AVG(${calificacion.claseOrganizada})`,
-				cumpleHorarios: sql<number>`AVG(${calificacion.cumpleHorarios})`,
-				fomentaParticipacion: sql<number>`AVG(${calificacion.fomentaParticipacion})`,
-				panoramaAmplio: sql<number>`AVG(${calificacion.panoramaAmplio})`,
-				respondeMails: sql<number>`AVG(${calificacion.respondeMails})`
-			}
-		})
-		.from(docente)
-		.innerJoin(catedraDocente, eq(docente.codigo, catedraDocente.codigoDocente))
-		.leftJoin(calificacion, eq(docente.codigo, calificacion.codigoDocente))
-		.where(eq(catedraDocente.codigoCatedra, codigoCatedra))
-		.groupBy(docente.codigo, docente.nombre)
-		.orderBy(docente.nombre);
+      cantidadCalificaciones: sql<number>`COUNT(${calificacion.codigo})`,
+      promedios: {
+        aceptaCritica: sql<number>`AVG(${calificacion.aceptaCritica})`,
+        asistencia: sql<number>`AVG(${calificacion.asistencia})`,
+        buenTrato: sql<number>`AVG(${calificacion.buenTrato})`,
+        claridad: sql<number>`AVG(${calificacion.claridad})`,
+        claseOrganizada: sql<number>`AVG(${calificacion.claseOrganizada})`,
+        cumpleHorarios: sql<number>`AVG(${calificacion.cumpleHorarios})`,
+        fomentaParticipacion: sql<number>`AVG(${calificacion.fomentaParticipacion})`,
+        panoramaAmplio: sql<number>`AVG(${calificacion.panoramaAmplio})`,
+        respondeMails: sql<number>`AVG(${calificacion.respondeMails})`,
+      },
+    })
+    .from(docente)
+    .innerJoin(catedraDocente, eq(docente.codigo, catedraDocente.codigoDocente))
+    .leftJoin(calificacion, eq(docente.codigo, calificacion.codigoDocente))
+    .where(eq(catedraDocente.codigoCatedra, codigoCatedra))
+    .groupBy(docente.codigo, docente.nombre)
+    .orderBy(docente.nombre);
 
-	const comentarios = await db
-		.select({
-			codigoDocente: docente.codigo,
-			codigo: comentario.codigo,
-			cuatrimestre: comentario.cuatrimestre,
-			contenido: comentario.contenido
-		})
-		.from(comentario)
-		.innerJoin(docente, eq(comentario.codigoDocente, docente.codigo))
-		.innerJoin(catedraDocente, eq(docente.codigo, catedraDocente.codigoDocente))
-		.where(eq(catedraDocente.codigoCatedra, codigoCatedra));
+  const comentarios = await db
+    .select({
+      codigoDocente: docente.codigo,
+      codigo: comentario.codigo,
+      cuatrimestre: comentario.cuatrimestre,
+      contenido: comentario.contenido,
+    })
+    .from(comentario)
+    .innerJoin(docente, eq(comentario.codigoDocente, docente.codigo))
+    .innerJoin(catedraDocente, eq(docente.codigo, catedraDocente.codigoDocente))
+    .where(eq(catedraDocente.codigoCatedra, codigoCatedra));
 
-	const codigoDocenteToComentario: Map<string, typeof comentarios> = new Map();
+  const codigoDocenteToComentario: Map<string, typeof comentarios> = new Map();
 
-	for (const com of comentarios) {
-		const comentarios = codigoDocenteToComentario.get(com.codigoDocente) || [];
-		comentarios.push(com);
-		codigoDocenteToComentario.set(com.codigoDocente, comentarios);
-	}
+  for (const com of comentarios) {
+    const comentarios = codigoDocenteToComentario.get(com.codigoDocente) || [];
+    comentarios.push(com);
+    codigoDocenteToComentario.set(com.codigoDocente, comentarios);
+  }
 
-	return docentes.map((doc) => {
-		const comentarios = codigoDocenteToComentario.get(doc.codigo) || [];
-		comentarios.sort((a, b) => sortCuatrimestres(a.cuatrimestre, b.cuatrimestre));
+  return docentes.map((doc) => {
+    const comentarios = codigoDocenteToComentario.get(doc.codigo) || [];
+    comentarios.sort((a, b) =>
+      sortCuatrimestres(a.cuatrimestre, b.cuatrimestre)
+    );
 
-		return { ...doc, comentarios };
-	});
+    return { ...doc, comentarios };
+  });
 }
