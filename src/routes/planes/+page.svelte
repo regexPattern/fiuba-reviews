@@ -29,11 +29,11 @@
   import { mode } from "mode-watcher";
   import { toast } from "svelte-sonner";
   import { Turnstile } from "svelte-turnstile";
-  import { superForm } from "sveltekit-superforms/client";
+  import SuperDebug from "sveltekit-superforms/client/SuperDebug.svelte";
 
   export let data: PageData;
 
-  const options: FormOptions<typeof schema> = {
+  const formOptions: FormOptions<typeof schema> = {
     resetForm: true,
     onUpdated: ({ form }) => {
       if (form.valid) {
@@ -102,36 +102,37 @@
     method="POST"
     form={data.form}
     {schema}
-    {options}
+    options={formOptions}
     let:config
+    let:formValues
     let:submitting
+    let:errors
     class="space-y-6 xs:space-y-8"
   >
-    <FormField {config} name="">
-      <div class="grid grid-cols-2">
-        <Label for="" class="flex items-center">Seleccioná tu carrera</Label>
+    <FormField {config} name="carrera">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <Label for="carrera" class="flex items-center"
+          >Seleccioná tu carrera</Label
+        >
         <Select>
           <SelectTrigger>
             <SelectValue placeholder="Seleccionar" />
           </SelectTrigger>
-          <SelectContent id="">
-            <SelectItem value="informatica"
-              >Ingeniería en Informática</SelectItem
-            >
-            <SelectItem value="informatica">Ingeniería Química</SelectItem>
-            <SelectItem value="informatica">Ingeniería Civil</SelectItem>
-            <SelectItem value="informatica">Ingeniería en Alimentos</SelectItem>
-            <SelectItem value="informatica" class="text-gray-500"
-              ><span
-                ><span class="line-through">Ingeniería Industrial</span> (LISTO)</span
-              ></SelectItem
-            >
-            <SelectItem value="informatica" class="text-gray-500"
-              ><span
-                ><span class="line-through">Ingeniería Mecánica</span> (LISTO)</span
-              ></SelectItem
-            >
+          <SelectContent id="carrera">
+            {#each data.carrerasFaltantes as carrera}
+              <SelectItem value={carrera}>{carrera}</SelectItem>
+            {/each}
+            {#each data.planesRegistrados as plan}
+              <SelectItem value={plan.carrera} disabled
+                ><span
+                  ><span class="line-through">{plan.carrera}</span> (Ya actualizada)</span
+                ></SelectItem
+              >
+            {/each}
           </SelectContent>
+          {#if errors.carrera}
+            {errors.carrera}
+          {/if}
         </Select>
       </div>
     </FormField>
@@ -153,5 +154,7 @@
         Enviar
       {/if}
     </FormButton>
+
+    <!-- <SuperDebug data={formValues} /> -->
   </Form>
 </main>

@@ -25,10 +25,11 @@
   import { mode } from "mode-watcher";
   import { toast } from "svelte-sonner";
   import { Turnstile } from "svelte-turnstile";
+  import SuperDebug from "sveltekit-superforms/client/SuperDebug.svelte";
 
   export let data: PageData;
 
-  const options: FormOptions<typeof schema> = {
+  const formOptions: FormOptions<typeof schema> = {
     resetForm: true,
     onUpdated: ({ form }) => {
       if (form.valid) {
@@ -60,7 +61,7 @@
     method="POST"
     form={data.form}
     {schema}
-    {options}
+    options={formOptions}
     let:config
     let:formValues
     let:submitting
@@ -139,5 +140,7 @@
         Enviar
       {/if}
     </FormButton>
+
+    <!-- <SuperDebug data={formValues} /> -->
   </Form>
 </main>
