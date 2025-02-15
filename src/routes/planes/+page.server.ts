@@ -23,12 +23,22 @@ const CARRERAS = new Set([
   "Ingeniería en Informática",
 ]);
 
+function diferencia(a: Set<string>, b: Set<string>) {
+  const res = new Set();
+  for (const element of a) {
+    if (!b.has(element)) {
+      res.add(element);
+    }
+  }
+  return res;
+}
+
 export const load: PageServerLoad = async () => {
   const planesRegistradosRes = await fetch(`${BACKEND_URL}/planes`);
   const planesRegistrados: PlanRegistrado[] = await planesRegistradosRes.json();
 
   const carrerasListas = planesRegistrados.map((p) => p.carrera);
-  const carrerasFaltantes = CARRERAS.difference(new Set(carrerasListas));
+  const carrerasFaltantes = diferencia(CARRERAS, new Set(carrerasListas));
 
   return {
     form: await superValidate(schema),
