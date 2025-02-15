@@ -7,20 +7,19 @@ import {
   comentario,
   cuatrimestre,
   docente,
-  materia
+  materia,
 } from "$lib/db/schema";
 import { sortCuatrimestres } from "$lib/utils";
-import schema from "$lib/zod/schema";
+import { codigoDocente as schema } from "$lib/zod/schema";
+import type { PageServerLoad } from "./$types";
+import type { Actions } from "./$types";
 import type { Config } from "@sveltejs/adapter-vercel";
 import { error, fail } from "@sveltejs/kit";
 import { eq } from "drizzle-orm";
 import { message, setError, superValidate } from "sveltekit-superforms/server";
 
-import type { PageServerLoad } from "./$types";
-import type { Actions } from "./$types";
-
 export const config: Config = {
-	runtime: "nodejs18.x"
+  runtime: "nodejs18.x",
 };
 
 export const load: PageServerLoad = async ({ params }) => {
@@ -31,10 +30,13 @@ export const load: PageServerLoad = async ({ params }) => {
       .select({
         nombreDocente: docente.nombre,
         codigoMateria: materia.codigo,
-        codigoCatedra: catedraDocente.codigoCatedra
+        codigoCatedra: catedraDocente.codigoCatedra,
       })
       .from(docente)
-      .innerJoin(catedraDocente, eq(docente.codigo, catedraDocente.codigoDocente))
+      .innerJoin(
+        catedraDocente,
+        eq(docente.codigo, catedraDocente.codigoDocente)
+      )
       .innerJoin(catedra, eq(catedraDocente.codigoCatedra, catedra.codigo))
       .innerJoin(materia, eq(catedra.codigoMateria, materia.codigo))
       .where(eq(docente.codigo, params.codigoDocente))
@@ -55,12 +57,12 @@ export const load: PageServerLoad = async ({ params }) => {
   const cuatrimestres = await db.select().from(cuatrimestre);
   cuatrimestres.sort((a, b) => -sortCuatrimestres(a.nombre, b.nombre));
 
-  const form = superValidate(schema);
+  const form = await superValidate(schema);
 
   return {
     ...docentes[0],
     cuatrimestres,
-    form
+    form,
   };
 };
 
@@ -82,8 +84,16 @@ export const actions: Actions = {
           .limit(1)
       ).length === 1;
 
-    if (form.data.cuatrimestre && form.data.cuatrimestre != "undefined" && !esCuatrimestreValido) {
-      return setError(form, "cuatrimestre", `Cuatrimestre '${form.data.cuatrimestre}' no existe`);
+    if (
+      form.data.cuatrimestre &&
+      form.data.cuatrimestre != "undefined" &&
+      !esCuatrimestreValido
+    ) {
+      return setError(
+        form,
+        "cuatrimestre",
+        `Cuatrimestre '${form.data.cuatrimestre}' no existe`
+      );
     }
 
     const { success } = await validateToken(
@@ -96,11 +106,15 @@ export const actions: Actions = {
     }
 
     try {
-      if (form.data.comentario && form.data.comentario.length > 0 && form.data.cuatrimestre) {
+      if (
+        form.data.comentario &&
+        form.data.comentario.length > 0 &&
+        form.data.cuatrimestre
+      ) {
         await db.insert(comentario).values({
           codigoDocente: params.codigoDocente,
           cuatrimestre: form.data.cuatrimestre,
-          contenido: form.data.comentario
+          contenido: form.data.comentario,
         });
       }
 
@@ -114,14 +128,14 @@ export const actions: Actions = {
         cumpleHorarios: form.data["cumple-horario"],
         fomentaParticipacion: form.data["fomenta-participacion"],
         panoramaAmplio: form.data["panorama-amplio"],
-        respondeMails: form.data["responde-mails"]
+        respondeMails: form.data["responde-mails"],
       });
     } catch {
       return fail(500);
     }
 
     return message(form, "Calificación registrada con éxito");
-  }
+  },
 };
 
 interface TokenValidateResponse {
@@ -132,21 +146,24 @@ interface TokenValidateResponse {
 }
 
 async function validateToken(token: string, secret: string) {
-  const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json"
-    },
-    body: JSON.stringify({
-      response: token,
-      secret: secret
-    })
-  });
+  const res = await fetch(
+    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        response: token,
+        secret: secret,
+      }),
+    }
+  );
 
   const data: TokenValidateResponse = await res.json();
 
   return {
     success: data.success,
-    error: data["error-codes"]?.length ? data["error-codes"][0] : null
+    error: data["error-codes"]?.length ? data["error-codes"][0] : null,
   };
 }
