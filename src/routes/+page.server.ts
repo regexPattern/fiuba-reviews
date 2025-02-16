@@ -1,32 +1,24 @@
 import db from "$lib/db";
-import { catedra, catedraDocente, comentario, materia } from "$lib/db/schema";
+import { materia, plan, planMateria } from "$lib/db/schema";
 import type { PageServerLoad } from "./$types";
-import { desc, eq, sql } from "drizzle-orm";
+import { countDistinct, desc, eq } from "drizzle-orm";
 
 export const prerender = true;
 
 export const load: PageServerLoad = async () => {
-  const materiasPopulares = await db
+  const filasMateriasMasPopulares = await db
     .select({
       codigo: materia.codigo,
       nombre: materia.nombre,
-      cantidadCatedras: sql<number>`(
-        SELECT COUNT(*)
-        FROM ${catedra}
-        WHERE ${catedra.codigoMateria} = ${materia.codigo}
-      )`,
-      cantidadComentarios: sql<number>`COUNT(${comentario.codigo})`,
+      cantidadPlanesVigentes: countDistinct(plan.codigo),
     })
     .from(materia)
-    .innerJoin(catedra, eq(materia.codigo, catedra.codigoMateria))
-    .innerJoin(catedraDocente, eq(catedra.codigo, catedraDocente.codigoCatedra))
-    .innerJoin(
-      comentario,
-      eq(catedraDocente.codigoDocente, comentario.codigoDocente)
-    )
-    .groupBy(materia.codigo)
-    .orderBy(({ cantidadComentarios }) => desc(cantidadComentarios))
+    .innerJoin(planMateria, eq(materia.codigo, planMateria.codigoMateria))
+    .innerJoin(plan, eq(planMateria.codigoPlan, plan.codigo))
+    .where(eq(plan.estaVigente, true))
+    .groupBy(materia.codigo, materia.nombre)
+    .orderBy(desc(countDistinct(plan.codigo)))
     .limit(20);
 
-  return { materiasPopulares };
+  return { materiasMasPopulares: filasMateriasMasPopulares };
 };

@@ -52,11 +52,10 @@
 
 <main class="mx-auto max-w-screen-sm space-y-6 p-4 xs:space-y-8">
   <Alert>
-    <AlertTitle class="text-lg"
+    <AlertTitle class="text-xl"
       >Actualización de oferta de cátedras y docentes</AlertTitle
     >
-    <AlertDescription>
-      <br />
+    <AlertDescription class="text-md mt-6">
       La <Link href="https://ofertahoraria.fi.uba.ar/"
         >página de la oferta horaria</Link
       > dejó de actualizarse luego del primer cuatrimestre del 2024, por eso necesito
@@ -125,7 +124,7 @@
             {#each data.planesRegistrados as plan}
               <SelectItem value={plan.carrera} disabled
                 ><span
-                  ><span class="line-through">{plan.carrera}</span> (Ya actualizada)</span
+                  ><span class="line-through">{plan.carrera}</span> (Ya enviada)</span
                 ></SelectItem
               >
             {/each}

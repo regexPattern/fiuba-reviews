@@ -1,94 +1,95 @@
 import db from "$lib/db";
 import {
-  calificacion,
+  calificacionDolly,
   catedraDocente,
   comentario,
+  cuatrimestre,
   docente,
 } from "$lib/db/schema";
-import { sortCuatrimestres } from "$lib/utils";
 import type { PageServerLoad } from "./$types";
-import { eq, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 
-// Con esta versión de SvelteKit no hay forma de manejar Promise rejections
-// de data que esta siendo streameada, así que en esta función no le pongo
-// atención a los errores que puedan ocurrir, solo me importa que ocurra uno
-// o no. Desafortunamente esto también signfica que no tengo forma de
-// retornar un Redirect desde el servidor.
-//
 export const load = (async ({ params }) => {
-  return {
-    streamed: {
-      docentes: fetchDocentesInfo(params.codigoCatedra).catch(() => []),
-    },
-  };
-}) satisfies PageServerLoad;
+  const filasDocentes = await db.execute<{
+    codigo: string;
+    nombre: string;
+    calificaciones: {
+      promedio_general: number;
+      aceptacion: number;
+      asistencia: number;
+      buen_trato: number;
+      claridad: number;
+      clase_organizada: number;
+      cumple_horarios: number;
+      fomenta_participacion: number;
+      panorama_amplio: number;
+      responde_mails: number;
+    } | null;
+    cantidad_calificaciones: number;
+    resumen_comentarios: string | null;
+  }>(sql`
+      SELECT
+        d.codigo,
+        d.nombre,
+        CASE
+          WHEN pd.promedio_general IS NOT NULL THEN
+            JSON_BUILD_OBJECT(
+              'promedio_general', pd.promedio_general,
+              'resumen_comentarios', pd.resumen_comentarios,
+              'aceptacion', pd.aceptacion,
+              'asistencia', pd.asistencia,
+              'buen_trato', pd.buen_trato,
+              'claridad', pd.claridad,
+              'clase_organizada', pd.clase_organizada,
+              'cumple_horarios', pd.cumple_horarios,
+              'fomenta_participacion', pd.fomenta_participacion,
+              'panorama_amplio', pd.panorama_amplio,
+              'responde_mails', pd.responde_mails
+            )
+          ELSE
+            NULL
+        END AS calificaciones,
+        d.resumen_comentarios,
+        COUNT(cdolly.codigo) AS cantidad_calificaciones
+      FROM
+        ${docente} d
+      INNER JOIN
+        ${catedraDocente} cd ON d.codigo = cd.codigo_docente
+      INNER JOIN LATERAL
+        promedio_docente_cal_dolly(d.codigo) pd ON TRUE
+      LEFT JOIN
+        ${calificacionDolly} cdolly ON d.codigo = cdolly.codigo_docente
+      WHERE
+        cd.codigo_catedra = ${params.codigoCatedra}
+      GROUP BY
+        d.codigo, d.nombre, pd.promedio_general, pd.resumen_comentarios,
+        pd.aceptacion, pd.asistencia, pd.buen_trato, pd.claridad,
+        pd.clase_organizada, pd.cumple_horarios, pd.fomenta_participacion,
+        pd.panorama_amplio, pd.responde_mails
+      ORDER BY
+        d.nombre ASC;
+    `);
 
-async function fetchDocentesInfo(codigoCatedra: string) {
-  const docentes = await db
+  const filasComentarios = await db
     .select({
-      codigo: docente.codigo,
-      nombre: docente.nombre,
-      resumen_comentarios: docente.resumenComentarios,
-      promedio: sql<number | null>`
-(SELECT AVG((
-    ${calificacion.aceptaCritica}
-    + ${calificacion.asistencia}
-    + ${calificacion.buenTrato}
-    + ${calificacion.claridad}
-    + ${calificacion.claseOrganizada}
-    + ${calificacion.cumpleHorarios}
-    + ${calificacion.fomentaParticipacion}
-    + ${calificacion.panoramaAmplio}
-    + ${calificacion.respondeMails}) / 9)
-  FROM ${calificacion}
-  WHERE ${calificacion.codigoDocente} = ${docente.codigo}
-)`,
-      cantidadCalificaciones: sql<number>`COUNT(${calificacion.codigo})`,
-      promedios: {
-        aceptaCritica: sql<number>`AVG(${calificacion.aceptaCritica})`,
-        asistencia: sql<number>`AVG(${calificacion.asistencia})`,
-        buenTrato: sql<number>`AVG(${calificacion.buenTrato})`,
-        claridad: sql<number>`AVG(${calificacion.claridad})`,
-        claseOrganizada: sql<number>`AVG(${calificacion.claseOrganizada})`,
-        cumpleHorarios: sql<number>`AVG(${calificacion.cumpleHorarios})`,
-        fomentaParticipacion: sql<number>`AVG(${calificacion.fomentaParticipacion})`,
-        panoramaAmplio: sql<number>`AVG(${calificacion.panoramaAmplio})`,
-        respondeMails: sql<number>`AVG(${calificacion.respondeMails})`,
-      },
-    })
-    .from(docente)
-    .innerJoin(catedraDocente, eq(docente.codigo, catedraDocente.codigoDocente))
-    .leftJoin(calificacion, eq(docente.codigo, calificacion.codigoDocente))
-    .where(eq(catedraDocente.codigoCatedra, codigoCatedra))
-    .groupBy(docente.codigo, docente.nombre)
-    .orderBy(docente.nombre);
-
-  const comentarios = await db
-    .select({
-      codigoDocente: docente.codigo,
       codigo: comentario.codigo,
-      cuatrimestre: comentario.cuatrimestre,
       contenido: comentario.contenido,
+      cuatrimestre: sql`${cuatrimestre.numero} + ${cuatrimestre.anio}`,
     })
     .from(comentario)
-    .innerJoin(docente, eq(comentario.codigoDocente, docente.codigo))
-    .innerJoin(catedraDocente, eq(docente.codigo, catedraDocente.codigoDocente))
-    .where(eq(catedraDocente.codigoCatedra, codigoCatedra));
-
-  const codigoDocenteToComentario: Map<string, typeof comentarios> = new Map();
-
-  for (const com of comentarios) {
-    const comentarios = codigoDocenteToComentario.get(com.codigoDocente) || [];
-    comentarios.push(com);
-    codigoDocenteToComentario.set(com.codigoDocente, comentarios);
-  }
-
-  return docentes.map((doc) => {
-    const comentarios = codigoDocenteToComentario.get(doc.codigo) || [];
-    comentarios.sort((a, b) =>
-      sortCuatrimestres(a.cuatrimestre, b.cuatrimestre)
+    .innerJoin(
+      cuatrimestre,
+      eq(comentario.codigoCuatrimestre, cuatrimestre.codigo)
+    )
+    .where(
+      inArray(
+        comentario.codigoDocente,
+        filasDocentes.map((d) => d.codigo)
+      )
     );
 
-    return { ...doc, comentarios };
-  });
-}
+  return {
+    docentes: filasDocentes,
+    comentarios: filasComentarios,
+  };
+}) satisfies PageServerLoad;

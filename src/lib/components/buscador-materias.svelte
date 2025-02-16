@@ -10,28 +10,30 @@
   } from "$lib/components/ui/command";
   import { cn } from "$lib/utils";
   import { Search } from "lucide-svelte";
+  import Fuse from "fuse.js";
 
   export let label: string;
-
-  type Materia = {
-    nombre: string;
-    codigo: string;
-    codigoEquivalencia: string | null;
-  };
-
-  export let materias: Materia[];
-
-  const filterQueryMinLength = 2;
-  let filtered: Materia[];
 
   let className = "";
   export { className as class };
 
-  let search = "";
+  type Materia = { codigo: string; nombre: string };
+
+  export let materias: Materia[];
+  let materiasFiltradas: Materia[] = materias;
+
+  const fuse = new Fuse(materias, {
+    keys: ["nombre"],
+    ignoreDiacritics: true,
+    minMatchCharLength: 3,
+    threshold: 0.2,
+  });
+
+  let query = "";
   let debounceTimeout: ReturnType<typeof setTimeout> | undefined;
 
-  $: if (search.length < filterQueryMinLength || !$CommandStore) {
-    filtered = [];
+  $: if (!$CommandStore) {
+    materiasFiltradas = [];
   }
 
   async function debounceSearch(e: Event) {
@@ -39,18 +41,9 @@
 
     debounceTimeout = setTimeout(() => {
       if (e.target instanceof HTMLInputElement) {
-        search = e.target.value;
+        query = e.target.value;
 
-        if (search.length < filterQueryMinLength) {
-          return;
-        }
-
-        filtered = materias.filter(
-          (m) =>
-            m.codigo.includes(search) ||
-            m.codigoEquivalencia?.includes(search) ||
-            m.nombre.includes(search.toUpperCase())
-        );
+        materiasFiltradas = fuse.search(query).map((r) => r.item);
       }
     }, 300);
   }
@@ -71,8 +64,8 @@
     on:input={debounceSearch}
   />
   <CommandList>
-    {#each filtered as mat (mat.codigo)}
-      {@const slug = mat.codigoEquivalencia || mat.codigo}
+    {#each materiasFiltradas as mat (mat.codigo)}
+      {@const slug = mat.codigo}
       <CommandItem
         value={mat.codigo}
         onSelect={async () => {
@@ -81,14 +74,7 @@
         }}
         class="flex cursor-pointer items-start space-x-1.5"
       >
-        <span class="font-mono font-semibold">{mat.codigo}</span>
-        <span class="font-bold">&bullet;</span>
-        <span>
-          {mat.nombre}
-          {#if mat.codigoEquivalencia}
-            (Equivalente a {mat.codigoEquivalencia})
-          {/if}
-        </span>
+        <span> {mat.nombre} </span>
       </CommandItem>
     {/each}
   </CommandList>

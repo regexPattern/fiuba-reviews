@@ -7,8 +7,7 @@
   export let data: PageData;
 
   onMount(async () => {
-    const catedras = await data.streamed.catedras;
-    goto(`/materias/${data.materia.codigo}/${catedras[0].codigo}`);
+    goto(`/materias/${data.materia.codigo}/${data.catedras[0].codigo}`);
   });
 </script>
 

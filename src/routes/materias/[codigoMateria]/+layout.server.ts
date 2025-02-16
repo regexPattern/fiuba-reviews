@@ -1,68 +1,47 @@
 import db from "$lib/db";
-import {
-  calificacion,
-  catedra,
-  catedraDocente,
-  docente,
-  materia,
-} from "$lib/db/schema";
+import { equivalencia, materia } from "$lib/db/schema";
 import type { LayoutServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { aliasedTable, eq, sql, inArray } from "drizzle-orm";
 
 export const load = (async ({ params }) => {
-  const codigoMateria = parseInt(params.codigoMateria, 10);
-
-  const materias = await db
+  const filasMaterias = await db
     .select({
-      nombre: materia.nombre,
       codigo: materia.codigo,
+      nombre: materia.nombre,
     })
     .from(materia)
-    .where(
-      and(eq(materia.codigo, codigoMateria), isNull(materia.codigoEquivalencia))
-    )
-    .innerJoin(catedra, eq(materia.codigo, catedra.codigoMateria))
-    .limit(1);
+    .where(eq(materia.codigo, params.codigoMateria));
 
-  if (materias.length === 0) {
+  if (filasMaterias.length === 0) {
     error(404, "Materia no encontrada.");
   }
 
+  const filasEquivalencias = await db
+    .select({
+      codigo: sql<string>`m2.codigo`,
+      nombre: sql<string>`m2.nombre`,
+    })
+    .from(equivalencia)
+    .innerJoin(
+      aliasedTable(materia, "m2"),
+      eq(equivalencia.codigoMateriaPlanAnterior, sql`m2.codigo`)
+    )
+    .where(eq(equivalencia.codigoMateriaPlanVigente, params.codigoMateria));
+
+  const filasCatedras = await db.execute(
+    sql`
+SELECT *
+FROM catedras_por_equivalencia(${params.codigoMateria})
+ORDER BY promedio DESC
+`
+  );
+
+  console.log(filasCatedras);
+
   return {
-    materia: materias[0],
-    streamed: {
-      catedras: fetchCatedrasMateria(codigoMateria),
-    },
+    materia: filasMaterias[0],
+    equivalencias: filasEquivalencias,
+    catedras: filasCatedras,
   };
 }) satisfies LayoutServerLoad;
-
-async function fetchCatedrasMateria(codigoMateria: number) {
-  return await db
-    .select({
-      codigo: catedra.codigo,
-      nombre: sql<string>`STRING_AGG(${docente.nombre}, '-' ORDER BY ${docente.nombre} ASC)`,
-      promedio: sql<number | null>`
-AVG((
-  SELECT AVG((
-    ${calificacion.aceptaCritica} 
-      + ${calificacion.asistencia} 
-      + ${calificacion.buenTrato} 
-      + ${calificacion.claridad} 
-      + ${calificacion.claseOrganizada} 
-      + ${calificacion.cumpleHorarios} 
-      + ${calificacion.fomentaParticipacion} 
-      + ${calificacion.panoramaAmplio} 
-      + ${calificacion.respondeMails}) / 9)
-	FROM ${calificacion}
-	WHERE ${calificacion.codigoDocente} = ${docente.codigo}
-  GROUP BY ${docente.codigo})
-)`,
-    })
-    .from(catedra)
-    .innerJoin(catedraDocente, eq(catedra.codigo, catedraDocente.codigoCatedra))
-    .innerJoin(docente, eq(docente.codigo, catedraDocente.codigoDocente))
-    .where(eq(catedra.codigoMateria, codigoMateria))
-    .groupBy(catedra.codigo)
-    .orderBy(({ promedio }) => sql`${promedio} DESC NULLS LAST`);
-}

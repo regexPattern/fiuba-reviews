@@ -6,8 +6,7 @@
   export let materias: {
     codigo: number;
     nombre: string;
-    cantidadCatedras: number;
-    cantidadComentarios: number;
+    cantidadPlanesVigentes: number;
   }[];
 </script>
 
@@ -30,11 +29,8 @@
       class="m-0.5 rounded-lg border bg-slate-50 text-center text-sm text-muted-foreground dark:bg-slate-900"
     >
       <Link href={`/materias/${mat.codigo}`} class="flex flex-col p-3">
-        <span class="font-medium text-foreground"
-          >{mat.codigo} &bull; {mat.nombre}</span
-        >
-        <span>{mat.cantidadCatedras} cátedras</span>
-        <span>{mat.cantidadComentarios} comentarios</span>
+        <span class="font-medium text-foreground">{mat.nombre}</span>
+        <span>Cursada por {mat.cantidadPlanesVigentes} carreras</span>
       </Link>
     </SplideSlide>
   {/each}

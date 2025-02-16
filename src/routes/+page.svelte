@@ -14,11 +14,13 @@
   <title>FIUBA Reviews</title>
 </svelte:head>
 
-<div class="bg-fiuba p-3 text-center text-sm text-slate-900">
+<div
+  class="sticky top-16 bg-fiuba p-3 text-center text-background bg-background/75 backdrop-blur-lg"
+>
   <span class=""
     >Ayudame a actualizar los listados de cátedras y docentes para mejorar la
-    info de FIUBA Reviews. <Link href="/planes" class="font-medium underline"
-      >Leer más.</Link
+    info de FIUBA Reviews. <Link href="/planes" class="underline" external
+      >Más Información.</Link
     ></span
   >
 </div>
@@ -63,10 +65,11 @@
       Materias Más Populares
     </h2>
     <p class="text-center text-muted-foreground">
-      Las {data.materiasPopulares.length} materias con mayor cantidad de comentarios.
+      Las {data.materiasMasPopulares.length} materias más cursadas de la facultad
+      en base a la cantidad de planes de carrera en las que están presentes.
     </p>
-    <MateriasPopulares materias={data.materiasPopulares.slice(0, 10)} />
-    <MateriasPopulares materias={data.materiasPopulares.slice(10, 20)} />
+    <MateriasPopulares materias={data.materiasMasPopulares.slice(0, 10)} />
+    <MateriasPopulares materias={data.materiasMasPopulares.slice(10, 20)} />
   </section>
 
   <section class="space-y-4 text-center text-muted-foreground">

@@ -1,21 +1,20 @@
 import db from "$lib/db";
-import { catedra, materia } from "$lib/db/schema";
+import { materia, plan, planMateria } from "$lib/db/schema";
 import type { LayoutServerLoad } from "./$types";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export const load: LayoutServerLoad = async () => {
   const materias = await db
     .select({
+      codigo: materia.codigo,
       nombre: materia.nombre,
-      codigo: sql<string>`CAST(${materia.codigo} AS TEXT)`,
-      codigoEquivalencia: sql<
-        string | null
-      >`CAST(${materia.codigoEquivalencia} AS TEXT)`,
     })
     .from(materia)
-    .innerJoin(catedra, eq(materia.codigo, catedra.codigoMateria))
+    .innerJoin(planMateria, eq(materia.codigo, planMateria.codigoMateria))
+    .innerJoin(plan, eq(planMateria.codigoPlan, plan.codigo))
+    .where(eq(plan.estaVigente, true))
     .groupBy(materia.codigo)
-    .orderBy(materia.codigo);
+    .orderBy(materia.nombre);
 
   return { materias };
 };
