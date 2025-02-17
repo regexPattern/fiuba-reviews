@@ -1,16 +1,9 @@
 import db from "$lib/db";
-import {
-  calificacionDolly,
-  catedraDocente,
-  comentario,
-  cuatrimestre,
-  docente,
-} from "$lib/db/schema";
 import type { PageServerLoad } from "./$types";
-import { eq, inArray, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 export const load = (async ({ params }) => {
-  const filasDocentes = await db.execute<{
+  const filasInfoDocentesComentarios = await db.execute<{
     codigo: string;
     nombre: string;
     calificaciones: {
@@ -27,78 +20,14 @@ export const load = (async ({ params }) => {
     } | null;
     cantidad_calificaciones: number;
     resumen_comentarios: string | null;
+    comentarios: {
+      codigo: number;
+      contenido: string;
+      cuatrimestre: string;
+    }[];
   }>(sql`
-      SELECT
-        d.codigo,
-        d.nombre,
-        CASE
-          WHEN pd.promedio_general IS NOT NULL THEN
-            JSON_BUILD_OBJECT(
-              'promedio_general', pd.promedio_general,
-              'resumen_comentarios', pd.resumen_comentarios,
-              'acepta_critica', pd.acepta_critica,
-              'asistencia', pd.asistencia,
-              'buen_trato', pd.buen_trato,
-              'claridad', pd.claridad,
-              'clase_organizada', pd.clase_organizada,
-              'cumple_horarios', pd.cumple_horarios,
-              'fomenta_participacion', pd.fomenta_participacion,
-              'panorama_amplio', pd.panorama_amplio,
-              'responde_mails', pd.responde_mails
-            )
-          ELSE
-            NULL
-        END AS calificaciones,
-        d.resumen_comentarios,
-        COUNT(cdolly.codigo) AS cantidad_calificaciones
-      FROM
-        ${docente} d
-      INNER JOIN
-        ${catedraDocente} cd ON d.codigo = cd.codigo_docente
-      INNER JOIN LATERAL
-        promedio_docente_cal_dolly(d.codigo) pd ON TRUE
-      LEFT JOIN
-        ${calificacionDolly} cdolly ON d.codigo = cdolly.codigo_docente
-      WHERE
-        cd.codigo_catedra = ${params.codigoCatedra}
-      GROUP BY
-        d.codigo, d.nombre, pd.promedio_general, pd.resumen_comentarios,
-        pd.acepta_critica, pd.asistencia, pd.buen_trato, pd.claridad,
-        pd.clase_organizada, pd.cumple_horarios, pd.fomenta_participacion,
-        pd.panorama_amplio, pd.responde_mails
-      ORDER BY
-        d.nombre ASC;
-    `);
+    SELECT * FROM informacion_comentarios_docentes_catedra(${params.codigoCatedra}::uuid);
+  `);
 
-  const filasComentarios = await db
-    .select({
-      codigo: comentario.codigo,
-      codigo_docente: comentario.codigoDocente,
-      contenido: comentario.contenido,
-      cuatrimestre: sql<string>`${cuatrimestre.numero} + ${cuatrimestre.anio}`,
-    })
-    .from(comentario)
-    .innerJoin(
-      cuatrimestre,
-      eq(comentario.codigoCuatrimestre, cuatrimestre.codigo)
-    )
-    .where(
-      inArray(
-        comentario.codigoDocente,
-        filasDocentes.map((d) => d.codigo)
-      )
-    );
-
-  const docentesAComentarios = new Map<string, typeof filasComentarios>();
-
-  for (const com of filasComentarios) {
-    const comentarios = docentesAComentarios.get(com.codigo_docente) || [];
-    comentarios.push(com);
-    docentesAComentarios.set(com.codigo_docente, comentarios);
-  }
-
-  return {
-    docentes: filasDocentes,
-    comentarios: docentesAComentarios,
-  };
+  return { docentes: filasInfoDocentesComentarios };
 }) satisfies PageServerLoad;

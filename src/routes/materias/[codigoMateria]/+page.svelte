@@ -11,4 +11,5 @@
   });
 </script>
 
+<!-- TODO: Handle en el caso de que no haya catedras -->
 <PlaceholderCatedra />

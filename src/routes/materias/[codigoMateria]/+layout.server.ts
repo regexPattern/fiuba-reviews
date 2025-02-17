@@ -33,7 +33,7 @@ export const load = (async ({ params }) => {
     sql`
 SELECT *
 FROM catedras_por_equivalencia(${params.codigoMateria})
-ORDER BY promedio DESC
+ORDER BY promedio DESC NULLS LAST
 `
   );
 

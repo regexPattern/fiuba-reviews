@@ -76,9 +76,7 @@
     </div>
 
     <div class="flex flex-col gap-2 divide-y">
-      {#each data.comentarios
-        .get(doc.codigo)
-        ?.values() ?? [] as com (com.codigo)}
+      {#each doc.comentarios as com (com.codigo)}
         <div class="pt-2 [&:first-child]:pt-0">
           <p class={`inline before:content-['"'] after:content-['"']`}>
             {com.contenido}
