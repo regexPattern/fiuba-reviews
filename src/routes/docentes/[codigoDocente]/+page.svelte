@@ -1,26 +1,15 @@
 <script lang="ts">
+  import type { PageData } from "./$types";
+  import type { FormOptions } from "formsnap";
+
+  import * as Form from "$lib/components/ui/form";
+  import * as Select from "$lib/components/ui/select";
+
   import { PUBLIC_TURNSTILE_SITE_KEY } from "$env/static/public";
   import InputCalificacion from "$lib/components/input-calificacion.svelte";
   import Link from "$lib/components/link.svelte";
-  import {
-    Form,
-    FormButton,
-    FormField,
-    FormItem,
-    Label,
-    Select,
-    Textarea,
-  } from "$lib/components/ui/form";
-  import {
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-  } from "$lib/components/ui/select";
   import { Toaster } from "$lib/components/ui/sonner";
   import { codigoDocente as schema } from "$lib/zod/schema";
-  import type { PageData } from "./$types";
-  import type { FormOptions } from "formsnap";
   import { ChevronLeft, Loader2 } from "lucide-svelte";
   import { mode } from "mode-watcher";
   import { toast } from "svelte-sonner";
@@ -48,16 +37,16 @@
 
 <main class="mx-auto max-w-screen-sm space-y-6 p-4 xs:space-y-8">
   <Link
-    href={`/materias/${data.codigoMateria}/${data.codigoCatedra}`}
+    href={`/materias/${data.docente.codigo_materia}/${data.docente.codigo_catedra}`}
     class="flex items-center gap-1 underline"
   >
     <ChevronLeft class="w-4" />
     Ir a cátedra del docente
   </Link>
 
-  <h1 class="text-5xl font-bold tracking-tight">{data.nombreDocente}</h1>
+  <h1 class="text-5xl font-bold tracking-tight">{data.docente.nombre}</h1>
 
-  <Form
+  <Form.Root
     method="POST"
     form={data.form}
     {schema}
@@ -104,43 +93,45 @@
     </div>
 
     <div class="space-y-4">
-      <FormField {config} name="comentario">
-        <FormItem>
-          <Label for="comentario">Comentario (Opcional)</Label>
-          <Textarea id="comentario" />
-        </FormItem>
-      </FormField>
+      <Form.Field {config} name="comentario">
+        <Form.Item>
+          <Form.Label for="comentario">Comentario (Opcional)</Form.Label>
+          <Form.Textarea id="comentario" />
+        </Form.Item>
+      </Form.Field>
 
-      <FormField {config} name="cuatrimestre">
-        <FormItem>
-          <Label for="cuatrimestre">Cuatrimestre</Label>
-          <Select disabled={!formValues.comentario}>
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar" />
-            </SelectTrigger>
-            <SelectContent id="cuatrimestre">
-              {#each data.cuatrimestres as cuatrimestre}
-                <SelectItem value={cuatrimestre.nombre}
-                  >{cuatrimestre.nombre}</SelectItem
+      <Form.Field {config} name="cuatrimestre">
+        <Form.Item>
+          <Form.Label for="cuatrimestre">Cuatrimestre</Form.Label>
+          <Form.Select disabled={!formValues.comentario}>
+            <Form.SelectTrigger>
+              <Select.Value placeholder="Seleccionar" />
+            </Form.SelectTrigger>
+            <Form.SelectContent id="cuatrimestre">
+              {#each data.cuatrimestres as cuatri}
+                <Form.SelectItem value={`${cuatri.anio}-${cuatri.numero}`}
+                  >{cuatri.numero}C {cuatri.anio}</Form.SelectItem
                 >
               {/each}
-            </SelectContent>
-          </Select>
-        </FormItem>
-      </FormField>
+            </Form.SelectContent>
+          </Form.Select>
+        </Form.Item>
+      </Form.Field>
     </div>
 
     <Turnstile siteKey={PUBLIC_TURNSTILE_SITE_KEY} theme={$mode} />
 
-    <FormButton type="submit" class="items-center gap-1" disabled={submitting}>
+    <Form.Button type="submit" class="items-center gap-1" disabled={submitting}>
       {#if submitting}
         <span>Enviando</span>
         <Loader2 class="h-4 w-4 animate-spin" />
       {:else}
         Enviar
       {/if}
-    </FormButton>
+    </Form.Button>
 
-    <!-- <SuperDebug data={formValues} /> -->
-  </Form>
+    {#if import.meta.env.DEV}
+      <SuperDebug data={formValues} />
+    {/if}
+  </Form.Root>
 </main>
