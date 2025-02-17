@@ -15,7 +15,7 @@ export const load = (async ({ params }) => {
     nombre: string;
     calificaciones: {
       promedio_general: number;
-      aceptacion: number;
+      acepta_critica: number;
       asistencia: number;
       buen_trato: number;
       claridad: number;
@@ -36,7 +36,7 @@ export const load = (async ({ params }) => {
             JSON_BUILD_OBJECT(
               'promedio_general', pd.promedio_general,
               'resumen_comentarios', pd.resumen_comentarios,
-              'aceptacion', pd.aceptacion,
+              'acepta_critica', pd.acepta_critica,
               'asistencia', pd.asistencia,
               'buen_trato', pd.buen_trato,
               'claridad', pd.claridad,
@@ -63,7 +63,7 @@ export const load = (async ({ params }) => {
         cd.codigo_catedra = ${params.codigoCatedra}
       GROUP BY
         d.codigo, d.nombre, pd.promedio_general, pd.resumen_comentarios,
-        pd.aceptacion, pd.asistencia, pd.buen_trato, pd.claridad,
+        pd.acepta_critica, pd.asistencia, pd.buen_trato, pd.claridad,
         pd.clase_organizada, pd.cumple_horarios, pd.fomenta_participacion,
         pd.panorama_amplio, pd.responde_mails
       ORDER BY
@@ -73,8 +73,9 @@ export const load = (async ({ params }) => {
   const filasComentarios = await db
     .select({
       codigo: comentario.codigo,
+      codigo_docente: comentario.codigoDocente,
       contenido: comentario.contenido,
-      cuatrimestre: sql`${cuatrimestre.numero} + ${cuatrimestre.anio}`,
+      cuatrimestre: sql<string>`${cuatrimestre.numero} + ${cuatrimestre.anio}`,
     })
     .from(comentario)
     .innerJoin(
@@ -88,8 +89,16 @@ export const load = (async ({ params }) => {
       )
     );
 
+  const docentesAComentarios = new Map<string, typeof filasComentarios>();
+
+  for (const com of filasComentarios) {
+    const comentarios = docentesAComentarios.get(com.codigo_docente) || [];
+    comentarios.push(com);
+    docentesAComentarios.set(com.codigo_docente, comentarios);
+  }
+
   return {
     docentes: filasDocentes,
-    comentarios: filasComentarios,
+    comentarios: docentesAComentarios,
   };
 }) satisfies PageServerLoad;

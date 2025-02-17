@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let cantidad_calificaciones: number;
+  export let cantidadCalificaciones: number;
   export let acepta_critica: number;
   export let asistencia: number;
   export let buen_trato: number;
@@ -52,7 +52,7 @@
   </tbody>
 </table>
 <span class="block text-center text-sm text-muted-foreground"
-  >{cantidad_calificaciones} calificaci{cantidad_calificaciones > 1
+  >{cantidadCalificaciones} calificaci{cantidadCalificaciones > 1
     ? "ones"
     : "ón"}</span
 >

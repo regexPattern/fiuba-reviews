@@ -37,8 +37,6 @@ ORDER BY promedio DESC
 `
   );
 
-  console.log(filasCatedras);
-
   return {
     materia: filasMaterias[0],
     equivalencias: filasEquivalencias,

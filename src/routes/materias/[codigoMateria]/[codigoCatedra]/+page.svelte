@@ -76,15 +76,17 @@
     </div>
 
     <div class="flex flex-col gap-2 divide-y">
-      <!-- {#each [] as com (com.codigo)} -->
-      <!--   <div class="pt-2 [&:first-child]:pt-0"> -->
-      <!--     <p class={`inline before:content-['"'] after:content-['"']`}> -->
-      <!--       {com.contenido} -->
-      <!--     </p> -->
-      <!--     &dash; -->
-      <!--     <span class="text-sm text-muted-foreground">{com.cuatrimestre}</span> -->
-      <!--   </div> -->
-      <!-- {/each} -->
+      {#each data.comentarios
+        .get(doc.codigo)
+        ?.values() ?? [] as com (com.codigo)}
+        <div class="pt-2 [&:first-child]:pt-0">
+          <p class={`inline before:content-['"'] after:content-['"']`}>
+            {com.contenido}
+          </p>
+          &dash;
+          <span class="text-sm text-muted-foreground">{com.cuatrimestre}</span>
+        </div>
+      {/each}
     </div>
   </section>
 {/each}
