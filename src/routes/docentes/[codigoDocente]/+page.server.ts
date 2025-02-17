@@ -1,21 +1,18 @@
-import { TURNSTILE_SECRET_KEY } from "$env/static/private";
-import db from "$lib/db";
-import {
-  catedra,
-  catedraDocente,
-  comentario,
-  cuatrimestre,
-  docente,
-  equivalencia,
-  materia,
-} from "$lib/db/schema";
-import { codigoDocente as schema } from "$lib/zod/schema";
 import type { PageServerLoad } from "./$types";
 import type { Actions } from "./$types";
 import type { Config } from "@sveltejs/adapter-vercel";
-import { error, fail } from "@sveltejs/kit";
+
+import { TURNSTILE_SECRET_KEY } from "$env/static/private";
+
+import * as dbSchema from "$lib/db/schema";
+import db from "$lib/db";
 import { desc, eq } from "drizzle-orm";
+import { error } from "@sveltejs/kit";
+import { formCalificacionDocente as formSchema } from "$lib/zod/schema";
 import { message, setError, superValidate } from "sveltekit-superforms/server";
+import { validarToken } from "$lib/utils";
+
+export const prerender = false;
 
 export const config: Config = {
   runtime: "nodejs18.x",
@@ -33,43 +30,47 @@ export const load: PageServerLoad = async ({ params }) => {
   try {
     filasDocentes = await db
       .select({
-        nombre: docente.nombre,
-        codigo_materia: equivalencia.codigoMateriaPlanVigente,
-        codigo_catedra: catedraDocente.codigoCatedra,
+        nombre: dbSchema.docente.nombre,
+        codigo_materia: dbSchema.equivalencia.codigoMateriaPlanVigente,
+        codigo_catedra: dbSchema.catedraDocente.codigoCatedra,
       })
-      .from(docente)
+      .from(dbSchema.docente)
       .innerJoin(
-        catedraDocente,
-        eq(docente.codigo, catedraDocente.codigoDocente)
+        dbSchema.catedraDocente,
+        eq(dbSchema.docente.codigo, dbSchema.catedraDocente.codigoDocente),
       )
       .leftJoin(
-        equivalencia,
-        eq(docente.codigoMateria, equivalencia.codigoMateriaPlanAnterior)
+        dbSchema.equivalencia,
+        eq(
+          dbSchema.docente.codigoMateria,
+          dbSchema.equivalencia.codigoMateriaPlanAnterior,
+        ),
       )
-      .where(eq(docente.codigo, params.codigoDocente))
+      .where(eq(dbSchema.docente.codigo, params.codigoDocente))
       .limit(1);
   } catch (e: any) {
-    // Si me pasan un código que no es serializable como UUID.
+    // Si pasan un código que no es serializable como UUID.
     if (e.code === "22P02") {
-      error(404, "Docente no encontrado.");
+      throw error(404, "Docente no encontrado.");
     } else {
       throw e;
     }
   }
 
-  console.log(filasDocentes);
-
   if (filasDocentes.length === 0) {
-    error(404, "Docente no encontrado");
+    throw error(404, "Docente no encontrado.");
   }
 
   const filasCuatrimestres = await db
     .select()
-    .from(cuatrimestre)
-    .orderBy(desc(cuatrimestre.anio), desc(cuatrimestre.numero))
+    .from(dbSchema.cuatrimestre)
+    .orderBy(
+      desc(dbSchema.cuatrimestre.anio),
+      desc(dbSchema.cuatrimestre.numero),
+    )
     .limit(4);
 
-  const form = await superValidate(schema);
+  const form = await superValidate(formSchema);
 
   return {
     docente: filasDocentes[0],
@@ -80,102 +81,73 @@ export const load: PageServerLoad = async ({ params }) => {
 
 export const actions: Actions = {
   default: async ({ params, request }) => {
-    const form = await superValidate(request, schema);
+    const form = await superValidate(request, formSchema);
 
-    // if (!form.valid) {
-    //   console.log(form.errors);
-    //   return message(form, "Datos inválidos");
-    // }
-    //
-    // const esCuatrimestreValido =
-    //   (
-    //     await db
-    //       .select()
-    //       .from(cuatrimestre)
-    //       .where(eq(cuatrimestre.nombre, form.data.cuatrimestre || ""))
-    //       .limit(1)
-    //   ).length === 1;
-    //
-    // if (
-    //   form.data.cuatrimestre &&
-    //   form.data.cuatrimestre != "undefined" &&
-    //   !esCuatrimestreValido
-    // ) {
-    //   return setError(
-    //     form,
-    //     "cuatrimestre",
-    //     `Cuatrimestre '${form.data.cuatrimestre}' no existe`
-    //   );
-    // }
-    //
-    // const { success } = await validateToken(
-    //   form.data["cf-turnstile-response"],
-    //   TURNSTILE_SECRET_KEY
-    // );
-    //
-    // if (!success) {
-    //   return setError(form, "Error al validar CAPTCHA");
-    // }
-    //
-    // try {
-    //   if (
-    //     form.data.comentario &&
-    //     form.data.comentario.length > 0 &&
-    //     form.data.cuatrimestre
-    //   ) {
-    //     await db.insert(comentario).values({
-    //       codigoDocente: params.codigoDocente,
-    //       cuatrimestre: form.data.cuatrimestre,
-    //       contenido: form.data.comentario,
-    //     });
-    //   }
-    //
-    //   await db.insert(calificacion).values({
-    //     codigoDocente: params.codigoDocente,
-    //     aceptaCritica: form.data["acepta-critica"],
-    //     asistencia: form.data["asistencia"],
-    //     buenTrato: form.data["buen-trato"],
-    //     claridad: form.data["claridad"],
-    //     claseOrganizada: form.data["clase-organizada"],
-    //     cumpleHorarios: form.data["cumple-horario"],
-    //     fomentaParticipacion: form.data["fomenta-participacion"],
-    //     panoramaAmplio: form.data["panorama-amplio"],
-    //     respondeMails: form.data["responde-mails"],
-    //   });
-    // } catch {
-    //   return fail(500);
-    // }
+    if (!form.valid) {
+      return message(form, "Datos inválidos.");
+    }
 
-    return message(form, "Calificación registrada con éxito");
+    const esCuatrimestreValido =
+      (
+        await db
+          .select()
+          .from(dbSchema.cuatrimestre)
+          .where(eq(dbSchema.cuatrimestre, form.data.cuatrimestre))
+          .limit(1)
+      ).length === 1;
+
+    if (form.data.cuatrimestre && !esCuatrimestreValido) {
+      return setError(
+        form,
+        "cuatrimestre",
+        `Cuatrimestre '${form.data.cuatrimestre}' no existe.`,
+      );
+    }
+
+    const { esValido } = await validarToken(
+      form.data["cf-turnstile-response"],
+      TURNSTILE_SECRET_KEY,
+    );
+
+    if (!esValido) {
+      return setError(form, "Error al validar CAPTCHA.");
+    }
+
+    if (
+      form.data.comentario &&
+      form.data.comentario.length > 0 &&
+      form.data.cuatrimestre
+    ) {
+      try {
+        await db.insert(dbSchema.comentario).values({
+          codigoDocente: params.codigoDocente,
+          codigoCuatrimestre: form.data.cuatrimestre,
+          contenido: form.data.comentario,
+        });
+      } catch (e) {
+        console.error(e);
+        throw error(500, "Error interno al guardar el comentario.");
+      }
+    }
+
+    try {
+      await db.insert(dbSchema.calificacionDolly).values({
+        codigoDocente: params.codigoDocente,
+        aceptaCritica: form.data["acepta-critica"],
+        asistencia: form.data["asistencia"],
+        buenTrato: form.data["buen-trato"],
+        claridad: form.data["claridad"],
+        claseOrganizada: form.data["clase-organizada"],
+        cumpleHorarios: form.data["cumple-horario"],
+        fomentaParticipacion: form.data["fomenta-participacion"],
+        panoramaAmplio: form.data["panorama-amplio"],
+        respondeMails: form.data["responde-mails"],
+      });
+    } catch (e) {
+      console.error(e);
+      throw error(500, "Error interno al guardar la calificación.");
+    }
+
+    return message(form, "Calificación registrada con éxito.");
   },
 };
-
-interface TokenValidateResponse {
-  "error-codes": string[];
-  success: boolean;
-  action: string;
-  cdata: string;
-}
-
-async function validateToken(token: string, secret: string) {
-  const res = await fetch(
-    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-    {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        response: token,
-        secret: secret,
-      }),
-    }
-  );
-
-  const data: TokenValidateResponse = await res.json();
-
-  return {
-    success: data.success,
-    error: data["error-codes"]?.length ? data["error-codes"][0] : null,
-  };
-}

@@ -1,8 +1,9 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import PlaceholderCatedra from "$lib/components/placeholder-catedra.svelte";
-  import type { PageData } from "./$types";
   import { onMount } from "svelte";
+
+  import type { PageData } from "./$types";
 
   export let data: PageData;
 

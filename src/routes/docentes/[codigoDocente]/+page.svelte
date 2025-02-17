@@ -1,24 +1,25 @@
 <script lang="ts">
-  import type { PageData } from "./$types";
   import type { FormOptions } from "formsnap";
-
-  import * as Form from "$lib/components/ui/form";
-  import * as Select from "$lib/components/ui/select";
+  import type { PageData } from "./$types";
 
   import { PUBLIC_TURNSTILE_SITE_KEY } from "$env/static/public";
-  import InputCalificacion from "$lib/components/input-calificacion.svelte";
-  import Link from "$lib/components/link.svelte";
-  import { Toaster } from "$lib/components/ui/sonner";
-  import { codigoDocente as schema } from "$lib/zod/schema";
-  import { ChevronLeft, Loader2 } from "lucide-svelte";
+
+  import { formCalificacionDocente as schema } from "$lib/zod/schema";
   import { mode } from "mode-watcher";
   import { toast } from "svelte-sonner";
+
+  import { ChevronLeft, Loader2 } from "lucide-svelte";
   import { Turnstile } from "svelte-turnstile";
   import SuperDebug from "sveltekit-superforms/client/SuperDebug.svelte";
 
+  import * as Form from "$lib/components/ui/form";
+  import Link from "$lib/components/link.svelte";
+  import { Toaster } from "$lib/components/ui/sonner";
+  import SelectValoresCalificacion from "./select-valores-calificacion.svelte";
+
   export let data: PageData;
 
-  const formOptions: FormOptions<typeof schema> = {
+  const configFormulario: FormOptions<typeof schema> = {
     resetForm: true,
     onUpdated: ({ form }) => {
       if (form.valid) {
@@ -38,8 +39,7 @@
 <main class="mx-auto max-w-screen-sm space-y-6 p-4 xs:space-y-8">
   <Link
     href={`/materias/${data.docente.codigo_materia}/${data.docente.codigo_catedra}`}
-    class="flex items-center gap-1 underline"
-  >
+    class="flex items-center gap-1 underline">
     <ChevronLeft class="w-4" />
     Ir a cátedra del docente
   </Link>
@@ -50,46 +50,45 @@
     method="POST"
     form={data.form}
     {schema}
-    options={formOptions}
+    options={configFormulario}
     let:config
     let:formValues
     let:submitting
-    class="space-y-6 xs:space-y-8"
-  >
+    class="space-y-6 xs:space-y-8">
     <div class="space-y-4">
-      <InputCalificacion
-        name="acepta-critica"
-        label="Acepta Crítica"
-        {config}
-      />
-      <InputCalificacion name="asistencia" label="Asistencia" {config} />
-      <InputCalificacion name="buen-trato" label="Buen Trato" {config} />
-      <InputCalificacion name="claridad" label="Claridad" {config} />
-      <InputCalificacion
-        name="clase-organizada"
-        label="Clase Organizada"
-        {config}
-      />
-      <InputCalificacion
-        name="cumple-horario"
-        label="Cumple Horario"
-        {config}
-      />
-      <InputCalificacion
-        name="fomenta-participacion"
-        label="Fomenta Participación"
-        {config}
-      />
-      <InputCalificacion
-        name="panorama-amplio"
-        label="Panorama Amplio"
-        {config}
-      />
-      <InputCalificacion
-        name="responde-mails"
-        label="Responde Mails"
-        {config}
-      />
+      <Form.Field {config} name="acepta-critica">
+        <SelectValoresCalificacion id="acepta-critica" label="Acepta Crítica" />
+      </Form.Field>
+      <Form.Field {config} name="asistencia">
+        <SelectValoresCalificacion id="asistencia" label="Asistencia" />
+      </Form.Field>
+      <Form.Field {config} name="buen-trato">
+        <SelectValoresCalificacion id="buen-trato" label="Buen Trato" />
+      </Form.Field>
+      <Form.Field {config} name="claridad">
+        <SelectValoresCalificacion id="claridad" label="Claridad" />
+      </Form.Field>
+      <Form.Field {config} name="clase-organizada">
+        <SelectValoresCalificacion
+          id="clase-organizada"
+          label="Clase Organizada" />
+      </Form.Field>
+      <Form.Field {config} name="cumple-horario">
+        <SelectValoresCalificacion id="cumple-horario" label="Cumple Horario" />
+      </Form.Field>
+      <Form.Field {config} name="fomenta-participacion">
+        <SelectValoresCalificacion
+          id="fomenta-participacion"
+          label="Fomenta Participación" />
+      </Form.Field>
+      <Form.Field {config} name="panorama-amplio">
+        <SelectValoresCalificacion
+          id="panorama-amplio"
+          label="Panorama Amplio" />
+      </Form.Field>
+      <Form.Field {config} name="responde-mails">
+        <SelectValoresCalificacion id="responde-mails" label="Responde Mails" />
+      </Form.Field>
     </div>
 
     <div class="space-y-4">
@@ -104,14 +103,11 @@
         <Form.Item>
           <Form.Label for="cuatrimestre">Cuatrimestre</Form.Label>
           <Form.Select disabled={!formValues.comentario}>
-            <Form.SelectTrigger>
-              <Select.Value placeholder="Seleccionar" />
-            </Form.SelectTrigger>
+            <Form.SelectTrigger placeholder="Seleccionar" />
             <Form.SelectContent id="cuatrimestre">
               {#each data.cuatrimestres as cuatri}
-                <Form.SelectItem value={`${cuatri.anio}-${cuatri.numero}`}
-                  >{cuatri.numero}C {cuatri.anio}</Form.SelectItem
-                >
+                <Form.SelectItem value={cuatri.codigo}
+                  >{cuatri.numero}C {cuatri.anio}</Form.SelectItem>
               {/each}
             </Form.SelectContent>
           </Form.Select>

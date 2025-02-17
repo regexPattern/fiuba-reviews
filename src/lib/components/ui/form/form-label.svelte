@@ -16,9 +16,8 @@
   for={$ids.input}
   class={cn(
     $errors && "text-destructive underline decoration-wavy underline-offset-4",
-    className
+    className,
   )}
-  {...$$restProps}
->
+  {...$$restProps}>
   <slot />
 </Label>

@@ -5,8 +5,9 @@
   import { Sheet, SheetTrigger } from "$lib/components/ui/sheet";
   import SheetContent from "$lib/components/ui/sheet/sheet-content.svelte";
   import { cn } from "$lib/utils";
-  import type { LayoutData } from "./$types";
   import { ChevronDown, Star } from "lucide-svelte";
+
+  import type { LayoutData } from "./$types";
 
   export let data: LayoutData;
 
@@ -20,11 +21,9 @@
 <div class="relative md:container md:mx-auto md:flex-row">
   <div class="sticky top-16 z-30 md:top-auto">
     <aside
-      class="fixed hidden h-[calc(100vh-4rem)] w-80 shrink-0 overflow-y-auto border-r bg-background md:block"
-    >
+      class="fixed hidden h-[calc(100vh-4rem)] w-80 shrink-0 overflow-y-auto border-r bg-background md:block">
       <div
-        class="sticky top-0 flex w-full items-start gap-1.5 border-b bg-background p-3 text-center font-medium"
-      >
+        class="sticky top-0 flex w-full items-start gap-1.5 border-b bg-background p-3 text-center font-medium">
         {data.materia.nombre}
       </div>
 
@@ -34,19 +33,16 @@
             <span
               class={`w-[2.5ch] shrink-0 font-medium ${
                 !cat.promedio ? "text-center" : ""
-              }`}
-            >
+              }`}>
               {cat.promedio?.toFixed(1) || "-"}
             </span>
             <Star
-              class="h-3 w-3 shrink-0 fill-current pr-0.5 text-yellow-500"
-            />
+              class="h-3 w-3 shrink-0 fill-current pr-0.5 text-yellow-500" />
             <a
               href={`/materias/${$page.params.codigoMateria}/${cat.codigo}`}
               class={cn(
                 $page.params.codigoCatedra === cat.codigo && "text-fiuba",
-              )}
-            >
+              )}>
               {cat.nombre}
             </a>
           </li>
@@ -61,8 +57,7 @@
           on:click={() => {
             open = !open;
             window.scroll({ top: 0, behavior: "instant" });
-          }}
-        >
+          }}>
           <span class="flex items-start gap-1">
             {data.materia.codigo}
             <span class="font-bold">&bullet;</span>
@@ -78,16 +73,14 @@
               <span
                 class={`w-[3ch] shrink-0 font-medium ${
                   !cat.promedio ? "text-center" : ""
-                }`}>{cat.promedio?.toFixed(1) || "-"}</span
-              >
+                }`}>{cat.promedio?.toFixed(1) || "-"}</span>
               <Star class="h-3 w-3 shrink-0 fill-current text-yellow-500" />
               <a
                 href={`/materias/${$page.params.codigoMateria}/${cat.codigo}`}
                 class={cn(
                   $page.params.codigoCatedra === cat.codigo && "text-fiuba",
                 )}
-                on:click={() => (open = !open)}
-              >
+                on:click={() => (open = !open)}>
                 {cat.nombre}
               </a>
             </li>
@@ -98,16 +91,14 @@
   </div>
 
   <main
-    class="flex flex-col gap-12 p-4 md:ml-80 md:min-h-[calc(100vh-4rem)] md:p-6"
-  >
-    <Alert class="bg-fiuba text-background"
-      >Debido a la migración de los datos hacia los nuevos planes por ahora se
-      están mostrando las cátedras de las materias equivalentes a {data.materia
-        .nombre} en los planes anteriores: {#each data.equivalencias as eq, i (eq.codigo)}
-        <span class="font-medium font-mono"
+    class="flex flex-col gap-12 p-4 md:ml-80 md:min-h-[calc(100vh-4rem)] md:p-6">
+    <Alert class="border-cyan-300 bg-fiuba text-background dark:border-cyan-600"
+      >⚠️ Debido a la migración de los datos hacia los nuevos planes por ahora
+      se están mostrando las cátedras de las materias equivalentes a {data
+        .materia.nombre} en los planes anteriores: {#each data.equivalencias as eq, i (eq.codigo)}
+        <span class="font-mono font-medium"
           >{eq.codigo}{#if i < data.equivalencias.length - 1},
-          {/if}</span
-        >
+          {/if}</span>
       {/each}. <Link href="/planes" class="underline" external
         >Más Información</Link
       >.

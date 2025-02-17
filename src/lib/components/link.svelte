@@ -16,8 +16,7 @@
     target="_blank"
     rel="noopener noreferrer"
     class={cn("underline", className)}
-    {...$$restProps}><slot /></a
-  >
+    {...$$restProps}><slot /></a>
 {:else}
   <a {href} {...$$restProps} class={className}><slot /></a>
 {/if}

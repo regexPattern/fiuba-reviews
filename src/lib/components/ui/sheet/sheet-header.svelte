@@ -10,7 +10,6 @@
 
 <div
   class={cn("flex flex-col space-y-2 text-center sm:text-left", className)}
-  {...$$restProps}
->
+  {...$$restProps}>
   <slot />
 </div>

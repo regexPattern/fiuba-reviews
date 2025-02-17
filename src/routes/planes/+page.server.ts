@@ -1,15 +1,15 @@
-import { BACKEND_URL, TURNSTILE_SECRET_KEY } from "$env/static/private";
-import { contenidoSiu as schema } from "$lib/zod/schema";
-import { fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
+
+import { BACKEND_URL, TURNSTILE_SECRET_KEY } from "$env/static/private";
+
+import { error } from "@sveltejs/kit";
+import { formPlanSiu as schema } from "$lib/zod/schema";
 import { message, setError, superValidate } from "sveltekit-superforms/server";
+import { validarToken } from "$lib/utils";
 
-type PlanRegistrado = {
-  carrera: string;
-  cuatri: { numero: number; anio: number };
-};
+export const prerender = false;
 
-const CARRERAS = new Set([
+const carreras = new Set([
   "Ingeniería Civil",
   "Ingeniería Electrónica",
   "Ingeniería Industrial",
@@ -35,15 +35,18 @@ function diferencia(a: Set<string>, b: Set<string>) {
 
 export const load: PageServerLoad = async () => {
   const planesRegistradosRes = await fetch(`${BACKEND_URL}/planes`);
-  const planesRegistrados: PlanRegistrado[] = await planesRegistradosRes.json();
+  const planesRegistrados: {
+    carrera: string;
+    cuatri: { numero: number; anio: number };
+  }[] = await planesRegistradosRes.json();
 
   const carrerasListas = planesRegistrados.map((p) => p.carrera);
-  const carrerasFaltantes = diferencia(CARRERAS, new Set(carrerasListas));
+  const carrerasFaltantes = diferencia(carreras, new Set(carrerasListas));
 
   return {
-    form: await superValidate(schema),
     planesRegistrados,
     carrerasFaltantes,
+    form: await superValidate(schema),
   };
 };
 
@@ -52,17 +55,16 @@ export const actions: Actions = {
     const form = await superValidate(request, schema);
 
     if (!form.valid) {
-      console.log(form.errors);
       return message(form, "Datos inválidos");
     }
 
-    const { success } = await validateToken(
+    const { esValido } = await validarToken(
       form.data["cf-turnstile-response"],
-      TURNSTILE_SECRET_KEY
+      TURNSTILE_SECRET_KEY,
     );
 
-    if (!success) {
-      return setError(form, "Error al validar CAPTCHA");
+    if (!esValido) {
+      return setError(form, "Error al validar CAPTCHA.");
     }
 
     try {
@@ -73,40 +75,11 @@ export const actions: Actions = {
         },
         body: form.data["contenido-siu"],
       });
-    } catch {
-      return fail(500);
+    } catch (e) {
+      console.error(e);
+      throw error(500, "Error interno al guardar el contenido del SIU.");
     }
 
-    return message(form, "Contenido del SIU registrado con éxito");
+    return message(form, "Contenido del SIU registrado con éxito.");
   },
 };
-
-interface TokenValidateResponse {
-  "error-codes": string[];
-  success: boolean;
-  action: string;
-  cdata: string;
-}
-
-async function validateToken(token: string, secret: string) {
-  const res = await fetch(
-    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-    {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        response: token,
-        secret: secret,
-      }),
-    }
-  );
-
-  const data: TokenValidateResponse = await res.json();
-
-  return {
-    success: data.success,
-    error: data["error-codes"]?.length ? data["error-codes"][0] : null,
-  };
-}

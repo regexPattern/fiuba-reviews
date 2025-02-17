@@ -10,7 +10,6 @@
 
 <span
   class={cn("ml-auto text-xs tracking-widest opacity-60", className)}
-  {...$$restProps}
->
+  {...$$restProps}>
   <slot />
 </span>

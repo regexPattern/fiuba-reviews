@@ -9,8 +9,8 @@
     CommandList,
   } from "$lib/components/ui/command";
   import { cn } from "$lib/utils";
-  import { Search } from "lucide-svelte";
   import Fuse from "fuse.js";
+  import { Search } from "lucide-svelte";
 
   export let label: string;
 
@@ -52,8 +52,7 @@
 <Button
   class={cn("flex justify-between gap-1 px-3 py-2", className)}
   on:click={() => ($CommandStore = !$CommandStore)}
-  {...$$restProps}
->
+  {...$$restProps}>
   <span>{label}</span>
   <Search class="h-4 w-4" />
 </Button>
@@ -61,8 +60,7 @@
 <CommandDialog bind:open={$CommandStore} shouldFilter={false}>
   <CommandInput
     placeholder="Código o nombre de una materia"
-    on:input={debounceSearch}
-  />
+    on:input={debounceSearch} />
   <CommandList>
     {#each materiasFiltradas as mat (mat.codigo)}
       {@const slug = mat.codigo}
@@ -72,8 +70,7 @@
           await goto(`/materias/${slug}`);
           $CommandStore = false;
         }}
-        class="flex cursor-pointer items-start space-x-1.5"
-      >
+        class="flex cursor-pointer items-start space-x-1.5">
         <span> {mat.nombre} </span>
       </CommandItem>
     {/each}

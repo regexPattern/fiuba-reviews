@@ -1,7 +1,8 @@
 import db from "$lib/db";
 import { materia, plan, planMateria } from "$lib/db/schema";
-import type { PageServerLoad } from "./$types";
 import { countDistinct, desc, eq } from "drizzle-orm";
+
+import type { PageServerLoad } from "./$types";
 
 export const prerender = true;
 

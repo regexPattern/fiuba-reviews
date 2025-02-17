@@ -1,10 +1,13 @@
+import type { LayoutServerLoad } from "./$types";
+
 import db from "$lib/db";
 import { materia, plan, planMateria } from "$lib/db/schema";
-import type { LayoutServerLoad } from "./$types";
 import { eq } from "drizzle-orm";
 
+export const prerender = true;
+
 export const load: LayoutServerLoad = async () => {
-  const materias = await db
+  const filasMateriasNuevosPlanes = await db
     .select({
       codigo: materia.codigo,
       nombre: materia.nombre,
@@ -16,5 +19,5 @@ export const load: LayoutServerLoad = async () => {
     .groupBy(materia.codigo)
     .orderBy(materia.nombre);
 
-  return { materias };
+  return { materias: filasMateriasNuevosPlanes };
 };

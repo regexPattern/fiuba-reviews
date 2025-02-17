@@ -16,8 +16,7 @@
   {...$attrStore}
   on:click
   on:keydown
-  type="button"
->
+  type="button">
   <Select.Value {placeholder} />
   <slot />
 </Select.Trigger>

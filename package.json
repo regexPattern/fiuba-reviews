@@ -8,21 +8,20 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "format": "prettier --plugin-search-dir . --write ."
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@sveltejs/adapter-vercel": "^4.0.5",
-    "@sveltejs/kit": "^2.17.1",
+    "@sveltejs/kit": "^2.11.0",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/pg": "^8.11.11",
     "autoprefixer": "^10.4.20",
     "drizzle-kit": "^0.30.4",
-    "postcss": "^8.5.1",
+    "postcss": "^8.5.2",
     "postcss-load-config": "^4.0.2",
-    "prettier": "^2.8.8",
-    "prettier-plugin-svelte": "^2.10.1",
-    "prettier-plugin-tailwindcss": "^0.4.1",
+    "prettier": "^3.5.1",
+    "prettier-plugin-svelte": "^3.3.3",
+    "prettier-plugin-tailwindcss": "^0.6.11",
     "shadcn-svelte": "^0.3.8",
     "svelte": "^4.2.19",
     "svelte-check": "^3.8.6",
@@ -36,7 +35,7 @@
   "dependencies": {
     "@splidejs/splide-extension-auto-scroll": "^0.5.3",
     "@splidejs/svelte-splide": "^0.2.9",
-    "@vercel/speed-insights": "^1.1.0",
+    "@vercel/speed-insights": "^1.2.0",
     "bits-ui": "^0.9.9",
     "clsx": "^2.1.1",
     "cmdk-sv": "^0.0.7",
@@ -46,17 +45,29 @@
     "lucide-svelte": "^0.292.0",
     "mode-watcher": "^0.1.2",
     "postgres": "^3.4.5",
-    "posthog-js": "^1.215.3",
+    "posthog-js": "^1.219.1",
     "svelte-sonner": "^0.3.28",
     "sveltekit-superforms": "^1.13.4",
     "tailwind-merge": "^2.6.0",
     "tailwind-variants": "^0.1.20",
-    "zod": "^3.24.1"
+    "zod": "^3.24.2"
   },
   "prettier": {
     "useTabs": false,
     "tabWidth": 2,
     "singleQuote": false,
-    "bracketSameLine": false
+    "bracketSameLine": true,
+    "plugins": [
+      "prettier-plugin-svelte",
+      "prettier-plugin-tailwindcss"
+    ],
+    "overrides": [
+      {
+        "files": "*.svelte",
+        "options": {
+          "parser": "svelte"
+        }
+      }
+    ]
   }
 }

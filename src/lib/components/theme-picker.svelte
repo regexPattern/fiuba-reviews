@@ -20,21 +20,17 @@
       variant="outline"
       size="icon"
       class={className}
-      aria-label="Cambiar tema"
-    >
+      aria-label="Cambiar tema">
       <Sun
-        class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
-      />
+        class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
       <Moon
-        class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
-      />
+        class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
     </Button>
   </DropdownMenuTrigger>
   <DropdownMenuContent class="z-[50]">
     <DropdownMenuItem on:click={() => setMode("light")}>Claro</DropdownMenuItem>
     <DropdownMenuItem on:click={() => setMode("dark")}>Oscuro</DropdownMenuItem>
     <DropdownMenuItem on:click={() => setMode("system")}
-      >Dispositivo</DropdownMenuItem
-    >
+      >Dispositivo</DropdownMenuItem>
   </DropdownMenuContent>
 </DropdownMenu>

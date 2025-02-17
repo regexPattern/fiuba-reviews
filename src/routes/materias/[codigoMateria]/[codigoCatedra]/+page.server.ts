@@ -1,6 +1,7 @@
 import db from "$lib/db";
-import type { PageServerLoad } from "./$types";
 import { sql } from "drizzle-orm";
+
+import type { PageServerLoad } from "./$types";
 
 export const load = (async ({ params }) => {
   const filasInfoDocentesComentarios = await db.execute<{

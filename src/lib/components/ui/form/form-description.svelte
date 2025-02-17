@@ -10,7 +10,6 @@
 
 <FormPrimitive.Description
   class={cn("text-sm text-muted-foreground", className)}
-  {...$$restProps}
->
+  {...$$restProps}>
   <slot />
 </FormPrimitive.Description>

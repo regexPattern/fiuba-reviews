@@ -5,8 +5,7 @@
 <div class="space-y-4">
   <Skeleton class="h-10 w-72" />
   <div
-    class="flex flex-col gap-2 xs:flex-row [&>*]:h-10 [&>*]:w-full [&>*]:xs:w-44"
-  >
+    class="flex flex-col gap-2 xs:flex-row [&>*]:h-10 [&>*]:w-full [&>*]:xs:w-44">
     <Skeleton />
     <Skeleton />
   </div>

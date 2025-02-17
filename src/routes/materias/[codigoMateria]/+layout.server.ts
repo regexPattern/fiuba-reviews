@@ -1,8 +1,9 @@
+import type { LayoutServerLoad } from "./$types";
+
 import db from "$lib/db";
 import { equivalencia, materia } from "$lib/db/schema";
-import type { LayoutServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
-import { aliasedTable, eq, sql, inArray } from "drizzle-orm";
+import { aliasedTable, eq, sql } from "drizzle-orm";
 
 export const load = (async ({ params }) => {
   const filasMaterias = await db
@@ -14,7 +15,7 @@ export const load = (async ({ params }) => {
     .where(eq(materia.codigo, params.codigoMateria));
 
   if (filasMaterias.length === 0) {
-    error(404, "Materia no encontrada.");
+    throw error(404, "Materia no encontrada.");
   }
 
   const filasEquivalencias = await db
@@ -25,16 +26,20 @@ export const load = (async ({ params }) => {
     .from(equivalencia)
     .innerJoin(
       aliasedTable(materia, "m2"),
-      eq(equivalencia.codigoMateriaPlanAnterior, sql`m2.codigo`)
+      eq(equivalencia.codigoMateriaPlanAnterior, sql`m2.codigo`),
     )
     .where(eq(equivalencia.codigoMateriaPlanVigente, params.codigoMateria));
 
-  const filasCatedras = await db.execute(
+  const filasCatedras = await db.execute<{
+    codigo: string;
+    nombre: string;
+    promedio: number | null;
+  }>(
     sql`
 SELECT *
 FROM catedras_por_equivalencia(${params.codigoMateria})
 ORDER BY promedio DESC NULLS LAST
-`
+`,
   );
 
   return {

@@ -1,14 +1,11 @@
 <script lang="ts">
-  import Link from "$lib/components/link.svelte";
-  import Promedios from "$lib/components/listado-promedios-docente.svelte";
-  import { Button } from "$lib/components/ui/button";
-  import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-  } from "$lib/components/ui/popover";
   import type { PageData } from "./$types";
+
   import { ChevronDown, PlusCircle, Star } from "lucide-svelte";
+
+  import * as Popover from "$lib/components/ui/popover";
+  import { Button } from "$lib/components/ui/button";
+  import TablaPromediosDocente from "./tabla-promedios-docente.svelte";
 
   export let data: PageData;
 </script>
@@ -19,50 +16,37 @@
 
     {#if doc.resumen_comentarios}
       <div
-        class="divide-y divide-border rounded-lg border bg-secondary dark:divide-slate-700 dark:border-slate-700 [&>*]:p-3"
-      >
+        class="divide-y divide-border rounded-lg border bg-secondary dark:divide-slate-700 dark:border-slate-700 [&>*]:p-3">
         <p
-          class={`text-secondary-foreground before:content-['"'] after:content-['"']`}
-        >
+          class={`text-secondary-foreground before:content-['"'] after:content-['"']`}>
           {doc.resumen_comentarios}
         </p>
-        <div class="text-sm text-slate-500">
-          Resumen generado por IA.
-          <Link
-            href="https://github.com/regexPattern/fiuba-reviews#resumen-de-comentarios-con-inteligencia-artificial"
-            class="after:content-link"
-          >
-            Más información.
-          </Link>
-        </div>
+        <div class="text-sm text-slate-500">Resumen generado por IA.</div>
       </div>
     {/if}
 
     <div class="flex flex-col gap-2 xs:flex-row xs:items-center">
       {#if doc.calificaciones}
-        <Popover>
-          <PopoverTrigger asChild let:builder>
+        <Popover.Root>
+          <Popover.Trigger asChild let:builder>
             <Button
               builders={[builder]}
               variant="outline"
-              class="items-center gap-1.5"
-            >
+              class="items-center gap-1.5">
               <Star class="h-4 w-4 fill-current text-yellow-500" />
               <span
                 >Promedio: {doc.calificaciones.promedio_general.toFixed(
                   1,
-                )}</span
-              >
+                )}</span>
               <ChevronDown class="h-[1.2rem] w-[1.2rem]" />
             </Button>
-          </PopoverTrigger>
-          <PopoverContent class="w-max">
-            <Promedios
+          </Popover.Trigger>
+          <Popover.Content class="w-max">
+            <TablaPromediosDocente
               cantidadCalificaciones={doc.cantidad_calificaciones}
-              {...doc.calificaciones}
-            />
-          </PopoverContent>
-        </Popover>
+              {...doc.calificaciones} />
+          </Popover.Content>
+        </Popover.Root>
       {:else}
         <Button variant="outline" class="items-center gap-1.5">
           <Star class="h-4 w-4 fill-none text-yellow-500" />
