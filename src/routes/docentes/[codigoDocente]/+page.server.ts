@@ -49,16 +49,16 @@ export const load: PageServerLoad = async ({ params }) => {
       .where(eq(dbSchema.docente.codigo, params.codigoDocente))
       .limit(1);
   } catch (e: any) {
-    // Si pasan un código que no es serializable como UUID.
     if (e.code === "22P02") {
-      throw error(404, "Docente no encontrado.");
+      throw error(404);
     } else {
-      throw e;
+      console.error(e);
+      throw error(500);
     }
   }
 
   if (filasDocentes.length === 0) {
-    throw error(404, "Docente no encontrado.");
+    throw error(404);
   }
 
   const filasCuatrimestres = await db

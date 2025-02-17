@@ -18,8 +18,8 @@
 <div
   class="sticky top-16 bg-background/75 bg-fiuba p-3 text-center text-background backdrop-blur-lg">
   <span class=""
-    >⚠️ Estamos en proceso de actualización de los listados de cátedras y
-    >docentes para las materias de los planes nuevos.
+    >⚠️ Estoy en proceso de actualización de los listados de cátedras y docentes
+    para las materias de los planes nuevos.
     <Link href="/planes" class="underline" external>Más Información.</Link
     ></span>
 </div>
