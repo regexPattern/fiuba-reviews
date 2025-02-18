@@ -4,8 +4,6 @@ import db from "$lib/db";
 import { materia, plan, planMateria } from "$lib/db/schema";
 import { eq } from "drizzle-orm";
 
-export const prerender = true;
-
 export const load: LayoutServerLoad = async () => {
   const filasMateriasNuevosPlanes = await db
     .select({
