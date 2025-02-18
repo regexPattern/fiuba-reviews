@@ -8,6 +8,7 @@
   import { ChevronDown, Star } from "lucide-svelte";
 
   import type { LayoutData } from "./$types";
+  import { Skeleton } from "$lib/components/ui/skeleton";
 
   export let data: LayoutData;
 
@@ -28,25 +29,33 @@
       </div>
 
       <ul class="space-y-1.5 py-2">
-        {#each data.catedras as cat (cat.codigo)}
-          <li class="flex items-center gap-1.5 px-5 py-2 md:pl-2 md:pr-4">
-            <span
-              class={`w-[2.5ch] shrink-0 font-medium ${
-                !cat.promedio ? "text-center" : ""
-              }`}>
-              {cat.promedio?.toFixed(1) || "-"}
-            </span>
-            <Star
-              class="h-3 w-3 shrink-0 fill-current pr-0.5 text-yellow-500" />
-            <a
-              href={`/materias/${$page.params.codigoMateria}/${cat.codigo}`}
-              class={cn(
-                $page.params.codigoCatedra === cat.codigo && "text-fiuba",
-              )}>
-              {cat.nombre}
-            </a>
-          </li>
-        {/each}
+        {#await data.catedras}
+          {#each Array(10) as _}
+            <li class="px-2 py-0.5">
+              <Skeleton class="h-10" />
+            </li>
+          {/each}
+        {:then catedras}
+          {#each catedras as cat (cat.codigo)}
+            <li class="flex items-center gap-1.5 px-5 py-2 md:pl-2 md:pr-4">
+              <span
+                class={`w-[2.5ch] shrink-0 font-medium ${
+                  !cat.promedio ? "text-center" : ""
+                }`}>
+                {cat.promedio?.toFixed(1) || "-"}
+              </span>
+              <Star
+                class="h-3 w-3 shrink-0 fill-current pr-0.5 text-yellow-500" />
+              <a
+                href={`/materias/${$page.params.codigoMateria}/${cat.codigo}`}
+                class={cn(
+                  $page.params.codigoCatedra === cat.codigo && "text-fiuba",
+                )}>
+                {cat.nombre}
+              </a>
+            </li>
+          {/each}
+        {/await}
       </ul>
     </aside>
 
@@ -66,23 +75,31 @@
       </SheetTrigger>
       <SheetContent class="z-[120] p-0 pt-8" side="left">
         <ul class="h-full space-y-1.5 overflow-y-scroll py-2">
-          {#each data.catedras as cat (cat.codigo)}
-            <li class="flex items-center gap-1.5 px-5 py-2 md:pl-2 md:pr-4">
-              <span
-                class={`w-[3ch] shrink-0 font-medium ${
-                  !cat.promedio ? "text-center" : ""
-                }`}>{cat.promedio?.toFixed(1) || "-"}</span>
-              <Star class="h-3 w-3 shrink-0 fill-current text-yellow-500" />
-              <a
-                href={`/materias/${$page.params.codigoMateria}/${cat.codigo}`}
-                class={cn(
-                  $page.params.codigoCatedra === cat.codigo && "text-fiuba",
-                )}
-                on:click={() => (open = !open)}>
-                {cat.nombre}
-              </a>
-            </li>
-          {/each}
+          {#await data.catedras}
+            {#each Array(10) as _}
+              <li class="px-2 py-0.5">
+                <Skeleton class="h-10" />
+              </li>
+            {/each}
+          {:then catedras}
+            {#each catedras as cat (cat.codigo)}
+              <li class="flex items-center gap-1.5 px-5 py-2 md:pl-2 md:pr-4">
+                <span
+                  class={`w-[3ch] shrink-0 font-medium ${
+                    !cat.promedio ? "text-center" : ""
+                  }`}>{cat.promedio?.toFixed(1) || "-"}</span>
+                <Star class="h-3 w-3 shrink-0 fill-current text-yellow-500" />
+                <a
+                  href={`/materias/${$page.params.codigoMateria}/${cat.codigo}`}
+                  class={cn(
+                    $page.params.codigoCatedra === cat.codigo && "text-fiuba",
+                  )}
+                  on:click={() => (open = !open)}>
+                  {cat.nombre}
+                </a>
+              </li>
+            {/each}
+          {/await}
         </ul>
       </SheetContent>
     </Sheet>

@@ -115,12 +115,6 @@ export const actions: Actions = {
       form.data.cuatrimestre
     ) {
       try {
-        console.log({
-          codigoDocente: params.codigoDocente,
-          codigoCuatrimestre: form.data.cuatrimestre,
-          contenido: form.data.comentario,
-        });
-
         await db.insert(s.comentario).values({
           codigoDocente: params.codigoDocente,
           codigoCuatrimestre: form.data.cuatrimestre,
