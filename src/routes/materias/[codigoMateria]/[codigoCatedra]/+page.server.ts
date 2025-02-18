@@ -5,7 +5,13 @@ import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 
 export const load = (async ({ params }) => {
-  let filasInfoDocentesComentarios: {
+  return {
+    docentes: streamDocentes(params.codigoCatedra),
+  };
+}) satisfies PageServerLoad;
+
+async function streamDocentes(codigoCatedra: string) {
+  let docentes: {
     codigo: string;
     nombre: string;
     calificaciones: {
@@ -30,8 +36,8 @@ export const load = (async ({ params }) => {
   }[];
 
   try {
-    filasInfoDocentesComentarios = await db.execute(sql`
-    SELECT * FROM informacion_comentarios_docentes_catedra(${params.codigoCatedra}::uuid);
+    docentes = await db.execute(sql`
+    SELECT * FROM informacion_comentarios_docentes_catedra(${codigoCatedra}::uuid);
   `);
   } catch (e: any) {
     if (e.code === "22P02") {
@@ -42,9 +48,9 @@ export const load = (async ({ params }) => {
     }
   }
 
-  if (filasInfoDocentesComentarios.length == 0) {
+  if (docentes.length == 0) {
     throw error(404);
   }
 
-  return { docentes: filasInfoDocentesComentarios };
-}) satisfies PageServerLoad;
+  return { docentes: docentes };
+}

@@ -6,7 +6,7 @@ import { error } from "@sveltejs/kit";
 import { aliasedTable, eq, sql } from "drizzle-orm";
 
 export const load = (async ({ params }) => {
-  const filasMaterias = await db
+  const materias = await db
     .select({
       codigo: materia.codigo,
       nombre: materia.nombre,
@@ -14,11 +14,7 @@ export const load = (async ({ params }) => {
     .from(materia)
     .where(eq(materia.codigo, params.codigoMateria));
 
-  if (filasMaterias.length === 0) {
-    throw error(404, "Materia no encontrada.");
-  }
-
-  const filasEquivalencias = await db
+  const equivalencias = await db
     .select({
       codigo: sql<string>`m2.codigo`,
       nombre: sql<string>`m2.nombre`,
@@ -30,21 +26,29 @@ export const load = (async ({ params }) => {
     )
     .where(eq(equivalencia.codigoMateriaPlanVigente, params.codigoMateria));
 
-  const filasCatedras = await db.execute<{
+  if (materias.length === 0) {
+    throw error(404);
+  }
+
+  return {
+    materia: materias[0],
+    equivalencias,
+    catedras: streamCatedrasMateria(params.codigoMateria),
+  };
+}) satisfies LayoutServerLoad;
+
+async function streamCatedrasMateria(codigoMateria: string) {
+  const catedras = await db.execute<{
     codigo: string;
     nombre: string;
     promedio: number | null;
   }>(
     sql`
 SELECT *
-FROM catedras_por_equivalencia(${params.codigoMateria})
+FROM catedras_por_equivalencia(${codigoMateria})
 ORDER BY promedio DESC NULLS LAST
 `,
   );
 
-  return {
-    materia: filasMaterias[0],
-    equivalencias: filasEquivalencias,
-    catedras: filasCatedras,
-  };
-}) satisfies LayoutServerLoad;
+  return catedras;
+}

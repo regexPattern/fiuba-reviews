@@ -11,26 +11,31 @@
   export let data: PageData;
 
   onMount(async () => {
-    if (data.catedras.length > 0) {
-      goto(`/materias/${data.materia.codigo}/${data.catedras[0].codigo}`);
+    const catedras = await data.catedras;
+    if (catedras.length > 0) {
+      goto(`/materias/${data.materia.codigo}/${catedras[0].codigo}`);
     }
   });
 </script>
 
-{#if data.catedras.length > 0}
+{#await data.catedras}
   <SkeletonCatedra />
-{:else}
-  <div class="space-y-6 text-center">
-    <img
-      alt="Steve de Minecraft."
-      src={sinCatedras}
-      class="mx-auto"
-      height={337.5}
-      width={150} />
-    <p class="mx-auto max-w-lg pb-4">
-      Aún no tenemos información de las cátedras de esta materia. Podés
-      ayudarnos a actualizar los listados enviándonos tu plan de estudio.
-      <Link href="/planes" class="underline" external>Más Información.</Link>
-    </p>
-  </div>
-{/if}
+{:then catedras}
+  {#if catedras.length > 0}
+    <SkeletonCatedra />
+  {:else}
+    <div class="space-y-6 text-center">
+      <img
+        alt="Steve de Minecraft."
+        src={sinCatedras}
+        class="mx-auto"
+        height={337.5}
+        width={150} />
+      <p class="mx-auto max-w-lg pb-4">
+        Aún no tenemos información de las cátedras de esta materia. Podés
+        ayudarnos a actualizar los listados enviándonos tu plan de estudio.
+        <Link href="/planes" class="underline" external>Más Información.</Link>
+      </p>
+    </div>
+  {/if}
+{/await}
