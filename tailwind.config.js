@@ -65,7 +65,7 @@ const config = {
       },
       screens: {
         xs: "425px",
-        ["2xs"]: "355px", 
+        ["2xs"]: "355px",
       },
     },
   },

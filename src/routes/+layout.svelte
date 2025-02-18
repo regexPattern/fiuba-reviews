@@ -25,10 +25,11 @@
     class="container flex h-16 items-center justify-start gap-2 p-3 sm:justify-between">
     <div class="mr-2 flex-1">
       <Link href="/" class="contents text-lg" aria-label="Página de inicio">
-        <span class="font-serif font-bold tracking-wide 2xs:tracking-tight text-fiuba"
-          >F<span class="2xs:inline hidden">IUBA </span></span
+        <span
+          class="font-serif font-bold tracking-wide text-fiuba 2xs:tracking-tight"
+          >F<span class="hidden 2xs:inline">IUBA </span></span
         ><span class="font-medium tracking-tighter"
-          >R<span class="2xs:inline hidden">eviews</span></span>
+          >R<span class="hidden 2xs:inline">eviews</span></span>
       </Link>
     </div>
 

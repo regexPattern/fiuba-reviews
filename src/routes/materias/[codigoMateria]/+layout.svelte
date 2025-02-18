@@ -96,7 +96,7 @@
         <span class="font-mono font-medium"
           >{eq.codigo}{#if i < data.equivalencias.length - 1},
           {/if}</span>
-      {/each}. <Link href="/planes" class="underline font-medium" external
+      {/each}. <Link href="/planes" class="font-medium underline" external
         >Más Información</Link
       >.
     </Alert>

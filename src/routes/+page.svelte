@@ -166,9 +166,9 @@
       .
     </p>
     <p>
-      Ahora que Dolly ya no está en funcionamiento, me parece necesario
-      mantener activa una plataforma donde los alumnos puedan comentar sobre
-      sus experiencias con las diferente cátedras.
+      Ahora que Dolly ya no está en funcionamiento, me parece necesario mantener
+      activa una plataforma donde los alumnos puedan comentar sobre sus
+      experiencias con las diferente cátedras.
     </p>
   </section>
 
