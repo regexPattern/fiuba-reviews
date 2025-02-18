@@ -1,6 +1,5 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import CommandStore from "$lib/command";
   import { Button } from "$lib/components/ui/button";
   import {
     CommandDialog,
@@ -11,14 +10,15 @@
   import { cn } from "$lib/utils";
   import Fuse from "fuse.js";
   import { Search } from "lucide-svelte";
+  import { onMount } from "svelte";
+  import { writable } from "svelte/store";
 
-  export let label: string;
+  const activo = writable(false);
 
   let className = "";
   export { className as class };
 
   type Materia = { codigo: string; nombre: string };
-
   export let materias: Materia[];
   let materiasFiltradas: Materia[] = materias;
 
@@ -32,35 +32,55 @@
   let query = "";
   let debounceTimeout: ReturnType<typeof setTimeout> | undefined;
 
-  $: if (!$CommandStore) {
+  $: if (!$activo) {
     materiasFiltradas = [];
   }
 
   async function debounceSearch(e: Event) {
     clearTimeout(debounceTimeout);
 
-    debounceTimeout = setTimeout(() => {
-      if (e.target instanceof HTMLInputElement) {
-        query = e.target.value;
-
-        materiasFiltradas = fuse.search(query).map((r) => r.item);
-      }
-    }, 300);
+    if (e.target instanceof HTMLInputElement) {
+      query = e.target.value;
+      debounceTimeout = setTimeout(
+        () => {
+          materiasFiltradas = fuse.search(query).map((r) => r.item);
+        },
+        query === "" ? 0 : 300,
+      );
+    }
   }
+
+  onMount(() => {
+    function manejarAtajo(e: KeyboardEvent) {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        $activo = !$activo;
+      }
+    }
+
+    document.addEventListener("keydown", manejarAtajo);
+    return () => {
+      document.removeEventListener("keydown", manejarAtajo);
+    };
+  });
 </script>
 
 <Button
-  class={cn("flex justify-between gap-1 px-3 py-2", className)}
-  on:click={() => ($CommandStore = !$CommandStore)}
+  class={cn("flex justify-between gap-2 p-2", className)}
+  on:click={() => ($activo = !$activo)}
   {...$$restProps}>
-  <span>{label}</span>
   <Search class="h-4 w-4" />
+  <span>
+    <span>Buscar</span> <span class="hidden sm:inline">Materias</span>
+  </span>
+  <kbd
+    class="hidden rounded border px-1 py-0.5 font-mono text-sm tracking-widest sm:inline">
+    Ctrl+K
+  </kbd>
 </Button>
 
-<CommandDialog bind:open={$CommandStore} shouldFilter={false}>
-  <CommandInput
-    placeholder="Código o nombre de una materia"
-    on:input={debounceSearch} />
+<CommandDialog bind:open={$activo} shouldFilter={false}>
+  <CommandInput placeholder="Nombre de una materia" on:input={debounceSearch} />
   <CommandList>
     {#each materiasFiltradas as mat (mat.codigo)}
       {@const slug = mat.codigo}
@@ -68,7 +88,7 @@
         value={mat.codigo}
         onSelect={async () => {
           await goto(`/materias/${slug}`);
-          $CommandStore = false;
+          $activo = false;
         }}
         class="flex cursor-pointer items-start space-x-1.5">
         <span> {mat.nombre} </span>

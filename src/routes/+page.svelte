@@ -39,8 +39,6 @@
     </p>
   </div>
 
-  <BuscadorMaterias label="Buscar materias" materias={data.materias} />
-
   <section class="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-4 lg:gap-6">
     <Feature
       icon={Database}
