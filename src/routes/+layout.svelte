@@ -27,7 +27,7 @@
       <Link href="/" class="contents text-lg" aria-label="Página de inicio">
         <span
           class="font-serif font-bold tracking-wide text-fiuba 2xs:tracking-tight"
-          >F<span class="hidden 2xs:inline">IUBA </span></span
+          >F<span class="hidden 2xs:inline">IUBA{" "}</span></span
         ><span class="font-medium tracking-tighter"
           >R<span class="hidden 2xs:inline">eviews</span></span>
       </Link>
