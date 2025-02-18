@@ -1,94 +1,50 @@
 import db from "$lib/db";
-import {
-  calificacion,
-  catedraDocente,
-  comentario,
-  docente,
-} from "$lib/db/schema";
-import { sortCuatrimestres } from "$lib/utils";
+import { sql } from "drizzle-orm";
+
 import type { PageServerLoad } from "./$types";
-import { eq, sql } from "drizzle-orm";
+import { error } from "@sveltejs/kit";
 
-// Con esta versión de SvelteKit no hay forma de manejar Promise rejections
-// de data que esta siendo streameada, así que en esta función no le pongo
-// atención a los errores que puedan ocurrir, solo me importa que ocurra uno
-// o no. Desafortunamente esto también signfica que no tengo forma de
-// retornar un Redirect desde el servidor.
-//
 export const load = (async ({ params }) => {
-  return {
-    streamed: {
-      docentes: fetchDocentesInfo(params.codigoCatedra).catch(() => []),
-    },
-  };
-}) satisfies PageServerLoad;
+  let filasInfoDocentesComentarios: {
+    codigo: string;
+    nombre: string;
+    calificaciones: {
+      promedio_general: number;
+      acepta_critica: number;
+      asistencia: number;
+      buen_trato: number;
+      claridad: number;
+      clase_organizada: number;
+      cumple_horarios: number;
+      fomenta_participacion: number;
+      panorama_amplio: number;
+      responde_mails: number;
+    } | null;
+    cantidad_calificaciones: number;
+    resumen_comentarios: string | null;
+    comentarios: {
+      codigo: number;
+      contenido: string;
+      cuatrimestre: string;
+    }[];
+  }[];
 
-async function fetchDocentesInfo(codigoCatedra: string) {
-  const docentes = await db
-    .select({
-      codigo: docente.codigo,
-      nombre: docente.nombre,
-      resumen_comentarios: docente.resumenComentarios,
-      promedio: sql<number | null>`
-(SELECT AVG((
-    ${calificacion.aceptaCritica}
-    + ${calificacion.asistencia}
-    + ${calificacion.buenTrato}
-    + ${calificacion.claridad}
-    + ${calificacion.claseOrganizada}
-    + ${calificacion.cumpleHorarios}
-    + ${calificacion.fomentaParticipacion}
-    + ${calificacion.panoramaAmplio}
-    + ${calificacion.respondeMails}) / 9)
-  FROM ${calificacion}
-  WHERE ${calificacion.codigoDocente} = ${docente.codigo}
-)`,
-      cantidadCalificaciones: sql<number>`COUNT(${calificacion.codigo})`,
-      promedios: {
-        aceptaCritica: sql<number>`AVG(${calificacion.aceptaCritica})`,
-        asistencia: sql<number>`AVG(${calificacion.asistencia})`,
-        buenTrato: sql<number>`AVG(${calificacion.buenTrato})`,
-        claridad: sql<number>`AVG(${calificacion.claridad})`,
-        claseOrganizada: sql<number>`AVG(${calificacion.claseOrganizada})`,
-        cumpleHorarios: sql<number>`AVG(${calificacion.cumpleHorarios})`,
-        fomentaParticipacion: sql<number>`AVG(${calificacion.fomentaParticipacion})`,
-        panoramaAmplio: sql<number>`AVG(${calificacion.panoramaAmplio})`,
-        respondeMails: sql<number>`AVG(${calificacion.respondeMails})`,
-      },
-    })
-    .from(docente)
-    .innerJoin(catedraDocente, eq(docente.codigo, catedraDocente.codigoDocente))
-    .leftJoin(calificacion, eq(docente.codigo, calificacion.codigoDocente))
-    .where(eq(catedraDocente.codigoCatedra, codigoCatedra))
-    .groupBy(docente.codigo, docente.nombre)
-    .orderBy(docente.nombre);
-
-  const comentarios = await db
-    .select({
-      codigoDocente: docente.codigo,
-      codigo: comentario.codigo,
-      cuatrimestre: comentario.cuatrimestre,
-      contenido: comentario.contenido,
-    })
-    .from(comentario)
-    .innerJoin(docente, eq(comentario.codigoDocente, docente.codigo))
-    .innerJoin(catedraDocente, eq(docente.codigo, catedraDocente.codigoDocente))
-    .where(eq(catedraDocente.codigoCatedra, codigoCatedra));
-
-  const codigoDocenteToComentario: Map<string, typeof comentarios> = new Map();
-
-  for (const com of comentarios) {
-    const comentarios = codigoDocenteToComentario.get(com.codigoDocente) || [];
-    comentarios.push(com);
-    codigoDocenteToComentario.set(com.codigoDocente, comentarios);
+  try {
+    filasInfoDocentesComentarios = await db.execute(sql`
+    SELECT * FROM informacion_comentarios_docentes_catedra(${params.codigoCatedra}::uuid);
+  `);
+  } catch (e: any) {
+    if (e.code === "22P02") {
+      throw error(404);
+    } else {
+      console.error(e);
+      throw error(500);
+    }
   }
 
-  return docentes.map((doc) => {
-    const comentarios = codigoDocenteToComentario.get(doc.codigo) || [];
-    comentarios.sort((a, b) =>
-      sortCuatrimestres(a.cuatrimestre, b.cuatrimestre)
-    );
+  if (filasInfoDocentesComentarios.length == 0) {
+    throw error(404);
+  }
 
-    return { ...doc, comentarios };
-  });
-}
+  return { docentes: filasInfoDocentesComentarios };
+}) satisfies PageServerLoad;

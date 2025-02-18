@@ -5,7 +5,7 @@ const campoNumerico = z
   .min(1, { message: "Valor mínimo 1" })
   .max(5, { message: "Valor máximo 5" });
 
-export const codigoDocente = z
+export const formCalificacionDocente = z
   .object({
     ["acepta-critica"]: campoNumerico,
     ["asistencia"]: campoNumerico,
@@ -17,18 +17,18 @@ export const codigoDocente = z
     ["panorama-amplio"]: campoNumerico,
     ["responde-mails"]: campoNumerico,
     ["comentario"]: z.string(),
-    ["cuatrimestre"]: z.string().optional(),
+    ["cuatrimestre"]: z.number().optional(),
     ["cf-turnstile-response"]: z.string(),
   })
   .refine((data) => (data.comentario.length > 0 ? data.cuatrimestre : true), {
-    message: "Cuatrimestre requerido",
+    message: "Cuatrimestre requerido.",
     path: ["cuatrimestre"],
   });
 
-export const contenidoSiu = z.object({
+export const formPlanSiu = z.object({
   ["carrera"]: z.string(),
   ["contenido-siu"]: z
     .string()
-    .min(1, { message: "Contenido del SIU no puede estar vacío" }),
+    .min(1, { message: "Contenido del SIU no puede estar vacío." }),
   ["cf-turnstile-response"]: z.string(),
 });

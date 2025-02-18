@@ -24,5 +24,4 @@
   on:mouseenter
   on:mouseleave
   on:paste
-  on:input
-/>
+  on:input />

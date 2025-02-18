@@ -1,6 +1,7 @@
+import { RadioGroup as RadioGroupPrimitive } from "bits-ui";
+
 import Item from "./radio-group-item.svelte";
 import Root from "./radio-group.svelte";
-import { RadioGroup as RadioGroupPrimitive } from "bits-ui";
 
 const Input = RadioGroupPrimitive.Input;
 

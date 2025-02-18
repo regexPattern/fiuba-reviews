@@ -1,8 +1,9 @@
 <script lang="ts">
   import { Textarea, type TextareaEvents } from "$lib/components/ui/textarea";
-  import type { TextareaGetFormField } from ".";
   import { getFormField } from "formsnap";
   import type { HTMLTextareaAttributes } from "svelte/elements";
+
+  import type { TextareaGetFormField } from ".";
 
   type $$Props = HTMLTextareaAttributes;
   type $$Events = TextareaEvents;
@@ -25,5 +26,4 @@
   on:mouseenter
   on:mouseleave
   on:paste
-  on:input
-/>
+  on:input />

@@ -3,3 +3,5 @@
 .env
 node_modules/
 .vercel/
+.drizzle/
+.DS_Store

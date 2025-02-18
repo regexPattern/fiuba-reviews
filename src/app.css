@@ -3,6 +3,13 @@
 @tailwind utilities;
 
 @font-face {
+  font-family: "Noto Serif";
+  src: url("/fonts/NotoSerif-VariableFont_wdth,wght.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 100 900;
+}
+
+@font-face {
   font-family: "Geist";
   src: url("/fonts/GeistVariableVF.ttf") format("truetype");
   font-display: swap;
