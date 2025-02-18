@@ -14,6 +14,7 @@ const config = {
       },
     },
     fontFamily: {
+      serif: ["Noto Serif", ...fontFamily.serif],
       sans: ["Geist", ...fontFamily.sans],
       mono: ["Geist Mono", ...fontFamily.mono],
     },
@@ -64,6 +65,7 @@ const config = {
       },
       screens: {
         xs: "425px",
+        ["2xs"]: "355px",
       },
     },
   },

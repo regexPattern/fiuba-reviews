@@ -1,7 +1,8 @@
+import { type VariantProps, tv } from "tailwind-variants";
+
 import Description from "./alert-description.svelte";
 import Title from "./alert-title.svelte";
 import Root from "./alert.svelte";
-import { type VariantProps, tv } from "tailwind-variants";
 
 export const alertVariants = tv({
   base: "[&>svg]:text-foreground relative w-full rounded-lg border p-4 [&:has(svg)]:pl-11 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4",

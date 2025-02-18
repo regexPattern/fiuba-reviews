@@ -2,11 +2,12 @@
   import { cn } from "$lib/utils";
 
   export let href: string;
+  export let external: boolean = false;
 
   let className = "";
   export { className as class };
 
-  const isExternal = !href.startsWith("/");
+  const isExternal = !href.startsWith("/") || external;
 </script>
 
 {#if isExternal}
@@ -15,8 +16,7 @@
     target="_blank"
     rel="noopener noreferrer"
     class={cn("underline", className)}
-    {...$$restProps}><slot /></a
-  >
+    {...$$restProps}><slot /></a>
 {:else}
   <a {href} {...$$restProps} class={className}><slot /></a>
 {/if}

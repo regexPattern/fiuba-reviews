@@ -9,5 +9,4 @@
 
 <CommandPrimitive.Separator
   class={cn("-mx-1 h-px bg-border", className)}
-  {...$$restProps}
-/>
+  {...$$restProps} />

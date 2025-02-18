@@ -10,7 +10,6 @@
 
 <DialogPrimitive.Description
   class={cn("text-sm text-muted-foreground", className)}
-  {...$$restProps}
->
+  {...$$restProps}>
   <slot />
 </DialogPrimitive.Description>

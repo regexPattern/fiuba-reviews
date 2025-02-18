@@ -1,7 +1,8 @@
 <script lang="ts">
   import { cn } from "$lib/utils";
-  import { type Events, type Props, buttonVariants } from ".";
   import { Button as ButtonPrimitive } from "bits-ui";
+
+  import { type Events, type Props, buttonVariants } from ".";
 
   type $$Props = Props;
   type $$Events = Events;
@@ -19,7 +20,6 @@
   type="button"
   {...$$restProps}
   on:click
-  on:keydown
->
+  on:keydown>
   <slot />
 </ButtonPrimitive.Root>
