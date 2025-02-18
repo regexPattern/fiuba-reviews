@@ -4,7 +4,7 @@ import type { Config } from "@sveltejs/adapter-vercel";
 
 import { TURNSTILE_SECRET_KEY } from "$env/static/private";
 
-import * as dbSchema from "$lib/db/schema";
+import * as s from "$lib/db/schema";
 import db from "$lib/db";
 import { desc, eq } from "drizzle-orm";
 import { error } from "@sveltejs/kit";
@@ -19,7 +19,7 @@ export const config: Config = {
 };
 
 export const load: PageServerLoad = async ({ params }) => {
-  let filasDocentes:
+  let docentes:
     | {
         nombre: string;
         codigo_materia: string | null;
@@ -28,25 +28,22 @@ export const load: PageServerLoad = async ({ params }) => {
     | undefined;
 
   try {
-    filasDocentes = await db
+    docentes = await db
       .select({
-        nombre: dbSchema.docente.nombre,
-        codigo_materia: dbSchema.equivalencia.codigoMateriaPlanVigente,
-        codigo_catedra: dbSchema.catedraDocente.codigoCatedra,
+        nombre: s.docente.nombre,
+        codigo_materia: s.equivalencia.codigoMateriaPlanVigente,
+        codigo_catedra: s.catedraDocente.codigoCatedra,
       })
-      .from(dbSchema.docente)
+      .from(s.docente)
       .innerJoin(
-        dbSchema.catedraDocente,
-        eq(dbSchema.docente.codigo, dbSchema.catedraDocente.codigoDocente),
+        s.catedraDocente,
+        eq(s.docente.codigo, s.catedraDocente.codigoDocente),
       )
       .leftJoin(
-        dbSchema.equivalencia,
-        eq(
-          dbSchema.docente.codigoMateria,
-          dbSchema.equivalencia.codigoMateriaPlanAnterior,
-        ),
+        s.equivalencia,
+        eq(s.docente.codigoMateria, s.equivalencia.codigoMateriaPlanAnterior),
       )
-      .where(eq(dbSchema.docente.codigo, params.codigoDocente))
+      .where(eq(s.docente.codigo, params.codigoDocente))
       .limit(1);
   } catch (e: any) {
     if (e.code === "22P02") {
@@ -57,24 +54,21 @@ export const load: PageServerLoad = async ({ params }) => {
     }
   }
 
-  if (filasDocentes.length === 0) {
+  if (docentes.length === 0) {
     throw error(404);
   }
 
-  const filasCuatrimestres = await db
+  const cuatrimestres = await db
     .select()
-    .from(dbSchema.cuatrimestre)
-    .orderBy(
-      desc(dbSchema.cuatrimestre.anio),
-      desc(dbSchema.cuatrimestre.numero),
-    )
+    .from(s.cuatrimestre)
+    .orderBy(desc(s.cuatrimestre.anio), desc(s.cuatrimestre.numero))
     .limit(4);
 
   const form = await superValidate(formSchema);
 
   return {
-    docente: filasDocentes[0],
-    cuatrimestres: filasCuatrimestres,
+    docente: docentes[0],
+    cuatrimestres,
     form,
   };
 };
@@ -87,21 +81,23 @@ export const actions: Actions = {
       return message(form, "Datos inválidos.");
     }
 
-    const esCuatrimestreValido =
-      (
-        await db
-          .select()
-          .from(dbSchema.cuatrimestre)
-          .where(eq(dbSchema.cuatrimestre, form.data.cuatrimestre))
-          .limit(1)
-      ).length === 1;
+    if (form.data.comentario.length > 0 && form.data.cuatrimestre != 0) {
+      const esCuatrimestreValido =
+        (
+          await db
+            .select()
+            .from(s.cuatrimestre)
+            .where(eq(s.cuatrimestre.codigo, Number(form.data.cuatrimestre)))
+            .limit(1)
+        ).length === 1;
 
-    if (form.data.cuatrimestre && !esCuatrimestreValido) {
-      return setError(
-        form,
-        "cuatrimestre",
-        `Cuatrimestre '${form.data.cuatrimestre}' no existe.`,
-      );
+      if (!esCuatrimestreValido) {
+        return setError(
+          form,
+          "cuatrimestre",
+          `Cuatrimestre '${form.data.cuatrimestre}' no existe.`,
+        );
+      }
     }
 
     const { esValido } = await validarToken(
@@ -119,19 +115,26 @@ export const actions: Actions = {
       form.data.cuatrimestre
     ) {
       try {
-        await db.insert(dbSchema.comentario).values({
+        console.log({
+          codigoDocente: params.codigoDocente,
+          codigoCuatrimestre: form.data.cuatrimestre,
+          contenido: form.data.comentario,
+        });
+
+        await db.insert(s.comentario).values({
           codigoDocente: params.codigoDocente,
           codigoCuatrimestre: form.data.cuatrimestre,
           contenido: form.data.comentario,
         });
       } catch (e) {
+        console.error("Error registrando el comentario.");
         console.error(e);
         throw error(500, "Error interno al guardar el comentario.");
       }
     }
 
     try {
-      await db.insert(dbSchema.calificacionDolly).values({
+      await db.insert(s.calificacionDolly).values({
         codigoDocente: params.codigoDocente,
         aceptaCritica: form.data["acepta-critica"],
         asistencia: form.data["asistencia"],
@@ -144,6 +147,7 @@ export const actions: Actions = {
         respondeMails: form.data["responde-mails"],
       });
     } catch (e) {
+      console.error("Error registrando la calificación.");
       console.error(e);
       throw error(500, "Error interno al guardar la calificación.");
     }

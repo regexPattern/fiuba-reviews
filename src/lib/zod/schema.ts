@@ -17,13 +17,22 @@ export const formCalificacionDocente = z
     ["panorama-amplio"]: campoNumerico,
     ["responde-mails"]: campoNumerico,
     ["comentario"]: z.string(),
-    ["cuatrimestre"]: z.number().optional(),
+    ["cuatrimestre"]: z.number(),
     ["cf-turnstile-response"]: z.string(),
   })
-  .refine((data) => (data.comentario.length > 0 ? data.cuatrimestre : true), {
-    message: "Cuatrimestre requerido.",
-    path: ["cuatrimestre"],
-  });
+  .refine(
+    (data) => {
+      if (data.comentario.length === 0) {
+        return true;
+      } else {
+        return !Number.isNaN(data.cuatrimestre) && data.cuatrimestre != 0;
+      }
+    },
+    {
+      message: "Cuatrimestre requerido.",
+      path: ["cuatrimestre"],
+    },
+  );
 
 export const formPlanSiu = z.object({
   ["carrera"]: z.string(),
