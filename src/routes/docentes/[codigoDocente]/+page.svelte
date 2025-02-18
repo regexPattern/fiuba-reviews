@@ -31,6 +31,7 @@
       }
     },
     onError: "apply",
+    multipleSubmits: "prevent",
   };
 </script>
 
@@ -102,8 +103,8 @@
       <Form.Field {config} name="cuatrimestre">
         <Form.Item>
           <Form.Label for="cuatrimestre">Cuatrimestre</Form.Label>
-          <Form.Select disabled={!formValues.comentario}>
-            <Form.SelectTrigger placeholder="Seleccionar" />
+          <Form.Select disabled={!formValues.comentario?.trim()}>
+            <Form.SelectTrigger placeholder="Seleccionar" value={0} />
             <Form.SelectContent id="cuatrimestre">
               {#each data.cuatrimestres as cuatri}
                 <Form.SelectItem value={cuatri.codigo}
