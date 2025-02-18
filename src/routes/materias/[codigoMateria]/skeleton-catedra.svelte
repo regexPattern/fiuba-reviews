@@ -1,6 +1,5 @@
 <script>
   import { Skeleton } from "$lib/components/ui/skeleton";
-
 </script>
 
 <div class="space-y-4">

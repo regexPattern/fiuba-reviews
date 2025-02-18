@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from "$app/state";
+  import { page } from "$app/stores";
   import Link from "$lib/components/link.svelte";
   import { Alert } from "$lib/components/ui/alert";
   import { Sheet, SheetTrigger } from "$lib/components/ui/sheet";
@@ -39,9 +39,9 @@
             <Star
               class="h-3 w-3 shrink-0 fill-current pr-0.5 text-yellow-500" />
             <a
-              href={`/materias/${page.params.codigoMateria}/${cat.codigo}`}
+              href={`/materias/${$page.params.codigoMateria}/${cat.codigo}`}
               class={cn(
-                page.params.codigoCatedra === cat.codigo && "text-fiuba",
+                $page.params.codigoCatedra === cat.codigo && "text-fiuba",
               )}>
               {cat.nombre}
             </a>
@@ -59,8 +59,6 @@
             window.scroll({ top: 0, behavior: "instant" });
           }}>
           <span class="flex items-start gap-1">
-            {data.materia.codigo}
-            <span class="font-bold">&bullet;</span>
             {data.materia.nombre}
           </span>
           <ChevronDown class="shrink-0" />
@@ -76,9 +74,9 @@
                 }`}>{cat.promedio?.toFixed(1) || "-"}</span>
               <Star class="h-3 w-3 shrink-0 fill-current text-yellow-500" />
               <a
-                href={`/materias/${page.params.codigoMateria}/${cat.codigo}`}
+                href={`/materias/${$page.params.codigoMateria}/${cat.codigo}`}
                 class={cn(
-                  page.params.codigoCatedra === cat.codigo && "text-fiuba",
+                  $page.params.codigoCatedra === cat.codigo && "text-fiuba",
                 )}
                 on:click={() => (open = !open)}>
                 {cat.nombre}
@@ -90,7 +88,7 @@
     </Sheet>
   </div>
 
-  <main class="p-4 md:ml-80 md:min-h-[calc(100vh-4rem)] md:p-6 space-y-6">
+  <main class="space-y-6 p-4 md:ml-80 md:min-h-[calc(100vh-4rem)] md:p-6">
     <Alert class="border-cyan-300 bg-fiuba text-background dark:border-cyan-600"
       >⚠️ Debido a la migración de los datos hacia los nuevos planes por ahora
       se están mostrando las cátedras de las materias equivalentes a {data
@@ -98,7 +96,7 @@
         <span class="font-mono font-medium"
           >{eq.codigo}{#if i < data.equivalencias.length - 1},
           {/if}</span>
-      {/each}. <Link href="/planes" class="underline" external
+      {/each}. <Link href="/planes" class="underline font-medium" external
         >Más Información</Link
       >.
     </Alert>

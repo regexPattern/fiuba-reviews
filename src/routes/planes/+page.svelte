@@ -58,11 +58,22 @@
             >Reportes > Oferta de comisiones.</Link>
         </li>
         <li>
-          Seleccioná todo el contenido de la página <kbd>(CTRL/CMD + A)</kbd>.
+          Seleccioná todo el contenido de la página <kbd
+            class="hidden rounded border px-1 py-0.5 font-mono text-sm tracking-widest sm:inline">
+            (CTRL/CMD + A)</kbd
+          >.
         </li>
-        <li>Copia todo <kbd>(CTRL/CMD + C)</kbd>.</li>
         <li>
-          Pegalo en el cuadro de texto de abajo <kbd>(CTRL/CMD + V)</kbd>.
+          Copia todo <kbd
+            class="hidden rounded border px-1 py-0.5 font-mono text-sm tracking-widest sm:inline">
+            (CTRL/CMD + C)</kbd
+          >.
+        </li>
+        <li>
+          Pegalo en el cuadro de texto de abajo <kbd
+            class="hidden rounded border px-1 py-0.5 font-mono text-sm tracking-widest sm:inline">
+            (CTRL/CMD + V)</kbd
+          >.
         </li>
       </ol>
       <br />

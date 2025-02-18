@@ -4,25 +4,33 @@ import { sql } from "drizzle-orm";
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 
-type InfoDocentesComentarios = {
-  promedio_general: number;
-  acepta_critica: number;
-  asistencia: number;
-  buen_trato: number;
-  claridad: number;
-  clase_organizada: number;
-  cumple_horarios: number;
-  fomenta_participacion: number;
-  panorama_amplio: number;
-  responde_mails: number;
-};
-
 export const load = (async ({ params }) => {
-  let filasInfoDocentesComentarios: InfoDocentesComentarios[];
+  let filasInfoDocentesComentarios: {
+    codigo: string;
+    nombre: string;
+    calificaciones: {
+      promedio_general: number;
+      acepta_critica: number;
+      asistencia: number;
+      buen_trato: number;
+      claridad: number;
+      clase_organizada: number;
+      cumple_horarios: number;
+      fomenta_participacion: number;
+      panorama_amplio: number;
+      responde_mails: number;
+    } | null;
+    cantidad_calificaciones: number;
+    resumen_comentarios: string | null;
+    comentarios: {
+      codigo: number;
+      contenido: string;
+      cuatrimestre: string;
+    }[];
+  }[];
 
   try {
-    filasInfoDocentesComentarios =
-      await db.execute<InfoDocentesComentarios>(sql`
+    filasInfoDocentesComentarios = await db.execute(sql`
     SELECT * FROM informacion_comentarios_docentes_catedra(${params.codigoCatedra}::uuid);
   `);
   } catch (e: any) {

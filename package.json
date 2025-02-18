@@ -46,6 +46,7 @@
     "mode-watcher": "^0.1.2",
     "postgres": "^3.4.5",
     "posthog-js": "^1.219.1",
+    "svelte-rough-notation": "^0.1.5",
     "svelte-sonner": "^0.3.28",
     "sveltekit-superforms": "^1.13.4",
     "tailwind-merge": "^2.6.0",
