@@ -11,7 +11,7 @@ export const prerender = false;
 
 const carreras = new Set([
   "Ingeniería Civil",
-  "Ingeniería Electrónica",
+  "Ingeniería electrónica",
   "Ingeniería Industrial",
   "Ingeniería Mecánica",
   "Ingeniería Naval",
@@ -19,7 +19,7 @@ const carreras = new Set([
   "Ingeniería de Alimentos",
   "Ingeniería en Agrimensura",
   "Ingeniería en Energía Eléctrica",
-  "Ingeniería en Petróleo",
+  "Ingeniería en Petroleo",
   "Ingeniería en Informática",
 ]);
 
