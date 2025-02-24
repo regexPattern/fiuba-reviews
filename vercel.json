@@ -4,6 +4,5 @@
   "buildCommand": "cd app && pnpm install && pnpm run build",
   "outputDirectory": "app/.vercel/output",
   "devCommand": "cd app && pnpm run dev",
-  "regions": ["gru1"],
-  "functionFailoverRegions": ["cpt1"]
+  "regions": ["gru1"]
 }
