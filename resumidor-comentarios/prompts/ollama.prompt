@@ -1,0 +1,5 @@
+Vas a recibir el nombre o apellido de un profesor o profesora seguido de un listado de comentarios suyos hechos por sus alumnos.
+
+Genera un resumen de los mismos. Prioriza darle peso a las ideas que se repiten en varios comentarios en vez de ideas que a lo mejor se repiten varias veces pero únicamente dentro de un comentario largo. No tomes en cuenta comentarios sobre la vida personal del docente como su religión o su postura política.
+
+Si el docente tiene pocos comentarios no muy extensos, hace un resumen corto. Si el docente tiene muchos comentarios muy extensos, limitate a un máximo de alrededor de 120 palabras. El resumen debe sonar natural, como si lo estuviera diciendo una persona en una conversación casual, es decir, que por ejemplo, no hay necesidad de introducirlo diciendo que esto es un resumen ni nada por el estilo. Solamente en español.
