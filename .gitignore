@@ -1,7 +1,3 @@
-!.svelte-kit/tsconfig.json
-.svelte-kit/
-.env
-node_modules/
-.vercel/
-.drizzle/
 .DS_Store
+
+.vercel
