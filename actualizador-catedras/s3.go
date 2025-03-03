@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
@@ -12,8 +13,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/charmbracelet/log"
 )
 
+const BUCKET_NAME_ENV string = ""
 const MAX_REQ_CONCURRENTES int = 5
 
 type materia struct {
@@ -32,35 +35,44 @@ type docente struct {
 	Rol    string `json:"rol"`
 }
 
-func getMateriasOfertasComisiones() ([]materia, error) {
-	cfg, err := config.LoadDefaultConfig(context.Background())
+var client *s3.Client
+
+func newS3Client() error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
+	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	client := s3.NewFromConfig(cfg)
-	bucket := aws.String(os.Getenv("AWS_S3_BUCKET"))
+	client = s3.NewFromConfig(cfg)
+	return nil
+}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+func getPlanesDeEstudio() ([]materia, error) {
+	bucket := aws.String(os.Getenv("AWS_S3_BUCKET"))
+	logger := log.Default().WithPrefix("S3 🪣").With("bucket", *bucket)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
 	output, err := client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket: bucket,
 	})
 
-	logger := slog.Default().With(slog.String("bucket", *bucket))
-
 	if err != nil {
 		return nil, err
 	}
 
-	var wg sync.WaitGroup
+	logger.Info(fmt.Sprintf("Obtenidos %v planes", len(output.Contents)))
 
+	var wg sync.WaitGroup
 	planes := make(chan []materia)
 	sem := make(chan struct{}, MAX_REQ_CONCURRENTES)
 
 	for _, obj := range output.Contents {
-		logger := logger.With(slog.String("key", *obj.Key))
+		logger := logger.With("obj", *obj.Key)
 
 		wg.Add(1)
 
@@ -78,32 +90,39 @@ func getMateriasOfertasComisiones() ([]materia, error) {
 			})
 
 			if err != nil {
+				// TODO: ocupar errgroup para manejar esto
 				logger.Error("Error obteniendo el archivo del plan", slog.String("error", err.Error()))
 				return
 			}
 
 			defer obj.Body.Close()
-			_, err = io.ReadAll(obj.Body)
+			data, err := io.ReadAll(obj.Body)
 
 			if err != nil {
+				// TODO: ocupar errgroup para manejar esto
 				logger.Error("Error leyendo el contenido del plan", slog.String("error", err.Error()))
 				return
 			}
 
-			planes <- []materia{{Nombre: ""}}
+			var plan []materia
+			_ = json.Unmarshal(data, &plan)
+
+			// TODO: obtener la metadata del plan (ya la tengo seguro) para imprimir el nombre del plan bonito
+			logger.Info(fmt.Sprintf("Obtenidas %v materias en el plan", len(plan)))
+
+			planes <- plan
 			<-sem
 		}(obj.Key)
 	}
 
 	go func() {
 		wg.Wait()
-		fmt.Println("closing")
 		close(planes)
 	}()
 
-	for plan := range planes {
-		fmt.Println(plan)
-	}
+	// TODO: lo que necesito es tirar a todas las materias en un hashset
+	plan := <-planes
+	fmt.Println(plan)
 
 	return nil, nil
 }

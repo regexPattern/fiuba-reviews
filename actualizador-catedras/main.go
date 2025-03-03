@@ -1,46 +1,33 @@
 package main
 
 import (
-	"fmt"
-	"log/slog"
-	"os"
-	"strings"
-
+	"github.com/charmbracelet/log"
 	_ "github.com/joho/godotenv/autoload"
 )
 
-func main() {
-	logger := initLogger()
-	slog.SetDefault(logger)
+func init() {
+	newLogger()
 
-	materias, err := getMateriasOfertasComisiones()
-	if err != nil {
-		slog.Error("Error obteniendo las ofertas de comisiones disponibles", "error", err)
+	if err := newDbConn(); err != nil {
+		log.Fatal(err)
 	}
 
-	fmt.Println(materias)
-
-	getCodigosMaterias()
+	if err := newS3Client(); err != nil {
+		log.Fatal(err)
+	}
 }
 
-func initLogger() *slog.Logger {
-	var level slog.Level
-
-	switch strings.ToUpper(os.Getenv("LOG_LEVEL")) {
-	case "DEBUG":
-		level = slog.LevelDebug
-	case "WARN", "WARNING":
-		level = slog.LevelWarn
-	case "ERROR":
-		level = slog.LevelError
-	default:
-		level = slog.LevelInfo
+func main() {
+	_, err := getCodigosMaterias()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	opts := &slog.HandlerOptions{
-		Level:     level,
-		AddSource: level == slog.LevelDebug,
+	_, err = getPlanesDeEstudio()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	return slog.New(slog.NewTextHandler(os.Stdout, opts))
+	// fmt.Println(cods)
+	// fmt.Println(mats)
 }

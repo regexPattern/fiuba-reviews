@@ -4,19 +4,28 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
+	"github.com/charmbracelet/log"
 	"github.com/jackc/pgx/v5"
 )
 
-func getCodigosMaterias() {
-	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
-	}
-	defer conn.Close(context.Background())
+var conn *pgx.Conn
 
-	res, _ := conn.Query(context.Background(), `
+func newDbConn() error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
+	var err error
+	conn, err = pgx.Connect(ctx, os.Getenv("DATABASE_URL"))
+
+	return err
+}
+
+func getCodigosMaterias() (map[string]string, error) {
+	logger := log.Default().WithPrefix("DB 💽")
+
+	res, err := conn.Query(context.Background(), `
 SELECT m.codigo, lower(unaccent(m.nombre))
 FROM materia m
 INNER JOIN plan_materia pm
@@ -26,11 +35,24 @@ ON p.codigo = pm.codigo_plan
 WHERE p.esta_vigente = true;
 		`)
 
-	materias := make(map[string]string, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	cods := make(map[string]string, 0)
 
 	for res.Next() {
-		var codigo, nombre string
-		_ = res.Scan(&codigo, &nombre)
-		materias[nombre] = codigo
+		var cod, nombre string
+
+		err := res.Scan(&cod, &nombre)
+		if err != nil {
+			return nil, err
+		}
+
+		cods[nombre] = cod
 	}
+
+	logger.Info(fmt.Sprintf("Obtenidas %v materias", len(cods)))
+
+	return cods, nil
 }
