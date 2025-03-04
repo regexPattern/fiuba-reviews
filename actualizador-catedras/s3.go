@@ -5,15 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log/slog"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/charmbracelet/log"
+	"golang.org/x/sync/errgroup"
 )
 
 const BUCKET_NAME_ENV string = ""
@@ -67,62 +66,65 @@ func getPlanesDeEstudio() ([]materia, error) {
 
 	logger.Info(fmt.Sprintf("Obtenidos %v planes", len(output.Contents)))
 
-	var wg sync.WaitGroup
-	planes := make(chan []materia)
-	sem := make(chan struct{}, MAX_REQ_CONCURRENTES)
+	var eg errgroup.Group
+	eg.SetLimit(MAX_REQ_CONCURRENTES)
+
+	planes := make(chan []materia, len(output.Contents))
 
 	for _, obj := range output.Contents {
-		logger := logger.With("obj", *obj.Key)
+		logger := logger.With("objKey", *obj.Key)
 
-		wg.Add(1)
-
-		go func(key *string) {
-			sem <- struct{}{}
-
-			defer wg.Done()
-
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-			defer cancel()
-
-			obj, err := client.GetObject(ctx, &s3.GetObjectInput{
+		eg.Go(func() error {
+			plan, err := procPlanDeEstudio(logger, &s3.GetObjectInput{
 				Bucket: bucket,
-				Key:    key,
+				Key:    obj.Key,
 			})
 
-			if err != nil {
-				// TODO: ocupar errgroup para manejar esto
-				logger.Error("Error obteniendo el archivo del plan", slog.String("error", err.Error()))
-				return
+			if err == nil {
+				planes <- plan
 			}
 
-			defer obj.Body.Close()
-			data, err := io.ReadAll(obj.Body)
-
-			if err != nil {
-				// TODO: ocupar errgroup para manejar esto
-				logger.Error("Error leyendo el contenido del plan", slog.String("error", err.Error()))
-				return
-			}
-
-			var plan []materia
-			_ = json.Unmarshal(data, &plan)
-
-			// TODO: obtener la metadata del plan (ya la tengo seguro) para imprimir el nombre del plan bonito
-			logger.Info(fmt.Sprintf("Obtenidas %v materias en el plan", len(plan)))
-
-			planes <- plan
-			<-sem
-		}(obj.Key)
+			return err
+		})
 	}
 
-	go func() {
-		wg.Wait()
-		close(planes)
-	}()
+	if err := eg.Wait(); err != nil {
+		return nil, err
+	}
 
-	// TODO: lo que necesito es tirar a todas las materias en un hashset
-	plan := <-planes
-	fmt.Println(plan)
+	close(planes)
+
+	// TODO: agregar las materias a un hashset segun su codigo
+	for plan := range planes {
+		fmt.Println(len(plan))
+	}
 
 	return nil, nil
+}
+
+func procPlanDeEstudio(logger *log.Logger, objInputOpts *s3.GetObjectInput) ([]materia, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
+	logger.Debug("Obteniendo contenido del plan")
+
+	obj, err := client.GetObject(ctx, objInputOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	defer obj.Body.Close()
+	data, err := io.ReadAll(obj.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var plan []materia
+	_ = json.Unmarshal(data, &plan)
+
+	// TODO: obtener la metadata del plan (ya la tengo seguro) para imprimir el nombre del plan bonito
+	logger.Info(fmt.Sprintf("Obtenidas %v materias en el plan", len(plan)))
+
+	return plan, nil
 }
