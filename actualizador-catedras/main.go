@@ -18,16 +18,21 @@ func init() {
 }
 
 func main() {
+	log.Info("Obteniendo códigos de materias")
+
 	_, err := getCodigosMaterias()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = getPlanesDeEstudio()
+	log.Info("Obteniendo últimos planes de estudio")
+
+	planes, err := getUltimosPlanesDeEstudio()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// fmt.Println(cods)
-	// fmt.Println(mats)
+	log.Info("Filtrando solo ofertas de comisiones más recientes")
+
+	filtrarMateriasMasRecientes(planes)
 }
