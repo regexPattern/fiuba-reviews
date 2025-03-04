@@ -22,9 +22,9 @@ const BUCKET_NAME_ENV string = ""
 const MAX_REQ_CONCURRENTES int = 5
 
 type plan struct {
-	carrera string
-	cuatri  cuatri
-	ofertas []oferta
+	carrera  string
+	cuatri   cuatri
+	materias []materia
 }
 
 type cuatri struct {
@@ -37,14 +37,10 @@ func (c cuatri) esDespuesDe(otro cuatri) bool {
 		((otro.anio == c.anio) && (otro.numero < c.numero))
 }
 
-type oferta struct {
-	materia
-	Catedras []catedra `json:"catedras"`
-}
-
 type materia struct {
-	Codigo string `json:"codigo"`
-	Nombre string `json:"nombre"`
+	Codigo   string    `json:"codigo"`
+	Nombre   string    `json:"nombre"`
+	Catedras []catedra `json:"catedras"`
 }
 
 func (m *materia) Equal(otra *materia) bool {
@@ -182,12 +178,12 @@ func getPlanDeEstudio(logger *log.Logger, bucket, objKey *string) (plan, error) 
 		return plan, err
 	}
 
-	err = json.Unmarshal(data, &plan.ofertas)
+	err = json.Unmarshal(data, &plan.materias)
 	if err != nil {
 		return plan, err
 	}
 
-	logger.Info(fmt.Sprintf("Obtenidas %v materias en el plan", len(plan.ofertas)))
+	logger.Info(fmt.Sprintf("Obtenidas %v materias en el plan", len(plan.materias)))
 
 	return plan, nil
 }
@@ -195,19 +191,22 @@ func getPlanDeEstudio(logger *log.Logger, bucket, objKey *string) (plan, error) 
 func filtrarMateriasMasRecientes(planes []plan) []materia {
 	maxMaterias := 0
 	for _, plan := range planes {
-		maxMaterias += len(plan.ofertas)
+		maxMaterias += len(plan.materias)
 	}
 
-	materias := make(map[materia]cuatri, maxMaterias)
+	cuatris := make(map[string]cuatri, maxMaterias)
+	materias := make(map[string]materia, maxMaterias)
 
 	for _, plan := range planes {
-		for _, oferta := range plan.ofertas {
-			cuatri, ok := materias[oferta.materia]
-			if plan.cuatri.esDespuesDe(cuatri) {
-				// materias[oferta.materia] = 
+		for _, materia := range plan.materias {
+			cuatriUltimoCambio, ok := cuatris[materia.Nombre]
+
+			if !ok || plan.cuatri.esDespuesDe(cuatriUltimoCambio) {
+				cuatris[materia.Nombre] = plan.cuatri
+				materias[materia.Nombre] = materia
 			}
 		}
 	}
 
-	return slices.Collect(maps.Keys(materias))
+	return slices.Collect(maps.Values(materias))
 }
