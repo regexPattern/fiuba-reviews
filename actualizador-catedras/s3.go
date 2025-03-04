@@ -95,10 +95,6 @@ func getPlanesDeEstudio() ([]materia, error) {
 	close(planes)
 
 	// TODO: agregar las materias a un hashset segun su codigo
-	for plan := range planes {
-		fmt.Println(len(plan))
-	}
-
 	return nil, nil
 }
 

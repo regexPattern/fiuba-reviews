@@ -1,1 +1,3 @@
+.docker/postgres/*.gz
+
 !.env.example

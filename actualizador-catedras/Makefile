@@ -1,7 +1,4 @@
-.PHONY: run test
+.PHONY: run
 
 run:
-	@go run .
-
-test:
-	@go test ./... -v
+	@GO_ENV=development go run .

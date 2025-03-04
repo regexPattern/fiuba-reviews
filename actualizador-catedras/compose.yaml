@@ -1,0 +1,27 @@
+services:
+  db:
+    build:
+      dockerfile_inline: |
+        FROM postgres:15.8
+        RUN apt update -y && apt upgrade -y
+        RUN apt install curl -y
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - ${POSTGRES_PORT:-5432}:5432
+    volumes:
+      - ./.docker/postgres/:/docker-entrypoint-initdb.d/
+
+  s3:
+    build:
+      dockerfile_inline: |
+        FROM localstack/localstack:4.2
+        RUN apt update -y && apt upgrade -y
+    environment:
+      - AWS_S3_BUCKET=${AWS_S3_BUCKET}
+    ports:
+      - ${AWS_PORT:-4566}:4566
+    volumes:
+      - ./.docker/localstack/:/etc/localstack/init/ready.d/

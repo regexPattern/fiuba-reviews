@@ -11,15 +11,21 @@ import (
 func newLogger() {
 	var level log.Level
 
-	switch strings.ToUpper(os.Getenv("LOG_LEVEL")) {
-	case "DEBUG":
+	levelEnv, levelEnvSet := os.LookupEnv("LOG_LEVEL")
+	goEnv := strings.ToUpper(os.Getenv("GO_ENV"))
+
+	if levelEnv := strings.ToUpper(levelEnv); (goEnv == "DEVELOPMENT" && !levelEnvSet) ||
+		levelEnv == "DEBUG" {
 		level = log.DebugLevel
-	case "WARN", "WARNING":
-		level = log.WarnLevel
-	case "ERROR":
-		level = log.ErrorLevel
-	default:
-		level = log.InfoLevel
+	} else {
+		switch levelEnv {
+		case "WARN", "WARNING":
+			level = log.WarnLevel
+		case "ERROR":
+			level = log.ErrorLevel
+		default:
+			level = log.InfoLevel
+		}
 	}
 
 	opts := log.Options{
