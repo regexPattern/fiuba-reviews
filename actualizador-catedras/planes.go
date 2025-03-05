@@ -12,13 +12,11 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/charmbracelet/log"
 	"golang.org/x/sync/errgroup"
 )
 
-const BUCKET_NAME_ENV string = ""
 const MAX_REQ_CONCURRENTES int = 5
 
 type plan struct {
@@ -57,21 +55,6 @@ type docente struct {
 	Rol    string `json:"rol"`
 }
 
-var client *s3.Client
-
-func newS3Client() error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
-
-	cfg, err := config.LoadDefaultConfig(ctx)
-	if err != nil {
-		return err
-	}
-
-	client = s3.NewFromConfig(cfg)
-	return nil
-}
-
 func getUltimosPlanesDeEstudio() ([]plan, error) {
 	bucket := aws.String(os.Getenv("AWS_S3_BUCKET"))
 	logger := log.Default().WithPrefix("S3 🪣").With("bucket", *bucket)
@@ -79,7 +62,7 @@ func getUltimosPlanesDeEstudio() ([]plan, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
-	output, err := client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+	output, err := s3Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket: bucket,
 	})
 
@@ -132,7 +115,7 @@ func getPlanDeEstudio(logger *log.Logger, bucket, objKey *string) (plan, error) 
 
 	logger.Debug("Obteniendo metadata del plan")
 
-	head, err := client.HeadObject(ctx, &s3.HeadObjectInput{
+	head, err := s3Client.HeadObject(ctx, &s3.HeadObjectInput{
 		Bucket: bucket,
 		Key:    objKey,
 	})
@@ -162,7 +145,7 @@ func getPlanDeEstudio(logger *log.Logger, bucket, objKey *string) (plan, error) 
 
 	logger.Debug("Obteniendo contenido del plan")
 
-	obj, err := client.GetObject(ctx, &s3.GetObjectInput{
+	obj, err := s3Client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: bucket,
 		Key:    objKey,
 	})

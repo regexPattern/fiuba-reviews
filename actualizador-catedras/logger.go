@@ -8,7 +8,7 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-func newLogger() {
+func initLogger() {
 	var level log.Level
 
 	levelEnv, levelEnvSet := os.LookupEnv("LOG_LEVEL")
