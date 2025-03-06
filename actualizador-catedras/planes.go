@@ -5,9 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"maps"
 	"os"
-	"slices"
 	"strconv"
 	"time"
 
@@ -30,60 +28,35 @@ type cuatri struct {
 	anio   int
 }
 
-func (c cuatri) esDespuesDe(otro cuatri) bool {
-	return (otro.anio < c.anio) ||
-		((otro.anio == c.anio) && (otro.numero < c.numero))
-}
-
-type materia struct {
-	Codigo   string    `json:"codigo"`
-	Nombre   string    `json:"nombre"`
-	Catedras []catedra `json:"catedras"`
-}
-
-func (m *materia) Equal(otra *materia) bool {
-	return m.Codigo == otra.Codigo && m.Nombre == otra.Nombre
-}
-
-type catedra struct {
-	Codigo   int       `json:"codigo"`
-	Docentes []docente `json:"docentes"`
-}
-
-type docente struct {
-	Nombre string `json:"nombre"`
-	Rol    string `json:"rol"`
-}
-
-func getUltimosPlanesDeEstudio() ([]plan, error) {
-	bucket := aws.String(os.Getenv("AWS_S3_BUCKET"))
-	logger := log.Default().WithPrefix("S3 🪣").With("bucket", *bucket)
+func fetchPlanesDeEstudio() ([]plan, error) {
+	bucketName := aws.String(os.Getenv("AWS_S3_BUCKET"))
+	logger := log.Default().WithPrefix("S3 🪣").With("bucket", *bucketName)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
-	output, err := s3Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
-		Bucket: bucket,
+	bucket, err := s3Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+		Bucket: bucketName,
 	})
 
 	if err != nil {
 		return nil, err
 	}
 
-	logger.Info(fmt.Sprintf("Obtenidos %v planes", len(output.Contents)))
+	logger.Info(fmt.Sprintf("Obtenidos %v planes", len(bucket.Contents)))
 
 	var eg errgroup.Group
 	eg.SetLimit(MAX_REQ_CONCURRENTES)
 
-	planes := make(chan plan, len(output.Contents))
+	ch := make(chan plan, len(bucket.Contents))
 
-	for _, obj := range output.Contents {
+	for _, obj := range bucket.Contents {
 		logger := logger.With("objKey", *obj.Key)
 
 		eg.Go(func() error {
-			plan, err := getPlanDeEstudio(logger, bucket, obj.Key)
+			plan, err := serPlanDeEstudio(logger, bucketName, obj.Key)
 			if err == nil {
-				planes <- plan
+				ch <- plan
 			}
 
 			return err
@@ -94,50 +67,29 @@ func getUltimosPlanesDeEstudio() ([]plan, error) {
 		return nil, err
 	}
 
-	close(planes)
-	ultimosPlanes := make(map[string]plan, len(planes))
+	close(ch)
 
-	for p1 := range planes {
-		p2, ok := ultimosPlanes[p1.carrera]
-		if !ok || p1.cuatri.esDespuesDe(p2.cuatri) {
-			ultimosPlanes[p1.carrera] = p1
-		}
+	planes := make([]plan, 0, len(ch))
+	for p := range ch {
+		planes = append(planes, p)
 	}
 
-	return slices.Collect(maps.Values(ultimosPlanes)), nil
+	return planes, nil
 }
 
-func getPlanDeEstudio(logger *log.Logger, bucket, objKey *string) (plan, error) {
-	var plan plan
-
+func serPlanDeEstudio(logger *log.Logger, bucket, objKey *string) (plan, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
 	logger.Debug("Obteniendo metadata del plan")
 
-	head, err := s3Client.HeadObject(ctx, &s3.HeadObjectInput{
+	objHead, err := s3Client.HeadObject(ctx, &s3.HeadObjectInput{
 		Bucket: bucket,
 		Key:    objKey,
 	})
 
 	if err != nil {
-		return plan, nil
-	}
-
-	numero, err := strconv.Atoi(head.Metadata["cuatri-numero"])
-	if err != nil {
-		return plan, err
-	}
-
-	anio, err := strconv.Atoi(head.Metadata["cuatri-anio"])
-	if err != nil {
-		return plan, err
-	}
-
-	plan.carrera = head.Metadata["carrera"]
-	plan.cuatri = cuatri{
-		numero: numero,
-		anio:   anio,
+		return plan{}, err
 	}
 
 	ctx, cancel = context.WithTimeout(context.Background(), time.Second*3)
@@ -151,45 +103,43 @@ func getPlanDeEstudio(logger *log.Logger, bucket, objKey *string) (plan, error) 
 	})
 
 	if err != nil {
-		return plan, err
+		return plan{}, err
 	}
 
 	defer obj.Body.Close()
 
 	data, err := io.ReadAll(obj.Body)
 	if err != nil {
-		return plan, err
+		return plan{}, err
 	}
 
-	err = json.Unmarshal(data, &plan.materias)
+	materias := []materia{}
+
+	err = json.Unmarshal(data, &materias)
 	if err != nil {
-		return plan, err
+		return plan{}, err
 	}
 
-	logger.Info(fmt.Sprintf("Obtenidas %v materias en el plan", len(plan.materias)))
+	logger.Info(fmt.Sprintf("Obtenidas %v materias en el plan", len(materias)))
+
+	// En este caso se sabe de antemano que si la información fue registrada y
+	// leída correctamente, los datos son serializables.
+	numero, _ := strconv.Atoi(objHead.Metadata["cuatri-numero"])
+	anio, _ := strconv.Atoi(objHead.Metadata["cuatri-anio"])
+
+	plan := plan{
+		carrera: objHead.Metadata["carrera"],
+		cuatri: cuatri{
+			numero: numero,
+			anio:   anio,
+		},
+		materias: materias,
+	}
 
 	return plan, nil
 }
 
-func filtrarMateriasMasRecientes(planes []plan) []materia {
-	maxMaterias := 0
-	for _, plan := range planes {
-		maxMaterias += len(plan.materias)
-	}
-
-	cuatris := make(map[string]cuatri, maxMaterias)
-	materias := make(map[string]materia, maxMaterias)
-
-	for _, plan := range planes {
-		for _, materia := range plan.materias {
-			cuatriUltimoCambio, ok := cuatris[materia.Nombre]
-
-			if !ok || plan.cuatri.esDespuesDe(cuatriUltimoCambio) {
-				cuatris[materia.Nombre] = plan.cuatri
-				materias[materia.Nombre] = materia
-			}
-		}
-	}
-
-	return slices.Collect(maps.Values(materias))
+func (c cuatri) esDespuesDe(otro cuatri) bool {
+	return (otro.anio < c.anio) ||
+		((otro.anio == c.anio) && (otro.numero < c.numero))
 }

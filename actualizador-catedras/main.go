@@ -1,13 +1,8 @@
 package main
 
 import (
-	"fmt"
-	"strings"
-	"unicode"
-
 	"github.com/charmbracelet/log"
 	_ "github.com/joho/godotenv/autoload"
-	"golang.org/x/text/unicode/norm"
 )
 
 func init() {
@@ -25,14 +20,14 @@ func init() {
 func main() {
 	log.Info("Obteniendo códigos de materias")
 
-	codsMaterias, err := getCodigosMaterias()
+	codigosMaterias, err := fetchNombresACodigosMateriasDB()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Info("Obteniendo últimos planes de estudio")
 
-	planes, err := getUltimosPlanesDeEstudio()
+	planes, err := fetchPlanesDeEstudio()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,22 +36,9 @@ func main() {
 
 	materias := filtrarMateriasMasRecientes(planes)
 
-	log.Info(fmt.Sprintf("Encontradas %v materias", len(materias)))
-
 	for _, m := range materias {
-		// TODO: tengo que pasar esto al parser mejor
-		nombre := norm.NFD.String(m.Nombre)
-
-		var nombreSanit strings.Builder
-		for _, r := range nombre {
-			if !unicode.Is(unicode.Mn, r) {
-				nombreSanit.WriteRune(r)
-			}
-		}
-
-		nombre = strings.ToLower(nombreSanit.String())
-		if _, ok := codsMaterias[nombre]; !ok {
-			log.Warn(nombre)
+		if _, ok := codigosMaterias[m.Nombre]; !ok {
+			log.Warn("Materia no está en la base de datos.", "codigo", m.Codigo, "nombre", m.Nombre)
 		}
 	}
 }
