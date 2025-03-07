@@ -1,14 +1,25 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"maps"
 	"slices"
-	"time"
-
-	"github.com/charmbracelet/log"
 )
+
+type ofertaComisiones struct {
+	carrera  string
+	cuatri   cuatri
+	materias []materia
+}
+
+type cuatri struct {
+	numero int
+	anio   int
+}
+
+func (c cuatri) esDespuesDe(otro cuatri) bool {
+	return (otro.anio < c.anio) ||
+		((otro.anio == c.anio) && (otro.numero < c.numero))
+}
 
 type materia struct {
 	Codigo   string    `json:"codigo"`
@@ -26,76 +37,21 @@ type docente struct {
 	Rol    string `json:"rol"`
 }
 
-func fetchNombresACodigosMateriasDB() (map[string]string, error) {
-	logger := log.Default().WithPrefix("DB 💽")
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
-
-	rows, err := conn.Query(ctx, `
-SELECT m.codigo, lower(unaccent(m.nombre))
-FROM materia m
-INNER JOIN plan_materia pm
-ON m.codigo = pm.codigo_materia
-INNER JOIN plan p
-ON p.codigo = pm.codigo_plan
-WHERE p.esta_vigente = true;
-		`)
-
-	if err != nil {
-		return nil, err
+func filtrarMateriasMasRecientes(ofertas []ofertaComisiones) []materia {
+	max := 0
+	for _, o := range ofertas {
+		max += len(o.materias)
 	}
 
-	codigos := make(map[string]string, 0)
+	cuatris := make(map[string]cuatri, max)
+	materias := make(map[string]materia, max)
 
-	for rows.Next() {
-		var cod, nombre string
-
-		err := rows.Scan(&cod, &nombre)
-		if err != nil {
-			return nil, err
-		}
-
-		codigos[nombre] = cod
-	}
-
-	logger.Info(fmt.Sprintf("Obtenidas %v materias", len(codigos)))
-
-	return codigos, nil
-}
-
-func fetchCodigosMateriasDesactualizadas() {
-}
-
-func actualizarCodigosMaterias(materias []materia, nombresACodigosMaterias map[string]string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
-
-	conn.Query(ctx, `
-CREATE TEMP TABLE tmp_codigos_materias (
-	nombre_materia_norm TEXT PRIMARY KEY,
-	codigo_materia_siu TEXT NOT NULL
-);
-		`)
-
-	return nil
-}
-
-func filtrarMateriasMasRecientes(planes []plan) []materia {
-	maxMaterias := 0
-	for _, p := range planes {
-		maxMaterias += len(p.materias)
-	}
-
-	cuatris := make(map[string]cuatri, maxMaterias)
-	materias := make(map[string]materia, maxMaterias)
-
-	for _, p := range planes {
-		for _, m := range p.materias {
+	for _, o := range ofertas {
+		for _, m := range o.materias {
 			cuatriUltimoCambio, ok := cuatris[m.Nombre]
 
-			if !ok || p.cuatri.esDespuesDe(cuatriUltimoCambio) {
-				cuatris[m.Nombre] = p.cuatri
+			if !ok || o.cuatri.esDespuesDe(cuatriUltimoCambio) {
+				cuatris[m.Nombre] = o.cuatri
 				materias[m.Nombre] = m
 			}
 		}

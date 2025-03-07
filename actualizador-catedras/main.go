@@ -8,37 +8,42 @@ import (
 func init() {
 	initLogger()
 
-	if err := initDbConn(); err != nil {
-		log.Fatal(err)
+	logger := log.Default().WithPrefix("⚙️")
+
+	if err := initDBConn(logger); err != nil {
+		logger.Fatal(err)
 	}
 
-	if err := initS3Client(); err != nil {
-		log.Fatal(err)
+	if err := initS3Client(logger); err != nil {
+		logger.Fatal(err)
 	}
 }
 
 func main() {
-	log.Info("Obteniendo códigos de materias")
-
-	codigosMaterias, err := fetchNombresACodigosMateriasDB()
+	codigosMaterias, err := selectNombresACodigosMaterias()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Info("Obteniendo últimos planes de estudio")
+	ofertas, err := fetchOfertasDeComisiones()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	planes, err := fetchPlanesDeEstudio()
+	err = syncCodigosMaterias(codigosMaterias, ofertas)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Info("Filtrando solo ofertas de comisiones más recientes")
 
-	materias := filtrarMateriasMasRecientes(planes)
+	filtrarMateriasMasRecientes(ofertas)
 
-	for _, m := range materias {
-		if _, ok := codigosMaterias[m.Nombre]; !ok {
-			log.Warn("Materia no está en la base de datos.", "codigo", m.Codigo, "nombre", m.Nombre)
-		}
-	}
+	// Lo que quiero hacer ahora es actualizar las catedras de las materias que
+	// tienen actualizacion.
+	// 1. Las materias que tienen actualizacion son aquellas que no tienen
+	// registro en `actualizacion_catedras` o cuyo registro fue actualizado en
+	// el cuatrimestre anterior. SOLO MATERIAS DE LOS NUEVOS PLANES.
+
+	_ = updateCatedrasMaterias()
 }
