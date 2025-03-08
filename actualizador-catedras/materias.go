@@ -3,9 +3,11 @@ package main
 import (
 	"maps"
 	"slices"
+
+	"github.com/charmbracelet/log"
 )
 
-type ofertaComisiones struct {
+type oferta struct {
 	carrera  string
 	cuatri   cuatri
 	materias []materia
@@ -37,22 +39,36 @@ type docente struct {
 	Rol    string `json:"rol"`
 }
 
-func filtrarMateriasMasRecientes(ofertas []ofertaComisiones) []materia {
+type ultimaComision struct {
+	materia materia
+	cuatri  cuatri
+}
+
+// entre las ofertas del SIU disponible, nos quedamos con la mas reciente de cada materia.
+// TODO: buscar mejores nombres definitivamente
+func filtrarUltimasComisiones(ofertas []oferta) []ultimaComision {
+	logger := log.Default().WithPrefix("🧹")
+
 	max := 0
 	for _, o := range ofertas {
 		max += len(o.materias)
 	}
 
 	cuatris := make(map[string]cuatri, max)
-	materias := make(map[string]materia, max)
+	materias := make(map[string]ultimaComision, max)
+
+	logger.Info("filtrando solo las ofertas de comisiones más recientes")
 
 	for _, o := range ofertas {
 		for _, m := range o.materias {
-			cuatriUltimoCambio, ok := cuatris[m.Nombre]
+			cuatriUltimaActualizacion, ok := cuatris[m.Nombre]
 
-			if !ok || o.cuatri.esDespuesDe(cuatriUltimoCambio) {
+			if !ok || o.cuatri.esDespuesDe(cuatriUltimaActualizacion) {
 				cuatris[m.Nombre] = o.cuatri
-				materias[m.Nombre] = m
+				materias[m.Nombre] = ultimaComision{
+					materia: m,
+					cuatri:  o.cuatri,
+				}
 			}
 		}
 	}

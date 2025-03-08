@@ -47,7 +47,7 @@ func initS3Client(logger *log.Logger) error {
 	return nil
 }
 
-func fetchOfertasDeComisiones() ([]ofertaComisiones, error) {
+func fetchOfertasDeComisiones() ([]oferta, error) {
 	logger := log.Default().WithPrefix("🪣")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
@@ -69,7 +69,7 @@ func fetchOfertasDeComisiones() ([]ofertaComisiones, error) {
 	var eg errgroup.Group
 	eg.SetLimit(MAX_REQ_CONCURRENTES)
 
-	ch := make(chan ofertaComisiones, len(bucket.Contents))
+	ch := make(chan oferta, len(bucket.Contents))
 
 	for _, obj := range bucket.Contents {
 		eg.Go(func() error {
@@ -90,7 +90,7 @@ func fetchOfertasDeComisiones() ([]ofertaComisiones, error) {
 
 	close(ch)
 
-	ofertas := make([]ofertaComisiones, 0, len(ch))
+	ofertas := make([]oferta, 0, len(ch))
 	for o := range ch {
 		ofertas = append(ofertas, o)
 	}
@@ -98,7 +98,7 @@ func fetchOfertasDeComisiones() ([]ofertaComisiones, error) {
 	return ofertas, nil
 }
 
-func serializarOfertaDeComisiones(objKey *string) (ofertaComisiones, error) {
+func serializarOfertaDeComisiones(objKey *string) (oferta, error) {
 	logger := log.Default().WithPrefix("🔗").With("objKey", *objKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
@@ -113,7 +113,7 @@ func serializarOfertaDeComisiones(objKey *string) (ofertaComisiones, error) {
 
 	if err != nil {
 		logger.Error(err)
-		return ofertaComisiones{}, errors.New("error obteniendo metadata")
+		return oferta{}, errors.New("error obteniendo metadata")
 	}
 
 	// En este caso se sabe de antemano que si la información fue registrada y
@@ -135,7 +135,7 @@ func serializarOfertaDeComisiones(objKey *string) (ofertaComisiones, error) {
 
 	if err != nil {
 		logger.Error(err)
-		return ofertaComisiones{}, err
+		return oferta{}, err
 	}
 
 	defer obj.Body.Close()
@@ -143,7 +143,7 @@ func serializarOfertaDeComisiones(objKey *string) (ofertaComisiones, error) {
 	data, err := io.ReadAll(obj.Body)
 	if err != nil {
 		logger.Error(err)
-		return ofertaComisiones{}, err
+		return oferta{}, err
 	}
 
 	materias := []materia{}
@@ -151,12 +151,12 @@ func serializarOfertaDeComisiones(objKey *string) (ofertaComisiones, error) {
 	err = json.Unmarshal(data, &materias)
 	if err != nil {
 		logger.Error(err)
-		return ofertaComisiones{}, err
+		return oferta{}, err
 	}
 
-	logger.Info(fmt.Sprintf("encontradas %v materias en oferta de comisiones", len(materias)))
+	logger.Infof("encontradas %v materias en oferta de comisiones", len(materias))
 
-	oferta := ofertaComisiones{
+	oferta := oferta{
 		carrera: objHead.Metadata["carrera"],
 		cuatri: cuatri{
 			numero: numero,

@@ -26,25 +26,30 @@ func TestSeFiltranLasMateriasDeLasOfetasMasRecientes(t *testing.T) {
 
 	codsCatedrasEsperadas := []int{3, 5, 8}
 
-	p1 := ofertaComisiones{
+	p1 := oferta{
 		carrera:  carrera,
 		cuatri:   cuatri{numero: 1, anio: 2024},
 		materias: []materia{initDummyMateria(4, 7, 11)},
 	}
 
-	p2 := ofertaComisiones{ // plan más reciente
+	p2 := oferta{ // plan más reciente
 		carrera:  carrera,
 		cuatri:   cuatri{numero: 1, anio: 2025},
 		materias: []materia{initDummyMateria(codsCatedrasEsperadas...)},
 	}
 
-	p3 := ofertaComisiones{
+	p3 := oferta{
 		carrera:  carrera,
 		cuatri:   cuatri{numero: 2, anio: 2023},
 		materias: []materia{initDummyMateria(1, 2, 6)},
 	}
 
-	materias := filtrarMateriasMasRecientes([]ofertaComisiones{p1, p2, p3})
+	ultimasComisiones := filtrarUltimasComisiones([]oferta{p1, p2, p3})
+
+	materias := make([]materia, 0, len(ultimasComisiones))
+	for _, uc := range ultimasComisiones {
+		materias = append(materias, uc.materia)
+	}
 
 	if len(materias) != 1 {
 		t.Fail()
@@ -61,7 +66,7 @@ func TestSeFiltranLasMateriasDeLasOfetasMasRecientes(t *testing.T) {
 }
 
 func TestSeDistinguenDosMateriasComoIgualesPorSuNombre(t *testing.T) {
-	p1 := ofertaComisiones{
+	p1 := oferta{
 		cuatri: cuatri{numero: 1, anio: 2025},
 		materias: []materia{{
 			Codigo:   "AM2",
@@ -70,7 +75,7 @@ func TestSeDistinguenDosMateriasComoIgualesPorSuNombre(t *testing.T) {
 		}},
 	}
 
-	p2 := ofertaComisiones{
+	p2 := oferta{
 		cuatri: cuatri{numero: 2, anio: 2021},
 		materias: []materia{{
 			Codigo:   "AM2",
@@ -79,7 +84,7 @@ func TestSeDistinguenDosMateriasComoIgualesPorSuNombre(t *testing.T) {
 		}},
 	}
 
-	materias := filtrarMateriasMasRecientes([]ofertaComisiones{p1, p2})
+	materias := filtrarUltimasComisiones([]oferta{p1, p2})
 
 	if len(materias) != 2 {
 		t.Fail()
@@ -87,7 +92,7 @@ func TestSeDistinguenDosMateriasComoIgualesPorSuNombre(t *testing.T) {
 }
 
 func TestSeConservanLasMateriasSinActualizacion(t *testing.T) {
-	p1 := ofertaComisiones{ // plan más reciente
+	p1 := oferta{ // plan más reciente
 		carrera: "Ingeniería Civil",
 		cuatri:  cuatri{numero: 1, anio: 2025},
 		materias: []materia{{
@@ -97,7 +102,7 @@ func TestSeConservanLasMateriasSinActualizacion(t *testing.T) {
 		}},
 	}
 
-	p2 := ofertaComisiones{
+	p2 := oferta{
 		carrera: "Ingeniería en Informática",
 		cuatri:  cuatri{numero: 2, anio: 2021},
 		materias: []materia{{
@@ -111,7 +116,12 @@ func TestSeConservanLasMateriasSinActualizacion(t *testing.T) {
 		}},
 	}
 
-	materias := filtrarMateriasMasRecientes([]ofertaComisiones{p1, p2})
+	ultimasComisiones := filtrarUltimasComisiones([]oferta{p1, p2})
+
+	materias := make([]materia, 0, len(ultimasComisiones))
+	for _, uc := range ultimasComisiones {
+		materias = append(materias, uc.materia)
+	}
 
 	codsMateriasEsperadas := []string{"AM2", "FIS"}
 
@@ -128,7 +138,7 @@ func TestSeConservanLasMateriasSinActualizacion(t *testing.T) {
 }
 
 func TestSeFiltranLasCatedrasMasRecientesSinImportarLaCarrera(t *testing.T) {
-	p1 := ofertaComisiones{ // plan más reciente
+	p1 := oferta{ // plan más reciente
 		carrera: "Ingeniería Civil",
 		cuatri:  cuatri{numero: 1, anio: 2025},
 		materias: []materia{{
@@ -138,7 +148,7 @@ func TestSeFiltranLasCatedrasMasRecientesSinImportarLaCarrera(t *testing.T) {
 		}},
 	}
 
-	p2 := ofertaComisiones{
+	p2 := oferta{
 		carrera: "Ingeniería en Informática",
 		cuatri:  cuatri{numero: 2, anio: 2021},
 		materias: []materia{{
@@ -148,7 +158,12 @@ func TestSeFiltranLasCatedrasMasRecientesSinImportarLaCarrera(t *testing.T) {
 		}},
 	}
 
-	materias := filtrarMateriasMasRecientes([]ofertaComisiones{p1, p2})
+	ultimasComisiones := filtrarUltimasComisiones([]oferta{p1, p2})
+
+	materias := make([]materia, 0, len(ultimasComisiones))
+	for _, uc := range ultimasComisiones {
+		materias = append(materias, uc.materia)
+	}
 
 	if materias[0].Catedras[0].Codigo != 7 {
 		t.Fail()
