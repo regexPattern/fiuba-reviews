@@ -25,12 +25,14 @@ type patchCatedras struct{}
 func getPatchesMaterias(ofertas []oferta) ([]patch, error) {
 	logger := log.Default().WithPrefix("⬆️")
 
-	logger.Info("actualizando comisiones")
+	logger.Info("actualizando ofertas de comisiones")
 
 	materiasPendientes, err := getMateriasPatchPendiente()
 	if err != nil {
 		return nil, err
 	}
+
+	log.Default().WithPrefix("🧹").Debug("filtrando solo las ofertas de comisiones más recientes")
 
 	ultimasComisiones := filtrarUltimasComisiones(ofertas)
 
@@ -41,7 +43,7 @@ func getPatchesMaterias(ofertas []oferta) ([]patch, error) {
 
 	for _, uc := range ultimasComisiones {
 		if _, ok := materiasPendientes[uc.materia.Codigo]; ok {
-			logger := logger.With("codigo", uc.materia.Codigo)
+			logger := logger.With("codigoMateria", uc.materia.Codigo)
 
 			wg.Add(1)
 			go func() {
@@ -109,15 +111,14 @@ AND NOT EXISTS (
 
 		err := rows.Scan(&cod)
 		if err != nil {
-			logger.Error("error serializando las materias",
-				"error", err, "codigo", cod)
+			logger.Error(err)
 			return nil, err
 		}
 
 		codigosMaterias[cod] = true
 	}
 
-	logger.Infof("encontradas %v materias que pueden requerir actualización", len(codigosMaterias))
+	logger.Infof("encontradas %v materias con ofertas posiblemente desactualizadas", len(codigosMaterias))
 
 	return codigosMaterias, nil
 }
@@ -180,7 +181,7 @@ SELECT EXISTS (
 }
 
 func genPatchDocentes(conn *pgxpool.Conn, uc ultimaComision) (*patchDocentes, error) {
-	logger := log.Default().WithPrefix("🎓").With("codigo", uc.materia.Codigo)
+	logger := log.Default().WithPrefix("🎓").With("codigoMateria", uc.materia.Codigo)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
@@ -229,8 +230,7 @@ WHERE codigo_materia = $1
 
 		err := rows.Scan(&cod, &nombre)
 		if err != nil {
-			logger.Error("error serializando los docentes",
-				"error", err, "codigo", cod, "nombre", nombre)
+			logger.Error(err)
 			return nil, err
 		}
 
@@ -396,7 +396,7 @@ WHERE codigo = $1
 }
 
 func genPatchCatedras(conn *pgxpool.Conn, uc ultimaComision) (*patchCatedras, error) {
-	logger := log.Default().WithPrefix("📚").With("codigo", uc.materia.Codigo)
+	logger := log.Default().WithPrefix("📚").With("codigoMateria", uc.materia.Codigo)
 
 	logger.Debugf("encontradas %v cátedras en materia", 0)
 

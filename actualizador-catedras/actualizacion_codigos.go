@@ -59,11 +59,11 @@ func updateCodigosMaterias(ofertas []oferta) error {
 		return errors.New("error commiteando transacción SQL de actualización de códigos")
 	}
 
-	// INFO: Que no se hayan actualizados los códigos de ninguna materia de las
+	// INFO: Que no se hayan actualizado los códigos de ninguna materia de las
 	// que estaban pendientes no es necesariamente un error, sino que a veces
 	// hay cuatrimestres en los que no hay comisiones para algunas materias,
 	// por lo que ni siquiera aparecen en el SIU.
-	logger.Infof("actualizados los códigos de %v materias", n)
+	logger.Infof("actualizado los códigos de %v materias", n)
 
 	return nil
 }
@@ -135,7 +135,7 @@ func asociarCodigos(logger *log.Logger, tx pgx.Tx, ofertas []oferta) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
-	logger.Debug("obteniendo códigos de materias")
+	logger.Debug("obteniendo códigos de materias de la base de datos")
 
 	rows, err := db.Query(ctx, `
 SELECT m.codigo, lower(unaccent(m.nombre))
@@ -159,15 +159,14 @@ WHERE p.esta_vigente = true
 
 		err := rows.Scan(&cod, &nombre)
 		if err != nil {
-			logger.Error("error serializando las materias",
-				"error", err, "codigo", cod, "nombre", nombre)
+			logger.Error("error serializando las materias", "error", err)
 			return err
 		}
 
 		codigosMaterias[nombre] = cod
 	}
 
-	logger.Infof("encontrado los códigos de %v materias", len(codigosMaterias))
+	logger.Debugf("encontrados los códigos de %v materias en la base de datos", len(codigosMaterias))
 
 	materias := make(map[string][]any, len(codigosMaterias))
 
@@ -181,7 +180,7 @@ WHERE p.esta_vigente = true
 				}
 			} else {
 				materiaFaltanteLogger.Warn("materia no está en la base de datos",
-					"codigo", m.Codigo, "nombre", m.Nombre)
+					"codigoMateria", m.Codigo, "nombreMateria", m.Nombre)
 			}
 		}
 	}
@@ -213,7 +212,7 @@ func updateCodigosActuales(logger *log.Logger, tx pgx.Tx) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
-	logger.Debug("actualizando los códigos de las materias")
+	logger.Info("actualizando los códigos de las materias")
 
 	rows, err := tx.Exec(ctx, `
 WITH materias_a_actualizar AS (

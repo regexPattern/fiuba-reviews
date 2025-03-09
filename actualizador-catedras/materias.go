@@ -3,8 +3,6 @@ package main
 import (
 	"maps"
 	"slices"
-
-	"github.com/charmbracelet/log"
 )
 
 type oferta struct {
@@ -47,8 +45,6 @@ type ultimaComision struct {
 // entre las ofertas del SIU disponible, nos quedamos con la mas reciente de cada materia.
 // TODO: buscar mejores nombres definitivamente
 func filtrarUltimasComisiones(ofertas []oferta) []ultimaComision {
-	logger := log.Default().WithPrefix("🧹")
-
 	max := 0
 	for _, o := range ofertas {
 		max += len(o.materias)
@@ -56,8 +52,6 @@ func filtrarUltimasComisiones(ofertas []oferta) []ultimaComision {
 
 	cuatris := make(map[string]cuatri, max)
 	materias := make(map[string]ultimaComision, max)
-
-	logger.Debug("filtrando solo las ofertas de comisiones más recientes")
 
 	for _, o := range ofertas {
 		for _, m := range o.materias {

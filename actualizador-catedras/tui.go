@@ -34,6 +34,9 @@ func NewModel(patches []patch) model {
 	for _, a := range patches {
 		numDocentes += len(a.docentes.db)
 		patchesMap[a.codigoMateria] = a
+		if len(a.docentes.siu) == 0 {
+			log.Error("WFT", "codigo", a.codigoMateria)
+		}
 	}
 
 	currDocentes := make(map[string]int, numDocentes)
@@ -48,7 +51,6 @@ func NewModel(patches []patch) model {
 
 func (m model) Init() tea.Cmd {
 	log.Default().WithPrefix("🎨").Info("iniciando interfaz gráfica")
-
 	return nil
 }
 

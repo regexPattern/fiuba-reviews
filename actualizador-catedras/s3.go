@@ -99,7 +99,7 @@ func getOfertasComisiones() ([]oferta, error) {
 // serOfertaComisiones serializa una oferta de comisión a partir de un archivo
 // almacenado en el bucket.
 func serOfertaComisiones(ch chan oferta, objKey *string) error {
-	logger := log.Default().WithPrefix("🔗").With("objKey", *objKey)
+	logger := log.Default().WithPrefix("📄").With("objKey", *objKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
@@ -121,7 +121,7 @@ func serOfertaComisiones(ch chan oferta, objKey *string) error {
 	numero, _ := strconv.Atoi(objHead.Metadata["cuatri-numero"])
 	anio, _ := strconv.Atoi(objHead.Metadata["cuatri-anio"])
 
-	logger = logger.WithPrefix("📄").With("cuatri", numero, "anio", anio)
+	logger = logger.With("cuatri", numero, "anio", anio)
 
 	ctx, cancel = context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
@@ -156,13 +156,22 @@ func serOfertaComisiones(ch chan oferta, objKey *string) error {
 
 	logger.Infof("encontradas %v materias en oferta de comisiones", len(materias))
 
+	materiasConCatedras := make([]materia, 0, len(materias))
+	for _, m := range materias {
+		if len(m.Catedras) == 0 {
+			logger.Warn("materia sin cátedras", "codigoMateria", m.Codigo)
+		} else {
+			materiasConCatedras = append(materiasConCatedras, m)
+		}
+	}
+
 	ch <- oferta{
 		carrera: objHead.Metadata["carrera"],
 		cuatri: cuatri{
 			numero: numero,
 			anio:   anio,
 		},
-		materias: materias,
+		materias: materiasConCatedras,
 	}
 
 	return nil
