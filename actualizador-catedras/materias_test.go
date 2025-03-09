@@ -44,7 +44,7 @@ func TestSeFiltranLasMateriasDeLasOfetasMasRecientes(t *testing.T) {
 		materias: []materia{initDummyMateria(1, 2, 6)},
 	}
 
-	ultimasComisiones := filtrarUltimasComisiones([]oferta{p1, p2, p3})
+	ultimasComisiones := FiltrarUltimasComisiones([]oferta{p1, p2, p3})
 
 	materias := make([]materia, 0, len(ultimasComisiones))
 	for _, uc := range ultimasComisiones {
@@ -84,7 +84,7 @@ func TestSeDistinguenDosMateriasComoIgualesPorSuNombre(t *testing.T) {
 		}},
 	}
 
-	materias := filtrarUltimasComisiones([]oferta{p1, p2})
+	materias := FiltrarUltimasComisiones([]oferta{p1, p2})
 
 	if len(materias) != 2 {
 		t.Fail()
@@ -116,7 +116,7 @@ func TestSeConservanLasMateriasSinActualizacion(t *testing.T) {
 		}},
 	}
 
-	ultimasComisiones := filtrarUltimasComisiones([]oferta{p1, p2})
+	ultimasComisiones := FiltrarUltimasComisiones([]oferta{p1, p2})
 
 	materias := make([]materia, 0, len(ultimasComisiones))
 	for _, uc := range ultimasComisiones {
@@ -158,7 +158,7 @@ func TestSeFiltranLasCatedrasMasRecientesSinImportarLaCarrera(t *testing.T) {
 		}},
 	}
 
-	ultimasComisiones := filtrarUltimasComisiones([]oferta{p1, p2})
+	ultimasComisiones := FiltrarUltimasComisiones([]oferta{p1, p2})
 
 	materias := make([]materia, 0, len(ultimasComisiones))
 	for _, uc := range ultimasComisiones {

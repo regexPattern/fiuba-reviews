@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/log"
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -20,7 +22,7 @@ func init() {
 }
 
 func main() {
-	ofertas, err := fetchOfertasDeComisiones()
+	ofertas, err := GetOfertasComisiones()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -30,8 +32,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = prepActualizacionesAUltimaOfertaDeComisiones(ofertas)
+	actualizaciones, err := GetActualizacionesMaterias(ofertas)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Println(actualizaciones)
 }

@@ -69,10 +69,10 @@ func ActualizarCodigosMaterias(ofertas []oferta) error {
 // getCantMateriasDesactualizadas retorna la cantidad de materias cuyos códigos
 // no han sido sincronizados con los códigos correctos del SIU.
 func getCantMateriasDesactualizadas(logger *log.Logger) (int, error) {
-	var n int
-
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
+
+	var n int
 
 	// Cuando se crearon las masterias de los nuevos planes en FIUBA Reviews,
 	// no se disponía de una fuente de información oficial de la cuál obtener
