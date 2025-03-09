@@ -57,7 +57,7 @@ func filtrarUltimasComisiones(ofertas []oferta) []ultimaComision {
 	cuatris := make(map[string]cuatri, max)
 	materias := make(map[string]ultimaComision, max)
 
-	logger.Info("filtrando solo las ofertas de comisiones más recientes")
+	logger.Debug("filtrando solo las ofertas de comisiones más recientes")
 
 	for _, o := range ofertas {
 		for _, m := range o.materias {

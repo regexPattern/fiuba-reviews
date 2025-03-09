@@ -4,7 +4,7 @@ set -e
 
 cd `mktemp -d`
 
-curl -L -O https://github.com/user-attachments/files/19100586/planes-parseados.tar.gz
+curl -L -O https://github.com/user-attachments/files/19150131/planes-parseados.tar.gz
 tar -xvf planes-parseados.tar.gz
 rm planes-parseados.tar.gz
 

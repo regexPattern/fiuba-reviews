@@ -47,11 +47,13 @@ func initS3Client(logger *log.Logger) error {
 	return nil
 }
 
-// GetOfertasComisiones retorna todas las ofertas de comisiones almacenadas en
+// getOfertasComisiones retorna todas las ofertas de comisiones almacenadas en
 // el bucket. Hay a lo sumo una oferta por carrera, que siempre es la variante
 // más reciente disponible de dicha oferta.
-func GetOfertasComisiones() ([]oferta, error) {
+func getOfertasComisiones() ([]oferta, error) {
 	logger := log.Default().WithPrefix("🪣")
+
+	logger.Info("obteniendo ofertas de comisiones")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
@@ -76,14 +78,7 @@ func GetOfertasComisiones() ([]oferta, error) {
 
 	for _, obj := range bucket.Contents {
 		eg.Go(func() error {
-			oferta, err := serOfertaComisiones(obj.Key)
-			if err != nil {
-				return err
-			}
-
-			ch <- oferta
-
-			return nil
+			return serOfertaComisiones(ch, obj.Key)
 		})
 	}
 
@@ -103,7 +98,7 @@ func GetOfertasComisiones() ([]oferta, error) {
 
 // serOfertaComisiones serializa una oferta de comisión a partir de un archivo
 // almacenado en el bucket.
-func serOfertaComisiones(objKey *string) (oferta, error) {
+func serOfertaComisiones(ch chan oferta, objKey *string) error {
 	logger := log.Default().WithPrefix("🔗").With("objKey", *objKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
@@ -118,7 +113,7 @@ func serOfertaComisiones(objKey *string) (oferta, error) {
 
 	if err != nil {
 		logger.Error("error obteniendo metadata", "error", err)
-		return oferta{}, err
+		return err
 	}
 
 	// En este caso se sabe de antemano que si la información fue registrada y
@@ -140,7 +135,7 @@ func serOfertaComisiones(objKey *string) (oferta, error) {
 
 	if err != nil {
 		logger.Error("error obteniendo contenido", "error", err)
-		return oferta{}, err
+		return err
 	}
 
 	defer obj.Body.Close()
@@ -148,7 +143,7 @@ func serOfertaComisiones(objKey *string) (oferta, error) {
 	data, err := io.ReadAll(obj.Body)
 	if err != nil {
 		logger.Error("error leyendo contenido", "error", err)
-		return oferta{}, err
+		return err
 	}
 
 	materias := []materia{}
@@ -156,12 +151,12 @@ func serOfertaComisiones(objKey *string) (oferta, error) {
 	err = json.Unmarshal(data, &materias)
 	if err != nil {
 		logger.Error("error serializando oferta de comisiones", "error", err)
-		return oferta{}, err
+		return err
 	}
 
 	logger.Infof("encontradas %v materias en oferta de comisiones", len(materias))
 
-	oferta := oferta{
+	ch <- oferta{
 		carrera: objHead.Metadata["carrera"],
 		cuatri: cuatri{
 			numero: numero,
@@ -170,5 +165,5 @@ func serOfertaComisiones(objKey *string) (oferta, error) {
 		materias: materias,
 	}
 
-	return oferta, nil
+	return nil
 }

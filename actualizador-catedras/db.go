@@ -12,7 +12,7 @@ import (
 
 var db *pgxpool.Pool
 
-func InitDBPool(logger *log.Logger) error {
+func initDbPool(logger *log.Logger) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 

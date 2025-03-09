@@ -9,12 +9,25 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type actualizacion struct{}
+type patch struct {
+	codigoMateria string
+	docentes      *patchDocentes
+	catedras      *patchCatedras
+}
 
-func GetActualizacionesMaterias(ofertas []oferta) ([]actualizacion, error) {
-	logger := log.Default().WithPrefix("🔄")
+type patchDocentes struct {
+	db  map[string]string
+	siu map[string]string
+}
 
-	materiasNoActualizadas, err := getMateriasNoActualizadasEnCuatriActual()
+type patchCatedras struct{}
+
+func getPatchesMaterias(ofertas []oferta) ([]patch, error) {
+	logger := log.Default().WithPrefix("⬆️")
+
+	logger.Info("actualizando comisiones")
+
+	materiasPendientes, err := getMateriasPatchPendiente()
 	if err != nil {
 		return nil, err
 	}
@@ -24,23 +37,22 @@ func GetActualizacionesMaterias(ofertas []oferta) ([]actualizacion, error) {
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, int(db.Config().MaxConns))
 
-	ch := make(chan actualizacion, len(ultimasComisiones))
+	ch := make(chan patch, len(ultimasComisiones))
 
 	for _, uc := range ultimasComisiones {
-		if _, ok := materiasNoActualizadas[uc.materia.Codigo]; ok {
+		if _, ok := materiasPendientes[uc.materia.Codigo]; ok {
 			logger := logger.With("codigo", uc.materia.Codigo)
+
 			wg.Add(1)
 			go func() {
+				defer wg.Done()
+
 				sem <- struct{}{}
+				defer func() { <-sem }()
 
-				if actualizacion, yaActualizada, err := prepararActualizacion(logger, uc); err != nil {
+				if genPatchMateria(logger, ch, uc) != nil {
 					logger.Warn("saltando actualización de materia")
-				} else if yaActualizada {
-					ch <- actualizacion
 				}
-
-				<-sem
-				wg.Done()
 			}()
 		}
 	}
@@ -50,15 +62,17 @@ func GetActualizacionesMaterias(ofertas []oferta) ([]actualizacion, error) {
 		close(ch)
 	}()
 
-	actualizaciones := make([]actualizacion, len(ch))
+	patches := make([]patch, len(ch))
 	for a := range ch {
-		actualizaciones = append(actualizaciones, a)
+		patches = append(patches, a)
 	}
 
-	return actualizaciones, nil
+	logger.Info("terminada generación de patches de actualización de materias")
+
+	return patches, nil
 }
 
-func getMateriasNoActualizadasEnCuatriActual() (map[string]bool, error) {
+func getMateriasPatchPendiente() (map[string]bool, error) {
 	logger := log.Default().WithPrefix("🛢️")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
@@ -108,14 +122,14 @@ AND NOT EXISTS (
 	return codigosMaterias, nil
 }
 
-func prepararActualizacion(logger *log.Logger, uc ultimaComision) (actualizacion, bool, error) {
+func genPatchMateria(logger *log.Logger, ch chan patch, uc ultimaComision) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
 	conn, err := db.Acquire(ctx)
 	if err != nil {
 		logger.Error(err)
-		return actualizacion{}, false, err
+		return err
 	}
 
 	defer conn.Release()
@@ -137,23 +151,37 @@ SELECT EXISTS (
 
 	if err != nil {
 		logger.Error(err)
-		return actualizacion{}, false, err
+		return err
 	}
 
-	err = prepararActualizacionDocentes(logger, conn, uc)
+	if yaActualizada {
+		return nil
+	}
+
+	logger.Debug("actualizando materia")
+
+	patchesDocentes, err := genPatchDocentes(conn, uc)
 	if err != nil {
-		return actualizacion{}, false, err
+		return err
 	}
 
-	err = prepararActualizacionCatedras(logger, conn, uc)
+	_, err = genPatchCatedras(conn, uc)
 	if err != nil {
-		return actualizacion{}, false, err
+		return err
 	}
 
-	return actualizacion{}, yaActualizada, nil
+	ch <- patch{
+		codigoMateria: uc.materia.Codigo,
+		docentes:      patchesDocentes,
+		catedras:      nil,
+	}
+
+	return nil
 }
 
-func prepararActualizacionDocentes(logger *log.Logger, conn *pgxpool.Conn, uc ultimaComision) error {
+func genPatchDocentes(conn *pgxpool.Conn, uc ultimaComision) (*patchDocentes, error) {
+	logger := log.Default().WithPrefix("🎓").With("codigo", uc.materia.Codigo)
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
@@ -171,16 +199,14 @@ WHERE codigo = $1
 
 	if err != nil {
 		logger.Error(err)
-		return err
+		return nil, err
 	}
 
 	if primeraActualizacion {
-		if err := migrarDocentesEquivalencias(conn, uc.materia.Codigo); err != nil {
-			return err
+		if err := migrarDocentesEquivalencias(logger, conn, uc.materia.Codigo); err != nil {
+			return nil, err
 		}
 	}
-
-	// A PARTIR DE AQUI SI INICIA EL TEMA DE LAS COMISIONES DEL SIU
 
 	ctx, cancel = context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
@@ -193,10 +219,10 @@ WHERE codigo_materia = $1
 
 	if err != nil {
 		logger.Error(err)
-		return err
+		return nil, err
 	}
 
-	docentesMateria := make(map[string]string)
+	docentesDb := make(map[string]string)
 
 	for rows.Next() {
 		var cod, nombre string
@@ -205,35 +231,40 @@ WHERE codigo_materia = $1
 		if err != nil {
 			logger.Error("error serializando los docentes",
 				"error", err, "codigo", cod, "nombre", nombre)
-			return err
+			return nil, err
 		}
 
-		docentesMateria[cod] = nombre
+		docentesDb[nombre] = cod
 	}
 
-	if err != nil {
+	logger.Debugf("encontrados %v docentes en la base de datos", len(docentesDb))
 
+	docentesSiu := make(map[string]string)
+	for _, c := range uc.materia.Catedras {
+		for _, d := range c.Docentes {
+			docentesSiu[d.Nombre] = d.Rol
+		}
 	}
 
-	// 2. traigo los docentes de la materia
-	//
-	// 3. por cada uno de los docentes de la oferta de ultimas comisiones,
-	// busco entre los docente que me traje de la db cual es su match. Esta
-	// busqueda es por nombre. Un match perfecto seria que el docente tenga el
-	// mismo nombre en la DB que en el SIU. En caso de que no haya match
-	// perfecto para cada docente, se debe hacer una asociacion para cada
-	// docente. Se buscan los nombres parecidos usando fuzzy match.
-	//
-	// 4.
-	// 4.1. en caso de match perfecto solo tenemos una opcion para hacer el
-	// link
+	docentesDbPendientes := make(map[string]string)
+	for nombre, cod := range docentesDb {
+		if _, ok := docentesSiu[nombre]; ok {
+			logger.Debug("docente encontrado en la base de datos", "nombre", nombre)
+			continue
+		}
 
-	return nil
+		docentesDbPendientes[nombre] = cod
+	}
+
+	patch := &patchDocentes{
+		db:  docentesDbPendientes,
+		siu: docentesSiu,
+	}
+
+	return patch, nil
 }
 
-func migrarDocentesEquivalencias(conn *pgxpool.Conn, codigoMateria string) error {
-	logger := log.Default().WithPrefix("♻️").With("codigo", codigoMateria)
-
+func migrarDocentesEquivalencias(logger *log.Logger, conn *pgxpool.Conn, codigoMateria string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
@@ -364,8 +395,10 @@ WHERE codigo = $1
 	return nil
 }
 
-func prepararActualizacionCatedras(logger *log.Logger, conn *pgxpool.Conn, uc ultimaComision) error {
-	// logger = logger.With("codigo", uc.materia.Codigo)
+func genPatchCatedras(conn *pgxpool.Conn, uc ultimaComision) (*patchCatedras, error) {
+	logger := log.Default().WithPrefix("📚").With("codigo", uc.materia.Codigo)
 
-	return nil
+	logger.Debugf("encontradas %v cátedras en materia", 0)
+
+	return nil, nil
 }

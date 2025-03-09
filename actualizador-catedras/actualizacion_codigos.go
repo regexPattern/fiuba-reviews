@@ -11,10 +11,12 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-// ActualizarCodigosMaterias sincroniza los códigos de las materias en la
+// updateCodigosMaterias sincroniza los códigos de las materias en la
 // base de datos con sus códigos correctos obtenidos del SIU.
-func ActualizarCodigosMaterias(ofertas []oferta) error {
+func updateCodigosMaterias(ofertas []oferta) error {
 	logger := log.Default().WithPrefix("🛢️")
+
+	logger.Info("actualizando códigos de materias")
 
 	if n, err := getCantMateriasDesactualizadas(logger); err != nil {
 		return errors.New("error determinando la cantidad de materias sin actualizar")

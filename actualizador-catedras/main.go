@@ -1,8 +1,7 @@
 package main
 
 import (
-	"fmt"
-
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/log"
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -12,7 +11,7 @@ func init() {
 
 	logger := log.Default().WithPrefix("⚙️")
 
-	if err := InitDBPool(logger); err != nil {
+	if err := initDbPool(logger); err != nil {
 		logger.Fatal(err)
 	}
 
@@ -22,20 +21,24 @@ func init() {
 }
 
 func main() {
-	ofertas, err := GetOfertasComisiones()
+	ofertas, err := getOfertasComisiones()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = ActualizarCodigosMaterias(ofertas)
+	err = updateCodigosMaterias(ofertas)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	actualizaciones, err := GetActualizacionesMaterias(ofertas)
+	patches, err := getPatchesMaterias(ofertas)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(actualizaciones)
+	p := tea.NewProgram(NewModel(patches))
+
+	if _, err := p.Run(); err != nil {
+		log.Fatal(err)
+	}
 }
