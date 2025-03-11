@@ -23,17 +23,17 @@ type patchDocentes struct {
 
 type patchCatedras struct{}
 
-func getPatchesMaterias(ofertas []oferta) ([]patch, error) {
-	logger := log.Default().WithPrefix("⬆️")
+// getPatchesActualizacion retorna los patches de actualización para las
+// materias.
+func getPatchesActualizacion(ofertas []ofertaComisiones) ([]patch, error) {
+	logger := log.Default().WithPrefix("👨‍🏫")
 
-	logger.Info("actualizando ofertas de comisiones")
-
-	materiasPendientes, err := getMateriasPatchPendiente()
+	materiasPendientes, err := getMateriasPendientes(logger)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Default().WithPrefix("🧹").Debug("filtrando solo las ofertas de comisiones más recientes")
+	logger.Debug("filtrando solo las ofertas de comisiones más recientes")
 
 	ultimasComisiones := filtrarUltimasComisiones(ofertas)
 
@@ -44,7 +44,7 @@ func getPatchesMaterias(ofertas []oferta) ([]patch, error) {
 
 	for _, uc := range ultimasComisiones {
 		if _, ok := materiasPendientes[uc.materia.Codigo]; ok {
-			logger := logger.With("codigoMateria", uc.materia.Codigo)
+			logger := logger.With("materia", uc.materia.Codigo)
 
 			wg.Add(1)
 			go func() {
@@ -53,7 +53,7 @@ func getPatchesMaterias(ofertas []oferta) ([]patch, error) {
 				sem <- struct{}{}
 				defer func() { <-sem }()
 
-				if genPatchMateria(logger, ch, uc) != nil {
+				if newPatchMateria(logger, ch, uc) != nil {
 					logger.Warn("saltando actualización de materia")
 				}
 			}()
@@ -66,20 +66,25 @@ func getPatchesMaterias(ofertas []oferta) ([]patch, error) {
 	}()
 
 	patches := make([]patch, len(ch))
-	for a := range ch {
-		patches = append(patches, a)
+	for p := range ch {
+		patches = append(patches, p)
 	}
-
-	logger.Info("terminada generación de patches de actualización de materias")
 
 	return patches, nil
 }
 
-func getMateriasPatchPendiente() (map[string]bool, error) {
-	logger := log.Default().WithPrefix("🛢️")
-
+// getMateriasPendientes retorna un hashset con los códigos de las materias
+// cuyas ofertas de comisiones no han sido actualizadas al último cuatrimestre.
+// Esto no significa que la materia esté desactualizada, sino que podría haber
+// alguna oferta de comisiones de las del SIU que sea más reciente, ya que la
+// materia no ha sido actualizada este cuatrimestre.
+func getMateriasPendientes(logger *log.Logger) (map[string]bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
+
+	// Solo las materias del nuevo plan cuyo código ya ha sido actualizado, ya
+	// que si el código no ha sido actualizado, es porque no estaba incluído en
+	// ninguna de las ofertas descargadas del SIU anteriormente.
 
 	rows, err := db.Query(ctx, `
 SELECT m.codigo
@@ -119,12 +124,15 @@ AND NOT EXISTS (
 		codigosMaterias[cod] = true
 	}
 
-	logger.Infof("encontradas %v materias con ofertas posiblemente desactualizadas", len(codigosMaterias))
+	logger.Logf(debugPatchesLevel, "encontradas %v materias con ofertas posiblemente desactualizadas", len(codigosMaterias))
 
 	return codigosMaterias, nil
 }
 
-func genPatchMateria(logger *log.Logger, ch chan patch, uc ultimaComision) error {
+// newPatchMateria escribe el patch de la materia en el channel sólo si la
+// oferta de comisiones de la materia no ha sido actualizada en este
+// cuatrimestre.
+func newPatchMateria(logger *log.Logger, ch chan patch, uc ultimaComision) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
@@ -136,7 +144,13 @@ func genPatchMateria(logger *log.Logger, ch chan patch, uc ultimaComision) error
 
 	defer conn.Release()
 
-	var yaActualizada bool
+	// Acá finalmente se verifica si la materia tiene una actualización
+	// posible o no. Antes solo traímos las que posiblemente tenían
+	// actualización porque no habían sido actualizadas en el último
+	// cuatrimestre. Ahora se verifica si el plan más reciente para esta
+	// materia es el que ya está registrado.
+
+	var yaEnPlanMasRecienteDisp bool
 
 	err = conn.QueryRow(ctx, `
 SELECT EXISTS (
@@ -149,23 +163,23 @@ SELECT EXISTS (
     AND c.anio = $3
 );
 		`, uc.materia.Codigo, uc.cuatri.anio, uc.cuatri.numero).
-		Scan(&yaActualizada)
+		Scan(&yaEnPlanMasRecienteDisp)
 
 	if err != nil {
 		logger.Error(err)
 		return err
 	}
 
-	if yaActualizada {
+	if yaEnPlanMasRecienteDisp {
 		return nil
 	}
 
-	patchesDocentes, err := genPatchDocentes(conn, uc)
+	patchesDocentes, err := newPatchDocentes(logger, conn, uc)
 	if err != nil {
 		return err
 	}
 
-	_, err = genPatchCatedras(conn, uc)
+	_, err = newPatchCatedras(logger, conn, uc)
 	if err != nil {
 		return err
 	}
@@ -174,15 +188,16 @@ SELECT EXISTS (
 		codigoMateria: uc.materia.Codigo,
 		nombreMateria: uc.materia.Nombre,
 		docentes:      patchesDocentes,
-		catedras:      nil,
+		catedras:      nil, // TODO
 	}
 
 	return nil
 }
 
-func genPatchDocentes(conn *pgxpool.Conn, uc ultimaComision) (*patchDocentes, error) {
-	logger := log.Default().WithPrefix("🎓").With("codigoMateria", uc.materia.Codigo)
-
+// newPatchDocentes retorna un patch de docentes con los docentes de la base de
+// datos que han sido relacionados con un docente del SIU, y un listado de los
+// docentes del SIU que no han sido agregados a la base de datos.
+func newPatchDocentes(logger *log.Logger, conn *pgxpool.Conn, uc ultimaComision) (*patchDocentes, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
@@ -237,7 +252,7 @@ WHERE codigo_materia = $1
 		docentesDb[nombre] = cod
 	}
 
-	logger.Debugf("encontrados %v docentes en la base de datos", len(docentesDb))
+	logger.Logf(debugPatchesLevel, "encontrados %v docentes en la base de datos", len(docentesDb))
 
 	docentesSiu := make(map[string]string)
 	for _, c := range uc.materia.Catedras {
@@ -246,24 +261,38 @@ WHERE codigo_materia = $1
 		}
 	}
 
-	docentesDbPendientes := make(map[string]string)
+	docentesDbPendientes := make(map[string]string, len(docentesDb))
+	docentesSiuPendientes := make(map[string]string, len(docentesSiu))
+
 	for nombre, cod := range docentesDb {
 		if _, ok := docentesSiu[nombre]; ok {
-			logger.Debug("docente encontrado en la base de datos", "nombre", nombre)
 			continue
 		}
 
 		docentesDbPendientes[nombre] = cod
 	}
 
+	for nombre, rol := range docentesSiu {
+		if _, ok := docentesDb[nombre]; ok {
+			continue
+		}
+
+		docentesSiuPendientes[nombre] = rol
+	}
+
 	patch := &patchDocentes{
 		db:  docentesDbPendientes,
-		siu: docentesSiu,
+		siu: docentesSiuPendientes,
 	}
 
 	return patch, nil
 }
 
+// migrarDocentesEquivalencias copia los docentes de las equivalencias de una
+// materia y los asigna a la materia en cuestión, como si fueran suyos. Esto
+// solo cobra importancia en el caso en el que no haya ningún docente en una
+// materia del nuevo plan aún, para generar un estado inicial con los datos de
+// Dolly.
 func migrarDocentesEquivalencias(logger *log.Logger, conn *pgxpool.Conn, codigoMateria string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
@@ -278,6 +307,8 @@ func migrarDocentesEquivalencias(logger *log.Logger, conn *pgxpool.Conn, codigoM
 	defer cancel()
 
 	var n int
+	
+	// La query la escribió la IA, pero anda y hace justo lo que debería.
 
 	err = tx.QueryRow(ctx, `
 WITH materias_equivalentes AS (
@@ -395,10 +426,6 @@ WHERE codigo = $1
 	return nil
 }
 
-func genPatchCatedras(_ *pgxpool.Conn, uc ultimaComision) (*patchCatedras, error) {
-	logger := log.Default().WithPrefix("📚").With("codigoMateria", uc.materia.Codigo)
-
-	logger.Debugf("encontradas %v cátedras en materia", 0)
-
+func newPatchCatedras(logger *log.Logger, _ *pgxpool.Conn, uc ultimaComision) (*patchCatedras, error) {
 	return nil, nil
 }

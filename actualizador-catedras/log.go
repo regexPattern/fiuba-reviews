@@ -8,17 +8,25 @@ import (
 	"github.com/charmbracelet/log"
 )
 
+const debugPatchesLevel log.Level = -8
+
 func initLogger() {
 	var level log.Level
 
 	levelEnv, levelEnvSet := os.LookupEnv("LOG_LEVEL")
-	goEnv := strings.ToUpper(os.Getenv("GO_ENV"))
+	levelEnv = strings.ToUpper(levelEnv)
 
-	if levelEnv := strings.ToUpper(levelEnv); (goEnv == "DEVELOPMENT" && !levelEnvSet) ||
-		levelEnv == "DEBUG" {
+	goEnv := strings.ToUpper(os.Getenv("GO_ENV"))
+	devMode := goEnv == "DEVELOPMENT"
+
+	if devMode && !levelEnvSet {
 		level = log.DebugLevel
 	} else {
 		switch levelEnv {
+		case "DEBUG_PATCHES":
+			level = debugPatchesLevel
+		case "DEBUG":
+			level = log.DebugLevel
 		case "WARN", "WARNING":
 			level = log.WarnLevel
 		case "ERROR":
@@ -30,7 +38,7 @@ func initLogger() {
 
 	opts := log.Options{
 		Level:        level,
-		ReportCaller: level == log.DebugLevel,
+		ReportCaller: devMode,
 	}
 
 	logger := log.NewWithOptions(os.Stderr, opts)
@@ -43,6 +51,9 @@ func initLogger() {
 	logger.SetStyles(&log.Styles{
 		Timestamp: lipgloss.NewStyle(),
 		Levels: map[log.Level]lipgloss.Style{
+			debugPatchesLevel: commonStyles.
+				SetString("PTCH").
+				Background(lipgloss.Color("199")),
 			log.DebugLevel: commonStyles.
 				SetString("DEBU").
 				Background(lipgloss.Color("33")),

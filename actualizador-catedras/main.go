@@ -8,19 +8,19 @@ import (
 
 func init() {
 	initLogger()
-
-	logger := log.Default().WithPrefix("⚙️")
-
-	if err := initDbPool(logger); err != nil {
-		logger.Fatal(err)
-	}
-
-	if err := initS3Client(logger); err != nil {
-		logger.Fatal(err)
-	}
 }
 
 func main() {
+	logger := log.Default().WithPrefix("⚙️")
+
+	if err := conectarDb(logger); err != nil {
+		logger.Fatal(err)
+	}
+
+	if err := conectarS3(logger); err != nil {
+		logger.Fatal(err)
+	}
+
 	ofertas, err := getOfertasComisiones()
 	if err != nil {
 		log.Fatal(err)
@@ -31,12 +31,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	patches, err := getPatchesMaterias(ofertas)
+	patches, err := getPatchesActualizacion(ofertas)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	p := tea.NewProgram(newApp(patches))
+	p := tea.NewProgram(newModeloApp(patches))
 
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)

@@ -15,50 +15,50 @@ import (
 	"github.com/lithammer/fuzzysearch/fuzzy"
 )
 
-type app struct {
-	pagsMaterias []pagMateria
+type modeloApp struct {
+	pagsMaterias []modeloPagMateria
 	currMateria  int
 	screenWidth  int
 	help         help.Model
 }
 
-type pagMateria struct {
+type modeloPagMateria struct {
 	codigo       string
 	nombre       string
-	tabsDocentes tabsDocentes
+	tabsDocentes modeloTabsDocentes
 }
 
-type tabsDocentes struct {
-	docentesDb    []docenteDb
+type modeloTabsDocentes struct {
+	docentesDb    []modeloDocenteDb
 	currDocenteDb int
-	docentesSiu   []docenteSiu
+	docentesSiu   []modeloDocenteSiu
 }
 
-type docenteDb struct {
+type modeloDocenteDb struct {
 	codigo  string
 	nombre  string
-	matches []docenteSiu
+	matches []modeloDocenteSiu
 }
 
-type docenteSiu struct {
+type modeloDocenteSiu struct {
 	nombre string
 	rol    string
 }
 
-func (pm pagMateria) tituloMateria() string {
-	return fmt.Sprintf("%v • %v", pm.codigo, strings.ToUpper(pm.nombre))
+func (m modeloPagMateria) tituloMateria() string {
+	return fmt.Sprintf("%v • %v", m.codigo, strings.ToUpper(m.nombre))
 }
 
-func newApp(patches []patch) app {
-	materias := make([]pagMateria, 0, len(patches))
+func newModeloApp(patches []patch) modeloApp {
+	materias := make([]modeloPagMateria, 0, len(patches))
 
 	for _, p := range patches {
-		docentesDb := newDocentesDb(*p.docentes)
+		docentesDb := newModeloDocentesDb(*p.docentes)
 
-		pm := pagMateria{
+		pm := modeloPagMateria{
 			codigo: p.codigoMateria,
 			nombre: p.nombreMateria,
-			tabsDocentes: tabsDocentes{
+			tabsDocentes: modeloTabsDocentes{
 				docentesDb:    docentesDb,
 				currDocenteDb: 0,
 			},
@@ -67,20 +67,20 @@ func newApp(patches []patch) app {
 		materias = append(materias, pm)
 	}
 
-	slices.SortFunc(materias, func(r1, r2 pagMateria) int {
-		return cmp.Compare(r1.codigo, r2.codigo)
+	slices.SortFunc(materias, func(m1, m2 modeloPagMateria) int {
+		return cmp.Compare(m1.codigo, m2.codigo)
 	})
 
-	model := app{
+	modelo := modeloApp{
 		pagsMaterias: materias,
 		currMateria:  0,
 	}
 
-	return model
+	return modelo
 }
 
-func newDocentesDb(pd patchDocentes) []docenteDb {
-	docentes := make([]docenteDb, 0, len(pd.db))
+func newModeloDocentesDb(pd patchDocentes) []modeloDocenteDb {
+	docentes := make([]modeloDocenteDb, 0, len(pd.db))
 	nombresDocentesSiu := slices.Collect(maps.Keys(pd.siu))
 
 	for nombre, cod := range pd.db {
@@ -91,9 +91,9 @@ func newDocentesDb(pd patchDocentes) []docenteDb {
 
 		sort.Sort(matches)
 
-		matchesConRol := make([]docenteSiu, 0, len(matches))
+		matchesConRol := make([]modeloDocenteSiu, 0, len(matches))
 		for _, m := range matches {
-			m := docenteSiu{
+			m := modeloDocenteSiu{
 				nombre: m.Target,
 				rol:    pd.siu[m.Target],
 			}
@@ -101,7 +101,7 @@ func newDocentesDb(pd patchDocentes) []docenteDb {
 			matchesConRol = append(matchesConRol, m)
 		}
 
-		d := docenteDb{
+		d := modeloDocenteDb{
 			codigo:  cod,
 			nombre:  nombre,
 			matches: matchesConRol,
@@ -110,75 +110,75 @@ func newDocentesDb(pd patchDocentes) []docenteDb {
 		docentes = append(docentes, d)
 	}
 
-	slices.SortFunc(docentes, func(d1, d2 docenteDb) int {
+	slices.SortFunc(docentes, func(d1, d2 modeloDocenteDb) int {
 		return cmp.Compare(d1.nombre, d2.nombre)
 	})
 
 	return docentes
 }
 
-func (a app) Init() tea.Cmd {
+func (m modeloApp) Init() tea.Cmd {
 	log.Default().WithPrefix("🎨").Info("iniciando interfaz gráfica")
 	return nil
 }
 
-func (td tabsDocentes) Init() tea.Cmd {
+func (td modeloTabsDocentes) Init() tea.Cmd {
 	return nil
 }
 
-func (a app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m modeloApp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		a.screenWidth = msg.Width
+		m.screenWidth = msg.Width
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
-			return a, tea.Quit
+			return m, tea.Quit
 		case ">":
-			if a.currMateria < len(a.pagsMaterias)-1 {
-				a.currMateria++
+			if m.currMateria < len(m.pagsMaterias)-1 {
+				m.currMateria++
 			} else {
-				a.currMateria = 0
+				m.currMateria = 0
 			}
-			return a, nil
+			return m, nil
 		case "<":
-			if a.currMateria > 0 {
-				a.currMateria--
+			if m.currMateria > 0 {
+				m.currMateria--
 			} else {
-				a.currMateria = len(a.pagsMaterias) - 1
+				m.currMateria = len(m.pagsMaterias) - 1
 			}
-			return a, nil
+			return m, nil
 		}
 	}
 
-	pagMateria := a.pagsMaterias[a.currMateria]
+	pagMateria := m.pagsMaterias[m.currMateria]
 	pagMateria.tabsDocentes, cmd = pagMateria.tabsDocentes.Update(msg)
 
-	return a, cmd
+	return m, cmd
 }
 
-func (td *tabsDocentes) avanzarDocente() {
-	td.currDocenteDb++
+func (m *modeloTabsDocentes) avanzarDocente() {
+	m.currDocenteDb++
 }
 
-func (td tabsDocentes) Update(msg tea.Msg) (tabsDocentes, tea.Cmd) {
+func (m modeloTabsDocentes) Update(msg tea.Msg) (modeloTabsDocentes, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "right", "ctrl+f":
-			td.avanzarDocente()
-			return td, nil
+			m.avanzarDocente()
+			return m, nil
 		case "left", "ctrl+b":
-			td.currDocenteDb--
-			return td, nil
+			m.currDocenteDb--
+			return m, nil
 		}
 	}
 
-	return td, cmd
+	return m, cmd
 }
 
 var (
@@ -189,8 +189,8 @@ var (
 	styleTabDocenteInactivo = styleTabDocente.Faint(true)
 )
 
-func (a app) View() string {
-	pagMateria := a.pagsMaterias[a.currMateria]
+func (m modeloApp) View() string {
+	pagMateria := m.pagsMaterias[m.currMateria]
 
 	s := strings.Builder{}
 
@@ -201,13 +201,13 @@ func (a app) View() string {
 	border.BottomLeft = "├"
 	border.BottomRight = "┴"
 
-	if a.screenWidth > 0 {
+	if m.screenWidth > 0 {
 		s.WriteString(lipgloss.
 			NewStyle().
 			Padding(0, 1).
 			Border(border).
 			Render("DOCENTES REGISTRADOS"))
-		s.WriteString(strings.Repeat(lipgloss.NormalBorder().Top, a.screenWidth-len("DOCENTES REGISTRADOS")-5))
+		s.WriteString(strings.Repeat(lipgloss.NormalBorder().Top, m.screenWidth-len("DOCENTES REGISTRADOS")-5))
 		s.WriteString("┐")
 		s.WriteString("\n")
 	}
@@ -224,7 +224,7 @@ func (a app) View() string {
 			style = styleTabDocenteInactivo
 		}
 
-		if lineWidth+len(d.nombre)+2 >= a.screenWidth-2 {
+		if lineWidth+len(d.nombre)+2 >= m.screenWidth-2 {
 			tabsDocentes.WriteString("\n")
 			lineWidth = 0
 		}
@@ -233,12 +233,12 @@ func (a app) View() string {
 		lineWidth += 2 + len(d.nombre)
 	}
 
-	s.WriteString(lipgloss.NewStyle().Width(a.screenWidth-2).Border(lipgloss.NormalBorder(), false, true, true, true).Render(tabsDocentes.String()))
+	s.WriteString(lipgloss.NewStyle().Width(m.screenWidth-2).Border(lipgloss.NormalBorder(), false, true, true, true).Render(tabsDocentes.String()))
 	s.WriteString("\n")
 
 	return pagMateria.tabsDocentes.View()
 }
 
-func (td tabsDocentes) View() string {
+func (td modeloTabsDocentes) View() string {
 	return fmt.Sprintf("%v", td.currDocenteDb)
 }

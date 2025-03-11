@@ -11,10 +11,31 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+type materia struct {
+	Codigo   string    `json:"codigo"`
+	Nombre   string    `json:"nombre"`
+	Catedras []catedra `json:"catedras"`
+}
+
+type catedra struct {
+	Codigo   int       `json:"codigo"`
+	Docentes []docente `json:"docentes"`
+}
+
+type docente struct {
+	Nombre string `json:"nombre"`
+	Rol    string `json:"rol"`
+}
+
+type ultimaComision struct {
+	materia materia
+	cuatri  cuatri
+}
+
 // updateCodigosMaterias sincroniza los códigos de las materias en la
 // base de datos con sus códigos correctos obtenidos del SIU.
-func updateCodigosMaterias(ofertas []oferta) error {
-	logger := log.Default().WithPrefix("🛢️")
+func updateCodigosMaterias(ofertas []ofertaComisiones) error {
+	logger := log.Default().WithPrefix("🔢")
 
 	logger.Info("actualizando códigos de materias")
 
@@ -40,13 +61,13 @@ func updateCodigosMaterias(ofertas []oferta) error {
 		return errors.New("error creando tabla de asociación de códigos de materias")
 	}
 
-	if err := asociarCodigos(logger, tx, ofertas); err != nil {
-		return errors.New("error asociando códigos de materias")
+	if err := asociarCodigosActualesSiu(logger, tx, ofertas); err != nil {
+		return errors.New("error sincronizando códigos de materias")
 	}
 
 	n, err := updateCodigosActuales(logger, tx)
 	if err != nil {
-		return errors.New("")
+		return errors.New("error actualizando códigos de materia")
 	}
 
 	if err := deleteTablaCodigos(tx); err != nil {
@@ -59,10 +80,11 @@ func updateCodigosMaterias(ofertas []oferta) error {
 		return errors.New("error commiteando transacción SQL de actualización de códigos")
 	}
 
-	// INFO: Que no se hayan actualizado los códigos de ninguna materia de las
-	// que estaban pendientes no es necesariamente un error, sino que a veces
-	// hay cuatrimestres en los que no hay comisiones para algunas materias,
-	// por lo que ni siquiera aparecen en el SIU.
+	// Que no se hayan actualizado los códigos de ninguna materia de las que
+	// estaban pendientes no es necesariamente un error, sino que a veces hay
+	// cuatrimestres en los que no hay comisiones para algunas materias, por lo
+	// que ni siquiera aparecen en el SIU.
+
 	logger.Infof("actualizado los códigos de %v materias", n)
 
 	return nil
@@ -84,6 +106,7 @@ func getCantMateriasDesactualizadas(logger *log.Logger) (int, error) {
 	// Si una materia aún tiene un código con este prefijo es porque su código
 	// no ha sido reemplazado por el código oficial obtenido desde el SIU en
 	// ejecuciones previas de esta utilidad.
+
 	err := db.QueryRow(ctx, `
 SELECT count(*) FROM materia WHERE codigo LIKE 'COD%'
 		`).Scan(&n)
@@ -129,9 +152,9 @@ func deleteTablaCodigos(tx pgx.Tx) error {
 	return err
 }
 
-// asociarCodigos completa la tabla de asociación de códigos actuales de las
+// asociarCodigosActualesSiu completa la tabla de asociación de códigos actuales de las
 // materias con los códigos correctos obtenidos desde el SIU.
-func asociarCodigos(logger *log.Logger, tx pgx.Tx, ofertas []oferta) error {
+func asociarCodigosActualesSiu(logger *log.Logger, tx pgx.Tx, ofertas []ofertaComisiones) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
@@ -170,8 +193,6 @@ WHERE p.esta_vigente = true
 
 	materias := make(map[string][]any, len(codigosMaterias))
 
-	materiaFaltanteLogger := log.Default().WithPrefix("🔎")
-
 	for _, o := range ofertas {
 		for _, m := range o.materias {
 			if codActual, ok := codigosMaterias[m.Nombre]; ok {
@@ -179,8 +200,8 @@ WHERE p.esta_vigente = true
 					materias[m.Nombre] = []any{m.Nombre, codActual, m.Codigo}
 				}
 			} else {
-				materiaFaltanteLogger.Warn("materia no está en la base de datos",
-					"codigoMateria", m.Codigo, "nombreMateria", m.Nombre)
+				logger.Warn("materia no está en la base de datos",
+					"materia", m.Codigo, "nombre", m.Nombre)
 			}
 		}
 	}
@@ -212,8 +233,6 @@ func updateCodigosActuales(logger *log.Logger, tx pgx.Tx) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
-	logger.Info("actualizando los códigos de las materias")
-
 	rows, err := tx.Exec(ctx, `
 WITH materias_a_actualizar AS (
 	SELECT m.codigo as codigo_materia_actual, tcm.codigo_materia_siu
@@ -236,4 +255,36 @@ WHERE materia.codigo = ma.codigo_materia_actual
 	}
 
 	return int(rows.RowsAffected()), nil
+}
+
+// filtrarUltimasComisiones se queda con la oferta de comisiones más reciente
+// para cada materia. Por ejemplo, si la oferta de comisiones de Ingeniería
+// Química está actualizada al 1C 2025 y la de Ingeniería Informática al 2C
+// 2024, para una materia en común como podría ser Álgebra Lineal, presente en
+// ambas ofertas, esta función retorna solamente la oferta de comisiones de
+// Álgebra Lineal del 1C 2025.
+func filtrarUltimasComisiones(ofertas []ofertaComisiones) []ultimaComision {
+	max := 0
+	for _, o := range ofertas {
+		max += len(o.materias)
+	}
+
+	cuatris := make(map[string]cuatri, max)
+	materias := make(map[string]ultimaComision, max)
+
+	for _, o := range ofertas {
+		for _, m := range o.materias {
+			cuatriUltimaActualizacion, ok := cuatris[m.Nombre]
+
+			if !ok || o.cuatri.esDespuesDe(cuatriUltimaActualizacion) {
+				cuatris[m.Nombre] = o.cuatri
+				materias[m.Nombre] = ultimaComision{
+					materia: m,
+					cuatri:  o.cuatri,
+				}
+			}
+		}
+	}
+
+	return slices.Collect(maps.Values(materias))
 }
