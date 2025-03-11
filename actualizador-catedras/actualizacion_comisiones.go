@@ -11,6 +11,7 @@ import (
 
 type patch struct {
 	codigoMateria string
+	nombreMateria string
 	docentes      *patchDocentes
 	catedras      *patchCatedras
 }
@@ -159,8 +160,6 @@ SELECT EXISTS (
 		return nil
 	}
 
-	logger.Debug("actualizando materia")
-
 	patchesDocentes, err := genPatchDocentes(conn, uc)
 	if err != nil {
 		return err
@@ -173,6 +172,7 @@ SELECT EXISTS (
 
 	ch <- patch{
 		codigoMateria: uc.materia.Codigo,
+		nombreMateria: uc.materia.Nombre,
 		docentes:      patchesDocentes,
 		catedras:      nil,
 	}
@@ -395,7 +395,7 @@ WHERE codigo = $1
 	return nil
 }
 
-func genPatchCatedras(conn *pgxpool.Conn, uc ultimaComision) (*patchCatedras, error) {
+func genPatchCatedras(_ *pgxpool.Conn, uc ultimaComision) (*patchCatedras, error) {
 	logger := log.Default().WithPrefix("📚").With("codigoMateria", uc.materia.Codigo)
 
 	logger.Debugf("encontradas %v cátedras en materia", 0)
