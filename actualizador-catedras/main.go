@@ -36,7 +36,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	p := tea.NewProgram(newModeloApp(patches))
+	p := tea.NewProgram(newApp(patches))
 
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
