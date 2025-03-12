@@ -37,8 +37,6 @@ type ultimaComision struct {
 func updateCodigosMaterias(ofertas []ofertaComisiones) error {
 	logger := log.Default().WithPrefix("🔢")
 
-	logger.Info("actualizando códigos de materias")
-
 	if n, err := getCantMateriasDesactualizadas(logger); err != nil {
 		return errors.New("error determinando la cantidad de materias sin actualizar")
 	} else if n == 0 {
@@ -85,7 +83,7 @@ func updateCodigosMaterias(ofertas []ofertaComisiones) error {
 	// cuatrimestres en los que no hay comisiones para algunas materias, por lo
 	// que ni siquiera aparecen en el SIU.
 
-	logger.Infof("actualizado los códigos de %v materias", n)
+	logger.Infof("actualizado los códigos de %v materias exitosamente", n)
 
 	return nil
 }
