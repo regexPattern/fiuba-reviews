@@ -37,7 +37,6 @@ func conectarDb(logger *log.Logger) error {
 	defer cancel()
 
 	if db.Ping(ctx) != nil {
-		logger.Error(err)
 		return errors.New("error estableciendo conexión con la base de datos")
 	}
 

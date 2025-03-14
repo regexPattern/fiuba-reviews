@@ -10,76 +10,80 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/log"
 	"github.com/lithammer/fuzzysearch/fuzzy"
 )
 
-type modeloApp struct {
-	pagsMaterias []modeloPagMateria
-	currMateria  int
-	screenWidth  int
+type model struct {
+	materias    []viewMateria
+	currMateria int
+	screenWidth int
 }
 
-type modeloPagMateria struct {
-	codigo            string
-	nombre            string
-	docentesDb        modeloDocentesDb
-	docentesSiu       modeloDocentesSiu
-	docentesDbActivos bool
+type viewMateria struct {
+	codigo               string
+	nombre               string
+	docentesDb           viewSincronDocentesDb
+	docentesNuevos       viewDocentesNuevos
+	viewDocentesDbActiva bool
 }
 
-type modeloDocentesDb struct {
-	docentes    []docenteDb
-	matches     [][]docenteSiu
+type viewSincronDocentesDb struct {
+	docentes            []modeloDocenteDb
+	matches             [][]modeloDocenteSiu
+	currDocente         int
+	currMatchesDocentes []int
+}
+
+type viewDocentesNuevos struct {
+	docentes    []modeloDocenteSiu
 	currDocente int
 }
 
-type modeloDocentesSiu struct {
-	docentes    []docenteSiu
-	currDocente int
-}
-
-type docenteDb struct {
+type modeloDocenteDb struct {
 	codigo string
 	nombre string
 }
 
-type docenteSiu struct {
+type modeloDocenteSiu struct {
 	nombre string
 	rol    string
 }
 
-func newModeloApp(patches []patch) modeloApp {
-	pagsMaterias := make([]modeloPagMateria, 0, len(patches))
+func newModeloApp(patches []patch) model {
+	pagsMaterias := make([]viewMateria, 0, len(patches))
 
 	for _, p := range patches {
-		docentesDb, docentesSiu := newModelosDocentes(*p.docentes)
+		docentesDb, docentesSiu := newViewsDocentes(*p.docentes)
 
-		pm := modeloPagMateria{
-			codigo:            p.codigoMateria,
-			nombre:            p.nombreMateria,
-			docentesDb:        docentesDb,
-			docentesSiu:       docentesSiu,
-			docentesDbActivos: true,
+		pm := viewMateria{
+			codigo:               p.codigoMateria,
+			nombre:               p.nombreMateria,
+			docentesDb:           docentesDb,
+			docentesNuevos:       docentesSiu,
+			viewDocentesDbActiva: true,
 		}
 
 		pagsMaterias = append(pagsMaterias, pm)
 	}
 
-	slices.SortFunc(pagsMaterias, func(m1, m2 modeloPagMateria) int {
+	slices.SortFunc(pagsMaterias, func(m1, m2 viewMateria) int {
 		return cmp.Compare(m1.codigo, m2.codigo)
 	})
 
-	modelo := modeloApp{
-		pagsMaterias: pagsMaterias,
-		currMateria:  0,
+	log.Debugf("sincronizando docentes de %v materias", len(pagsMaterias))
+
+	modelo := model{
+		materias:    pagsMaterias,
+		currMateria: 0,
 	}
 
 	return modelo
 }
 
-func newModelosDocentes(pd patchDocentes) (modeloDocentesDb, modeloDocentesSiu) {
-	docentesDb := make([]docenteDb, 0, len(pd.db))
-	matches := make([][]docenteSiu, 0, len(pd.db))
+func newViewsDocentes(pd patchDocentes) (viewSincronDocentesDb, viewDocentesNuevos) {
+	docentesDb := make([]modeloDocenteDb, 0, len(pd.db))
+	matchesDocentesDb := make([][]modeloDocenteSiu, 0, len(pd.db))
 
 	nombresDocentesDb := slices.Collect(maps.Keys(pd.db))
 	nombresDocentesSiu := slices.Collect(maps.Keys(pd.siu))
@@ -89,7 +93,7 @@ func newModelosDocentes(pd patchDocentes) (modeloDocentesDb, modeloDocentesSiu) 
 	for _, nombre := range nombresDocentesDb {
 		cod := pd.db[nombre]
 
-		rankedMatches := fuzzy.RankFind(nombre, nombresDocentesSiu)
+		matches := fuzzy.RankFind(nombre, nombresDocentesSiu)
 
 		// No tiene mucho sentido vincular un docente del SIU a un docente de
 		// la base de datos cuyo nombre no tiene similitud con este. El
@@ -97,15 +101,15 @@ func newModelosDocentes(pd patchDocentes) (modeloDocentesDb, modeloDocentesSiu) 
 		// permisivo, así que si no hay matches es porque definitivamente no
 		// hay matches.
 
-		if len(rankedMatches) == 0 {
+		if len(matches) == 0 {
 			continue
 		}
 
-		sort.Sort(rankedMatches)
-		matchesDocentesSiu := make([]docenteSiu, 0, len(rankedMatches))
+		sort.Sort(matches)
+		matchesDocentesSiu := make([]modeloDocenteSiu, 0, len(matches))
 
-		for _, m := range rankedMatches {
-			m := docenteSiu{
+		for _, m := range matches {
+			m := modeloDocenteSiu{
 				nombre: m.Target,
 				rol:    pd.siu[m.Target],
 			}
@@ -113,31 +117,32 @@ func newModelosDocentes(pd patchDocentes) (modeloDocentesDb, modeloDocentesSiu) 
 			matchesDocentesSiu = append(matchesDocentesSiu, m)
 		}
 
-		d := docenteDb{
+		d := modeloDocenteDb{
 			codigo: cod,
 			nombre: nombre,
 		}
 
 		docentesDb = append(docentesDb, d)
-		matches = append(matches, matchesDocentesSiu)
+		matchesDocentesDb = append(matchesDocentesDb, matchesDocentesSiu)
 	}
 
-	modeloDb := modeloDocentesDb{
-		docentes:    docentesDb,
-		matches:     matches,
-		currDocente: 0,
+	viewSincronDocentesDb := viewSincronDocentesDb{
+		docentes:            docentesDb,
+		matches:             matchesDocentesDb,
+		currDocente:         0,
+		currMatchesDocentes: make([]int, len(docentesDb)),
 	}
 
-	modeloSiu := modeloDocentesSiu{}
+	viewDocentesNuevos := viewDocentesNuevos{}
 
-	return modeloDb, modeloSiu
+	return viewSincronDocentesDb, viewDocentesNuevos
 }
 
-func (m modeloApp) Init() tea.Cmd {
+func (m model) Init() tea.Cmd {
 	return nil
 }
 
-func (m modeloApp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
@@ -148,7 +153,7 @@ func (m modeloApp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		case ">":
-			if m.currMateria < len(m.pagsMaterias)-1 {
+			if m.currMateria < len(m.materias)-1 {
 				m.currMateria++
 			} else {
 				m.currMateria = 0
@@ -158,56 +163,72 @@ func (m modeloApp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.currMateria > 0 {
 				m.currMateria--
 			} else {
-				m.currMateria = len(m.pagsMaterias) - 1
+				m.currMateria = len(m.materias) - 1
 			}
 			return m, nil
 		}
 	}
 
-	m.pagsMaterias[m.currMateria], cmd = m.pagsMaterias[m.currMateria].Update(msg)
+	m.materias[m.currMateria], cmd = m.materias[m.currMateria].Update(msg)
 
 	return m, cmd
 }
 
-func (m modeloPagMateria) Update(msg tea.Msg) (modeloPagMateria, tea.Cmd) {
+func (m viewMateria) Update(msg tea.Msg) (viewMateria, tea.Cmd) {
 	var cmd tea.Cmd
 
-	if m.docentesDbActivos {
+	if m.viewDocentesDbActiva {
 		m.docentesDb, cmd = m.docentesDb.Update(msg)
 	} else {
-		m.docentesSiu, cmd = m.docentesSiu.Update(msg)
+		m.docentesNuevos, cmd = m.docentesNuevos.Update(msg)
 	}
 
 	return m, cmd
 }
 
-func (m modeloDocentesDb) Update(msg tea.Msg) (modeloDocentesDb, tea.Cmd) {
+func (sd viewSincronDocentesDb) Update(msg tea.Msg) (viewSincronDocentesDb, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "right":
-			if m.currDocente+1 < len(m.docentes) {
-				m.currDocente++
+			if sd.currDocente+1 < len(sd.docentes) {
+				sd.currDocente++
 			} else {
-				m.currDocente = 0
+				sd.currDocente = 0
 			}
-			return m, nil
+			return sd, nil
 		case "left":
-			if m.currDocente-1 < 0 {
-				m.currDocente = len(m.docentes) - 1
+			if sd.currDocente-1 < 0 {
+				sd.currDocente = len(sd.docentes) - 1
 			} else {
-				m.currDocente--
+				sd.currDocente--
 			}
-			return m, nil
+			return sd, nil
+		case "up":
+			matchesDocente := len(sd.matches[sd.currDocente])
+			if sd.currMatchesDocentes[sd.currDocente]-1 >= 0 {
+				sd.currMatchesDocentes[sd.currDocente]--
+			} else {
+				sd.currMatchesDocentes[sd.currDocente] = matchesDocente - 1
+			}
+			return sd, nil
+		case "down":
+			matchesDocente := len(sd.matches[sd.currDocente])
+			if sd.currMatchesDocentes[sd.currDocente]+1 < matchesDocente {
+				sd.currMatchesDocentes[sd.currDocente]++
+			} else {
+				sd.currMatchesDocentes[sd.currDocente] = 0
+			}
+			return sd, nil
 		}
 	}
 
-	return m, cmd
+	return sd, cmd
 }
 
-func (m modeloDocentesSiu) Update(msg tea.Msg) (modeloDocentesSiu, tea.Cmd) {
+func (m viewDocentesNuevos) Update(msg tea.Msg) (viewDocentesNuevos, tea.Cmd) {
 	return m, nil
 }
 
@@ -219,8 +240,8 @@ var (
 	styleTabDocenteInactivo = styleTabDocente.Faint(true)
 )
 
-func (m modeloApp) View() string {
-	pm := m.pagsMaterias[m.currMateria]
+func (m model) View() string {
+	pm := m.materias[m.currMateria]
 
 	s := strings.Builder{}
 
@@ -234,19 +255,19 @@ func (m modeloApp) View() string {
 	return s.String()
 }
 
-func (m modeloPagMateria) View(screenWidth int) string {
+func (m viewMateria) View(screenWidth int) string {
 	s := strings.Builder{}
 
-	if m.docentesDbActivos {
+	if m.viewDocentesDbActiva {
 		s.WriteString(m.docentesDb.View(screenWidth))
 	} else {
-		s.WriteString(m.docentesSiu.View(screenWidth))
+		s.WriteString(m.docentesNuevos.View(screenWidth))
 	}
 
 	return s.String()
 }
 
-func (m modeloDocentesDb) View(screenWidth int) string {
+func (sd viewSincronDocentesDb) View(screenWidth int) string {
 	s := strings.Builder{}
 
 	lineWidth := 0
@@ -254,10 +275,10 @@ func (m modeloDocentesDb) View(screenWidth int) string {
 	_, rightPad, _, leftPad := styleTabDocente.GetPadding()
 	pad := leftPad + rightPad
 
-	for i, d := range m.docentes {
+	for i, d := range sd.docentes {
 		var style lipgloss.Style
 
-		if i == m.currDocente {
+		if i == sd.currDocente {
 			style = styleTabDocenteActivo
 		} else {
 			style = styleTabDocenteInactivo
@@ -274,14 +295,21 @@ func (m modeloDocentesDb) View(screenWidth int) string {
 
 	s.WriteString("\n")
 
-	for _, d := range m.matches[m.currDocente] {
-		s.WriteString(fmt.Sprintf("• %v - %v", d.nombre, d.rol))
+	for i, d := range sd.matches[sd.currDocente] {
+		styles := lipgloss.NewStyle()
+		s.WriteString("[ ] ")
+
+		if i == sd.currMatchesDocentes[sd.currDocente] {
+			styles = styles.Underline(true)
+		}
+
+		s.WriteString(styles.Render(fmt.Sprintf("%v - %v", d.nombre, d.rol)))
 		s.WriteString("\n")
 	}
 
 	return lipgloss.NewStyle().Width(screenWidth).Render(s.String())
 }
 
-func (m modeloDocentesSiu) View(_ int) string {
+func (m viewDocentesNuevos) View(_ int) string {
 	return ""
 }

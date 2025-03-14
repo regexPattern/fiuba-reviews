@@ -16,7 +16,7 @@ func initLogger() {
 	levelEnv, levelEnvSet := os.LookupEnv("LOG_LEVEL")
 	levelEnv = strings.ToUpper(levelEnv)
 
-	goEnv := strings.ToUpper(os.Getenv("GO_ENV"))
+	goEnv := strings.ToUpper(os.Getenv("GOENV"))
 	devMode := goEnv == "DEVELOPMENT"
 
 	if devMode && !levelEnvSet {
