@@ -4,9 +4,9 @@ set -e
 
 cd `mktemp -d`
 
-curl -L -O https://github.com/user-attachments/files/19150131/planes-parseados.tar.gz
-tar -xvf planes-parseados.tar.gz
-rm planes-parseados.tar.gz
+curl -L -O https://github.com/user-attachments/files/19256044/ofertas-json.tar.gz
+tar -xvf ofertas-json.tar.gz
+rm ofertas-json.tar.gz
 
 export AWS_ACCESS_KEY_ID=000000000000
 export AWS_SECRET_ACCESS_KEY=000000000000

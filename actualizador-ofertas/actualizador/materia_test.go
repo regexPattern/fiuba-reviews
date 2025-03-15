@@ -1,4 +1,4 @@
-package main
+package actualizador
 
 import (
 	"slices"
@@ -26,37 +26,35 @@ func TestSeFiltranLasMateriasDeLasOfetasMasRecientes(t *testing.T) {
 
 	codsCatedrasEsperadas := []int{3, 5, 8}
 
-	p1 := ofertaComisiones{
+	o1 := &oferta{
 		carrera:  carrera,
 		cuatri:   cuatri{numero: 1, anio: 2024},
 		materias: []materia{initDummyMateria(4, 7, 11)},
 	}
-
-	p2 := ofertaComisiones{ // plan más reciente
+	masReciente := &oferta{
 		carrera:  carrera,
 		cuatri:   cuatri{numero: 1, anio: 2025},
 		materias: []materia{initDummyMateria(codsCatedrasEsperadas...)},
 	}
-
-	p3 := ofertaComisiones{
+	o3 := &oferta{
 		carrera:  carrera,
 		cuatri:   cuatri{numero: 2, anio: 2023},
 		materias: []materia{initDummyMateria(1, 2, 6)},
 	}
 
-	ultimasComisiones := filtrarUltimasComisiones([]ofertaComisiones{p1, p2, p3})
+	coms := filtrarUltimasComisiones([]*oferta{o1, masReciente, o3})
 
-	materias := make([]materia, 0, len(ultimasComisiones))
-	for _, uc := range ultimasComisiones {
-		materias = append(materias, uc.materia)
+	mats := make([]materia, 0, len(coms))
+	for _, uc := range coms {
+		mats = append(mats, uc.materia)
 	}
 
-	if len(materias) != 1 {
+	if len(mats) != 1 {
 		t.Fail()
 	}
 
 	codsCatedrasFiltradas := make([]int, len(codsCatedrasEsperadas))
-	for i, c := range materias[0].Catedras {
+	for i, c := range mats[0].Catedras {
 		codsCatedrasFiltradas[i] = c.Codigo
 	}
 
@@ -66,7 +64,7 @@ func TestSeFiltranLasMateriasDeLasOfetasMasRecientes(t *testing.T) {
 }
 
 func TestSeDistinguenDosMateriasComoIgualesPorSuNombre(t *testing.T) {
-	p1 := ofertaComisiones{
+	o1 := &oferta{
 		cuatri: cuatri{numero: 1, anio: 2025},
 		materias: []materia{{
 			Codigo:   "AM2",
@@ -74,8 +72,7 @@ func TestSeDistinguenDosMateriasComoIgualesPorSuNombre(t *testing.T) {
 			Catedras: []catedra{{Codigo: 7}},
 		}},
 	}
-
-	p2 := ofertaComisiones{
+	o2 := &oferta{
 		cuatri: cuatri{numero: 2, anio: 2021},
 		materias: []materia{{
 			Codigo:   "AM2",
@@ -84,15 +81,14 @@ func TestSeDistinguenDosMateriasComoIgualesPorSuNombre(t *testing.T) {
 		}},
 	}
 
-	materias := filtrarUltimasComisiones([]ofertaComisiones{p1, p2})
-
-	if len(materias) != 2 {
+	mats := filtrarUltimasComisiones([]*oferta{o1, o2})
+	if len(mats) != 2 {
 		t.Fail()
 	}
 }
 
 func TestSeConservanLasMateriasSinActualizacion(t *testing.T) {
-	p1 := ofertaComisiones{ // plan más reciente
+	masReciente := &oferta{
 		carrera: "Ingeniería Civil",
 		cuatri:  cuatri{numero: 1, anio: 2025},
 		materias: []materia{{
@@ -101,8 +97,7 @@ func TestSeConservanLasMateriasSinActualizacion(t *testing.T) {
 			Catedras: []catedra{{Codigo: 7}},
 		}},
 	}
-
-	p2 := ofertaComisiones{
+	o2 := &oferta{
 		carrera: "Ingeniería en Informática",
 		cuatri:  cuatri{numero: 2, anio: 2021},
 		materias: []materia{{
@@ -116,20 +111,20 @@ func TestSeConservanLasMateriasSinActualizacion(t *testing.T) {
 		}},
 	}
 
-	ultimasComisiones := filtrarUltimasComisiones([]ofertaComisiones{p1, p2})
+	coms := filtrarUltimasComisiones([]*oferta{masReciente, o2})
 
-	materias := make([]materia, 0, len(ultimasComisiones))
-	for _, uc := range ultimasComisiones {
-		materias = append(materias, uc.materia)
+	mats := make([]materia, 0, len(coms))
+	for _, uc := range coms {
+		mats = append(mats, uc.materia)
 	}
 
 	codsMateriasEsperadas := []string{"AM2", "FIS"}
 
-	if len(materias) != 2 {
+	if len(mats) != 2 {
 		t.Fail()
 	}
 
-	codsMateriasFiltradas := []string{materias[0].Codigo, materias[1].Codigo}
+	codsMateriasFiltradas := []string{mats[0].Codigo, mats[1].Codigo}
 	slices.Sort(codsMateriasFiltradas)
 
 	if !slices.Equal(codsMateriasFiltradas, codsMateriasEsperadas) {
@@ -138,7 +133,7 @@ func TestSeConservanLasMateriasSinActualizacion(t *testing.T) {
 }
 
 func TestSeFiltranLasCatedrasMasRecientesSinImportarLaCarrera(t *testing.T) {
-	p1 := ofertaComisiones{ // plan más reciente
+	masReciente := &oferta{
 		carrera: "Ingeniería Civil",
 		cuatri:  cuatri{numero: 1, anio: 2025},
 		materias: []materia{{
@@ -147,8 +142,7 @@ func TestSeFiltranLasCatedrasMasRecientesSinImportarLaCarrera(t *testing.T) {
 			Catedras: []catedra{{Codigo: 7}},
 		}},
 	}
-
-	p2 := ofertaComisiones{
+	o2 := &oferta{
 		carrera: "Ingeniería en Informática",
 		cuatri:  cuatri{numero: 2, anio: 2021},
 		materias: []materia{{
@@ -158,14 +152,14 @@ func TestSeFiltranLasCatedrasMasRecientesSinImportarLaCarrera(t *testing.T) {
 		}},
 	}
 
-	ultimasComisiones := filtrarUltimasComisiones([]ofertaComisiones{p1, p2})
+	coms := filtrarUltimasComisiones([]*oferta{masReciente, o2})
 
-	materias := make([]materia, 0, len(ultimasComisiones))
-	for _, uc := range ultimasComisiones {
-		materias = append(materias, uc.materia)
+	mats := make([]materia, 0, len(coms))
+	for _, uc := range coms {
+		mats = append(mats, uc.materia)
 	}
 
-	if materias[0].Catedras[0].Codigo != 7 {
+	if mats[0].Catedras[0].Codigo != 7 {
 		t.Fail()
 	}
 }

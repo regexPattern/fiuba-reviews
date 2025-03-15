@@ -1,4 +1,4 @@
-package main
+package actualizador
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type materia struct {
@@ -34,16 +35,16 @@ type ultimaComision struct {
 
 // updateCodigosMaterias sincroniza los códigos de las materias en la
 // base de datos con sus códigos correctos obtenidos del SIU.
-func updateCodigosMaterias(ofertas []ofertaComisiones) error {
-	logger := log.Default().WithPrefix("🔢")
+func updateCodigosMaterias(db *pgxpool.Pool, coms []ultimaComision) error {
+	lg := log.Default().WithPrefix("🔢")
 
-	if n, err := getCantMateriasDesactualizadas(logger); err != nil {
+	if n, err := getCantMateriasDesactualizadas(db, lg); err != nil {
 		return errors.New("error determinando la cantidad de materias sin actualizar")
 	} else if n == 0 {
-		logger.Info("no se encontraron materias con códigos sin actualizar")
+		lg.Info("no se encontraron materias con códigos sin actualizar")
 		return nil
 	} else {
-		logger.Debugf("encontradas %v materias con códigos sin actualizar", n)
+		lg.Debugf("encontradas %v materias con códigos sin actualizar", n)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
@@ -51,30 +52,30 @@ func updateCodigosMaterias(ofertas []ofertaComisiones) error {
 
 	tx, err := db.Begin(ctx)
 	if err != nil {
-		logger.Error(err)
+		lg.Error(err)
 		return errors.New("error iniciando transacción SQL de actualización de códigos")
 	}
 
-	if err := createTablaCodigos(logger, tx); err != nil {
+	if err := createTablaCodigos(lg, tx); err != nil {
 		return errors.New("error creando tabla de asociación de códigos de materias")
 	}
 
-	if err := asociarCodigosActualesSiu(logger, tx, ofertas); err != nil {
+	if err := asociarCodigosActualesSiu(db, tx, lg, coms); err != nil {
 		return errors.New("error sincronizando códigos de materias")
 	}
 
-	n, err := updateCodigosActuales(logger, tx)
+	n, err := updateCodigosActuales(tx, lg)
 	if err != nil {
 		return errors.New("error actualizando códigos de materia")
 	}
 
 	if err := deleteTablaCodigos(tx); err != nil {
-		logger.Error("error eliminando tabla de asociación de códigos de materias", err)
+		lg.Error("error eliminando tabla de asociación de códigos de materias", err)
 	}
 
 	err = tx.Commit(ctx)
 	if err != nil {
-		logger.Error(err)
+		lg.Error(err)
 		return errors.New("error commiteando transacción SQL de actualización de códigos")
 	}
 
@@ -83,14 +84,14 @@ func updateCodigosMaterias(ofertas []ofertaComisiones) error {
 	// cuatrimestres en los que no hay comisiones para algunas materias, por lo
 	// que ni siquiera aparecen en el SIU.
 
-	logger.Infof("actualizado los códigos de %v materias exitosamente", n)
+	lg.Infof("actualizado los códigos de %v materias exitosamente", n)
 
 	return nil
 }
 
 // getCantMateriasDesactualizadas retorna la cantidad de materias cuyos códigos
 // no han sido sincronizados con los códigos correctos del SIU.
-func getCantMateriasDesactualizadas(logger *log.Logger) (int, error) {
+func getCantMateriasDesactualizadas(db *pgxpool.Pool, lg *log.Logger) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
@@ -110,7 +111,7 @@ SELECT count(*) FROM materia WHERE codigo LIKE 'COD%'
 		`).Scan(&n)
 
 	if err != nil {
-		logger.Error(err)
+		lg.Error(err)
 	}
 
 	return n, err
@@ -152,82 +153,82 @@ func deleteTablaCodigos(tx pgx.Tx) error {
 
 // asociarCodigosActualesSiu completa la tabla de asociación de códigos actuales de las
 // materias con los códigos correctos obtenidos desde el SIU.
-func asociarCodigosActualesSiu(logger *log.Logger, tx pgx.Tx, ofertas []ofertaComisiones) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
-
-	logger.Debug("obteniendo códigos de materias de la base de datos")
-
-	rows, err := db.Query(ctx, `
-SELECT m.codigo, lower(unaccent(m.nombre))
-FROM materia m
-INNER JOIN plan_materia pm
-ON m.codigo = pm.codigo_materia
-INNER JOIN plan p
-ON p.codigo = pm.codigo_plan
-WHERE p.esta_vigente = true
-		`)
-
-	if err != nil {
-		logger.Error(err)
-		return err
-	}
-
-	codigosMaterias := make(map[string]string)
-
-	for rows.Next() {
-		var cod, nombre string
-
-		err := rows.Scan(&cod, &nombre)
-		if err != nil {
-			logger.Error("error serializando las materias", "error", err)
-			return err
-		}
-
-		codigosMaterias[nombre] = cod
-	}
-
-	logger.Debugf("encontrados los códigos de %v materias en la base de datos", len(codigosMaterias))
-
-	materias := make(map[string][]any, len(codigosMaterias))
-
-	for _, o := range ofertas {
-		for _, m := range o.materias {
-			if codActual, ok := codigosMaterias[m.Nombre]; ok {
-				if _, ok := materias[m.Nombre]; !ok {
-					materias[m.Nombre] = []any{m.Nombre, codActual, m.Codigo}
-				}
-			} else {
-				logger.Warn("materia no está en la base de datos",
-					"materia", m.Codigo, "nombre", m.Nombre)
-			}
-		}
-	}
-
-	logger.Debugf("obtenidos los códigos de %v materias desde el SIU", len(materias))
-
-	ctx, cancel = context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
-
-	_, err = tx.CopyFrom(
-		ctx,
-		pgx.Identifier{"tmp_codigos_materias"},
-		[]string{"nombre_materia", "codigo_materia_actual", "codigo_materia_siu"},
-		pgx.CopyFromRows(slices.Collect(maps.Values(materias))),
-	)
-
-	if err != nil {
-		logger.Error(err)
-		return err
-	}
-
+func asociarCodigosActualesSiu(db *pgxpool.Pool, tx pgx.Tx, lg *log.Logger, coms []ultimaComision) error {
+// 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+// 	defer cancel()
+//
+// 	lg.Debug("obteniendo códigos de materias de la base de datos")
+//
+// 	rows, err := db.Query(ctx, `
+// SELECT m.codigo, lower(unaccent(m.nombre))
+// FROM materia m
+// INNER JOIN plan_materia pm
+// ON m.codigo = pm.codigo_materia
+// INNER JOIN plan p
+// ON p.codigo = pm.codigo_plan
+// WHERE p.esta_vigente = true
+// 		`)
+// 	if err != nil {
+// 		lg.Error(err)
+// 		return err
+// 	}
+//
+// 	codigosMaterias := make(map[string]string)
+//
+// 	for rows.Next() {
+// 		var cod, nombre string
+//
+// 		err := rows.Scan(&cod, &nombre)
+// 		if err != nil {
+// 			lg.Error("error serializando las materias", "error", err)
+// 			return err
+// 		}
+//
+// 		codigosMaterias[nombre] = cod
+// 	}
+//
+// 	lg.Debugf("encontrados los códigos de %v materias en la base de datos", len(codigosMaterias))
+//
+// 	materias := make(map[string][]any, len(codigosMaterias))
+//
+// 	for _, c := range coms {
+// 		for _, m := range c.materias {
+// 			if codActual, ok := codigosMaterias[m.Nombre]; ok {
+// 				if _, ok := materias[m.Nombre]; !ok {
+// 					materias[m.Nombre] = []any{m.Nombre, codActual, m.Codigo}
+// 				}
+// 			} else {
+// 				lg.Warn("materia no está en la base de datos",
+// 					"materia", m.Codigo, "nombre", m.Nombre)
+// 			}
+// 		}
+// 	}
+//
+// 	lg.Debugf("obtenidos los códigos de %v materias desde el SIU", len(materias))
+//
+// 	ctx, cancel = context.WithTimeout(context.Background(), time.Second*3)
+// 	defer cancel()
+//
+// 	_, err = tx.CopyFrom(
+// 		ctx,
+// 		pgx.Identifier{"tmp_codigos_materias"},
+// 		[]string{"nombre_materia", "codigo_materia_actual", "codigo_materia_siu"},
+// 		pgx.CopyFromRows(slices.Collect(maps.Values(materias))),
+// 	)
+//
+// 	if err != nil {
+// 		lg.Error(err)
+// 		return err
+// 	}
+//
+// 	return nil
 	return nil
 }
 
 // updateCodigosActuales efectúa la actualización de los códigos de las
 // materias con código desactualizado. Retorna la cantidad de registros que
 // fueron afectados por la query de actualización.
-func updateCodigosActuales(logger *log.Logger, tx pgx.Tx) (int, error) {
+func updateCodigosActuales(tx pgx.Tx, lg *log.Logger) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
@@ -248,7 +249,7 @@ WHERE materia.codigo = ma.codigo_materia_actual
 			`)
 
 	if err != nil {
-		logger.Error(err)
+		lg.Error(err)
 		return -1, errors.New("error actualizando códigos de materias")
 	}
 
@@ -261,22 +262,22 @@ WHERE materia.codigo = ma.codigo_materia_actual
 // 2024, para una materia en común como podría ser Álgebra Lineal, presente en
 // ambas ofertas, esta función retorna solamente la oferta de comisiones de
 // Álgebra Lineal del 1C 2025.
-func filtrarUltimasComisiones(ofertas []ofertaComisiones) []ultimaComision {
+func filtrarUltimasComisiones(ofertas []*oferta) []ultimaComision {
 	max := 0
 	for _, o := range ofertas {
 		max += len(o.materias)
 	}
 
 	cuatris := make(map[string]cuatri, max)
-	materias := make(map[string]ultimaComision, max)
+	mats := make(map[string]ultimaComision, max)
 
 	for _, o := range ofertas {
 		for _, m := range o.materias {
-			cuatriUltimaActualizacion, ok := cuatris[m.Nombre]
+			c, ok := cuatris[m.Nombre]
 
-			if !ok || o.cuatri.esDespuesDe(cuatriUltimaActualizacion) {
+			if !ok || o.cuatri.esDespuesDe(c) {
 				cuatris[m.Nombre] = o.cuatri
-				materias[m.Nombre] = ultimaComision{
+				mats[m.Nombre] = ultimaComision{
 					materia: m,
 					cuatri:  o.cuatri,
 				}
@@ -284,5 +285,5 @@ func filtrarUltimasComisiones(ofertas []ofertaComisiones) []ultimaComision {
 		}
 	}
 
-	return slices.Collect(maps.Values(materias))
+	return slices.Collect(maps.Values(mats))
 }

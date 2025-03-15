@@ -1,4 +1,4 @@
-package main
+package tui
 
 import (
 	"cmp"
@@ -12,12 +12,24 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
 	"github.com/lithammer/fuzzysearch/fuzzy"
+	"github.com/regexPattern/fiuba-reviews/actualizador-ofertas/actualizador"
 )
 
 type model struct {
 	materias    []viewMateria
 	currMateria int
 	screenWidth int
+}
+
+func newModel() model {
+	return model{}
+}
+
+func Run(patches []actualizador.PatchMateriaOutput) error {
+	m := newModel()
+	p := tea.NewProgram(m)
+	_, err := p.Run()
+	return err
 }
 
 type viewMateria struct {
@@ -50,15 +62,15 @@ type modeloDocenteSiu struct {
 	rol    string
 }
 
-func newModeloApp(patches []patch) model {
+func newModeloApp(patches []actualizador.PatchMateriaOutput) model {
 	pagsMaterias := make([]viewMateria, 0, len(patches))
 
 	for _, p := range patches {
-		docentesDb, docentesSiu := newViewsDocentes(*p.docentes)
+		docentesDb, docentesSiu := newViewsDocentes(*p.Docentes)
 
 		pm := viewMateria{
-			codigo:               p.codigoMateria,
-			nombre:               p.nombreMateria,
+			codigo:               p.Codigo,
+			nombre:               p.Nombre,
 			docentesDb:           docentesDb,
 			docentesNuevos:       docentesSiu,
 			viewDocentesDbActiva: true,
@@ -81,17 +93,17 @@ func newModeloApp(patches []patch) model {
 	return modelo
 }
 
-func newViewsDocentes(pd patchDocentes) (viewSincronDocentesDb, viewDocentesNuevos) {
-	docentesDb := make([]modeloDocenteDb, 0, len(pd.db))
-	matchesDocentesDb := make([][]modeloDocenteSiu, 0, len(pd.db))
+func newViewsDocentes(pd actualizador.PatchDocentesOutput) (viewSincronDocentesDb, viewDocentesNuevos) {
+	docentesDb := make([]modeloDocenteDb, 0, len(pd.Registrados))
+	matchesDocentesDb := make([][]modeloDocenteSiu, 0, len(pd.Registrados))
 
-	nombresDocentesDb := slices.Collect(maps.Keys(pd.db))
-	nombresDocentesSiu := slices.Collect(maps.Keys(pd.siu))
+	nombresDocentesDb := slices.Collect(maps.Keys(pd.Registrados))
+	nombresDocentesSiu := slices.Collect(maps.Keys(pd.Nuevos))
 
 	slices.Sort(nombresDocentesDb)
 
 	for _, nombre := range nombresDocentesDb {
-		cod := pd.db[nombre]
+		cod := pd.Registrados[nombre]
 
 		matches := fuzzy.RankFind(nombre, nombresDocentesSiu)
 
@@ -111,7 +123,7 @@ func newViewsDocentes(pd patchDocentes) (viewSincronDocentesDb, viewDocentesNuev
 		for _, m := range matches {
 			m := modeloDocenteSiu{
 				nombre: m.Target,
-				rol:    pd.siu[m.Target],
+				rol:    pd.Nuevos[m.Target],
 			}
 
 			matchesDocentesSiu = append(matchesDocentesSiu, m)

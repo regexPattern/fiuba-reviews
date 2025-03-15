@@ -1,4 +1,4 @@
-module github.com/regexPattern/fiuba-reviews/actualizador-catedras
+module github.com/regexPattern/fiuba-reviews/actualizador-ofertas
 
 go 1.24.0
 

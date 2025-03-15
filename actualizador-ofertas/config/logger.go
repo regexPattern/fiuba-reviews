@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"os"
@@ -8,9 +8,9 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-const debugPatchesLevel log.Level = -8
+const DebugIndividualOps log.Level = -8
 
-func initLogger() {
+func NewLogger() *log.Logger {
 	var level log.Level
 
 	levelEnv, levelEnvSet := os.LookupEnv("LOG_LEVEL")
@@ -24,7 +24,7 @@ func initLogger() {
 	} else {
 		switch levelEnv {
 		case "DEBUG_PATCHES":
-			level = debugPatchesLevel
+			level = DebugIndividualOps
 		case "DEBUG":
 			level = log.DebugLevel
 		case "WARN", "WARNING":
@@ -43,7 +43,7 @@ func initLogger() {
 
 	logger := log.NewWithOptions(os.Stderr, opts)
 
-	commonStyles := lipgloss.NewStyle().
+	s := lipgloss.NewStyle().
 		Bold(true).
 		Padding(0, 1).
 		Foreground(lipgloss.NoColor{})
@@ -51,26 +51,26 @@ func initLogger() {
 	logger.SetStyles(&log.Styles{
 		Timestamp: lipgloss.NewStyle(),
 		Levels: map[log.Level]lipgloss.Style{
-			debugPatchesLevel: commonStyles.
+			DebugIndividualOps: s.
 				SetString("PTCH").
 				Background(lipgloss.Color("199")),
-			log.DebugLevel: commonStyles.
+			log.DebugLevel: s.
 				SetString("DEBU").
 				Background(lipgloss.Color("33")),
-			log.InfoLevel: commonStyles.
+			log.InfoLevel: s.
 				SetString("INFO").
 				Background(lipgloss.Color("72")),
-			log.WarnLevel: commonStyles.
+			log.WarnLevel: s.
 				SetString("WARN").
 				Background(lipgloss.Color("202")),
-			log.ErrorLevel: commonStyles.
+			log.ErrorLevel: s.
 				SetString("ERRO").
 				Background(lipgloss.Color("196")),
-			log.FatalLevel: commonStyles.
+			log.FatalLevel: s.
 				SetString("FATA").
 				Background(lipgloss.Color("162")),
 		},
 	})
 
-	log.SetDefault(logger)
+	return logger
 }
