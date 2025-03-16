@@ -8,22 +8,29 @@ import (
 	"github.com/regexPattern/fiuba-reviews/actualizador-ofertas/config"
 )
 
-func GetPatches(cfg *config.Config) ([]PatchMateriaOutput, error) {
+func GetPatches(cfg config.Config) ([]PatchMateriaOutput, error) {
 	logger := log.Default()
 
-	_, err := getOfertas(logger, cfg.S3)
+	ofs, err := getOfertas(logger, cfg.S3)
 	if err != nil {
 		return nil, fmt.Errorf("error obteniendo ofertas de comisiones: %w", err)
 	}
 
-	return nil, nil
+	ps, err := getPatchesMateriaOutput(logger, cfg.Db, ofs)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"error generando patches de actualización de materias: %w", err)
+	}
+
+	return ps, nil
 }
 
-func WritePatches(_ *config.Config) error {
+func WritePatches(_ config.Config) error {
 	return nil
 }
 
-func wrapErrorMsg(logger *log.Logger, msg string, err error) error {
+func logErrRetMsg(logger *log.Logger, msg string, err error) error {
+	logger.Helper()
 	logger.Error(msg, "err", err)
 	return errors.New(msg)
 }

@@ -26,26 +26,32 @@ func TestSeFiltranLasMateriasDeLasOfetasMasRecientes(t *testing.T) {
 
 	codsCatedrasEsperadas := []int{3, 5, 8}
 
-	o1 := &oferta{
-		carrera:  carrera,
-		cuatri:   cuatri{numero: 1, anio: 2024},
+	o1 := oferta{
+		ofertaMetadata: ofertaMetadata{
+			carrera: carrera,
+			cuatri:  cuatri{numero: 1, anio: 2024},
+		},
 		materias: []materia{initDummyMateria(4, 7, 11)},
 	}
-	masReciente := &oferta{
-		carrera:  carrera,
-		cuatri:   cuatri{numero: 1, anio: 2025},
+	masReciente := oferta{
+		ofertaMetadata: ofertaMetadata{
+			carrera: carrera,
+			cuatri:  cuatri{numero: 1, anio: 2025},
+		},
 		materias: []materia{initDummyMateria(codsCatedrasEsperadas...)},
 	}
-	o3 := &oferta{
-		carrera:  carrera,
-		cuatri:   cuatri{numero: 2, anio: 2023},
+	o3 := oferta{
+		ofertaMetadata: ofertaMetadata{
+			carrera: carrera,
+			cuatri:  cuatri{numero: 2, anio: 2023},
+		},
 		materias: []materia{initDummyMateria(1, 2, 6)},
 	}
 
-	coms := filtrarUltimasComisiones([]*oferta{o1, masReciente, o3})
+	uofs := filtrarUltimasOfertas([]oferta{o1, masReciente, o3})
 
-	mats := make([]materia, 0, len(coms))
-	for _, uc := range coms {
+	mats := make([]materia, 0, len(uofs))
+	for _, uc := range uofs {
 		mats = append(mats, uc.materia)
 	}
 
@@ -64,16 +70,20 @@ func TestSeFiltranLasMateriasDeLasOfetasMasRecientes(t *testing.T) {
 }
 
 func TestSeDistinguenDosMateriasComoIgualesPorSuNombre(t *testing.T) {
-	o1 := &oferta{
-		cuatri: cuatri{numero: 1, anio: 2025},
+	o1 := oferta{
+		ofertaMetadata: ofertaMetadata{
+			cuatri: cuatri{numero: 1, anio: 2025},
+		},
 		materias: []materia{{
 			Codigo:   "AM2",
 			Nombre:   "Análisis Matemático II",
 			Catedras: []catedra{{Codigo: 7}},
 		}},
 	}
-	o2 := &oferta{
-		cuatri: cuatri{numero: 2, anio: 2021},
+	o2 := oferta{
+		ofertaMetadata: ofertaMetadata{
+			cuatri: cuatri{numero: 2, anio: 2021},
+		},
 		materias: []materia{{
 			Codigo:   "AM2",
 			Nombre:   "Física de los Sistemas de Partículas",
@@ -81,25 +91,29 @@ func TestSeDistinguenDosMateriasComoIgualesPorSuNombre(t *testing.T) {
 		}},
 	}
 
-	mats := filtrarUltimasComisiones([]*oferta{o1, o2})
+	mats := filtrarUltimasOfertas([]oferta{o1, o2})
 	if len(mats) != 2 {
 		t.Fail()
 	}
 }
 
 func TestSeConservanLasMateriasSinActualizacion(t *testing.T) {
-	masReciente := &oferta{
-		carrera: "Ingeniería Civil",
-		cuatri:  cuatri{numero: 1, anio: 2025},
+	masReciente := oferta{
+		ofertaMetadata: ofertaMetadata{
+			carrera: "Ingeniería Civil",
+			cuatri:  cuatri{numero: 1, anio: 2025},
+		},
 		materias: []materia{{
 			Codigo:   "AM2",
 			Nombre:   "Análisis Matemático II",
 			Catedras: []catedra{{Codigo: 7}},
 		}},
 	}
-	o2 := &oferta{
-		carrera: "Ingeniería en Informática",
-		cuatri:  cuatri{numero: 2, anio: 2021},
+	o2 := oferta{
+		ofertaMetadata: ofertaMetadata{
+			carrera: "Ingeniería en Informática",
+			cuatri:  cuatri{numero: 2, anio: 2021},
+		},
 		materias: []materia{{
 			Codigo:   "AM2",
 			Nombre:   "Análisis Matemático II",
@@ -111,10 +125,10 @@ func TestSeConservanLasMateriasSinActualizacion(t *testing.T) {
 		}},
 	}
 
-	coms := filtrarUltimasComisiones([]*oferta{masReciente, o2})
+	uofs := filtrarUltimasOfertas([]oferta{masReciente, o2})
 
-	mats := make([]materia, 0, len(coms))
-	for _, uc := range coms {
+	mats := make([]materia, 0, len(uofs))
+	for _, uc := range uofs {
 		mats = append(mats, uc.materia)
 	}
 
@@ -133,18 +147,22 @@ func TestSeConservanLasMateriasSinActualizacion(t *testing.T) {
 }
 
 func TestSeFiltranLasCatedrasMasRecientesSinImportarLaCarrera(t *testing.T) {
-	masReciente := &oferta{
-		carrera: "Ingeniería Civil",
-		cuatri:  cuatri{numero: 1, anio: 2025},
+	masReciente := oferta{
+		ofertaMetadata: ofertaMetadata{
+			carrera: "Ingeniería Civil",
+			cuatri:  cuatri{numero: 1, anio: 2025},
+		},
 		materias: []materia{{
 			Codigo:   "AM2",
 			Nombre:   "Análisis Matemático II",
 			Catedras: []catedra{{Codigo: 7}},
 		}},
 	}
-	o2 := &oferta{
-		carrera: "Ingeniería en Informática",
-		cuatri:  cuatri{numero: 2, anio: 2021},
+	o2 := oferta{
+		ofertaMetadata: ofertaMetadata{
+			carrera: "Ingeniería en Informática",
+			cuatri:  cuatri{numero: 2, anio: 2021},
+		},
 		materias: []materia{{
 			Codigo:   "AM2",
 			Nombre:   "Análisis Matemático II",
@@ -152,10 +170,10 @@ func TestSeFiltranLasCatedrasMasRecientesSinImportarLaCarrera(t *testing.T) {
 		}},
 	}
 
-	coms := filtrarUltimasComisiones([]*oferta{masReciente, o2})
+	uofs := filtrarUltimasOfertas([]oferta{masReciente, o2})
 
-	mats := make([]materia, 0, len(coms))
-	for _, uc := range coms {
+	mats := make([]materia, 0, len(uofs))
+	for _, uc := range uofs {
 		mats = append(mats, uc.materia)
 	}
 

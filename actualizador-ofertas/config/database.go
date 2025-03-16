@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/charmbracelet/log"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -23,6 +24,7 @@ func newDbPool() (*pgxpool.Pool, error) {
 	if err := checkDbConn(db); err != nil {
 		return nil, fmt.Errorf("error estableciendo conexión con la base de datos: %w", err)
 	}
+	log.Info("establecida conexión con la base de datos")
 	return db, nil
 }
 

@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/charmbracelet/log"
 )
 
 const (
@@ -34,6 +35,7 @@ func newS3Client() (*S3Config, error) {
 	if err := checkBucketConn(cl, bn); err != nil {
 		return nil, fmt.Errorf("error estableciendo conexión con el bucket: %w", err)
 	}
+	log.Info("establecida conexión con el bucket", "bucketName", bn)
 	c := &S3Config{
 		Client:     cl,
 		BucketName: &bn,

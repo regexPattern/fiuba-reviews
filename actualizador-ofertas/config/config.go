@@ -9,20 +9,23 @@ type Config struct {
 	S3 *S3Config
 }
 
-func NewConfig() (*Config, error) {
+func NewConfig() (Config, error) {
+	var cfg Config
+
 	db, err := newDbPool()
 	if err != nil {
-		return nil, err
+		return cfg, err
 	}
 
 	s3, err := newS3Client()
 	if err != nil {
-		return nil, err
+		return cfg, err
 	}
 
-	c := &Config{
+	cfg = Config{
 		Db: db,
 		S3: s3,
 	}
-	return c, nil
+
+	return cfg, nil
 }

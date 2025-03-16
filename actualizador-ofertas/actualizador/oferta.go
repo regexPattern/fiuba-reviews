@@ -3,7 +3,6 @@ package actualizador
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"strconv"
@@ -16,16 +15,19 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// Oferta de comisiones de una materia.
 type oferta struct {
 	ofertaMetadata
 	materias []materia
 }
 
+// Metadata de la oferta de comisiones de una materia.
 type ofertaMetadata struct {
 	carrera string
 	cuatri  cuatri
 }
 
+// Cuatrimestre del año lectivo.
 type cuatri struct {
 	numero int
 	anio   int
@@ -38,6 +40,8 @@ func getOfertas(logger *log.Logger, cfg *config.S3Config) ([]oferta, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Info(fmt.Sprintf("encontradas %v ofertas en el bucket", len(objs)))
 
 	var eg errgroup.Group
 	eg.SetLimit(config.BucketMaxRequests)
@@ -55,8 +59,8 @@ func getOfertas(logger *log.Logger, cfg *config.S3Config) ([]oferta, error) {
 
 	close(ofertach)
 	ofs := make([]oferta, 0, len(ofertach))
-	for o := range ofertach {
-		ofs = append(ofs, o)
+	for of := range ofertach {
+		ofs = append(ofs, of)
 	}
 
 	return ofs, nil
@@ -71,8 +75,7 @@ func getBucketObjects(logger *log.Logger, cfg *config.S3Config) ([]types.Object,
 	})
 	if err != nil {
 		msg := "error obteniendo listado de objetos del bucket"
-		logger.Error(msg, "err", err)
-		return nil, errors.New(msg)
+		return nil, logErrRetMsg(logger, msg, err)
 	}
 
 	return b.Contents, nil
@@ -89,7 +92,7 @@ func newOfertaFromObject(logger *log.Logger, cfg *config.S3Config, ch chan ofert
 	if err != nil {
 		return err
 	}
-	md, err := newPlanMetadata(objMd)
+	md, err := newPlanMetadata(logger, objMd)
 	if err != nil {
 		return err
 	}
@@ -100,11 +103,11 @@ func newOfertaFromObject(logger *log.Logger, cfg *config.S3Config, ch chan ofert
 	of, err := newOferta(logger, md, body)
 	if err != nil {
 		msg := "error serializando oferta"
-		return wrapErrorMsg(logger, msg, err)
+		return logErrRetMsg(logger, msg, err)
 	}
 
 	ch <- of
-	logger.Info("oferta obtenida exitosamente")
+	logger.Info("oferta obtenida exitosamente", "materias", len(of.materias))
 
 	return nil
 }
@@ -119,7 +122,7 @@ func getObjMetadata(logger *log.Logger, cfg *config.S3Config, key *string) (map[
 	})
 	if err != nil {
 		msg := "error obteniendo metadata de objeto"
-		return nil, wrapErrorMsg(logger, msg, err)
+		return nil, logErrRetMsg(logger, msg, err)
 	}
 
 	return h.Metadata, nil
@@ -135,54 +138,55 @@ func getObjBody(logger *log.Logger, cfg *config.S3Config, key *string) ([]byte, 
 	})
 	if err != nil {
 		msg := "error obteniendo body del objeto"
-		return nil, wrapErrorMsg(logger, msg, err)
+		return nil, logErrRetMsg(logger, msg, err)
 	}
 
 	defer obj.Body.Close()
-	bs, err := io.ReadAll(obj.Body)
+	body, err := io.ReadAll(obj.Body)
 	if err != nil {
-		return nil, err
+		msg := "error leyendo body del objeto"
+		return nil, logErrRetMsg(logger, msg, err)
 	}
 
-	return bs, nil
+	return body, nil
 }
 
-func newPlanMetadata(objMd map[string]string) (ofertaMetadata, error) {
+func newPlanMetadata(logger *log.Logger, objMd map[string]string) (ofertaMetadata, error) {
 	var md ofertaMetadata
 
 	getMd := func(key string) (string, error) {
 		if val, ok := objMd[key]; !ok {
-			return "", fmt.Errorf("campo '%v' no está presente en metadata", key)
+			return "", fmt.Errorf("campo '%v' no está en metadata", key)
 		} else {
 			return val, nil
 		}
 	}
-	errMd := func(err error) error {
-		return fmt.Errorf("error procesando metadata del objeto: %w", err)
-	}
+
+	errMsg := "error procesando metadata del objeto"
 
 	carr, err := getMd("carrera")
 	if err != nil {
-		return md, err
+		return md, logErrRetMsg(logger, errMsg, err)
 	}
 
-	getValFromMd := func(key string) (int, error) {
+	getIntValFromMd := func(key string) (int, error) {
 		str, err := getMd(key)
 		if err != nil {
-			return 0, errMd(fmt.Errorf("campo `%v` no está presente en metadata", key))
+			return 0, logErrRetMsg(logger, errMsg, err)
 		}
 		val, err := strconv.Atoi(str)
 		if err != nil {
-			return 0, errMd(fmt.Errorf("campo `%v` no serializable como entero: %w", key, err))
+			err := fmt.Errorf("campo '%v' no es serializable como entero: %w", key, err)
+			return 0, logErrRetMsg(logger, errMsg, err)
 		}
 		return val, nil
 	}
 
-	num, err := getValFromMd("cuatri-numero")
+	num, err := getIntValFromMd("cuatri-numero")
 	if err != nil {
 		return md, err
 	}
-	anio, err := getValFromMd("cuatri-anio")
+	anio, err := getIntValFromMd("cuatri-anio")
 	if err != nil {
 		return md, err
 	}
@@ -204,7 +208,7 @@ func newOferta(logger *log.Logger, md ofertaMetadata, body []byte) (oferta, erro
 	mats := []materia{}
 	if err := json.Unmarshal(body, &mats); err != nil {
 		msg := "error serializando body del objeto"
-		return of, wrapErrorMsg(logger, msg, err)
+		return of, logErrRetMsg(logger, msg, err)
 	}
 
 	matsConCatedras := make([]materia, 0, len(mats))
