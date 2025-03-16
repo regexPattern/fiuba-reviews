@@ -17,7 +17,6 @@ type PatchMateriaOutput struct {
 	Catedras PatchCatedrasOutput
 }
 
-// getPatchesMateriaOutput retorna los patches de actualización de materias.
 func getPatchesMateriaOutput(logger *log.Logger, db *pgxpool.Pool, ofertas []oferta) ([]PatchMateriaOutput, error) {
 	// Para generar los patches de las materias que requieren actualización,
 	// primero nos aseguramos de tener los códigos correctamente sincronizados

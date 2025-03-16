@@ -1,12 +1,11 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/charmbracelet/log"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/regexPattern/fiuba-reviews/actualizador-ofertas/actualizador"
 	"github.com/regexPattern/fiuba-reviews/actualizador-ofertas/config"
+	"github.com/regexPattern/fiuba-reviews/actualizador-ofertas/tui"
 )
 
 func main() {
@@ -22,9 +21,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(ps)
-
-	// if tui.Run(ps) != nil {
-	// 	log.Fatal(err)
-	// }
+	if tui.Run(ps) != nil {
+		log.Fatal(err)
+	}
 }
