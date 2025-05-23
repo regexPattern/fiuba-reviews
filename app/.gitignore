@@ -3,3 +3,5 @@ node_modules
 .drizzle
 .svelte-kit
 .vercel
+
+!.env.development
