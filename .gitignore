@@ -1,6 +1,8 @@
-.DS_Store
-
 .vercel
 
-.env*
-!.env.example
+.direnv
+.envrc
+.gemini
+.jj
+
+.DS_Store
