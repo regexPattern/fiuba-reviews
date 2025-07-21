@@ -32,6 +32,7 @@ export const cuatrimestre = pgTable(
       using: sql`true`,
     }),
     check("cuatrimestre_numero_check", sql`numero = ANY (ARRAY[1, 2])`),
+    unique("cuatrimestre_natural_key").on(table.anio, table.numero),
   ],
 );
 

@@ -1,4 +1,14 @@
 {
   "framework": "sveltekit-1",
-  "regions": ["gru1"]
+  "regions": ["gru1"],
+  "crons": [
+    {
+      "path": "/api/cronjobs/generarcuatrimestre",
+      "schedule": "0 0 1 7 *"
+    },
+    {
+      "path": "/api/cronjobs/generarcuatrimestre",
+      "schedule": "0 0 1 12 *"
+    }
+  ]
 }
