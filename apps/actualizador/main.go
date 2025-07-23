@@ -8,28 +8,34 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
 	"github.com/regexPattern/fiuba-reviews/apps/actualizador/resolver"
 )
 
 func main() {
 	setupLogger()
 
-	genCtx, cancelGenCtx := context.WithTimeout(context.Background(), time.Millisecond*3000)
-	defer cancelGenCtx()
+	g := patch.Generador{
+		DbUrl:         os.Getenv("DATABASE_URL"),
+		DbTimeout:     time.Second * 3,
+		S3BucketName:  os.Getenv("AWS_S3_BUCKET"),
+		S3InitTimeout: time.Second * 3,
+		S3Timeout:     time.Second * 3,
+	}
 
-	proposed, err := patcher.GeneratePatches(genCtx)
+	proposed, err := g.GenerarPatches(context.Background())
 	if err != nil {
 		slog.Error("no se pudieron generar los patches de actualización")
 		os.Exit(1)
 	}
 
+	if proposed == nil {
+		return
+	}
+
 	resolved := resolver.ResolvePatches(proposed)
 
-	applyCtx, cancelApplyCtx := context.WithTimeout(context.Background(), time.Millisecond*3000)
-	defer cancelApplyCtx()
-
-	if patcher.ApplyPatches(applyCtx, resolved) != nil {
+	if patch.ApplyPatches(context.Background(), resolved) != nil {
 		slog.Error("no se pudieron aplicar los patches de actualización")
 		os.Exit(1)
 	}
