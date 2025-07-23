@@ -1,4 +1,4 @@
-package patch
+package patcher
 
 import (
 	"context"
@@ -9,18 +9,23 @@ import (
 	"maps"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
+	"unicode"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/jackc/pgx/v5"
 	"golang.org/x/sync/errgroup"
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 var s3Client *s3.Client
 
-type Generador struct {
+type GeneradorPatches struct {
 	DbUrl         string
 	DbTimeout     time.Duration
 	S3BucketName  string
@@ -28,19 +33,26 @@ type Generador struct {
 	S3Timeout     time.Duration
 }
 
-func (g *Generador) GenerarPatches(ctx context.Context) (*PatchProposal, error) {
+type PatchGenerado struct {
+	CodigoDb  string
+	CodigoSiu string
+	Nombre    string
+	Catedras  []CatedraSiu
+	Cuatri
+}
+
+func (g *GeneradorPatches) GenerarPatches(ctx context.Context) ([]PatchGenerado, error) {
 	eg, egCtx := errgroup.WithContext(ctx)
 
 	var materiasDb []materiaDb
-	var oMaterias []ofertaMateriaSiu
+	var oMateriasSiu []ofertaMateriaSiu
 
 	eg.Go(func() error {
 		dbCtx, dbCancel := context.WithTimeout(egCtx, g.DbTimeout)
 		defer dbCancel()
 
 		var err error
-		materiasDb, err = g.obtenerMateriasDB(dbCtx)
-
+		materiasDb, err = g.obtenerMateriasDb(dbCtx)
 		return err
 	})
 
@@ -57,8 +69,7 @@ func (g *Generador) GenerarPatches(ctx context.Context) (*PatchProposal, error) 
 			return err
 		}
 
-		oMaterias = unificarOfertasMateriasSiu(oCarreras)
-
+		oMateriasSiu = unificarOfertasMateriasSiu(oCarreras)
 		return nil
 	})
 
@@ -66,11 +77,8 @@ func (g *Generador) GenerarPatches(ctx context.Context) (*PatchProposal, error) 
 		return nil, err
 	}
 
-	fmt.Println(materiasDb)
-	fmt.Println()
-	fmt.Println(oMaterias)
-
-	return nil, nil
+	patches := vincularMateriasSiuConDb(oMateriasSiu, materiasDb)
+	return patches, nil
 }
 
 type materiaDb struct {
@@ -78,7 +86,7 @@ type materiaDb struct {
 	Nombre string `db:"nombre"`
 }
 
-func (g *Generador) obtenerMateriasDB(ctx context.Context) ([]materiaDb, error) {
+func (g *GeneradorPatches) obtenerMateriasDb(ctx context.Context) ([]materiaDb, error) {
 	conn, err := pgx.Connect(ctx, g.DbUrl)
 	if err != nil {
 		slog.Error("no se pudo conectar con la base de datos", "error", err)
@@ -86,16 +94,21 @@ func (g *Generador) obtenerMateriasDB(ctx context.Context) ([]materiaDb, error) 
 	}
 
 	defer conn.Close(ctx)
-
 	rows, _ := conn.Query(ctx, `
 SELECT
 	codigo,
 	nombre
 FROM
 	materia
-WHERE
+WHERE (
 	codigo_cuatrimestre_actualizacion IS NULL OR
-	codigo_cuatrimestre_actualizacion < (SELECT MAX(codigo) FROM cuatrimestre);
+	codigo_cuatrimestre_actualizacion < (SELECT MAX(codigo) FROM cuatrimestre)
+) AND EXISTS (
+	SELECT 1
+	FROM plan_materia
+	JOIN plan ON plan.codigo = plan_materia.codigo_plan
+	WHERE plan_materia.codigo_materia = materia.codigo AND plan.esta_vigente
+);
 		`)
 
 	materias, err := pgx.CollectRows(rows, pgx.RowToStructByName[materiaDb])
@@ -109,7 +122,7 @@ WHERE
 	return materias, nil
 }
 
-func (g *Generador) initS3Client(ctx context.Context) error {
+func (g *GeneradorPatches) initS3Client(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(ctx, g.S3InitTimeout)
 	defer cancel()
 
@@ -120,40 +133,39 @@ func (g *Generador) initS3Client(ctx context.Context) error {
 	}
 
 	s3Client = s3.NewFromConfig(cfg)
-
 	slog.Info("cliente de S3 inicializado exitosamente")
 
 	return nil
 }
 
 type ofertaCarrera struct {
-	cuatri
+	Cuatri
 	materias []materiaSiu
 }
 
 type materiaSiu struct {
 	Codigo   string       `json:"codigo"`
 	Nombre   string       `json:"nombre"`
-	Catedras []catedraSiu `json:"catedras"`
+	Catedras []CatedraSiu `json:"catedras"`
 }
 
-type catedraSiu struct {
+type CatedraSiu struct {
 	Codigo   int          `json:"codigo"`
-	Docentes []docenteSiu `json:"docentes"`
+	Docentes []DocenteSiu `json:"docentes"`
 }
 
-type docenteSiu struct {
+type DocenteSiu struct {
 	Nombre string `json:"nombre"`
 	Rol    string `json:"rol"`
 }
 
-type cuatri struct {
-	numero int
-	anio   int
+type Cuatri struct {
+	Numero int
+	Anio   int
 }
 
-func tryNewCuatri(metadata map[string]string) (cuatri, error) {
-	var c cuatri
+func tryNewCuatri(metadata map[string]string) (Cuatri, error) {
+	var c Cuatri
 
 	numero, err := strconv.Atoi(metadata["cuatri-numero"])
 	if err != nil {
@@ -165,28 +177,27 @@ func tryNewCuatri(metadata map[string]string) (cuatri, error) {
 		return c, err
 	}
 
-	c.numero = numero
-	c.anio = anio
+	c.Numero = numero
+	c.Anio = anio
 
 	return c, nil
 }
 
-func (c cuatri) despuesDe(otro cuatri) bool {
-	if c.anio == otro.anio {
-		return c.numero > otro.numero
+func (c Cuatri) despuesDe(otro Cuatri) bool {
+	if c.Anio == otro.Anio {
+		return c.Numero > otro.Numero
 	} else {
-		return c.anio > otro.anio
+		return c.Anio > otro.Anio
 	}
 }
 
-func (g *Generador) obtenerOfertasCarrerasSiu(ctx context.Context) ([]*ofertaCarrera, error) {
+func (g *GeneradorPatches) obtenerOfertasCarrerasSiu(ctx context.Context) ([]*ofertaCarrera, error) {
 	objs, err := g.descargarOfertasBucket(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	ofertas := make([]*ofertaCarrera, 0, len(objs))
-
 	for _, obj := range objs {
 		if o, err := g.obtenerMateriasOferta(ctx, obj); err != nil {
 			slog.Warn("omitiendo indexado de oferta", "key", *obj.Key)
@@ -198,7 +209,7 @@ func (g *Generador) obtenerOfertasCarrerasSiu(ctx context.Context) ([]*ofertaCar
 	return ofertas, nil
 }
 
-func (g *Generador) descargarOfertasBucket(ctx context.Context) ([]s3types.Object, error) {
+func (g *GeneradorPatches) descargarOfertasBucket(ctx context.Context) ([]s3types.Object, error) {
 	output, err := s3Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket: &g.S3BucketName,
 	})
@@ -213,7 +224,7 @@ func (g *Generador) descargarOfertasBucket(ctx context.Context) ([]s3types.Objec
 	return output.Contents, nil
 }
 
-func (g *Generador) obtenerMateriasOferta(ctx context.Context, obj s3types.Object) (*ofertaCarrera, error) {
+func (g *GeneradorPatches) obtenerMateriasOferta(ctx context.Context, obj s3types.Object) (*ofertaCarrera, error) {
 	logger := slog.Default().With("key", *obj.Key)
 
 	content, err := s3Client.GetObject(ctx, &s3.GetObjectInput{
@@ -227,18 +238,16 @@ func (g *Generador) obtenerMateriasOferta(ctx context.Context, obj s3types.Objec
 	}
 
 	carrera := content.Metadata["carrera"]
-
 	cuatri, err := tryNewCuatri(content.Metadata)
 	if err != nil {
 		logger.Error("error obteniendo el cuatrimestre de la oferta", "carrera", carrera, "error", err)
 		return nil, err
 	}
 
-	logger = slog.Default().With("carrera", carrera, "cuatri", cuatri.numero, "anio", cuatri.anio)
+	logger = slog.Default().With("carrera", carrera, "cuatri", cuatri.Numero, "anio", cuatri.Anio)
 
 	defer content.Body.Close()
 	bytes, err := io.ReadAll(content.Body)
-
 	if err != nil {
 		logger.Error("error leyendo bytes de contenido de oferta", "error", err)
 		return nil, err
@@ -252,43 +261,80 @@ func (g *Generador) obtenerMateriasOferta(ctx context.Context, obj s3types.Objec
 		return nil, err
 	}
 
-	logger.Info("oferta procesada correctamente")
-
 	o := &ofertaCarrera{
-		cuatri:   cuatri,
+		Cuatri:   cuatri,
 		materias: materias,
 	}
+
+	logger.Info("oferta procesada exitosamente")
 
 	return o, nil
 }
 
 type ofertaMateriaSiu struct {
-	cuatri
+	Cuatri
 	materia materiaSiu
 }
 
 func unificarOfertasMateriasSiu(oCarreras []*ofertaCarrera) []ofertaMateriaSiu {
 	totalMaterias := 0
-
 	for _, oc := range oCarreras {
 		totalMaterias += len(oc.materias)
 	}
 
 	oMaterias := make(map[string]ofertaMateriaSiu, totalMaterias)
-
 	for _, oc := range oCarreras {
 		for _, m := range oc.materias {
 			oMasReciente, ok := oMaterias[m.Nombre]
-			if !ok || oc.cuatri.despuesDe(oMasReciente.cuatri) {
+			if !ok || oc.Cuatri.despuesDe(oMasReciente.Cuatri) {
 				oMaterias[m.Nombre] = ofertaMateriaSiu{
-					cuatri:  oc.cuatri,
+					Cuatri:  oc.Cuatri,
 					materia: m,
 				}
 			}
 		}
 	}
 
-	slog.Debug("unificado últimas ofertas de materias", "n_inicial", totalMaterias, "n_final", len(oMaterias))
+	slog.Debug("unificado las últimas ofertas de materias", "n_inicial", totalMaterias, "n_final", len(oMaterias))
 
 	return slices.Collect(maps.Values(oMaterias))
+}
+
+func vincularMateriasSiuConDb(materiasSiu []ofertaMateriaSiu, materiasDb []materiaDb) []PatchGenerado {
+	materiasDbMap := make(map[string]materiaDb, len(materiasDb))
+	for _, mDb := range materiasDb {
+		materiasDbMap[normalize(mDb.Nombre)] = mDb
+	}
+
+	patches := make([]PatchGenerado, 0, len(materiasSiu))
+	for _, mSiu := range materiasSiu {
+		if mDb, ok := materiasDbMap[normalize(mSiu.materia.Nombre)]; ok {
+			patches = append(patches, PatchGenerado{
+				CodigoDb:  mDb.Codigo,
+				CodigoSiu: mSiu.materia.Codigo,
+				Nombre:    mDb.Nombre,
+				Catedras:  mSiu.materia.Catedras,
+				Cuatri:    mSiu.Cuatri,
+			})
+		} else {
+			slog.Warn(
+				"materia del SIU no encontrada en la base de datos",
+				"nombre", mSiu.materia.Nombre,
+				"codigo", mSiu.materia.Codigo,
+			)
+		}
+	}
+
+	return patches
+}
+
+func normalize(s string) string {
+	t := transform.Chain(
+		norm.NFD,
+		runes.Remove(runes.In(unicode.Mn)),
+		norm.NFC,
+	)
+
+	result, _, _ := transform.String(t, strings.ToLower(s))
+	return result
 }

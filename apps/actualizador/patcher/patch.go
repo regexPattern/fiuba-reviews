@@ -1,10 +1,10 @@
-package patch
+package patcher
 
 import (
 	"context"
 )
 
-type PatchProposal struct {}
+type PatchProposal struct{}
 
 type PatchResolution struct{}
 
