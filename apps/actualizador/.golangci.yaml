@@ -3,3 +3,7 @@ formatters:
   enable:
     - gofmt
     - goimports
+    - golines
+  settings:
+    golines:
+      shorten-comments: true

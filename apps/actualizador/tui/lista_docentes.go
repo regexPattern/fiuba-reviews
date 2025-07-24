@@ -26,13 +26,13 @@ func (d itemDocenteDelegate) Render(w io.Writer, m list.Model, index int, listIt
 	}
 
 	label := fmt.Sprint(i)
-	
+
 	// Truncar con elipsis si excede el ancho máximo considerando el padding
 	maxLen := maxItemWidth - 4 // Restamos el padding left de 4
 	if index == m.Index() {
 		maxLen = maxItemWidth - 4 // Para el item activo también consideramos "> " (2 chars) + padding (2)
 	}
-	
+
 	if len(label) > maxLen {
 		if maxLen > 3 {
 			label = label[:maxLen-3] + "..."

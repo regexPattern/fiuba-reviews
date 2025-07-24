@@ -8,14 +8,16 @@ import (
 	"time"
 )
 
+// Ofeta de cátedras y docentes de una materia obtenida desde las ofertas de comisiones del SIU.
 type Patch struct {
-	CodigoDb  string
-	CodigoSiu string
-	Nombre    string
-	Catedras  []catedraSiu
+	Codigo   string
+	Nombre   string
+	Catedras []catedraSiu
 	cuatri
 }
 
+// Genera los patches de actualización para las materias accediendo a las ofetas en S3 y las
+// materias en la base de datos utilizando la configuración provista.
 type GeneradorPatches struct {
 	DbUrl         string
 	DbTimeout     time.Duration
@@ -24,6 +26,7 @@ type GeneradorPatches struct {
 	S3Timeout     time.Duration
 }
 
+// GenerarPatches genera los patches de actualización para las materias.
 func (g *GeneradorPatches) GenerarPatches(ctx context.Context) ([]Patch, error) {
 	if err := g.initClienteS3(ctx); err != nil {
 		return nil, err
@@ -35,63 +38,64 @@ func (g *GeneradorPatches) GenerarPatches(ctx context.Context) ([]Patch, error) 
 		return nil, err
 	}
 
-	om := filtrarOfertasMaterias(oc)
-	if err := g.actualizarCodigosMaterias(om); err != nil {
+	patches := filtrarOfertasMaterias(oc)
+	if err := g.actualizarCodigosMaterias(patches); err != nil {
 		return nil, err
 	}
 
-	return []Patch{}, nil
+	return patches, nil
 }
 
-type ofertaMateria struct {
-	materia materiaSiu
-	cuatri
-	carrera string
-}
-
-func filtrarOfertasMaterias(oc []*ofertaCarrera) []ofertaMateria {
+// filtrarOfertasMaterias unifica las materias de diferentes ofertas de carrera y se queda con la
+// oferta más reciente para cada una.
+func filtrarOfertasMaterias(oc []*ofertaCarrera) []Patch {
 	nMaterias := 0
 	for _, o := range oc {
 		nMaterias += len(o.Materias)
 	}
 
-	om := make(map[string]ofertaMateria, nMaterias)
+	patches := make(map[string]Patch, nMaterias)
 	for _, o := range oc {
 		for _, m := range o.Materias {
-			oMasReciente, ok := om[m.Nombre]
-			if !ok || o.cuatri.despuesDe(oMasReciente.cuatri) {
-				om[m.Nombre] = ofertaMateria{
-					materia: m,
-					cuatri:  o.cuatri,
-					carrera: o.carrera,
+			pActual, ok := patches[m.Nombre]
+			if !ok || o.cuatri.despuesDe(pActual.cuatri) {
+				patches[m.Nombre] = Patch{
+					Codigo:   m.Codigo,
+					Nombre:   m.Nombre,
+					Catedras: m.Catedras,
+					cuatri:   o.cuatri,
 				}
-			} else if ok && oMasReciente.cuatri == o.cuatri {
+			} else if ok && pActual.cuatri == o.cuatri {
 				// Si tenemos dos ofertas para una misma materia, y ambas
 				// ofertas corresponden al mismo cuatrimestre, entonces
 				// agregamos todas las cátedras de ambas ofertas al total de
 				// la materia.
 
 				c := make(map[int]catedraSiu)
-				for _, cat := range oMasReciente.materia.Catedras {
+				for _, cat := range pActual.Catedras {
 					c[cat.Codigo] = cat
 				}
 				for _, cat := range m.Catedras {
 					c[cat.Codigo] = cat
 				}
 
-				materiaUnificada := oMasReciente.materia
-				materiaUnificada.Catedras = slices.Collect(maps.Values(c))
-
-				om[m.Nombre] = ofertaMateria{
-					materia: materiaUnificada,
-					cuatri:  o.cuatri,
-					carrera: o.carrera,
+				patches[m.Nombre] = Patch{
+					Codigo:   pActual.Codigo,
+					Nombre:   pActual.Nombre,
+					Catedras: slices.Collect(maps.Values(c)),
+					cuatri:   o.cuatri,
 				}
 			}
 		}
 	}
 
-	slog.Debug("unificado las últimas ofertas de materias", "n_inicial", nMaterias, "n_final", len(om))
+	slog.Debug(
+		"unificado las últimas ofertas de materias",
+		"n_inicial",
+		nMaterias,
+		"n_final",
+		len(patches),
+	)
 
-	return slices.Collect(maps.Values(om))
+	return slices.Collect(maps.Values(patches))
 }

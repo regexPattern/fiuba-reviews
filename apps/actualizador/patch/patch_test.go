@@ -30,8 +30,16 @@ func TestFiltrarConOfertasDisjuntas(t *testing.T) {
 	om := filtrarOfertasMaterias(oc)
 
 	assert.Len(t, om, 2)
-	assert.Contains(t, om, ofertaMateria{cuatri: cuatri{1, 2025}, materia: m0})
-	assert.Contains(t, om, ofertaMateria{cuatri: cuatri{1, 2025}, materia: m1})
+	assert.Contains(
+		t,
+		om,
+		Patch{Codigo: m0.Codigo, Nombre: m0.Nombre, Catedras: m0.Catedras, cuatri: cuatri{1, 2025}},
+	)
+	assert.Contains(
+		t,
+		om,
+		Patch{Codigo: m1.Codigo, Nombre: m1.Nombre, Catedras: m1.Catedras, cuatri: cuatri{1, 2025}},
+	)
 }
 
 func TestFiltrarConOfertasNoDisjuntas(t *testing.T) {
@@ -80,68 +88,8 @@ func TestFiltrarConOfertasConflictivas(t *testing.T) {
 
 	om := filtrarOfertasMaterias(oc)
 
-	assert.Len(t, om[0].materia.Catedras, 3)
-	assert.Contains(t, om[0].materia.Catedras, catedraSiu{Codigo: 1})
-	assert.Contains(t, om[0].materia.Catedras, catedraSiu{Codigo: 2})
-	assert.Contains(t, om[0].materia.Catedras, catedraSiu{Codigo: 3})
-}
-
-func TestVincularMateriasSiuConDb(t *testing.T) {
-	m0 := materiaSiu{
-		Codigo:   "CB001",
-		Nombre:   "ANÁLISIS matematico ii",
-		Catedras: []catedraSiu{{Codigo: 1}},
-	}
-
-	m1 := materiaSiu{
-		Codigo:   "CB002",
-		Nombre:   "algebra lineal",
-		Catedras: []catedraSiu{{Codigo: 2}},
-	}
-
-	m2 := materiaSiu{
-		Codigo:   "CB003",
-		Nombre:   "probabilidad y estadistica",
-		Catedras: []catedraSiu{{Codigo: 3}, {Codigo: 4}},
-	}
-
-	mSiu := []ofertaMateria{
-		{cuatri: cuatri{1, 2025}, materia: m0},
-		{cuatri: cuatri{2, 2024}, materia: m1},
-		{cuatri: cuatri{1, 2025}, materia: m2},
-	}
-
-	mDb := []materiaDb{
-		{Codigo: "CODXX1", Nombre: "Análisis Matemático II"},
-		{Codigo: "CODXX2", Nombre: "Álgebra Lineal"},
-		{Codigo: "CODXX3", Nombre: "Probabilidad y Estadística"},
-	}
-
-	patches := vincularMateriasSiuConDb(mSiu, mDb)
-
-	assert.Len(t, patches, 3)
-
-	assert.Contains(t, patches, Patch{
-		CodigoDb:  "CODXX1",
-		CodigoSiu: "CB001",
-		Nombre:    "Análisis Matemático II",
-		Catedras:  m0.Catedras,
-		cuatri:    cuatri{1, 2025},
-	})
-
-	assert.Contains(t, patches, Patch{
-		CodigoDb:  "CODXX2",
-		CodigoSiu: "CB002",
-		Nombre:    "Álgebra Lineal",
-		Catedras:  m1.Catedras,
-		cuatri:    cuatri{2, 2024},
-	})
-
-	assert.Contains(t, patches, Patch{
-		CodigoDb:  "CODXX3",
-		CodigoSiu: "CB003",
-		Nombre:    "Probabilidad y Estadística",
-		Catedras:  m2.Catedras,
-		cuatri:    cuatri{1, 2025},
-	})
+	assert.Len(t, om[0].Catedras, 3)
+	assert.Contains(t, om[0].Catedras, catedraSiu{Codigo: 1})
+	assert.Contains(t, om[0].Catedras, catedraSiu{Codigo: 2})
+	assert.Contains(t, om[0].Catedras, catedraSiu{Codigo: 3})
 }

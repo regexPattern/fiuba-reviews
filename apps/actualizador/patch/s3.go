@@ -13,8 +13,10 @@ import (
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
+// Cliente de S3.
 var s3Client *s3.Client
 
+// initClienteS3 inicializa el cliente de S3.
 func (g *GeneradorPatches) initClienteS3(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(ctx, g.S3InitTimeout)
 	defer cancel()
@@ -31,48 +33,54 @@ func (g *GeneradorPatches) initClienteS3(ctx context.Context) error {
 	return nil
 }
 
+// Oferta de una carrera.
 type ofertaCarrera struct {
 	Materias []materiaSiu
 	cuatri
 	carrera string
 }
 
+// Materia de una oferta.
 type materiaSiu struct {
 	Codigo   string       `json:"codigo"`
 	Nombre   string       `json:"nombre"`
 	Catedras []catedraSiu `json:"catedras"`
 }
 
+// Cátedra de una materia.
 type catedraSiu struct {
 	Codigo   int          `json:"codigo"`
 	Docentes []docenteSiu `json:"docentes"`
 }
 
+// Cátedra de una cátedra.
 type docenteSiu struct {
 	Nombre string `json:"nombre"`
 	Rol    string `json:"rol"`
 }
 
+// Cuatrimestre.
 type cuatri struct {
 	numero int
 	anio   int
 }
 
-func newCuatri(metadata map[string]string) (cuatri, error) {
+// newCuatri crea un cuatrimestre a partir de un hashmap con los campos 'cuatri-numero' y
+func newCuatri(numero, anio string) (cuatri, error) {
 	var c cuatri
-	numero, err := strconv.Atoi(metadata["cuatri-numero"])
+	var err error
+	c.numero, err = strconv.Atoi(numero)
 	if err != nil {
 		return c, err
 	}
-	anio, err := strconv.Atoi(metadata["cuatri-anio"])
+	c.anio, err = strconv.Atoi(anio)
 	if err != nil {
 		return c, err
 	}
-	c.numero = numero
-	c.anio = anio
 	return c, nil
 }
 
+// despuesDe compara si el cuatrimestre viene después del otro en orden cronológico.
 func (c cuatri) despuesDe(otro cuatri) bool {
 	if c.anio == otro.anio {
 		return c.numero > otro.numero
@@ -81,6 +89,7 @@ func (c cuatri) despuesDe(otro cuatri) bool {
 	}
 }
 
+// obtenerOfertasCarreras obtiene las ofertas de carreras disponibles en el bucket.
 func (g *GeneradorPatches) obtenerOfertasCarreras(ctx context.Context) ([]*ofertaCarrera, error) {
 	ctx, cancel := context.WithTimeout(ctx, g.S3Timeout)
 	defer cancel()
@@ -92,7 +101,7 @@ func (g *GeneradorPatches) obtenerOfertasCarreras(ctx context.Context) ([]*ofert
 
 	ofertas := make([]*ofertaCarrera, 0, len(objs))
 	for _, obj := range objs {
-		if o, err := g.newOfertaCarrera(ctx, obj); err != nil {
+		if o, err := g.newOfertaCarrera(ctx, obj.Key); err != nil {
 			slog.Warn("omitiendo indexado de oferta", "key", *obj.Key)
 		} else {
 			ofertas = append(ofertas, o)
@@ -102,45 +111,54 @@ func (g *GeneradorPatches) obtenerOfertasCarreras(ctx context.Context) ([]*ofert
 	return ofertas, nil
 }
 
+// descargarObjetosBucket descarga los archivos del bucket.
 func (g *GeneradorPatches) descargarObjetosBucket(ctx context.Context) ([]s3types.Object, error) {
 	output, err := s3Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket: &g.S3BucketName,
 	})
-
 	if err != nil {
-		slog.Error("no se pudieron enlistar los archivos del bucket", "error", err)
+		slog.Error("error enlistando archivos del bucket", "error", err)
 		return nil, err
 	}
-
 	slog.Debug(fmt.Sprintf("obtenidas %v ofertas del bucket", len(output.Contents)))
-
 	return output.Contents, nil
 }
 
-func (g *GeneradorPatches) newOfertaCarrera(ctx context.Context, obj s3types.Object) (*ofertaCarrera, error) {
-	logger := slog.Default().With("key", *obj.Key)
+// newOfertaCarrera crea una nueva oferta de carrera a partir de un archivo del bucket.
+func (g *GeneradorPatches) newOfertaCarrera(
+	ctx context.Context,
+	objKey *string,
+) (*ofertaCarrera, error) {
+	logger := slog.Default().With("key", *objKey)
 
-	content, err := s3Client.GetObject(ctx, &s3.GetObjectInput{
+	obj, err := s3Client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: &g.S3BucketName,
-		Key:    obj.Key,
+		Key:    objKey,
 	})
 
 	if err != nil {
-		logger.Error("error obteniendo el contenido del objeto", "error", err)
+		logger.Error("error obteniendo contenido del objeto", "error", err)
 		return nil, err
 	}
 
-	carrera := content.Metadata["carrera"]
-	cuatri, err := newCuatri(content.Metadata)
+	carrera := obj.Metadata["carrera"]
+
+	cuatri, err := newCuatri(obj.Metadata["cuatri-numero"], obj.Metadata["cuatri-anio"])
 	if err != nil {
-		logger.Error("error obteniendo el cuatrimestre de la oferta", "carrera", carrera, "error", err)
+		logger.Error(
+			"error obteniendo cuatrimestre de la oferta",
+			"carrera",
+			carrera,
+			"error",
+			err,
+		)
 		return nil, err
 	}
 
 	logger = slog.Default().With("carrera", carrera, "cuatri", cuatri.numero, "anio", cuatri.anio)
 
-	defer content.Body.Close()
-	bytes, err := io.ReadAll(content.Body)
+	defer obj.Body.Close()
+	bytes, err := io.ReadAll(obj.Body)
 	if err != nil {
 		logger.Error("error leyendo bytes de contenido de oferta", "error", err)
 		return nil, err

@@ -18,7 +18,14 @@ type materiaDb struct {
 	Nombre string `db:"nombre"`
 }
 
-func (g *GeneradorPatches) actualizarCodigosMaterias(om []ofertaMateria) error {
+// actualizarCodigosMaterias actualiza los códigos de las materias de la base de datos con los
+// códigos de las materias obtenidos desde el SIU.
+func (g *GeneradorPatches) actualizarCodigosMaterias(patches []Patch) error {
+	// Cuando se agregaron las materias de los nuevos planes a la base de datos se les puso un
+	// placeholder como código ya que los PDFs de los planes no tenían información sobre el código
+	// oficial de cada materia, por lo que este se tiene que actualizar una vez se tienen la
+	// información del SIU.
+
 	ctx, cancel := context.WithTimeout(context.Background(), g.DbTimeout)
 	defer cancel()
 
@@ -40,50 +47,58 @@ func (g *GeneradorPatches) actualizarCodigosMaterias(om []ofertaMateria) error {
 		return err
 	}
 
-	for _, o := range om {
-		codDb, ok := cm[normalize(o.materia.Nombre)]
+	for _, p := range patches {
+		codDb, ok := cm[normalize(p.Nombre)]
 		if !ok {
 			continue
 		}
 
 		res, err := tx.Exec(ctx, `
-			UPDATE materia 
-			SET codigo = $1 
-			WHERE codigo = $2
-			`, o.materia.Codigo, codDb)
+UPDATE
+    materia
+SET
+    codigo = $1
+WHERE
+    codigo = $2
+			`, p.Codigo, codDb)
 
 		if err != nil {
 			slog.Error("error actualizando código de materia",
-				"codigo", o.materia.Codigo,
-				"nombre", o.materia.Nombre,
+				"codigo", p.Codigo,
+				"nombre", p.Nombre,
 				"error", err)
 			return err
 		}
 
 		if res.RowsAffected() > 0 {
-			slog.Debug("actualizado código de materia exitosamente",
-				"codigo", o.materia.Codigo,
-				"nombre", o.materia.Nombre)
+			slog.Debug("código de materia actualizado exitosamente",
+				"codigo", p.Codigo,
+				"nombre", p.Nombre)
 		}
 
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		slog.Error("error confirmando transacción de actualización de códigos de materias", "error", err)
+		slog.Error(
+			"error confirmando transacción de actualización de códigos de materias",
+			"error",
+			err,
+		)
 		return err
 	}
 
 	return nil
 }
 
-func obtenerCodigosMateriasDesactualizadas(ctx context.Context, conn *pgx.Conn) (map[string]string, error) {
-	// Cuando se agregaron las materias de los nuevos planes a la base de datos
-	// se les puso un placeholder como código ya que los PDFs de los planes no
-	// tenían información sobre el código oficial de cada materia, por lo que
-	// este se tiene que actualizar una vez se tienen la información del SIU.
-	// Este placeholder es un valor número antecedido por el prefijo 'COD'. Es
-	// decir, si una materia tiene un código que inicia con este prefijo, su
-	// código no ha sido cambiado a su código real según el SIU.
+// obtenerCodigosMateriasDesactualizadas obtiene los códigos de las materias con códigos
+// desactualizados de la base de datos. Revisar actualizarCodigosMaterias para mayor información.
+func obtenerCodigosMateriasDesactualizadas(
+	ctx context.Context,
+	conn *pgx.Conn,
+) (map[string]string, error) {
+	// Las materia con código desactualizado son aquellas cuyo código actual todavía tiene el
+	// prefijo 'COD'. Este fue el placeholder elegido cuando se cargaron las materias de los nuevos
+	// planes.
 
 	rows, _ := conn.Query(ctx, `
 SELECT
@@ -97,11 +112,20 @@ WHERE
 
 	desact, err := pgx.CollectRows(rows, pgx.RowToStructByName[materiaDb])
 	if err != nil {
-		slog.Error("error obteniendo materias con códigos desactualizados de la base de datos", "error", err)
+		slog.Error(
+			"error obteniendo materias con códigos desactualizados de la base de datos",
+			"error",
+			err,
+		)
 		return nil, err
 	}
 
-	slog.Debug(fmt.Sprintf("encontradas %v materias con códigos desactualizados en la base de datos", len(desact)))
+	slog.Debug(
+		fmt.Sprintf(
+			"encontradas %v materias con códigos desactualizados en la base de datos",
+			len(desact),
+		),
+	)
 
 	cm := make(map[string]string, len(desact))
 	for _, m := range desact {
@@ -111,6 +135,7 @@ WHERE
 	return cm, nil
 }
 
+// normalize normaliza una string haciendola lowercase y eliminando los acentos.
 func normalize(s string) string {
 	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
 	result, _, _ := transform.String(t, s)
