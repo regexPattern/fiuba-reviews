@@ -7,13 +7,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
-)
-
-var (
-	itemStyle         = lipgloss.NewStyle().PaddingLeft(4).MaxWidth(30)
-	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).MaxWidth(30).Foreground(lipgloss.Color("170"))
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
 )
 
 type itemMateria string
@@ -30,16 +24,28 @@ func (d itemMateriaDelegate) Render(w io.Writer, m list.Model, index int, listIt
 		return
 	}
 
-	label := fmt.Sprintf("%v", i)
-
-	styleFn := itemStyle.Render
+	// Truncar con elipsis si excede el ancho máximo considerando el padding
+	maxLen := maxItemWidth - 4 // Restamos el padding left de 4
 	if index == m.Index() {
-		styleFn = func(s ...string) string {
-			return selectedItemStyle.Render("> " + strings.Join(s, " "))
+		maxLen = maxItemWidth - 4 // Para el item activo también consideramos "> " (2 chars) + padding (2)
+	}
+
+	if len(i) > maxLen {
+		if maxLen > 3 {
+			i = i[:maxLen-3] + "..."
+		} else {
+			i = "..."
 		}
 	}
 
-	fmt.Fprint(w, styleFn(label))
+	styleFn := styleItemLista.Render
+	if index == m.Index() {
+		styleFn = func(s ...string) string {
+			return styleItemActivoLista.Render("> " + strings.Join(s, " "))
+		}
+	}
+
+	fmt.Fprint(w, styleFn(string(i)))
 }
 
 func (d itemMateriaDelegate) Height() int {
@@ -55,19 +61,22 @@ func (d itemMateriaDelegate) Update(_ tea.Msg, _ *list.Model) tea.Cmd {
 }
 
 type listaMateriasModel struct {
-	patches []patcher.PatchGenerado
+	patches []patch.Patch
 	lista   list.Model
 }
 
-func newListaMaterias(patches []patcher.PatchGenerado) listaMateriasModel {
+func newListaMaterias(patches []patch.Patch) listaMateriasModel {
 	items := make([]list.Item, len(patches))
 	for i, p := range patches {
 		items[i] = itemMateria(p.Nombre)
 	}
 
-	l := list.New(items, itemMateriaDelegate{}, 20, 20)
+	l := list.New(items, itemMateriaDelegate{}, listWidth, listHeight)
 
-	l.Title = "Materias"
+	l.KeyMap.CloseFullHelp.Unbind()
+	l.KeyMap.ShowFullHelp.Unbind()
+	l.KeyMap.Quit.Unbind()
+	l.KeyMap.ForceQuit.Unbind()
 
 	m := listaMateriasModel{
 		patches: patches,
@@ -91,6 +100,6 @@ func (m listaMateriasModel) View() string {
 	return m.lista.View()
 }
 
-func (m listaMateriasModel) GetSelectedPatch() patcher.PatchGenerado {
+func (m listaMateriasModel) GetSelectedPatch() patch.Patch {
 	return m.patches[m.lista.GlobalIndex()]
 }

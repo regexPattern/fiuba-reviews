@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "dbhub": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@bytebase/dbhub",
+        "--transport",
+        "stdio",
+        "--dsn",
+        "postgres://postgres:postgres@localhost:5432"
+      ]
+    }
+  }
+}

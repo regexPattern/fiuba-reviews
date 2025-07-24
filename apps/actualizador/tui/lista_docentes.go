@@ -8,13 +8,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
-)
-
-var (
-	itemDocenteStyle         = lipgloss.NewStyle().PaddingLeft(4).MaxWidth(30)
-	selectedDocenteItemStyle = lipgloss.NewStyle().PaddingLeft(2).MaxWidth(30).Foreground(lipgloss.Color("170"))
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
 )
 
 type itemDocente string
@@ -31,12 +25,26 @@ func (d itemDocenteDelegate) Render(w io.Writer, m list.Model, index int, listIt
 		return
 	}
 
-	label := fmt.Sprintf("%v", i)
+	label := fmt.Sprint(i)
+	
+	// Truncar con elipsis si excede el ancho máximo considerando el padding
+	maxLen := maxItemWidth - 4 // Restamos el padding left de 4
+	if index == m.Index() {
+		maxLen = maxItemWidth - 4 // Para el item activo también consideramos "> " (2 chars) + padding (2)
+	}
+	
+	if len(label) > maxLen {
+		if maxLen > 3 {
+			label = label[:maxLen-3] + "..."
+		} else {
+			label = "..."
+		}
+	}
 
-	styleFn := itemDocenteStyle.Render
+	styleFn := styleItemLista.Render
 	if index == m.Index() {
 		styleFn = func(s ...string) string {
-			return selectedDocenteItemStyle.Render("> " + strings.Join(s, " "))
+			return styleItemActivoLista.Render("> " + strings.Join(s, " "))
 		}
 	}
 
@@ -56,15 +64,24 @@ func (d itemDocenteDelegate) Update(_ tea.Msg, _ *list.Model) tea.Cmd {
 }
 
 type docentesModel struct {
-	patch             patcher.PatchGenerado
+	patch             patch.Patch
 	docentesOrdenados []string
 	lista             list.Model
 }
 
 func newListaDocentes() docentesModel {
-	l := list.New([]list.Item{}, itemDocenteDelegate{}, 20, 20)
+	l := list.New([]list.Item{}, itemDocenteDelegate{}, listWidth, listHeight)
+
 	l.Title = "Docentes SIU"
-	
+	l.SetWidth(listWidth)
+	l.SetHeight(listHeight)
+	l.SetShowHelp(false)
+
+	l.KeyMap.CloseFullHelp.Unbind()
+	l.KeyMap.ShowFullHelp.Unbind()
+	l.KeyMap.Quit.Unbind()
+	l.KeyMap.ForceQuit.Unbind()
+
 	return docentesModel{
 		lista: l,
 	}
@@ -84,7 +101,7 @@ func (m docentesModel) View() string {
 	return m.lista.View()
 }
 
-func (m *docentesModel) SetPatch(patch patcher.PatchGenerado) {
+func (m *docentesModel) SetPatch(patch patch.Patch) {
 	m.patch = patch
 
 	docentes := make(map[string]bool)
@@ -100,7 +117,7 @@ func (m *docentesModel) SetPatch(patch patcher.PatchGenerado) {
 	}
 
 	sort.Strings(m.docentesOrdenados)
-	
+
 	items := make([]list.Item, len(m.docentesOrdenados))
 	for i, nombre := range m.docentesOrdenados {
 		items[i] = itemDocente(nombre)

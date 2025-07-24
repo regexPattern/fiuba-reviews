@@ -6,7 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
 )
 
 type state uint
@@ -19,7 +19,7 @@ const (
 
 var (
 	stylePanelBase     = lipgloss.NewStyle().Border(lipgloss.NormalBorder())
-	stylePanelActivo   = stylePanelBase.BorderForeground(lipgloss.Color("#4EACD4"))
+	stylePanelActivo   = stylePanelBase.BorderForeground(fiubaColor)
 	stylePanelInactivo = stylePanelBase.BorderForeground(lipgloss.Color("240"))
 )
 
@@ -30,7 +30,7 @@ type model struct {
 	infoDocente   infoDocenteModel
 }
 
-func newModel(patches []patcher.PatchGenerado) model {
+func newModel(patches []patch.Patch) model {
 	nDocentes := make(map[string]int, len(patches))
 	for _, p := range patches {
 		docentes := make(map[string]bool)
@@ -130,10 +130,7 @@ func (m model) View() string {
 	return lipgloss.JoinHorizontal(lipgloss.Top, lmView, ldView, idView)
 }
 
-func ResolvePatches(patches []patcher.PatchGenerado) []patcher.PatchResolution {
-	p := tea.NewProgram(newModel(patches))
-
-	_, _ = p.Run()
-
-	return nil
+func ResolvePatches(patches []patch.Patch) {
+	// p := tea.NewProgram(newModel(patches))
+	// _, _ = p.Run()
 }
