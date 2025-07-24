@@ -140,10 +140,10 @@ func (g *GeneradorPatches) initS3Client(ctx context.Context) error {
 
 type ofertaCarrera struct {
 	Cuatri
-	materias []materiaSiu
+	Materias []MateriaSiu
 }
 
-type materiaSiu struct {
+type MateriaSiu struct {
 	Codigo   string       `json:"codigo"`
 	Nombre   string       `json:"nombre"`
 	Catedras []CatedraSiu `json:"catedras"`
@@ -255,15 +255,21 @@ func (g *GeneradorPatches) obtenerMateriasOferta(ctx context.Context, obj s3type
 
 	logger.Debug(fmt.Sprintf("obtenidos %v bytes de contenido de oferta", len(bytes)))
 
-	var materias []materiaSiu
+	var materias []MateriaSiu
 	if err := json.Unmarshal(bytes, &materias); err != nil {
 		logger.Error("error serializando contenido de oferta", "error", err)
 		return nil, err
 	}
 
+	for _, m := range materias {
+		if len(m.Catedras) == 0 {
+			logger.Warn("materia no tiene cátedras", "codigo", m.Codigo, "nombre", m.Nombre)
+		}
+	}
+
 	o := &ofertaCarrera{
 		Cuatri:   cuatri,
-		materias: materias,
+		Materias: materias,
 	}
 
 	logger.Info("oferta procesada exitosamente")
@@ -273,18 +279,18 @@ func (g *GeneradorPatches) obtenerMateriasOferta(ctx context.Context, obj s3type
 
 type ofertaMateriaSiu struct {
 	Cuatri
-	materia materiaSiu
+	materia MateriaSiu
 }
 
 func unificarOfertasMateriasSiu(oCarreras []*ofertaCarrera) []ofertaMateriaSiu {
 	totalMaterias := 0
 	for _, oc := range oCarreras {
-		totalMaterias += len(oc.materias)
+		totalMaterias += len(oc.Materias)
 	}
 
 	oMaterias := make(map[string]ofertaMateriaSiu, totalMaterias)
 	for _, oc := range oCarreras {
-		for _, m := range oc.materias {
+		for _, m := range oc.Materias {
 			oMasReciente, ok := oMaterias[m.Nombre]
 			if !ok || oc.Cuatri.despuesDe(oMasReciente.Cuatri) {
 				oMaterias[m.Nombre] = ofertaMateriaSiu{

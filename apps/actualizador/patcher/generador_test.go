@@ -19,12 +19,12 @@ func TestUnificarSinOfertas(t *testing.T) {
 }
 
 func TestUnificarConOfertasDisjuntas(t *testing.T) {
-	m0 := materiaSiu{Nombre: "Análisis Matemático II"}
-	m1 := materiaSiu{Nombre: "Álgebra Lineal"}
+	m0 := MateriaSiu{Nombre: "Análisis Matemático II"}
+	m1 := MateriaSiu{Nombre: "Álgebra Lineal"}
 
 	oCarreras := []*ofertaCarrera{
-		{Cuatri: Cuatri{1, 2025}, materias: []materiaSiu{m0}},
-		{Cuatri: Cuatri{1, 2025}, materias: []materiaSiu{m1}},
+		{Cuatri: Cuatri{1, 2025}, materias: []MateriaSiu{m0}},
+		{Cuatri: Cuatri{1, 2025}, materias: []MateriaSiu{m1}},
 	}
 
 	oMateriasSiu := unificarOfertasMateriasSiu(oCarreras)
@@ -35,12 +35,12 @@ func TestUnificarConOfertasDisjuntas(t *testing.T) {
 }
 
 func TestUnificarConOfertasNoDisjuntas(t *testing.T) {
-	m := materiaSiu{Nombre: "Análisis Matemático II"}
+	m := MateriaSiu{Nombre: "Análisis Matemático II"}
 
 	oCarreras := []*ofertaCarrera{
-		{Cuatri: Cuatri{1, 2025}, materias: []materiaSiu{m}},
-		{Cuatri: Cuatri{2, 2024}, materias: []materiaSiu{m}},
-		{Cuatri: Cuatri{1, 2023}, materias: []materiaSiu{m}},
+		{Cuatri: Cuatri{1, 2025}, materias: []MateriaSiu{m}},
+		{Cuatri: Cuatri{2, 2024}, materias: []MateriaSiu{m}},
+		{Cuatri: Cuatri{1, 2023}, materias: []MateriaSiu{m}},
 	}
 
 	oMateriasSiu := unificarOfertasMateriasSiu(oCarreras)
@@ -50,11 +50,11 @@ func TestUnificarConOfertasNoDisjuntas(t *testing.T) {
 }
 
 func TestUnificarConOfertasIguales(t *testing.T) {
-	m := materiaSiu{Nombre: "Análisis Matemático II"}
+	m := MateriaSiu{Nombre: "Análisis Matemático II"}
 
 	oCarreras := []*ofertaCarrera{
-		{Cuatri: Cuatri{1, 2025}, materias: []materiaSiu{m}},
-		{Cuatri: Cuatri{1, 2025}, materias: []materiaSiu{m}},
+		{Cuatri: Cuatri{1, 2025}, materias: []MateriaSiu{m}},
+		{Cuatri: Cuatri{1, 2025}, materias: []MateriaSiu{m}},
 	}
 
 	oMaterias := unificarOfertasMateriasSiu(oCarreras)
@@ -63,19 +63,19 @@ func TestUnificarConOfertasIguales(t *testing.T) {
 }
 
 func TestVincularMateriasSiuConDb(t *testing.T) {
-	m0 := materiaSiu{
+	m0 := MateriaSiu{
 		Codigo:   "CB001",
 		Nombre:   "ANÁLISIS matematico ii",
 		Catedras: []CatedraSiu{{Codigo: 1}},
 	}
 
-	m1 := materiaSiu{
+	m1 := MateriaSiu{
 		Codigo:   "CB002",
 		Nombre:   "algebra lineal",
 		Catedras: []CatedraSiu{{Codigo: 2}},
 	}
 
-	m2 := materiaSiu{
+	m2 := MateriaSiu{
 		Codigo:   "CB003",
 		Nombre:   "probabilidad y estadistica",
 		Catedras: []CatedraSiu{{Codigo: 3}, {Codigo: 4}},
