@@ -38,12 +38,12 @@ func (g *GeneradorPatches) GenerarPatches(ctx context.Context) ([]Patch, error) 
 		return nil, err
 	}
 
-	patches := filtrarOfertasMaterias(oc)
-	if err := g.actualizarCodigosMaterias(patches); err != nil {
+	p := filtrarOfertasMaterias(oc)
+	if err := g.actualizarCodigosMaterias(ctx, p); err != nil {
 		return nil, err
 	}
 
-	return patches, nil
+	return p, nil
 }
 
 // filtrarOfertasMaterias unifica las materias de diferentes ofertas de carrera y se queda con la

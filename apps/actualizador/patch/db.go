@@ -20,13 +20,13 @@ type materiaDb struct {
 
 // actualizarCodigosMaterias actualiza los códigos de las materias de la base de datos con los
 // códigos de las materias obtenidos desde el SIU.
-func (g *GeneradorPatches) actualizarCodigosMaterias(patches []Patch) error {
+func (g *GeneradorPatches) actualizarCodigosMaterias(ctx context.Context, patches []Patch) error {
 	// Cuando se agregaron las materias de los nuevos planes a la base de datos se les puso un
 	// placeholder como código ya que los PDFs de los planes no tenían información sobre el código
 	// oficial de cada materia, por lo que este se tiene que actualizar una vez se tienen la
 	// información del SIU.
 
-	ctx, cancel := context.WithTimeout(context.Background(), g.DbTimeout)
+	ctx, cancel := context.WithTimeout(ctx, g.DbTimeout)
 	defer cancel()
 
 	conn, err := pgx.Connect(ctx, g.DbUrl)
