@@ -3,7 +3,6 @@ package tui
 import "github.com/charmbracelet/lipgloss"
 
 var (
-	fiubaColor           = lipgloss.Color("#4EACD4")
 	listWidth            = 50
 	listHeight           = 20
 	maxItemWidth         = 46

@@ -26,11 +26,13 @@ var (
 type model struct {
 	state         state
 	listaMaterias listaMateriasModel
-	listaDocentes docentesModel
+	listaDocentes listaDocentesModel
 	infoDocente   infoDocenteModel
 }
 
 func newModel(patches []patch.Patch) model {
+	// Ordenamos las materias según cantidad de docentes de mayor a menor, para así dar prioridad
+	// (al menos visual) a las materias que tengan más docentes.
 	nDocentes := make(map[string]int, len(patches))
 	for _, p := range patches {
 		docentes := make(map[string]bool)
@@ -65,20 +67,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
-		case "tab":
+		case "ctrl+f":
 			switch m.state {
 			case enListaMaterias:
 				m.state = enListaDocentes
 			case enListaDocentes:
 				m.state = enInfoDocente
 			case enInfoDocente:
-				m.state = enListaMaterias
+				m.state = enInfoDocente
 			}
 			return m, nil
-		case "shift+tab":
+		case "ctrl+b":
 			switch m.state {
 			case enListaMaterias:
-				m.state = enInfoDocente
+				m.state = enListaMaterias
 			case enListaDocentes:
 				m.state = enListaMaterias
 			case enInfoDocente:
@@ -131,6 +133,6 @@ func (m model) View() string {
 }
 
 func ResolvePatches(patches []patch.Patch) {
-	// p := tea.NewProgram(newModel(patches))
-	// _, _ = p.Run()
+	p := tea.NewProgram(newModel(patches))
+	_, _ = p.Run()
 }

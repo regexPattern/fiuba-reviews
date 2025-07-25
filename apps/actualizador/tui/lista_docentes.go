@@ -1,107 +1,41 @@
 package tui
 
 import (
-	"fmt"
-	"io"
 	"sort"
-	"strings"
 
-	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
 )
 
-type itemDocente string
-
-func (i itemDocente) FilterValue() string {
-	return string(i)
-}
-
-type itemDocenteDelegate struct{}
-
-func (d itemDocenteDelegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
-	i, ok := listItem.(itemDocente)
-	if !ok {
-		return
-	}
-
-	label := fmt.Sprint(i)
-
-	// Truncar con elipsis si excede el ancho máximo considerando el padding
-	maxLen := maxItemWidth - 4 // Restamos el padding left de 4
-	if index == m.Index() {
-		maxLen = maxItemWidth - 4 // Para el item activo también consideramos "> " (2 chars) + padding (2)
-	}
-
-	if len(label) > maxLen {
-		if maxLen > 3 {
-			label = label[:maxLen-3] + "..."
-		} else {
-			label = "..."
-		}
-	}
-
-	styleFn := styleItemLista.Render
-	if index == m.Index() {
-		styleFn = func(s ...string) string {
-			return styleItemActivoLista.Render("> " + strings.Join(s, " "))
-		}
-	}
-
-	fmt.Fprint(w, styleFn(label))
-}
-
-func (d itemDocenteDelegate) Height() int {
-	return 1
-}
-
-func (d itemDocenteDelegate) Spacing() int {
-	return 0
-}
-
-func (d itemDocenteDelegate) Update(_ tea.Msg, _ *list.Model) tea.Cmd {
-	return nil
-}
-
-type docentesModel struct {
+type listaDocentesModel struct {
 	patch             patch.Patch
 	docentesOrdenados []string
-	lista             list.Model
+	lista             listaModel
 }
 
-func newListaDocentes() docentesModel {
-	l := list.New([]list.Item{}, itemDocenteDelegate{}, listWidth, listHeight)
+func newListaDocentes() listaDocentesModel {
+	lista := newListaModel("Docentes")
 
-	l.Title = "Docentes SIU"
-	l.SetWidth(listWidth)
-	l.SetHeight(listHeight)
-	l.SetShowHelp(false)
-
-	l.KeyMap.CloseFullHelp.Unbind()
-	l.KeyMap.ShowFullHelp.Unbind()
-	l.KeyMap.Quit.Unbind()
-	l.KeyMap.ForceQuit.Unbind()
-
-	return docentesModel{
-		lista: l,
+	return listaDocentesModel{
+		lista: lista,
 	}
 }
 
-func (m docentesModel) Init() tea.Cmd {
+func (m listaDocentesModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m docentesModel) Update(msg tea.Msg) (docentesModel, tea.Cmd) {
+func (m listaDocentesModel) Update(msg tea.Msg) (listaDocentesModel, tea.Cmd) {
 	var cmd tea.Cmd
 	m.lista, cmd = m.lista.Update(msg)
 	return m, cmd
 }
 
-func (m docentesModel) View() string {
+func (m listaDocentesModel) View() string {
 	return m.lista.View()
 }
 
-func (m *docentesModel) SetPatch(patch patch.Patch) {
+func (m *listaDocentesModel) SetPatch(patch patch.Patch) {
 	m.patch = patch
 
 	docentes := make(map[string]bool)
@@ -118,13 +52,9 @@ func (m *docentesModel) SetPatch(patch patch.Patch) {
 
 	sort.Strings(m.docentesOrdenados)
 
-	items := make([]list.Item, len(m.docentesOrdenados))
-	for i, nombre := range m.docentesOrdenados {
-		items[i] = itemDocente(nombre)
-	}
-	m.lista.SetItems(items)
+	m.lista.setItems(m.docentesOrdenados)
 }
 
-func (m docentesModel) GetSelectedDocente() string {
-	return m.docentesOrdenados[m.lista.GlobalIndex()]
+func (m listaDocentesModel) GetSelectedDocente() string {
+	return m.docentesOrdenados[m.lista.globalIndex()]
 }

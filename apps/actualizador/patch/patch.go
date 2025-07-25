@@ -54,12 +54,12 @@ func filtrarOfertasMaterias(oc []*ofertaCarrera) []Patch {
 		nMaterias += len(o.Materias)
 	}
 
-	patches := make(map[string]Patch, nMaterias)
+	p := make(map[string]Patch, nMaterias)
 	for _, o := range oc {
 		for _, m := range o.Materias {
-			pActual, ok := patches[m.Nombre]
+			pActual, ok := p[m.Nombre]
 			if !ok || o.cuatri.despuesDe(pActual.cuatri) {
-				patches[m.Nombre] = Patch{
+				p[m.Nombre] = Patch{
 					Codigo:   m.Codigo,
 					Nombre:   m.Nombre,
 					Catedras: m.Catedras,
@@ -79,7 +79,7 @@ func filtrarOfertasMaterias(oc []*ofertaCarrera) []Patch {
 					c[cat.Codigo] = cat
 				}
 
-				patches[m.Nombre] = Patch{
+				p[m.Nombre] = Patch{
 					Codigo:   pActual.Codigo,
 					Nombre:   pActual.Nombre,
 					Catedras: slices.Collect(maps.Values(c)),
@@ -94,8 +94,8 @@ func filtrarOfertasMaterias(oc []*ofertaCarrera) []Patch {
 		"n_inicial",
 		nMaterias,
 		"n_final",
-		len(patches),
+		len(p),
 	)
 
-	return slices.Collect(maps.Values(patches))
+	return slices.Collect(maps.Values(p))
 }

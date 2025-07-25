@@ -25,7 +25,6 @@ func (g *GeneradorPatches) actualizarCodigosMaterias(ctx context.Context, patche
 	// placeholder como código ya que los PDFs de los planes no tenían información sobre el código
 	// oficial de cada materia, por lo que este se tiene que actualizar una vez se tienen la
 	// información del SIU.
-
 	ctx, cancel := context.WithTimeout(ctx, g.DbTimeout)
 	defer cancel()
 
@@ -99,7 +98,6 @@ func obtenerCodigosMateriasDesactualizadas(
 	// Las materia con código desactualizado son aquellas cuyo código actual todavía tiene el
 	// prefijo 'COD'. Este fue el placeholder elegido cuando se cargaron las materias de los nuevos
 	// planes.
-
 	rows, _ := conn.Query(ctx, `
 SELECT
     codigo,
