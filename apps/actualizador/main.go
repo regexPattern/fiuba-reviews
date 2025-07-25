@@ -17,10 +17,10 @@ func main() {
 
 	g := patch.GeneradorPatches{
 		DbUrl:         os.Getenv("DATABASE_URL"),
-		DbTimeout:     time.Second * 3,
+		DbTimeout:     time.Second * 10,
 		S3BucketName:  os.Getenv("AWS_S3_BUCKET"),
-		S3InitTimeout: time.Second * 3,
-		S3Timeout:     time.Second * 3,
+		S3InitTimeout: time.Second * 10,
+		S3Timeout:     time.Second * 10,
 	}
 
 	p, err := g.GenerarPatches(context.Background())

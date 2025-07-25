@@ -89,13 +89,9 @@ func filtrarOfertasMaterias(oc []*ofertaCarrera) []Patch {
 		}
 	}
 
-	slog.Debug(
-		"unificado las últimas ofertas de materias",
-		"n_inicial",
-		nMaterias,
-		"n_final",
-		len(p),
-	)
+	slog.Debug("unificado las últimas ofertas de materias",
+		"n_inicial", nMaterias,
+		"n_final", len(p))
 
 	return slices.Collect(maps.Values(p))
 }

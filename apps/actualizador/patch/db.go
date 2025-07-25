@@ -8,10 +8,14 @@ import (
 	"unicode"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"golang.org/x/sync/errgroup"
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
 )
+
+var pool *pgxpool.Pool
 
 type materiaDb struct {
 	Codigo string `db:"codigo"`
@@ -28,61 +32,36 @@ func (g *GeneradorPatches) actualizarCodigosMaterias(ctx context.Context, patche
 	ctx, cancel := context.WithTimeout(ctx, g.DbTimeout)
 	defer cancel()
 
-	conn, err := pgx.Connect(ctx, g.DbUrl)
+	var err error
+	pool, err = pgxpool.New(ctx, g.DbUrl)
 	if err != nil {
 		slog.Error("error estableciendo conexión con la base de datos", "error", err)
 		return err
 	}
 
-	defer conn.Close(ctx)
-
-	cm, err := obtenerCodigosMateriasDesactualizadas(ctx, conn)
+	cods, err := obtenerCodigosMateriasDesactualizadas(ctx)
 	if err != nil {
 		return err
 	}
 
-	tx, err := conn.Begin(ctx)
-	if err != nil {
-		return err
-	}
+	eg, egCtx := errgroup.WithContext(ctx)
+	sem := make(chan struct{}, pool.Config().MaxConns)
 
 	for _, p := range patches {
-		codDb, ok := cm[normalize(p.Nombre)]
+		cod, ok := cods[normalize(p.Nombre)]
 		if !ok {
 			continue
 		}
 
-		res, err := tx.Exec(ctx, `
-UPDATE
-    materia
-SET
-    codigo = $1
-WHERE
-    codigo = $2
-			`, p.Codigo, codDb)
-
-		if err != nil {
-			slog.Error("error actualizando código de materia",
-				"codigo", p.Codigo,
-				"nombre", p.Nombre,
-				"error", err)
-			return err
-		}
-
-		if res.RowsAffected() > 0 {
-			slog.Debug("código de materia actualizado exitosamente",
-				"codigo", p.Codigo,
-				"nombre", p.Nombre)
-		}
-
+		eg.Go(func() error {
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			return actualizarCodigoMateria(egCtx, pool, p.Codigo, p.Nombre, cod)
+		})
 	}
 
-	if err := tx.Commit(ctx); err != nil {
-		slog.Error(
-			"error confirmando transacción de actualización de códigos de materias",
-			"error",
-			err,
-		)
+	if err := eg.Wait(); err != nil {
+		slog.Error("error actualizando códigos de materias", "error", err)
 		return err
 	}
 
@@ -93,19 +72,14 @@ WHERE
 // desactualizados de la base de datos. Revisar actualizarCodigosMaterias para mayor información.
 func obtenerCodigosMateriasDesactualizadas(
 	ctx context.Context,
-	conn *pgx.Conn,
 ) (map[string]string, error) {
 	// Las materia con código desactualizado son aquellas cuyo código actual todavía tiene el
 	// prefijo 'COD'. Este fue el placeholder elegido cuando se cargaron las materias de los nuevos
 	// planes.
-	rows, _ := conn.Query(ctx, `
-SELECT
-    codigo,
-    nombre
-FROM
-    materia
-WHERE
-    codigo LIKE 'COD%'
+	rows, _ := pool.Query(ctx, `
+SELECT codigo, nombre
+FROM materia
+WHERE codigo LIKE 'COD%'
 		`)
 
 	desact, err := pgx.CollectRows(rows, pgx.RowToStructByName[materiaDb])
@@ -125,12 +99,42 @@ WHERE
 		),
 	)
 
-	cm := make(map[string]string, len(desact))
+	cods := make(map[string]string, len(desact))
 	for _, m := range desact {
-		cm[normalize(m.Nombre)] = m.Codigo
+		cods[normalize(m.Nombre)] = m.Codigo
 	}
 
-	return cm, nil
+	return cods, nil
+}
+
+// actualizarCodigoMateria actualiza el código de una materia específica en la base de datos, con
+// el código oficial del SIU.
+func actualizarCodigoMateria(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	codigoSiu, nombre, codigoDb string,
+) error {
+	logger := slog.Default().With(
+		"codigo_siu", codigoSiu,
+		"codigo_db", codigoDb,
+		"nombre", nombre)
+
+	res, err := pool.Exec(ctx, `
+UPDATE materia
+SET codigo = $1
+WHERE codigo = $2
+			`, codigoSiu, codigoDb)
+
+	if err != nil {
+		logger.Error("error actualizando código de materia", "error", err)
+		return err
+	}
+
+	if res.RowsAffected() > 0 {
+		logger.Debug("código de materia actualizado exitosamente")
+	}
+
+	return nil
 }
 
 // normalize normaliza una string haciendola lowercase y eliminando los acentos.

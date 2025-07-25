@@ -145,17 +145,18 @@ func (g *GeneradorPatches) newOfertaCarrera(
 
 	cuatri, err := newCuatri(obj.Metadata["cuatri-numero"], obj.Metadata["cuatri-anio"])
 	if err != nil {
-		logger.Error(
-			"error obteniendo cuatrimestre de la oferta",
-			"carrera",
-			carrera,
-			"error",
-			err,
+		logger.Error("error obteniendo cuatrimestre de la oferta",
+			"carrera", carrera,
+			"error", err,
 		)
 		return nil, err
 	}
 
-	logger = slog.Default().With("carrera", carrera, "cuatri", cuatri.numero, "anio", cuatri.anio)
+	logger = slog.Default().With(
+		"carrera", carrera,
+		"cuatri", cuatri.numero,
+		"anio", cuatri.anio,
+	)
 
 	defer obj.Body.Close()
 	bytes, err := io.ReadAll(obj.Body)
@@ -172,7 +173,9 @@ func (g *GeneradorPatches) newOfertaCarrera(
 
 	for _, m := range materias {
 		if len(m.Catedras) == 0 {
-			logger.Warn("materia no tiene cátedras", "codigo", m.Codigo, "nombre", m.Nombre)
+			logger.Warn("materia no tiene cátedras",
+				"codigo", m.Codigo,
+				"nombre", m.Nombre)
 		}
 	}
 

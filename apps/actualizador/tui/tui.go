@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"fmt"
 	"log/slog"
 	"sort"
 
@@ -133,6 +134,7 @@ func (m model) View() string {
 }
 
 func ResolvePatches(patches []patch.Patch) {
-	p := tea.NewProgram(newModel(patches))
-	_, _ = p.Run()
+	// p := tea.NewProgram(newModel(patches))
+	// _, _ = p.Run()
+	fmt.Println()
 }
