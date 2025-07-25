@@ -5,16 +5,17 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/tui/lista"
 )
 
 type listaDocentesModel struct {
-	patch             patch.Patch
+	patch             patch.PatchMateria
 	docentesOrdenados []string
-	lista             listaModel
+	lista             lista.Model
 }
 
 func newListaDocentes() listaDocentesModel {
-	lista := newListaModel("Docentes")
+	lista := lista.New("Docentes")
 
 	return listaDocentesModel{
 		lista: lista,
@@ -35,7 +36,7 @@ func (m listaDocentesModel) View() string {
 	return m.lista.View()
 }
 
-func (m *listaDocentesModel) SetPatch(patch patch.Patch) {
+func (m *listaDocentesModel) SetPatch(patch patch.PatchMateria) {
 	m.patch = patch
 
 	docentes := make(map[string]bool)
@@ -52,9 +53,9 @@ func (m *listaDocentesModel) SetPatch(patch patch.Patch) {
 
 	sort.Strings(m.docentesOrdenados)
 
-	m.lista.setItems(m.docentesOrdenados)
+	m.lista.SetItems(m.docentesOrdenados)
 }
 
 func (m listaDocentesModel) GetSelectedDocente() string {
-	return m.docentesOrdenados[m.lista.globalIndex()]
+	return m.docentesOrdenados[m.lista.GlobalIndex()]
 }

@@ -1,38 +1,40 @@
-package tui
+package lista
 
 import (
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/paginator"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/ansi"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/tui/color"
 )
 
+const listaWidth = 30
+const listaHeight = 20
+
 var (
-	fiubaColor           = lipgloss.Color("#4EACD4")
 	itemNormalTitleStyle = lipgloss.NewStyle().
 				PaddingLeft(3).
 				Foreground(lipgloss.AdaptiveColor{Light: "#1A1A1A", Dark: "#DDDDDD"})
 	itemSelectedTitleStyle     = lipgloss.NewStyle().Inherit(itemNormalTitleStyle)
 	itemSelectedIndicatorStyle = lipgloss.NewStyle().
 					PaddingLeft(1).
-					Foreground(fiubaColor)
+					Foreground(color.FiubaColor)
 	itemFilterMatchStyle = lipgloss.NewStyle().
-				Background(fiubaColor).
+				Background(color.FiubaColor).
 				Foreground(lipgloss.AdaptiveColor{Light: "#DDDDDD", Dark: "#1A1A1A"})
 	listTitleBarStyle = lipgloss.NewStyle().
 				PaddingLeft(1).
 				PaddingBottom(1)
 	listTitleStyle = lipgloss.NewStyle().
 			Padding(0, 1).
-			Background(fiubaColor).
+			Background(color.FiubaColor).
 			Foreground(lipgloss.AdaptiveColor{Light: "#DDDDDD", Dark: "#1A1A1A"})
-	listFilterPromptStyle = lipgloss.NewStyle().Foreground(fiubaColor)
-	listFilterCursorStyle = lipgloss.NewStyle().Foreground(fiubaColor)
+	listFilterPromptStyle = lipgloss.NewStyle().Foreground(color.FiubaColor)
+	listFilterCursorStyle = lipgloss.NewStyle().Foreground(color.FiubaColor)
 )
 
 type item string
@@ -41,21 +43,21 @@ func (i item) FilterValue() string {
 	return string(i)
 }
 
-type itemDelegate struct{}
+type delegate struct{}
 
-func (d itemDelegate) Height() int {
+func (d delegate) Height() int {
 	return 1
 }
 
-func (d itemDelegate) Spacing() int {
+func (d delegate) Spacing() int {
 	return 0
 }
 
-func (d itemDelegate) Update(_ tea.Msg, _ *list.Model) tea.Cmd {
+func (d delegate) Update(_ tea.Msg, _ *list.Model) tea.Cmd {
 	return nil
 }
 
-func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
+func (d delegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
 	i, ok := listItem.(item)
 	if !ok {
 		return
@@ -93,13 +95,13 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 	fmt.Fprint(w, title)
 }
 
-type listaModel struct {
+type Model struct {
 	lista list.Model
 }
 
-func newListaModel(titulo string) listaModel {
+func New(titulo string) Model {
 	defaultKeys := list.DefaultKeyMap()
-	l := list.New([]list.Item{}, itemDelegate{}, 50, 20)
+	l := list.New([]list.Item{}, delegate{}, listaWidth, listaHeight)
 
 	l.Title = titulo
 
@@ -122,29 +124,26 @@ func newListaModel(titulo string) listaModel {
 	}
 	l.Paginator.Type = paginator.Arabic
 
-	itemName := strings.ToLower(titulo)
-	l.SetStatusBarItemName(itemName[:len(itemName)-1], itemName)
+	l.SetShowHelp(false)
 
-	return listaModel{
-		lista: l,
-	}
+	return Model{l}
 }
 
-func (m listaModel) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m listaModel) Update(msg tea.Msg) (listaModel, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.lista, cmd = m.lista.Update(msg)
 	return m, cmd
 }
 
-func (m listaModel) View() string {
+func (m Model) View() string {
 	return m.lista.View()
 }
 
-func (m *listaModel) setItems(items []string) {
+func (m *Model) SetItems(items []string) {
 	listItems := make([]list.Item, len(items))
 	for idx, i := range items {
 		listItems[idx] = item(i)
@@ -152,6 +151,6 @@ func (m *listaModel) setItems(items []string) {
 	m.lista.SetItems(listItems)
 }
 
-func (m listaModel) globalIndex() int {
+func (m Model) GlobalIndex() int {
 	return m.lista.GlobalIndex()
 }

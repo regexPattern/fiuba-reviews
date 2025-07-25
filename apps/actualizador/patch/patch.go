@@ -2,68 +2,76 @@ package patch
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"maps"
 	"slices"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 )
 
-// Ofeta de cátedras y docentes de una materia obtenida desde las ofertas de comisiones del SIU.
-type Patch struct {
-	Codigo   string
-	Nombre   string
-	Catedras []catedraSiu
+type PatchMateria struct {
+	CodigoSiu string
+	Nombre    string
+	Catedras  []catedraSiu
 	cuatri
 }
 
-// Genera los patches de actualización para las materias accediendo a las ofetas en S3 y las
-// materias en la base de datos utilizando la configuración provista.
 type GeneradorPatches struct {
 	DbUrl         string
-	DbTimeout     time.Duration
+	DbInitTimeout time.Duration
+	DbOpsTimeout  time.Duration
 	S3BucketName  string
 	S3InitTimeout time.Duration
-	S3Timeout     time.Duration
+	S3OpsTimeout  time.Duration
 }
 
-// GenerarPatches genera los patches de actualización para las materias.
-func (g *GeneradorPatches) GenerarPatches(ctx context.Context) ([]Patch, error) {
-	if err := g.initClienteS3(ctx); err != nil {
+func (g *GeneradorPatches) GenerarPatches(ctx context.Context) ([]PatchMateria, error) {
+	eg, egCtx := errgroup.WithContext(ctx)
+
+	eg.Go(func() error { return g.initS3Client(egCtx) })
+	eg.Go(func() error { return g.initDbPool(egCtx) })
+
+	if err := eg.Wait(); err != nil {
 		return nil, err
 	}
 
-	var oc []*ofertaCarrera
+	var ofertas []*oferta
 	var err error
-	if oc, err = g.obtenerOfertasCarreras(ctx); err != nil {
+
+	if ofertas, err = g.obtenerOfertasCarreras(ctx); err != nil {
 		return nil, err
 	}
 
-	p := filtrarOfertasMaterias(oc)
-	if err := g.actualizarCodigosMaterias(ctx, p); err != nil {
+	patches := filtrarOfertasMaterias(ofertas)
+	if err := g.asociarMaterias(ctx, patches); err != nil {
 		return nil, err
 	}
 
-	return p, nil
+	if err := g.migrarMaterias(ctx, patches); err != nil {
+		return nil, err
+	}
+
+	return patches, nil
 }
 
-// filtrarOfertasMaterias unifica las materias de diferentes ofertas de carrera y se queda con la
-// oferta más reciente para cada una.
-func filtrarOfertasMaterias(oc []*ofertaCarrera) []Patch {
+func filtrarOfertasMaterias(ofertas []*oferta) []PatchMateria {
 	nMaterias := 0
-	for _, o := range oc {
+	for _, o := range ofertas {
 		nMaterias += len(o.Materias)
 	}
 
-	p := make(map[string]Patch, nMaterias)
-	for _, o := range oc {
+	patches := make(map[string]PatchMateria, nMaterias)
+	for _, o := range ofertas {
 		for _, m := range o.Materias {
-			pActual, ok := p[m.Nombre]
+			pActual, ok := patches[m.Nombre]
 			if !ok || o.cuatri.despuesDe(pActual.cuatri) {
-				p[m.Nombre] = Patch{
-					Codigo:   m.Codigo,
-					Nombre:   m.Nombre,
-					Catedras: m.Catedras,
-					cuatri:   o.cuatri,
+				patches[m.Nombre] = PatchMateria{
+					CodigoSiu: m.Codigo,
+					Nombre:    m.Nombre,
+					Catedras:  m.Catedras,
+					cuatri:    o.cuatri,
 				}
 			} else if ok && pActual.cuatri == o.cuatri {
 				// Si tenemos dos ofertas para una misma materia, y ambas
@@ -79,19 +87,18 @@ func filtrarOfertasMaterias(oc []*ofertaCarrera) []Patch {
 					c[cat.Codigo] = cat
 				}
 
-				p[m.Nombre] = Patch{
-					Codigo:   pActual.Codigo,
-					Nombre:   pActual.Nombre,
-					Catedras: slices.Collect(maps.Values(c)),
-					cuatri:   o.cuatri,
+				patches[m.Nombre] = PatchMateria{
+					CodigoSiu: pActual.CodigoSiu,
+					Nombre:    pActual.Nombre,
+					Catedras:  slices.Collect(maps.Values(c)),
+					cuatri:    o.cuatri,
 				}
 			}
 		}
 	}
 
-	slog.Debug("unificado las últimas ofertas de materias",
-		"n_inicial", nMaterias,
-		"n_final", len(p))
+	slog.Debug("unificado las últimas ofertas de materias", "unificadas", nMaterias-len(patches))
+	slog.Info(fmt.Sprintf("generados %v patches de actualización de materias", len(patches)))
 
-	return slices.Collect(maps.Values(p))
+	return slices.Collect(maps.Values(patches))
 }

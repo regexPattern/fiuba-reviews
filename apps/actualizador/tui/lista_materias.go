@@ -3,22 +3,23 @@ package tui
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/tui/lista"
 )
 
 type listaMateriasModel struct {
-	patches []patch.Patch
-	lista   listaModel
+	patches []patch.PatchMateria
+	lista   lista.Model
 }
 
-func newListaMaterias(patches []patch.Patch) listaMateriasModel {
-	l := newListaModel("Materias")
+func newListaMaterias(patches []patch.PatchMateria) listaMateriasModel {
+	l := lista.New("Materias")
 
 	nombres := make([]string, len(patches))
 	for i, p := range patches {
 		nombres[i] = p.Nombre
 	}
-	
-	l.setItems(nombres)
+
+	l.SetItems(nombres)
 
 	return listaMateriasModel{
 		patches: patches,
@@ -40,6 +41,6 @@ func (m listaMateriasModel) View() string {
 	return m.lista.View()
 }
 
-func (m listaMateriasModel) GetSelectedPatch() patch.Patch {
-	return m.patches[m.lista.globalIndex()]
+func (m listaMateriasModel) getPatchSeleccionado() patch.PatchMateria {
+	return m.patches[m.lista.GlobalIndex()]
 }

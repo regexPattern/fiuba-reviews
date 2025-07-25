@@ -13,67 +13,77 @@ func TestComparacionCuatrimestres(t *testing.T) {
 }
 
 func TestFiltrarSinOfertas(t *testing.T) {
-	om := filtrarOfertasMaterias([]*ofertaCarrera{})
+	patches := filtrarOfertasMaterias([]*oferta{})
 
-	assert.Empty(t, om)
+	assert.Empty(t, patches)
 }
 
 func TestFiltrarConOfertasDisjuntas(t *testing.T) {
 	m0 := materiaSiu{Nombre: "Análisis Matemático II"}
 	m1 := materiaSiu{Nombre: "Álgebra Lineal"}
 
-	oc := []*ofertaCarrera{
+	ofertas := []*oferta{
 		{cuatri: cuatri{1, 2025}, Materias: []materiaSiu{m0}},
 		{cuatri: cuatri{1, 2025}, Materias: []materiaSiu{m1}},
 	}
 
-	om := filtrarOfertasMaterias(oc)
+	patches := filtrarOfertasMaterias(ofertas)
 
-	assert.Len(t, om, 2)
+	assert.Len(t, patches, 2)
 	assert.Contains(
 		t,
-		om,
-		Patch{Codigo: m0.Codigo, Nombre: m0.Nombre, Catedras: m0.Catedras, cuatri: cuatri{1, 2025}},
+		patches,
+		PatchMateria{
+			CodigoSiu: m0.Codigo,
+			Nombre:    m0.Nombre,
+			Catedras:  m0.Catedras,
+			cuatri:    cuatri{1, 2025},
+		},
 	)
 	assert.Contains(
 		t,
-		om,
-		Patch{Codigo: m1.Codigo, Nombre: m1.Nombre, Catedras: m1.Catedras, cuatri: cuatri{1, 2025}},
+		patches,
+		PatchMateria{
+			CodigoSiu: m1.Codigo,
+			Nombre:    m1.Nombre,
+			Catedras:  m1.Catedras,
+			cuatri:    cuatri{1, 2025},
+		},
 	)
 }
 
 func TestFiltrarConOfertasNoDisjuntas(t *testing.T) {
 	m := materiaSiu{Nombre: "Análisis Matemático II"}
 
-	oc := []*ofertaCarrera{
+	ofertas := []*oferta{
 		{cuatri: cuatri{1, 2025}, Materias: []materiaSiu{m}},
 		{cuatri: cuatri{2, 2024}, Materias: []materiaSiu{m}},
 		{cuatri: cuatri{1, 2023}, Materias: []materiaSiu{m}},
 	}
 
-	om := filtrarOfertasMaterias(oc)
+	patches := filtrarOfertasMaterias(ofertas)
 
-	assert.Len(t, om, 1)
-	assert.Equal(t, om[0].cuatri, cuatri{1, 2025})
+	assert.Len(t, patches, 1)
+	assert.Equal(t, patches[0].cuatri, cuatri{1, 2025})
 }
 
 func TestFiltrarConOfertasIguales(t *testing.T) {
 	m := materiaSiu{Nombre: "Análisis Matemático II"}
 
-	oc := []*ofertaCarrera{
+	ofertas := []*oferta{
 		{cuatri: cuatri{1, 2025}, Materias: []materiaSiu{m}},
 		{cuatri: cuatri{1, 2025}, Materias: []materiaSiu{m}},
 	}
 
-	om := filtrarOfertasMaterias(oc)
+	patches := filtrarOfertasMaterias(ofertas)
 
-	assert.Len(t, om, 1)
+	assert.Len(t, patches, 1)
 }
 
 func TestFiltrarConOfertasConflictivas(t *testing.T) {
 	m := materiaSiu{Nombre: "Análisis Matemático II"}
 
-	oc := []*ofertaCarrera{
+	ofertas := []*oferta{
 		{cuatri: cuatri{1, 2025}, Materias: []materiaSiu{m}},
 		{cuatri: cuatri{1, 2025}, Materias: []materiaSiu{m}},
 	}
@@ -83,13 +93,26 @@ func TestFiltrarConOfertasConflictivas(t *testing.T) {
 	// son idénticas entre si, sino que solo se intersectan en la cátedra con
 	// código 2.
 
-	oc[0].Materias[0].Catedras = []catedraSiu{{Codigo: 1}, {Codigo: 2}}
-	oc[1].Materias[0].Catedras = []catedraSiu{{Codigo: 2}, {Codigo: 3}}
+	ofertas[0].Materias[0].Catedras = []catedraSiu{{Codigo: 1}, {Codigo: 2}}
+	ofertas[1].Materias[0].Catedras = []catedraSiu{{Codigo: 2}, {Codigo: 3}}
 
-	om := filtrarOfertasMaterias(oc)
+	patches := filtrarOfertasMaterias(ofertas)
 
-	assert.Len(t, om[0].Catedras, 3)
-	assert.Contains(t, om[0].Catedras, catedraSiu{Codigo: 1})
-	assert.Contains(t, om[0].Catedras, catedraSiu{Codigo: 2})
-	assert.Contains(t, om[0].Catedras, catedraSiu{Codigo: 3})
+	assert.Len(t, patches[0].Catedras, 3)
+	assert.Contains(t, patches[0].Catedras, catedraSiu{Codigo: 1})
+	assert.Contains(t, patches[0].Catedras, catedraSiu{Codigo: 2})
+	assert.Contains(t, patches[0].Catedras, catedraSiu{Codigo: 3})
+}
+
+func TestMapNombreCodigoMateriasDb(t *testing.T) {
+	materias := []materiaDb{
+		{Codigo: "COD001", Nombre: "Análisis Matemático II"},
+		{Codigo: "COD002", Nombre: "Álgebra Lineal"},
+	}
+
+	codigos := mapNombreCodigo(materias)
+
+	assert.Len(t, codigos, 2)
+	assert.Equal(t, codigos["analisis matematico ii"], "COD001")
+	assert.Equal(t, codigos["algebra lineal"], "COD002")
 }

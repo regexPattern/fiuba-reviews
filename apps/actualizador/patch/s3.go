@@ -16,14 +16,13 @@ import (
 // Cliente de S3.
 var s3Client *s3.Client
 
-// initClienteS3 inicializa el cliente de S3.
-func (g *GeneradorPatches) initClienteS3(ctx context.Context) error {
-	ctx, cancel := context.WithTimeout(ctx, g.S3InitTimeout)
+func (g *GeneradorPatches) initS3Client(s3Ctx context.Context) error {
+	s3Ctx, cancel := context.WithTimeout(s3Ctx, g.S3InitTimeout)
 	defer cancel()
 
-	cfg, err := config.LoadDefaultConfig(ctx)
+	cfg, err := config.LoadDefaultConfig(s3Ctx)
 	if err != nil {
-		slog.Error("no se puedo configurar cliente de S3", "error", err)
+		slog.Error("error inicializado cliente de S3", "error", err)
 		return err
 	}
 
@@ -34,7 +33,7 @@ func (g *GeneradorPatches) initClienteS3(ctx context.Context) error {
 }
 
 // Oferta de una carrera.
-type ofertaCarrera struct {
+type oferta struct {
 	Materias []materiaSiu
 	cuatri
 	carrera string
@@ -90,8 +89,8 @@ func (c cuatri) despuesDe(otro cuatri) bool {
 }
 
 // obtenerOfertasCarreras obtiene las ofertas de carreras disponibles en el bucket.
-func (g *GeneradorPatches) obtenerOfertasCarreras(ctx context.Context) ([]*ofertaCarrera, error) {
-	ctx, cancel := context.WithTimeout(ctx, g.S3Timeout)
+func (g *GeneradorPatches) obtenerOfertasCarreras(ctx context.Context) ([]*oferta, error) {
+	ctx, cancel := context.WithTimeout(ctx, g.S3OpsTimeout)
 	defer cancel()
 
 	objs, err := g.descargarObjetosBucket(ctx)
@@ -99,7 +98,7 @@ func (g *GeneradorPatches) obtenerOfertasCarreras(ctx context.Context) ([]*ofert
 		return nil, err
 	}
 
-	ofertas := make([]*ofertaCarrera, 0, len(objs))
+	ofertas := make([]*oferta, 0, len(objs))
 	for _, obj := range objs {
 		if o, err := g.newOfertaCarrera(ctx, obj.Key); err != nil {
 			slog.Warn("omitiendo indexado de oferta", "key", *obj.Key)
@@ -128,7 +127,7 @@ func (g *GeneradorPatches) descargarObjetosBucket(ctx context.Context) ([]s3type
 func (g *GeneradorPatches) newOfertaCarrera(
 	ctx context.Context,
 	objKey *string,
-) (*ofertaCarrera, error) {
+) (*oferta, error) {
 	logger := slog.Default().With("key", *objKey)
 
 	obj, err := s3Client.GetObject(ctx, &s3.GetObjectInput{
@@ -179,7 +178,7 @@ func (g *GeneradorPatches) newOfertaCarrera(
 		}
 	}
 
-	o := &ofertaCarrera{
+	o := &oferta{
 		Materias: materias,
 		cuatri:   cuatri,
 		carrera:  carrera,
