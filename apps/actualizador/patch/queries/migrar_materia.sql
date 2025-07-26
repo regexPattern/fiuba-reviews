@@ -1,13 +1,9 @@
+-- Resumen:
 -- Migra los docentes, sus comentarios y calificaciones hacia una materia desde
 -- sus equivalencias. Es decir, si una nueva materia A (de un nuevo plan) tiene
--- como equivalencias a las materias B y C (de un plan anterior), la materia A
--- todavía no tiene información sobre las comisiones propias de esta materia,
--- por lo que lo más útil es asumir que es un renombramiento de sus materias
--- equivalentes del plan anterior. En el peor de los casos la materia A tiene
--- sus propias cátedras y no utiliza estos datos copiados.
---
--- Claramente generada con inteligencia artificial, pero si, hace lo que se
--- pretende.
+-- como equivalencias a las materias B y C (de un plan anterior) y la materia A
+-- todavía no tiene información sobre sus propias comisiones, esta query copia
+-- esta información de las materias B y C.
 WITH materias_equivalentes AS (
     SELECT
         e.codigo_materia_plan_anterior AS codigo_materia_equivalente

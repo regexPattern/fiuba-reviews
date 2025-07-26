@@ -17,16 +17,16 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
-//go:embed query/materias_sin_asociar.sql
+//go:embed queries/materias_sin_asociar.sql
 var queryMateriasSinAsociar string
 
-//go:embed query/asociar_materia.sql
+//go:embed queries/asociar_materia.sql
 var queryAsociarMateria string
 
-//go:embed query/materias_sin_migrar.sql
+//go:embed queries/materias_sin_migrar.sql
 var queryMateriasSinMigrar string
 
-//go:embed query/migrar_materia.sql
+//go:embed queries/migrar_materia.sql
 var queryMigrarMateria string
 
 var pool *pgxpool.Pool
@@ -67,8 +67,6 @@ func (g *GeneradorPatches) asociarMaterias(ctx context.Context, patches []PatchM
 	eg, egCtx := errgroup.WithContext(ctx)
 
 	for _, p := range patches {
-		// Solo actualizamos el código de una materia en la base de datos si tenemos un patch con
-		// el código real de esta materia.
 		if codigoDb, ok := sinAsociar[normalize(p.Nombre)]; ok {
 			eg.Go(func() error {
 				err := asociarMateria(egCtx, pool, p, codigoDb)
