@@ -1,4 +1,4 @@
-package patch
+package actualizador
 
 import (
 	"context"
@@ -11,14 +11,14 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-type PatchMateria struct {
+type PatchActualizacionMateria struct {
 	CodigoSiu string
 	Nombre    string
 	Catedras  []catedraSiu
 	cuatri
 }
 
-type GeneradorPatches struct {
+type IndexadorOfertas struct {
 	DbUrl         string
 	DbInitTimeout time.Duration
 	DbOpsTimeout  time.Duration
@@ -27,47 +27,49 @@ type GeneradorPatches struct {
 	S3OpsTimeout  time.Duration
 }
 
-func (g *GeneradorPatches) GenerarPatches(ctx context.Context) ([]PatchMateria, error) {
-	eg, egCtx := errgroup.WithContext(ctx)
+func (i *IndexadorOfertas) GenerarPatchesDeActualizacion(
+	ctx context.Context,
+) ([]PatchActualizacionMateria, error) {
+	g, gCtx := errgroup.WithContext(ctx)
 
-	eg.Go(func() error { return g.initS3Client(egCtx) })
-	eg.Go(func() error { return g.initDbPool(egCtx) })
+	g.Go(func() error { return i.initS3Client(gCtx) })
+	g.Go(func() error { return i.initDbPool(gCtx) })
 
-	if err := eg.Wait(); err != nil {
+	if err := g.Wait(); err != nil {
 		return nil, err
 	}
 
 	var ofertas []*oferta
 	var err error
 
-	if ofertas, err = g.obtenerOfertasCarreras(ctx); err != nil {
+	if ofertas, err = i.obtenerOfertasCarreras(ctx); err != nil {
 		return nil, err
 	}
 
 	patches := filtrarOfertasMaterias(ofertas)
-	if err := g.asociarMaterias(ctx, patches); err != nil {
+	if err := i.asociarMaterias(ctx, patches); err != nil {
 		return nil, err
 	}
 
-	if err := g.migrarMaterias(ctx, patches); err != nil {
+	if err := i.migrarMaterias(ctx, patches); err != nil {
 		return nil, err
 	}
 
 	return patches, nil
 }
 
-func filtrarOfertasMaterias(ofertas []*oferta) []PatchMateria {
+func filtrarOfertasMaterias(ofertas []*oferta) []PatchActualizacionMateria {
 	nMaterias := 0
 	for _, o := range ofertas {
 		nMaterias += len(o.Materias)
 	}
 
-	patches := make(map[string]PatchMateria, nMaterias)
+	patches := make(map[string]PatchActualizacionMateria, nMaterias)
 	for _, o := range ofertas {
 		for _, m := range o.Materias {
 			pActual, ok := patches[m.Nombre]
 			if !ok || o.cuatri.despuesDe(pActual.cuatri) {
-				patches[m.Nombre] = PatchMateria{
+				patches[m.Nombre] = PatchActualizacionMateria{
 					CodigoSiu: m.Codigo,
 					Nombre:    m.Nombre,
 					Catedras:  m.Catedras,
@@ -87,7 +89,7 @@ func filtrarOfertasMaterias(ofertas []*oferta) []PatchMateria {
 					c[cat.Codigo] = cat
 				}
 
-				patches[m.Nombre] = PatchMateria{
+				patches[m.Nombre] = PatchActualizacionMateria{
 					CodigoSiu: pActual.CodigoSiu,
 					Nombre:    pActual.Nombre,
 					Catedras:  slices.Collect(maps.Values(c)),
@@ -97,8 +99,14 @@ func filtrarOfertasMaterias(ofertas []*oferta) []PatchMateria {
 		}
 	}
 
-	slog.Debug("unificado las últimas ofertas de materias", "unificadas", nMaterias-len(patches))
-	slog.Info(fmt.Sprintf("generados %v patches de actualización de materias", len(patches)))
+	slog.Debug(
+		"unificado las últimas ofertas de materias",
+		"unificadas",
+		nMaterias-len(patches),
+	)
+	slog.Info(
+		fmt.Sprintf("generados %v patches de actualización de materias", len(patches)),
+	)
 
 	return slices.Collect(maps.Values(patches))
 }

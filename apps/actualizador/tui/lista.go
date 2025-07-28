@@ -1,15 +1,13 @@
-package lista
+package tui
 
 import (
 	"fmt"
 	"io"
 
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/paginator"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/ansi"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/tui/color"
 )
 
 const listaWidth = 30
@@ -22,19 +20,19 @@ var (
 	itemSelectedTitleStyle     = lipgloss.NewStyle().Inherit(itemNormalTitleStyle)
 	itemSelectedIndicatorStyle = lipgloss.NewStyle().
 					PaddingLeft(1).
-					Foreground(color.FiubaColor)
+					Foreground(colorFiuba)
 	itemFilterMatchStyle = lipgloss.NewStyle().
-				Background(color.FiubaColor).
+				Background(colorFiuba).
 				Foreground(lipgloss.AdaptiveColor{Light: "#DDDDDD", Dark: "#1A1A1A"})
 	listTitleBarStyle = lipgloss.NewStyle().
 				PaddingLeft(1).
 				PaddingBottom(1)
 	listTitleStyle = lipgloss.NewStyle().
 			Padding(0, 1).
-			Background(color.FiubaColor).
+			Background(colorFiuba).
 			Foreground(lipgloss.AdaptiveColor{Light: "#DDDDDD", Dark: "#1A1A1A"})
-	listFilterPromptStyle = lipgloss.NewStyle().Foreground(color.FiubaColor)
-	listFilterCursorStyle = lipgloss.NewStyle().Foreground(color.FiubaColor)
+	listFilterPromptStyle = lipgloss.NewStyle().Foreground(colorFiuba)
+	listFilterCursorStyle = lipgloss.NewStyle().Foreground(colorFiuba)
 )
 
 type item string
@@ -95,11 +93,11 @@ func (d delegate) Render(w io.Writer, m list.Model, index int, listItem list.Ite
 	fmt.Fprint(w, title)
 }
 
-type Model struct {
+type listaModel struct {
 	lista list.Model
 }
 
-func New(titulo string) Model {
+func NewLista(titulo string) listaModel {
 	defaultKeys := list.DefaultKeyMap()
 	l := list.New([]list.Item{}, delegate{}, listaWidth, listaHeight)
 
@@ -122,28 +120,27 @@ func New(titulo string) Model {
 		CancelWhileFiltering: defaultKeys.CancelWhileFiltering,
 		AcceptWhileFiltering: defaultKeys.AcceptWhileFiltering,
 	}
-	l.Paginator.Type = paginator.Arabic
 
 	l.SetShowHelp(false)
 
-	return Model{l}
+	return listaModel{l}
 }
 
-func (m Model) Init() tea.Cmd {
+func (m listaModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m listaModel) Update(msg tea.Msg) (listaModel, tea.Cmd) {
 	var cmd tea.Cmd
 	m.lista, cmd = m.lista.Update(msg)
 	return m, cmd
 }
 
-func (m Model) View() string {
+func (m listaModel) View() string {
 	return m.lista.View()
 }
 
-func (m *Model) SetItems(items []string) {
+func (m *listaModel) setItems(items []string) {
 	listItems := make([]list.Item, len(items))
 	for idx, i := range items {
 		listItems[idx] = item(i)
@@ -151,6 +148,6 @@ func (m *Model) SetItems(items []string) {
 	m.lista.SetItems(listItems)
 }
 
-func (m Model) GlobalIndex() int {
+func (m *listaModel) globalIndex() int {
 	return m.lista.GlobalIndex()
 }

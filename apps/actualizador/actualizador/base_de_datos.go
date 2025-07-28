@@ -1,4 +1,4 @@
-package patch
+package actualizador
 
 import (
 	"context"
@@ -29,6 +29,9 @@ var queryMateriasSinMigrar string
 //go:embed queries/migrar_materia.sql
 var queryMigrarMateria string
 
+//go:embed queries/docentes_materia.sql
+var queryDocentesMateria string
+
 var pool *pgxpool.Pool
 
 type materiaDb struct {
@@ -36,12 +39,12 @@ type materiaDb struct {
 	Nombre string `db:"nombre"`
 }
 
-func (g *GeneradorPatches) initDbPool(dbCtx context.Context) error {
-	dbCtx, cancel := context.WithTimeout(dbCtx, g.DbInitTimeout)
+func (i *IndexadorOfertas) initDbPool(dbCtx context.Context) error {
+	dbCtx, cancel := context.WithTimeout(dbCtx, i.DbInitTimeout)
 	defer cancel()
 
 	var err error
-	pool, err = pgxpool.New(dbCtx, g.DbUrl)
+	pool, err = pgxpool.New(dbCtx, i.DbUrl)
 
 	if err != nil {
 		slog.Error("error inicializado pool de conexiones con la base de datos", "error", err)
@@ -53,8 +56,11 @@ func (g *GeneradorPatches) initDbPool(dbCtx context.Context) error {
 	return nil
 }
 
-func (g *GeneradorPatches) asociarMaterias(ctx context.Context, patches []PatchMateria) error {
-	ctx, cancel := context.WithTimeout(ctx, g.DbOpsTimeout)
+func (i *IndexadorOfertas) asociarMaterias(
+	ctx context.Context,
+	patches []PatchActualizacionMateria,
+) error {
+	ctx, cancel := context.WithTimeout(ctx, i.DbOpsTimeout)
 	defer cancel()
 
 	sinAsociar, err := getMateriasSinAsociar(ctx)
@@ -64,12 +70,12 @@ func (g *GeneradorPatches) asociarMaterias(ctx context.Context, patches []PatchM
 
 	var completas int64
 
-	eg, egCtx := errgroup.WithContext(ctx)
+	g, gCtx := errgroup.WithContext(ctx)
 
 	for _, p := range patches {
 		if codigoDb, ok := sinAsociar[normalize(p.Nombre)]; ok {
-			eg.Go(func() error {
-				err := asociarMateria(egCtx, pool, p, codigoDb)
+			g.Go(func() error {
+				err := asociarMateria(gCtx, pool, p, codigoDb)
 				if err == nil {
 					atomic.AddInt64(&completas, 1)
 				}
@@ -78,7 +84,7 @@ func (g *GeneradorPatches) asociarMaterias(ctx context.Context, patches []PatchM
 		}
 	}
 
-	if err := eg.Wait(); err != nil {
+	if err := g.Wait(); err != nil {
 		completasVal := atomic.LoadInt64(&completas)
 		slog.Error("error migrando docentes de materia desde equivalencias",
 			"completas", completasVal,
@@ -117,7 +123,7 @@ func mapNombreCodigo(materias []materiaDb) map[string]string {
 func asociarMateria(
 	ctx context.Context,
 	pool *pgxpool.Pool,
-	p PatchMateria,
+	p PatchActualizacionMateria,
 	codigoDb string,
 ) error {
 	l := slog.Default().With(
@@ -136,18 +142,17 @@ func asociarMateria(
 	return err
 }
 
-// normalize normaliza una string haciendola lowercase y eliminando los acentos.
 func normalize(s string) string {
 	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
 	result, _, _ := transform.String(t, s)
 	return strings.ToLower(strings.TrimSpace(result))
 }
 
-func (g *GeneradorPatches) migrarMaterias(
+func (i *IndexadorOfertas) migrarMaterias(
 	ctx context.Context,
-	patches []PatchMateria,
+	patches []PatchActualizacionMateria,
 ) error {
-	ctx, cancel := context.WithTimeout(ctx, g.DbOpsTimeout)
+	ctx, cancel := context.WithTimeout(ctx, i.DbOpsTimeout)
 	defer cancel()
 
 	sinMigrar, err := getMateriasSinMigrar(ctx)
@@ -157,12 +162,12 @@ func (g *GeneradorPatches) migrarMaterias(
 
 	var completas int64
 
-	eg, egCtx := errgroup.WithContext(ctx)
+	g, gCtx := errgroup.WithContext(ctx)
 
 	for _, p := range patches {
 		if _, ok := sinMigrar[p.Nombre]; ok {
-			eg.Go(func() error {
-				err := migrarMateria(egCtx, p)
+			g.Go(func() error {
+				err := migrarMateria(gCtx, p)
 				if err == nil {
 					atomic.AddInt64(&completas, 1)
 				}
@@ -171,7 +176,7 @@ func (g *GeneradorPatches) migrarMaterias(
 		}
 	}
 
-	if err := eg.Wait(); err != nil {
+	if err := g.Wait(); err != nil {
 		completasVal := atomic.LoadInt64(&completas)
 		slog.Error("error migrando docentes de materia desde equivalencias",
 			"completas", completasVal,
@@ -197,7 +202,7 @@ func getMateriasSinMigrar(ctx context.Context) (map[string]string, error) {
 	return mapNombreCodigo(materias), nil
 }
 
-func migrarMateria(ctx context.Context, p PatchMateria) error {
+func migrarMateria(ctx context.Context, p PatchActualizacionMateria) error {
 	l := slog.Default().With("codigo", p.CodigoSiu, "nombre", p.Nombre)
 
 	res, err := pool.Exec(ctx, queryMigrarMateria, p.CodigoSiu)
@@ -211,31 +216,53 @@ func migrarMateria(ctx context.Context, p PatchMateria) error {
 	return nil
 }
 
-type DocenteDb struct {
-	Codigo string `db:"codigo"`
-	Nombre string `db:"nombre"`
+type InfoMateria struct {
+	Nombre   string
+	Docentes []DocenteDb
 }
 
-func ObtenerDocentesMateria(codigoMateria string) ([]*DocenteDb, error) {
-	l := slog.Default().With("codigo", codigoMateria)
+type DocenteDb struct {
+	Codigo    string  `db:"codigo"`
+	Nombre    string  `db:"nombre"`
+	NombreSiu *string `db:"nombre_siu"`
+}
 
-	rows, _ := pool.Query(context.Background(), `
-SELECT codigo, nombre
-FROM docente
-WHERE codigo_materia = $1
-		`, codigoMateria)
+func GetInfoMateria(codigo string) (*InfoMateria, error) {
+	var nombre string
 
-	d, err := pgx.CollectRows(rows, pgx.RowToAddrOfStructByName[DocenteDb])
+	err := pool.QueryRow(context.Background(), `
+SELECT
+		nombre
+FROM
+		materia
+WHERE
+		codigo = $1
+		`, codigo).Scan(&nombre)
+
 	if err != nil {
 		return nil, err
 	}
 
-	l.Debug(
-		fmt.Sprintf(
-			"encontrados %v docentes de materia",
-			len(d),
-		),
-	)
+	rows, _ := pool.Query(context.Background(), `
+SELECT
+    codigo,
+    nombre,
+    nombre_siu
+FROM
+    docente
+WHERE
+    codigo_materia = $1
+		`, codigo)
 
-	return d, nil
+	docentes, err := pgx.CollectRows(rows, pgx.RowToStructByName[DocenteDb])
+	if err != nil {
+		return nil, err
+	}
+
+	info := &InfoMateria{
+		Nombre:   nombre,
+		Docentes: docentes,
+	}
+
+	return info, nil
 }

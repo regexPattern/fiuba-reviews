@@ -1,33 +1,34 @@
 package tui
 
 import (
-	"fmt"
 	"log/slog"
 	"sort"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/tui/color"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/actualizador"
 )
 
-type actualizacionDocentesMsg struct {
-	patch      patch.PatchMateria
-	docentesDb []*patch.DocenteDb
+var (
+	colorFiuba = lipgloss.Color("#4EACD4")
+)
+
+type getInfoMateriaMsg struct {
+	patch actualizador.PatchActualizacionMateria
+	info  actualizador.InfoMateria
+	err   error
 }
 
-type errorDocentesMsg struct {
-	patch patch.PatchMateria
-	error error
-}
-
-func cargarDocentesCmd(p patch.PatchMateria) tea.Cmd {
+func getInfoMateriaCmd(p actualizador.PatchActualizacionMateria) tea.Cmd {
 	return func() tea.Msg {
-		d, err := patch.ObtenerDocentesMateria(p.CodigoSiu)
+		info, err := actualizador.GetInfoMateria(p.CodigoSiu)
 		if err != nil {
-			return errorDocentesMsg{patch: p, error: err}
+			return getInfoMateriaMsg{err: err}
 		}
-		return actualizacionDocentesMsg{patch: p, docentesDb: d}
+		return getInfoMateriaMsg{
+			patch: p,
+			info:  *info,
+		}
 	}
 }
 
@@ -41,19 +42,19 @@ const (
 
 var (
 	stylePanelBase     = lipgloss.NewStyle().Border(lipgloss.ThickBorder())
-	stylePanelActivo   = stylePanelBase.BorderForeground(color.FiubaColor)
+	stylePanelActivo   = stylePanelBase.BorderForeground(colorFiuba)
 	stylePanelInactivo = stylePanelBase.BorderForeground(lipgloss.Color("240"))
 )
 
-type model struct {
+type Model struct {
 	view          view
 	listaMaterias listaMateriasModel
 	listaDocentes listaDocentesModel
-	infoDocente   infoDocenteModel
+	vistaMateria  vistaMateriaModel
 }
 
-func newModel(patches []patch.PatchMateria) model {
-	// Ordenamos las materias según cantidad de docentes de mayor a menor, para así dar prioridad
+func newModel(patches []actualizador.PatchActualizacionMateria) Model {
+	// Ordenamos las materias según cantidad de de mayor a menor, para así dar prioridad
 	// (al menos visual) a las materias que tengan más docentes.
 	nDocentes := make(map[string]int, len(patches))
 	for _, p := range patches {
@@ -70,25 +71,26 @@ func newModel(patches []patch.PatchMateria) model {
 		return nDocentes[patches[i].Nombre] > nDocentes[patches[j].Nombre]
 	})
 
-	return model{
+	return Model{
 		listaMaterias: newListaMaterias(patches),
 		listaDocentes: newListaDocentes(),
-		infoDocente:   newInfoDocente(),
+		vistaMateria:  newVistaMateria(),
 	}
 }
 
-func (m model) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	slog.Info("iniciando resolvedor de patches gráfico")
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case actualizacionDocentesMsg:
-		m.infoDocente.setDocentesMateria(msg.patch.CodigoSiu, msg.docentesDb)
-		return m, nil
-	case errorDocentesMsg:
-		m.infoDocente.setErrorDocentes(msg.patch.CodigoSiu, msg.error)
+	case getInfoMateriaMsg:
+		if msg.err != nil {
+			m.vistaMateria.setError(msg.err)
+		} else {
+			m.vistaMateria.setInfoMateria(msg.patch, msg.info)
+		}
 		return m, nil
 
 	case tea.KeyMsg:
@@ -126,12 +128,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// seleccionada cambió, entonces descargamos los docentes de la nueva materia seleccionada.
 		// Para esto necesitamos guardarnos el indice seleccionado antes de ejecutar el comando en
 		// la lista.
-		prevIdx := m.listaMaterias.lista.GlobalIndex()
+		prevIdx := m.listaMaterias.lista.globalIndex()
 		m.listaMaterias, cmd = m.listaMaterias.Update(msg)
 
-		if m.listaMaterias.lista.GlobalIndex() != prevIdx {
+		if m.listaMaterias.lista.globalIndex() != prevIdx {
 			p := m.listaMaterias.getPatchSeleccionado()
-			return m, tea.Batch(cmd, cargarDocentesCmd(p))
+			return m, tea.Batch(cmd, getInfoMateriaCmd(p))
 		}
 	case enListaDocentes:
 		m.listaDocentes, cmd = m.listaDocentes.Update(msg)
@@ -140,35 +142,31 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) View() string {
+func (m Model) View() string {
 	var lm, ld, id string
 
 	if m.view == enListaMaterias {
-		lm = stylePanelActivo.Render(m.listaMaterias.View())
+		lm = stylePanelActivo.Width(30 + 4).Height(21).Render(m.listaMaterias.View())
 	} else {
-		lm = stylePanelInactivo.Render(m.listaMaterias.View())
+		lm = stylePanelInactivo.Width(30).Height(21).Render(m.listaMaterias.View())
 	}
 
 	if m.view == enListaDocentes {
-		ld = stylePanelActivo.Render(m.listaDocentes.View())
+		ld = stylePanelActivo.Width(30).Height(21).Render(m.listaDocentes.View())
 	} else {
-		ld = stylePanelInactivo.Render(m.listaDocentes.View())
+		ld = stylePanelInactivo.Width(30).Height(21).Render(m.listaDocentes.View())
 	}
 
 	if m.view == enInfoDocente {
-		id = stylePanelActivo.Render(m.infoDocente.View())
+		id = stylePanelActivo.Height(21).Render(m.vistaMateria.View())
 	} else {
-		id = stylePanelInactivo.Render(m.infoDocente.View())
+		id = stylePanelInactivo.Height(21).Render(m.vistaMateria.View())
 	}
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, lm, ld, id)
 }
 
-func ResolvePatches(patches []patch.PatchMateria) {
-	// f, _ := tea.LogToFile("debug.log", "debug")
-	// defer f.Close()
-
-	// p := tea.NewProgram(newModel(patches))
-	// _, _ = p.Run()
-	fmt.Println()
+func ResolvePatches(patches []actualizador.PatchActualizacionMateria) {
+	p := tea.NewProgram(newModel(patches))
+	_, _ = p.Run()
 }

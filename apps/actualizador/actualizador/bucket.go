@@ -1,4 +1,4 @@
-package patch
+package actualizador
 
 import (
 	"context"
@@ -13,11 +13,10 @@ import (
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
-// Cliente de S3.
-var s3Client *s3.Client
+var clienteS3 *s3.Client
 
-func (g *GeneradorPatches) initS3Client(s3Ctx context.Context) error {
-	s3Ctx, cancel := context.WithTimeout(s3Ctx, g.S3InitTimeout)
+func (i *IndexadorOfertas) initS3Client(s3Ctx context.Context) error {
+	s3Ctx, cancel := context.WithTimeout(s3Ctx, i.S3InitTimeout)
 	defer cancel()
 
 	cfg, err := config.LoadDefaultConfig(s3Ctx)
@@ -26,7 +25,7 @@ func (g *GeneradorPatches) initS3Client(s3Ctx context.Context) error {
 		return err
 	}
 
-	s3Client = s3.NewFromConfig(cfg)
+	clienteS3 = s3.NewFromConfig(cfg)
 	slog.Info("cliente de S3 inicializado exitosamente")
 
 	return nil
@@ -89,18 +88,18 @@ func (c cuatri) despuesDe(otro cuatri) bool {
 }
 
 // obtenerOfertasCarreras obtiene las ofertas de carreras disponibles en el bucket.
-func (g *GeneradorPatches) obtenerOfertasCarreras(ctx context.Context) ([]*oferta, error) {
-	ctx, cancel := context.WithTimeout(ctx, g.S3OpsTimeout)
+func (i *IndexadorOfertas) obtenerOfertasCarreras(ctx context.Context) ([]*oferta, error) {
+	ctx, cancel := context.WithTimeout(ctx, i.S3OpsTimeout)
 	defer cancel()
 
-	objs, err := g.descargarObjetosBucket(ctx)
+	objs, err := i.descargarObjetosBucket(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	ofertas := make([]*oferta, 0, len(objs))
 	for _, obj := range objs {
-		if o, err := g.newOfertaCarrera(ctx, obj.Key); err != nil {
+		if o, err := i.newOfertaCarrera(ctx, obj.Key); err != nil {
 			slog.Warn("omitiendo indexado de oferta", "key", *obj.Key)
 		} else {
 			ofertas = append(ofertas, o)
@@ -111,9 +110,9 @@ func (g *GeneradorPatches) obtenerOfertasCarreras(ctx context.Context) ([]*ofert
 }
 
 // descargarObjetosBucket descarga los archivos del bucket.
-func (g *GeneradorPatches) descargarObjetosBucket(ctx context.Context) ([]s3types.Object, error) {
-	output, err := s3Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
-		Bucket: &g.S3BucketName,
+func (i *IndexadorOfertas) descargarObjetosBucket(ctx context.Context) ([]s3types.Object, error) {
+	output, err := clienteS3.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+		Bucket: &i.S3BucketName,
 	})
 	if err != nil {
 		slog.Error("error enlistando archivos del bucket", "error", err)
@@ -124,14 +123,14 @@ func (g *GeneradorPatches) descargarObjetosBucket(ctx context.Context) ([]s3type
 }
 
 // newOfertaCarrera crea una nueva oferta de carrera a partir de un archivo del bucket.
-func (g *GeneradorPatches) newOfertaCarrera(
+func (i *IndexadorOfertas) newOfertaCarrera(
 	ctx context.Context,
 	objKey *string,
 ) (*oferta, error) {
 	logger := slog.Default().With("key", *objKey)
 
-	obj, err := s3Client.GetObject(ctx, &s3.GetObjectInput{
-		Bucket: &g.S3BucketName,
+	obj, err := clienteS3.GetObject(ctx, &s3.GetObjectInput{
+		Bucket: &i.S3BucketName,
 		Key:    objKey,
 	})
 

@@ -1,4 +1,4 @@
-package patch
+package actualizador
 
 import (
 	"testing"
@@ -33,7 +33,7 @@ func TestFiltrarConOfertasDisjuntas(t *testing.T) {
 	assert.Contains(
 		t,
 		patches,
-		PatchMateria{
+		PatchActualizacionMateria{
 			CodigoSiu: m0.Codigo,
 			Nombre:    m0.Nombre,
 			Catedras:  m0.Catedras,
@@ -43,7 +43,7 @@ func TestFiltrarConOfertasDisjuntas(t *testing.T) {
 	assert.Contains(
 		t,
 		patches,
-		PatchMateria{
+		PatchActualizacionMateria{
 			CodigoSiu: m1.Codigo,
 			Nombre:    m1.Nombre,
 			Catedras:  m1.Catedras,

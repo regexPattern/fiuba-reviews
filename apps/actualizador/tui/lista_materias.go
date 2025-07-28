@@ -2,24 +2,23 @@ package tui
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/tui/lista"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/actualizador"
 )
 
 type listaMateriasModel struct {
-	patches []patch.PatchMateria
-	lista   lista.Model
+	patches []actualizador.PatchActualizacionMateria
+	lista   listaModel
 }
 
-func newListaMaterias(patches []patch.PatchMateria) listaMateriasModel {
-	l := lista.New("Materias")
+func newListaMaterias(patches []actualizador.PatchActualizacionMateria) listaMateriasModel {
+	l := NewLista("Materias")
 
 	nombres := make([]string, len(patches))
 	for i, p := range patches {
 		nombres[i] = p.Nombre
 	}
 
-	l.SetItems(nombres)
+	l.setItems(nombres)
 
 	return listaMateriasModel{
 		patches: patches,
@@ -41,6 +40,6 @@ func (m listaMateriasModel) View() string {
 	return m.lista.View()
 }
 
-func (m listaMateriasModel) getPatchSeleccionado() patch.PatchMateria {
-	return m.patches[m.lista.GlobalIndex()]
+func (m listaMateriasModel) getPatchSeleccionado() actualizador.PatchActualizacionMateria {
+	return m.patches[m.lista.globalIndex()]
 }

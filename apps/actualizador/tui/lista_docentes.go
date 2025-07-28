@@ -1,24 +1,21 @@
 package tui
 
 import (
-	"sort"
-
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/tui/lista"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/actualizador"
 )
 
 type listaDocentesModel struct {
-	patch             patch.PatchMateria
-	docentesOrdenados []string
-	lista             lista.Model
+	patch *actualizador.PatchActualizacionMateria
+	lista listaModel
 }
 
 func newListaDocentes() listaDocentesModel {
-	lista := lista.New("Docentes")
+	l := NewLista("Docentes")
 
 	return listaDocentesModel{
-		lista: lista,
+		patch: nil,
+		lista: l,
 	}
 }
 
@@ -36,7 +33,7 @@ func (m listaDocentesModel) View() string {
 	return m.lista.View()
 }
 
-func (m *listaDocentesModel) SetPatch(patch patch.PatchMateria) {
+func (m *listaDocentesModel) SetPatch(patch *actualizador.PatchActualizacionMateria) {
 	m.patch = patch
 
 	docentes := make(map[string]bool)
@@ -46,16 +43,7 @@ func (m *listaDocentesModel) SetPatch(patch patch.PatchMateria) {
 		}
 	}
 
-	m.docentesOrdenados = make([]string, 0, len(docentes))
-	for nombre := range docentes {
-		m.docentesOrdenados = append(m.docentesOrdenados, nombre)
-	}
-
-	sort.Strings(m.docentesOrdenados)
-
-	m.lista.SetItems(m.docentesOrdenados)
-}
-
-func (m listaDocentesModel) GetSelectedDocente() string {
-	return m.docentesOrdenados[m.lista.GlobalIndex()]
+	// TODO: realmente deberia hacer este sort cuando creo los patches
+	// al menos desde el TUI
+	// m.lista.setItems([]{|)
 }
