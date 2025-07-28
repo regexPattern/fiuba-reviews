@@ -13,31 +13,12 @@ var (
 	colorFiuba = lipgloss.Color("#4EACD4")
 )
 
-type getInfoMateriaMsg struct {
-	patch actualizador.PatchActualizacionMateria
-	info  actualizador.InfoMateria
-	err   error
-}
-
-func getInfoMateriaCmd(p actualizador.PatchActualizacionMateria) tea.Cmd {
-	return func() tea.Msg {
-		info, err := actualizador.GetInfoMateria(p.CodigoSiu)
-		if err != nil {
-			return getInfoMateriaMsg{err: err}
-		}
-		return getInfoMateriaMsg{
-			patch: p,
-			info:  *info,
-		}
-	}
-}
-
-type view uint
+type indiceVista uint
 
 const (
-	enListaMaterias view = iota
+	enListaMaterias indiceVista = iota
 	enListaDocentes
-	enInfoDocente
+	enVistaDocente
 )
 
 var (
@@ -46,15 +27,15 @@ var (
 	stylePanelInactivo = stylePanelBase.BorderForeground(lipgloss.Color("240"))
 )
 
-type Model struct {
-	view          view
-	listaMaterias listaMateriasModel
-	listaDocentes listaDocentesModel
-	vistaMateria  vistaMateriaModel
+type App struct {
+	indiceVista
+	selectorMateria  selectorMateriaModel
+	selectorDocentes selectorDocentes
+	vistaDocente     vistaDocenteModel
 }
 
-func newModel(patches []actualizador.PatchActualizacionMateria) Model {
-	// Ordenamos las materias según cantidad de de mayor a menor, para así dar prioridad
+func newApp(patches []actualizador.PatchActualizacionMateria) App {
+	// Ordenamos las materias según cantidad de docentes, de mayor a menor, para así dar prioridad
 	// (al menos visual) a las materias que tengan más docentes.
 	nDocentes := make(map[string]int, len(patches))
 	for _, p := range patches {
@@ -71,26 +52,22 @@ func newModel(patches []actualizador.PatchActualizacionMateria) Model {
 		return nDocentes[patches[i].Nombre] > nDocentes[patches[j].Nombre]
 	})
 
-	return Model{
-		listaMaterias: newListaMaterias(patches),
-		listaDocentes: newListaDocentes(),
-		vistaMateria:  newVistaMateria(),
+	return App{
+		selectorMateria:  newSelectorMateria(patches),
+		selectorDocentes: newSelectorDocentes(),
+		vistaDocente:     newVistaMateria(),
 	}
 }
 
-func (m Model) Init() tea.Cmd {
+func (m App) Init() tea.Cmd {
 	slog.Info("iniciando resolvedor de patches gráfico")
-	return nil
+	return m.selectorMateria.Init()
 }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case getInfoMateriaMsg:
-		if msg.err != nil {
-			m.vistaMateria.setError(msg.err)
-		} else {
-			m.vistaMateria.setInfoMateria(msg.patch, msg.info)
-		}
+	case materiaSeleccionadaMsg:
+		m.selectorDocentes.setDocentes(msg.patch)
 		return m, nil
 
 	case tea.KeyMsg:
@@ -98,23 +75,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			return m, tea.Quit
 		case "tab":
-			switch m.view {
+			switch m.indiceVista {
 			case enListaMaterias:
-				m.view = enListaDocentes
+				m.indiceVista = enListaDocentes
 			case enListaDocentes:
-				m.view = enInfoDocente
-			case enInfoDocente:
-				m.view = enInfoDocente
+				m.indiceVista = enVistaDocente
+			case enVistaDocente:
+				m.indiceVista = enVistaDocente
 			}
 			return m, nil
 		case "shift+tab":
-			switch m.view {
+			switch m.indiceVista {
 			case enListaMaterias:
-				m.view = enListaMaterias
+				m.indiceVista = enListaMaterias
 			case enListaDocentes:
-				m.view = enListaMaterias
-			case enInfoDocente:
-				m.view = enListaDocentes
+				m.indiceVista = enListaMaterias
+			case enVistaDocente:
+				m.indiceVista = enListaDocentes
 			}
 			return m, nil
 		}
@@ -122,51 +99,41 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var cmd tea.Cmd
 
-	switch m.view {
+	switch m.indiceVista {
 	case enListaMaterias:
-		// Si luego de haber actualizado el componente de la lista de materias la materia
-		// seleccionada cambió, entonces descargamos los docentes de la nueva materia seleccionada.
-		// Para esto necesitamos guardarnos el indice seleccionado antes de ejecutar el comando en
-		// la lista.
-		prevIdx := m.listaMaterias.lista.globalIndex()
-		m.listaMaterias, cmd = m.listaMaterias.Update(msg)
-
-		if m.listaMaterias.lista.globalIndex() != prevIdx {
-			p := m.listaMaterias.getPatchSeleccionado()
-			return m, tea.Batch(cmd, getInfoMateriaCmd(p))
-		}
+		m.selectorMateria, cmd = m.selectorMateria.Update(msg)
 	case enListaDocentes:
-		m.listaDocentes, cmd = m.listaDocentes.Update(msg)
+		m.selectorDocentes, cmd = m.selectorDocentes.Update(msg)
 	}
 
 	return m, cmd
 }
 
-func (m Model) View() string {
+func (m App) View() string {
 	var lm, ld, id string
 
-	if m.view == enListaMaterias {
-		lm = stylePanelActivo.Width(30 + 4).Height(21).Render(m.listaMaterias.View())
+	if m.indiceVista == enListaMaterias {
+		lm = stylePanelActivo.Width(30 + 4).Height(21).Render(m.selectorMateria.View())
 	} else {
-		lm = stylePanelInactivo.Width(30).Height(21).Render(m.listaMaterias.View())
+		lm = stylePanelInactivo.Width(30 + 4).Height(21).Render(m.selectorMateria.View())
 	}
 
-	if m.view == enListaDocentes {
-		ld = stylePanelActivo.Width(30).Height(21).Render(m.listaDocentes.View())
+	if m.indiceVista == enListaDocentes {
+		ld = stylePanelActivo.Width(30 + 4).Height(21).Render(m.selectorDocentes.View())
 	} else {
-		ld = stylePanelInactivo.Width(30).Height(21).Render(m.listaDocentes.View())
+		ld = stylePanelInactivo.Width(30 + 4).Height(21).Render(m.selectorDocentes.View())
 	}
 
-	if m.view == enInfoDocente {
-		id = stylePanelActivo.Height(21).Render(m.vistaMateria.View())
+	if m.indiceVista == enVistaDocente {
+		id = stylePanelActivo.Height(21).Render(m.vistaDocente.View())
 	} else {
-		id = stylePanelInactivo.Height(21).Render(m.vistaMateria.View())
+		id = stylePanelInactivo.Height(21).Render(m.vistaDocente.View())
 	}
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, lm, ld, id)
 }
 
 func ResolvePatches(patches []actualizador.PatchActualizacionMateria) {
-	p := tea.NewProgram(newModel(patches))
+	p := tea.NewProgram(newApp(patches))
 	_, _ = p.Run()
 }

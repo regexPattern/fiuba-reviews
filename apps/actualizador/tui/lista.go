@@ -98,7 +98,6 @@ type listaModel struct {
 }
 
 func NewLista(titulo string) listaModel {
-	defaultKeys := list.DefaultKeyMap()
 	l := list.New([]list.Item{}, delegate{}, listaWidth, listaHeight)
 
 	l.Title = titulo
@@ -108,6 +107,7 @@ func NewLista(titulo string) listaModel {
 	l.Styles.FilterPrompt = listFilterPromptStyle
 	l.Styles.FilterCursor = listFilterCursorStyle
 
+	defaultKeys := list.DefaultKeyMap()
 	l.KeyMap = list.KeyMap{
 		CursorUp:             defaultKeys.CursorUp,
 		CursorDown:           defaultKeys.CursorDown,

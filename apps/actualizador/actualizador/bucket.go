@@ -32,27 +32,27 @@ func (i *IndexadorOfertas) initS3Client(s3Ctx context.Context) error {
 }
 
 // Oferta de una carrera.
-type oferta struct {
-	Materias []materiaSiu
+type Oferta struct {
+	Materias []MateriaSiu
 	cuatri
 	carrera string
 }
 
 // Materia de una oferta.
-type materiaSiu struct {
+type MateriaSiu struct {
 	Codigo   string       `json:"codigo"`
 	Nombre   string       `json:"nombre"`
-	Catedras []catedraSiu `json:"catedras"`
+	Catedras []CatedraSiu `json:"catedras"`
 }
 
 // Cátedra de una materia.
-type catedraSiu struct {
+type CatedraSiu struct {
 	Codigo   int          `json:"codigo"`
-	Docentes []docenteSiu `json:"docentes"`
+	Docentes []DocenteSiu `json:"docentes"`
 }
 
 // Cátedra de una cátedra.
-type docenteSiu struct {
+type DocenteSiu struct {
 	Nombre string `json:"nombre"`
 	Rol    string `json:"rol"`
 }
@@ -88,7 +88,7 @@ func (c cuatri) despuesDe(otro cuatri) bool {
 }
 
 // obtenerOfertasCarreras obtiene las ofertas de carreras disponibles en el bucket.
-func (i *IndexadorOfertas) obtenerOfertasCarreras(ctx context.Context) ([]*oferta, error) {
+func (i *IndexadorOfertas) obtenerOfertasCarreras(ctx context.Context) ([]*Oferta, error) {
 	ctx, cancel := context.WithTimeout(ctx, i.S3OpsTimeout)
 	defer cancel()
 
@@ -97,7 +97,7 @@ func (i *IndexadorOfertas) obtenerOfertasCarreras(ctx context.Context) ([]*ofert
 		return nil, err
 	}
 
-	ofertas := make([]*oferta, 0, len(objs))
+	ofertas := make([]*Oferta, 0, len(objs))
 	for _, obj := range objs {
 		if o, err := i.newOfertaCarrera(ctx, obj.Key); err != nil {
 			slog.Warn("omitiendo indexado de oferta", "key", *obj.Key)
@@ -126,7 +126,7 @@ func (i *IndexadorOfertas) descargarObjetosBucket(ctx context.Context) ([]s3type
 func (i *IndexadorOfertas) newOfertaCarrera(
 	ctx context.Context,
 	objKey *string,
-) (*oferta, error) {
+) (*Oferta, error) {
 	logger := slog.Default().With("key", *objKey)
 
 	obj, err := clienteS3.GetObject(ctx, &s3.GetObjectInput{
@@ -163,7 +163,7 @@ func (i *IndexadorOfertas) newOfertaCarrera(
 		return nil, err
 	}
 
-	var materias []materiaSiu
+	var materias []MateriaSiu
 	if err := json.Unmarshal(bytes, &materias); err != nil {
 		logger.Error("error serializando contenido de oferta", "error", err)
 		return nil, err
@@ -177,7 +177,7 @@ func (i *IndexadorOfertas) newOfertaCarrera(
 		}
 	}
 
-	o := &oferta{
+	o := &Oferta{
 		Materias: materias,
 		cuatri:   cuatri,
 		carrera:  carrera,

@@ -216,7 +216,7 @@ func migrarMateria(ctx context.Context, p PatchActualizacionMateria) error {
 	return nil
 }
 
-type InfoMateria struct {
+type InfoActualMateria struct {
 	Nombre   string
 	Docentes []DocenteDb
 }
@@ -227,7 +227,7 @@ type DocenteDb struct {
 	NombreSiu *string `db:"nombre_siu"`
 }
 
-func GetInfoMateria(codigo string) (*InfoMateria, error) {
+func GetInfoMateria(codigo string) (*InfoActualMateria, error) {
 	var nombre string
 
 	err := pool.QueryRow(context.Background(), `
@@ -259,7 +259,7 @@ WHERE
 		return nil, err
 	}
 
-	info := &InfoMateria{
+	info := &InfoActualMateria{
 		Nombre:   nombre,
 		Docentes: docentes,
 	}

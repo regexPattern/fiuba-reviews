@@ -14,7 +14,7 @@ import (
 type PatchActualizacionMateria struct {
 	CodigoSiu string
 	Nombre    string
-	Catedras  []catedraSiu
+	Catedras  []CatedraSiu
 	cuatri
 }
 
@@ -39,7 +39,7 @@ func (i *IndexadorOfertas) GenerarPatchesDeActualizacion(
 		return nil, err
 	}
 
-	var ofertas []*oferta
+	var ofertas []*Oferta
 	var err error
 
 	if ofertas, err = i.obtenerOfertasCarreras(ctx); err != nil {
@@ -58,7 +58,7 @@ func (i *IndexadorOfertas) GenerarPatchesDeActualizacion(
 	return patches, nil
 }
 
-func filtrarOfertasMaterias(ofertas []*oferta) []PatchActualizacionMateria {
+func filtrarOfertasMaterias(ofertas []*Oferta) []PatchActualizacionMateria {
 	nMaterias := 0
 	for _, o := range ofertas {
 		nMaterias += len(o.Materias)
@@ -81,7 +81,7 @@ func filtrarOfertasMaterias(ofertas []*oferta) []PatchActualizacionMateria {
 				// agregamos todas las cátedras de ambas ofertas al total de
 				// la materia.
 
-				c := make(map[int]catedraSiu)
+				c := make(map[int]CatedraSiu)
 				for _, cat := range pActual.Catedras {
 					c[cat.Codigo] = cat
 				}
