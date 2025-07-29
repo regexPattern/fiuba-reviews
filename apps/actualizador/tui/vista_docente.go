@@ -6,11 +6,11 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/actualizador"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
 )
 
 type vistaDocenteModel struct {
-	info actualizador.InfoActualMateria
+	info patch.InfoActualMateria
 	err  error
 }
 

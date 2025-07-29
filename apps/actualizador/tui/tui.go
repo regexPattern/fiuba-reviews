@@ -6,11 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/actualizador"
-)
-
-var (
-	colorFiuba = lipgloss.Color("#4EACD4")
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
 )
 
 type indiceVista uint
@@ -21,20 +17,15 @@ const (
 	enVistaDocente
 )
 
-var (
-	stylePanelBase     = lipgloss.NewStyle().Border(lipgloss.ThickBorder())
-	stylePanelActivo   = stylePanelBase.BorderForeground(colorFiuba)
-	stylePanelInactivo = stylePanelBase.BorderForeground(lipgloss.Color("240"))
-)
-
-type App struct {
+type AppModelo struct {
 	indiceVista
-	selectorMateria  selectorMateriaModel
-	selectorDocentes selectorDocentes
+	selectorMateria  listaMateriasModel
+	selectorDocentes listaDocentesModel
 	vistaDocente     vistaDocenteModel
+	windowSize       tea.WindowSizeMsg
 }
 
-func newApp(patches []actualizador.PatchActualizacionMateria) App {
+func newApp(patches []patch.Patch) AppModelo {
 	// Ordenamos las materias según cantidad de docentes, de mayor a menor, para así dar prioridad
 	// (al menos visual) a las materias que tengan más docentes.
 	nDocentes := make(map[string]int, len(patches))
@@ -52,19 +43,19 @@ func newApp(patches []actualizador.PatchActualizacionMateria) App {
 		return nDocentes[patches[i].Nombre] > nDocentes[patches[j].Nombre]
 	})
 
-	return App{
+	return AppModelo{
 		selectorMateria:  newSelectorMateria(patches),
 		selectorDocentes: newSelectorDocentes(),
 		vistaDocente:     newVistaMateria(),
 	}
 }
 
-func (m App) Init() tea.Cmd {
+func (m AppModelo) Init() tea.Cmd {
 	slog.Info("iniciando resolvedor de patches gráfico")
 	return m.selectorMateria.Init()
 }
 
-func (m App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m AppModelo) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case materiaSeleccionadaMsg:
 		m.selectorDocentes.setDocentes(msg.patch)
@@ -95,6 +86,9 @@ func (m App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, nil
 		}
+
+	case tea.WindowSizeMsg:
+		m.windowSize = msg
 	}
 
 	var cmd tea.Cmd
@@ -109,31 +103,38 @@ func (m App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m App) View() string {
-	var lm, ld, id string
+func (m AppModelo) View() string {
+	var panel0, panel1, panel2 string
 
 	if m.indiceVista == enListaMaterias {
-		lm = stylePanelActivo.Width(30 + 4).Height(21).Render(m.selectorMateria.View())
+		panel0 = estiloPanelActivo.Render(m.selectorMateria.View())
 	} else {
-		lm = stylePanelInactivo.Width(30 + 4).Height(21).Render(m.selectorMateria.View())
+		panel0 = estiloPanelInactivo.Render(m.selectorMateria.View())
 	}
 
 	if m.indiceVista == enListaDocentes {
-		ld = stylePanelActivo.Width(30 + 4).Height(21).Render(m.selectorDocentes.View())
+		panel1 = estiloPanelActivo.Render(m.selectorDocentes.View())
 	} else {
-		ld = stylePanelInactivo.Width(30 + 4).Height(21).Render(m.selectorDocentes.View())
+		panel1 = estiloPanelInactivo.Render(m.selectorDocentes.View())
 	}
+
+	anchoPanel0 := lipgloss.Width(panel0)
+	anchoPanel1 := lipgloss.Width(panel1)
+	anchoPanel2 := m.windowSize.Width - anchoPanel0 - anchoPanel1 - 2
+
+	estiloPanel2Activo := estiloPanelActivo.Width(anchoPanel2)
+	estiloPanel2Inactivo := estiloPanelInactivo.Width(anchoPanel2)
 
 	if m.indiceVista == enVistaDocente {
-		id = stylePanelActivo.Height(21).Render(m.vistaDocente.View())
+		panel2 = estiloPanel2Activo.Render(m.vistaDocente.View())
 	} else {
-		id = stylePanelInactivo.Height(21).Render(m.vistaDocente.View())
+		panel2 = estiloPanel2Inactivo.Render(m.vistaDocente.View())
 	}
 
-	return lipgloss.JoinHorizontal(lipgloss.Top, lm, ld, id)
+	return lipgloss.JoinHorizontal(lipgloss.Top, panel0, panel1, panel2)
 }
 
-func ResolvePatches(patches []actualizador.PatchActualizacionMateria) {
+func ResolvePatches(patches []patch.Patch) {
 	p := tea.NewProgram(newApp(patches))
 	_, _ = p.Run()
 }

@@ -8,14 +8,14 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/actualizador"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
 	"github.com/regexPattern/fiuba-reviews/apps/actualizador/tui"
 )
 
 func main() {
 	setupLogger()
 
-	i := actualizador.IndexadorOfertas{
+	i := patch.Indexador{
 		DbUrl:         os.Getenv("DATABASE_URL"),
 		DbInitTimeout: time.Second * 3,
 		DbOpsTimeout:  time.Second * 10,
@@ -24,7 +24,7 @@ func main() {
 		S3OpsTimeout:  time.Second * 10,
 	}
 
-	patches, err := i.GenerarPatchesDeActualizacion(context.Background())
+	patches, err := i.GenerarPatches(context.Background())
 	if err != nil {
 		slog.Error("no se pudieron generar los patches de actualización")
 		os.Exit(1)
