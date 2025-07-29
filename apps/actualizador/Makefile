@@ -6,10 +6,10 @@ run:
 	@go run main.go
 
 test:
-	@go test -v ./...
+	@go test ./...
 
 lint:
-	@golangci-lint run .
+	@golangci-lint run ./...
 
 format:
-	@golangci-lint fmt .
+	@golangci-lint fmt ./...

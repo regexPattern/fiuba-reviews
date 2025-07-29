@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"fmt"
 	"maps"
 	"slices"
 	"sort"
@@ -19,7 +20,7 @@ type listaDocentesModel struct {
 type docenteItem patch.DocenteSiu
 
 func (i docenteItem) Title() string {
-	return i.Nombre
+	return fmt.Sprintf("%s (%s)", i.Nombre, i.Rol)
 }
 
 func (i docenteItem) Description() string {

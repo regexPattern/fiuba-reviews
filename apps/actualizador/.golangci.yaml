@@ -1,9 +1,16 @@
 version: "2"
+linters:
+    enable:
+        - errcheck
+        - govet
+        - ineffassign
+        - staticcheck
+        - unused
 formatters:
-  enable:
-    - gofmt
-    - goimports
-    - golines
-  settings:
-    golines:
-      shorten-comments: true
+    enable:
+        - gofmt
+        - goimports
+        - golines
+    settings:
+        golines:
+            shorten-comments: true

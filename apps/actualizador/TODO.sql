@@ -17,3 +17,5 @@ ALTER TABLE equivalencia
 ALTER TABLE equivalencia
     ADD CONSTRAINT equivalencia_codigo_materia_plan_anterior_fkey FOREIGN KEY (codigo_materia_plan_anterior) REFERENCES materia (codigo) ON UPDATE CASCADE ON DELETE NO ACTION;
 
+ALTER TABLE docente
+    ADD COLUMN nombre_para_catedra TEXT;

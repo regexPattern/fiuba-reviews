@@ -32,12 +32,14 @@ func newDefaultList() list.Model {
 
 	l := list.New([]list.Item{}, d, anchoLista, alturaLista)
 	l.DisableQuitKeybindings()
+	l.KeyMap.ShowFullHelp.Unbind()
+	l.KeyMap.CloseFullHelp.Unbind()
+
 	l.SetShowHelp(false)
 
 	l.Styles.TitleBar = l.Styles.TitleBar.UnsetPaddingLeft()
 	l.Styles.TitleBar = l.Styles.TitleBar.UnsetPaddingRight()
-	l.Styles.StatusBar = l.Styles.StatusBar.UnsetPaddingLeft()
-	l.Styles.StatusBar = l.Styles.StatusBar.UnsetPaddingRight()
+	l.Styles.StatusBar = l.Styles.StatusBar.PaddingLeft(1)
 	l.Styles.PaginationStyle = l.Styles.PaginationStyle.PaddingLeft(1)
 
 	return l

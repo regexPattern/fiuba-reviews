@@ -122,19 +122,21 @@ func (m AppModelo) View() string {
 	anchoPanel1 := lipgloss.Width(panel1)
 	anchoPanel2 := m.windowSize.Width - anchoPanel0 - anchoPanel1 - 2
 
-	estiloPanel2Activo := estiloPanelActivo.Width(anchoPanel2)
-	estiloPanel2Inactivo := estiloPanelInactivo.Width(anchoPanel2)
-
 	if m.indiceVista == enVistaDocente {
-		panel2 = estiloPanel2Activo.Render(m.vistaDocente.View())
+		panel2 = estiloPanelActivo.Width(anchoPanel2).Render(m.vistaDocente.View())
 	} else {
-		panel2 = estiloPanel2Inactivo.Render(m.vistaDocente.View())
+		panel2 = estiloPanelInactivo.Width(anchoPanel2).Render(m.vistaDocente.View())
 	}
 
-	return lipgloss.JoinHorizontal(lipgloss.Top, panel0, panel1, panel2)
+	return lipgloss.JoinHorizontal(lipgloss.Top, panel0, panel1, panel2) + "\n"
 }
 
 func ResolvePatches(patches []patch.Patch) {
+	if len(patches) == 0 {
+		slog.Info("no hay materias por actualizar")
+		return
+	}
+
 	p := tea.NewProgram(newApp(patches))
 	_, _ = p.Run()
 }

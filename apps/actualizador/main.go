@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"strings"
@@ -18,10 +19,10 @@ func main() {
 	i := patch.Indexador{
 		DbUrl:         os.Getenv("DATABASE_URL"),
 		DbInitTimeout: time.Second * 3,
-		DbOpsTimeout:  time.Second * 10,
+		DbOpTimeout:   time.Second * 10,
 		S3BucketName:  os.Getenv("AWS_S3_BUCKET"),
 		S3InitTimeout: time.Second * 3,
-		S3OpsTimeout:  time.Second * 10,
+		S3OpTimeout:   time.Second * 10,
 	}
 
 	patches, err := i.GenerarPatches(context.Background())
@@ -30,7 +31,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	tui.ResolvePatches(patches)
+	for _, p := range patches[:10] {
+		fmt.Println(p)
+	}
+
+	tui.ResolvePatches([]patch.Patch{})
 }
 
 func setupLogger() {
