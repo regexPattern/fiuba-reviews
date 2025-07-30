@@ -1,20 +1,20 @@
-package tui
+package resolvedor
 
 import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
 )
 
 type listaMateriasModel struct {
-	patches     []patch.Patch
+	patches     []patcher.Patch
 	widgetLista list.Model
 }
 
-type patchItem patch.Patch
+type patchItem patcher.Patch
 
 func (i patchItem) Title() string {
-	return i.Nombre
+	return i.ContextoMateriaBD.Nombre
 }
 
 func (i patchItem) Description() string {
@@ -22,10 +22,10 @@ func (i patchItem) Description() string {
 }
 
 func (i patchItem) FilterValue() string {
-	return i.Nombre
+	return i.Materia.Nombre
 }
 
-func newSelectorMateria(patches []patch.Patch) listaMateriasModel {
+func newListaMaterias(patches []patcher.Patch) listaMateriasModel {
 	l := newDefaultList()
 	l.Title = "Materias"
 

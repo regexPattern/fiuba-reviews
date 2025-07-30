@@ -1,4 +1,4 @@
-package tui
+package resolvedor
 
 import (
 	"github.com/charmbracelet/bubbles/list"

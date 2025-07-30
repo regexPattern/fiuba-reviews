@@ -1,4 +1,4 @@
-package patch
+package patcher
 
 import (
 	"context"
@@ -6,13 +6,6 @@ import (
 
 	"golang.org/x/sync/errgroup"
 )
-
-type Patch struct {
-	CodigoSiu string
-	Nombre    string
-	Catedras  []CatedraSiu
-	Cuatri
-}
 
 type Indexador struct {
 	DbUrl         string
@@ -23,12 +16,12 @@ type Indexador struct {
 	S3OpTimeout   time.Duration
 }
 
-type NuevoPatch struct {
+type Patch struct {
 	OfertaMateriaSiu
 	ContextoMateriaBD
 }
 
-func (i *Indexador) GenerarPatches(ctx context.Context) ([]NuevoPatch, error) {
+func (i *Indexador) GenerarPatches(ctx context.Context) ([]Patch, error) {
 	if err := i.configClientesDatos(ctx); err != nil {
 		return nil, err
 	}
@@ -65,20 +58,30 @@ func (i *Indexador) configClientesDatos(ctx context.Context) error {
 func (i *Indexador) completarPatches(
 	ctx context.Context,
 	ofertas []OfertaMateriaSiu,
-) ([]NuevoPatch, error) {
-	patchesCh := make(chan NuevoPatch, len(ofertas))
+) ([]Patch, error) {
+	codigos := make([]string, len(ofertas))
+	for i, o := range ofertas {
+		codigos[i] = o.Materia.Codigo
+	}
+
+	nombres, err := i.getNombresMateriasBD(ctx, codigos)
+	if err != nil {
+		return nil, err
+	}
 
 	bdCtx, bdCancel := context.WithTimeout(ctx, i.DbOpTimeout)
 	defer bdCancel()
 
+	patchesCh := make(chan Patch, len(ofertas))
 	g, gCtx := errgroup.WithContext(bdCtx)
 
 	for _, o := range ofertas {
 		g.Go(func() error {
-			if c, err := getContextoMateriaBD(gCtx, o.Materia); err != nil {
+			nombreBD := nombres[o.Materia.Codigo]
+			if c, err := getContextoMateriaBD(gCtx, o.Materia, nombreBD); err != nil {
 				return err
 			} else {
-				patchesCh <- NuevoPatch{
+				patchesCh <- Patch{
 					OfertaMateriaSiu:  o,
 					ContextoMateriaBD: c,
 				}
@@ -93,7 +96,7 @@ func (i *Indexador) completarPatches(
 
 	close(patchesCh)
 
-	patches := make([]NuevoPatch, 0, len(ofertas))
+	patches := make([]Patch, 0, len(ofertas))
 	for p := range patchesCh {
 		patches = append(patches, p)
 	}

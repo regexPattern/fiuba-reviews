@@ -1,4 +1,4 @@
-package tui
+package resolvedor
 
 import (
 	"fmt"
@@ -6,11 +6,11 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
 )
 
 type vistaDocenteModel struct {
-	info patch.InfoActualMateria
+	info patcher.InfoActualMateria
 	err  error
 }
 

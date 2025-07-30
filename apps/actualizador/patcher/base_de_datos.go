@@ -1,10 +1,10 @@
-package patch
+package patcher
 
 import (
 	"context"
-	_ "embed"
 	"fmt"
 	"log/slog"
+	"strings"
 	"sync/atomic"
 
 	"github.com/jackc/pgx/v5"
@@ -26,11 +26,11 @@ func (i *Indexador) configPoolBD(ctx context.Context) error {
 	var err error
 	pool, err = pgxpool.New(ctx, i.DbUrl)
 	if err != nil {
-		slog.Error("error inicializado pool de conexiones con la base de datos", "error", err)
+		slog.Error("error configurando pool de conexiones con la base de datos", "error", err)
 		return err
 	}
 
-	slog.Info("pool de conexiones con la base de datos inicializado exitosamente")
+	slog.Info("pool de conexiones con la base de datos configurado exitosamente")
 
 	return nil
 }
@@ -56,10 +56,11 @@ func (i *Indexador) asociarMaterias(ctx context.Context, ofertas []OfertaMateria
 	g, gCtx := errgroup.WithContext(bdCtx)
 
 	for _, o := range ofertas {
-		if codigoDb, ok := sinAsociar[normalizeAndLower(o.Materia.Nombre)]; ok {
+		nombre := strings.ToLower(normalize(o.Materia.Nombre))
+		if codigoDb, ok := sinAsociar[nombre]; ok {
 			g.Go(func() error {
-				err := asociarMateria(gCtx, pool, o.Materia, codigoDb)
-				if err == nil {
+				asociada, err := asociarMateria(gCtx, pool, o.Materia, codigoDb)
+				if asociada && err == nil {
 					atomic.AddInt64(&completas, 1)
 				}
 				return err
@@ -67,13 +68,20 @@ func (i *Indexador) asociarMaterias(ctx context.Context, ofertas []OfertaMateria
 		}
 	}
 
+	completasVal := atomic.LoadInt64(&completas)
+
 	if err := g.Wait(); err != nil {
-		completasVal := atomic.LoadInt64(&completas)
-		slog.Error("error migrando docentes de materia desde equivalencias",
+		slog.Error("error asociando códigos de materias",
 			"completas", completasVal,
 			"incompletas", len(sinAsociar)-int(completasVal),
 		)
 		return err
+	}
+
+	if completasVal == 0 {
+		slog.Info("no se han asociado códigos de materias")
+	} else {
+		slog.Info(fmt.Sprintf("asociado códigos de %v materias exitosamente", completasVal))
 	}
 
 	return nil
@@ -107,7 +115,7 @@ WHERE
 func mapNombreCodigo(materias []MateriaBD) map[string]string {
 	codigos := make(map[string]string, len(materias))
 	for _, m := range materias {
-		codigos[normalizeAndLower(m.Nombre)] = m.Codigo
+		codigos[strings.ToLower(normalize(m.Nombre))] = m.Codigo
 	}
 	return codigos
 }
@@ -117,7 +125,7 @@ func asociarMateria(
 	pool *pgxpool.Pool,
 	materia MateriaSiu,
 	codigoDb string,
-) error {
+) (bool, error) {
 	l := slog.Default().With(
 		"codigo_siu", materia.Codigo,
 		"codigo_db", codigoDb,
@@ -134,11 +142,13 @@ WHERE
 
 	if err != nil {
 		l.Error("error asociando código de materia", "error", err)
+		return false, err
 	} else if res.RowsAffected() > 0 {
 		l.Debug("código de materia asociado exitosamente")
+		return true, nil
+	} else {
+		return false, nil
 	}
-
-	return err
 }
 
 func (i *Indexador) migrarMaterias(ctx context.Context, ofertas []OfertaMateriaSiu) error {
@@ -165,13 +175,20 @@ func (i *Indexador) migrarMaterias(ctx context.Context, ofertas []OfertaMateriaS
 		}
 	}
 
+	completasVal := atomic.LoadInt64(&completas)
+
 	if err := g.Wait(); err != nil {
-		completasVal := atomic.LoadInt64(&completas)
 		slog.Error("error migrando docentes de materia desde equivalencias",
 			"completas", completasVal,
 			"incompletas", len(sinMigrar)-int(completasVal),
 		)
 		return err
+	}
+
+	if completasVal == 0 {
+		slog.Info("no se han migrado materias desde equivalencias")
+	} else {
+		slog.Info(fmt.Sprintf("migradas %v materias desde equivalencias exitosamente", completasVal))
 	}
 
 	return nil
@@ -366,11 +383,16 @@ WHERE
 }
 
 type ContextoMateriaBD struct {
+	Nombre            string
 	CodigosDocentes   map[string]string
 	ResumenesDocentes map[string]string
 }
 
-func getContextoMateriaBD(ctx context.Context, materia MateriaSiu) (ContextoMateriaBD, error) {
+func getContextoMateriaBD(
+	ctx context.Context,
+	materia MateriaSiu,
+	nombreBD string,
+) (ContextoMateriaBD, error) {
 	var ctxMateria ContextoMateriaBD
 
 	logger := slog.Default().With("codigo", materia.Codigo, "nombre", materia.Nombre)
@@ -399,24 +421,59 @@ WHERE
 
 	docentes, err := pgx.CollectRows(rows, pgx.RowToStructByName[docenteDb])
 	if err != nil {
-		logger.Error("error obteniendo docentes para contexto de materia", "error", err)
+		logger.Error("error encontrando docentes para contexto de materia", "error", err)
 		return ctxMateria, err
 	} else {
-		logger.Debug(fmt.Sprintf("obtenidos %v docentes para contexto de materia", len(docentes)))
+		logger.Debug(fmt.Sprintf("encontrados %v docentes materia", len(docentes)))
 	}
 
+	ctxMateria.Nombre = nombreBD
 	ctxMateria.CodigosDocentes = make(map[string]string, len(docentes))
 	ctxMateria.ResumenesDocentes = make(map[string]string)
 
 	for _, d := range docentes {
-		nombreNorm := normalizeAndLower(d.Nombre)
-		ctxMateria.CodigosDocentes[nombreNorm] = d.Codigo
+		nombre := strings.ToLower(normalize(d.Nombre))
+		ctxMateria.CodigosDocentes[nombre] = d.Codigo
 		if d.ResumenComentarios != nil {
-			ctxMateria.ResumenesDocentes[nombreNorm] = *d.ResumenComentarios
+			ctxMateria.ResumenesDocentes[nombre] = *d.ResumenComentarios
 		}
 	}
 
-	logger.Debug("contexto de materia generado exitosamente")
-
 	return ctxMateria, nil
+}
+
+func (i *Indexador) getNombresMateriasBD(
+	ctx context.Context,
+	codigos []string,
+) (map[string]string, error) {
+	bdCtx, bdCancel := context.WithTimeout(ctx, i.DbOpTimeout)
+	defer bdCancel()
+
+	rows, err := pool.Query(bdCtx, `
+SELECT
+    codigo,
+    nombre
+FROM
+    materia
+WHERE
+    codigo = ANY($1)
+		`, codigos)
+
+	if err != nil {
+		slog.Error("error obteniendo nombres de materias", "error", err)
+		return nil, err
+	}
+
+	materias, err := pgx.CollectRows(rows, pgx.RowToStructByName[MateriaBD])
+	if err != nil {
+		slog.Error("error procesando nombres de materias", "error", err)
+		return nil, err
+	}
+
+	nombres := make(map[string]string, len(materias))
+	for _, m := range materias {
+		nombres[m.Codigo] = m.Nombre
+	}
+
+	return nombres, nil
 }

@@ -1,4 +1,4 @@
-.PHONY: run test lint
+.PHONY: run test lint format
 
 all: run
 

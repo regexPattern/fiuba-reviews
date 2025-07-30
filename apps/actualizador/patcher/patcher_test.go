@@ -1,4 +1,4 @@
-package patch
+package patcher
 
 import (
 	"testing"

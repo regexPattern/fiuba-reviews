@@ -1,4 +1,4 @@
-package patch
+package patcher
 
 import (
 	"testing"
@@ -13,7 +13,7 @@ func TestComparacionCuatrimestres(t *testing.T) {
 }
 
 func TestFiltrarSinOfertas(t *testing.T) {
-	ofertas := filtrarOfertasMateriasSiu([]*OfertaCarreraSiu{})
+	ofertas := filtrarOfertasMateriasSiu([]OfertaCarreraSiu{})
 
 	assert.Empty(t, ofertas)
 }
@@ -22,7 +22,7 @@ func TestFiltrarConOfertasDisjuntas(t *testing.T) {
 	m0 := MateriaSiu{Nombre: "Análisis Matemático II"}
 	m1 := MateriaSiu{Nombre: "Álgebra Lineal"}
 
-	ofertasCarreras := []*OfertaCarreraSiu{
+	ofertasCarreras := []OfertaCarreraSiu{
 		{Cuatri: Cuatri{1, 2025}, Materias: []MateriaSiu{m0}},
 		{Cuatri: Cuatri{1, 2025}, Materias: []MateriaSiu{m1}},
 	}
@@ -51,7 +51,7 @@ func TestFiltrarConOfertasDisjuntas(t *testing.T) {
 func TestFiltrarConOfertasNoDisjuntas(t *testing.T) {
 	m := MateriaSiu{Nombre: "Análisis Matemático II"}
 
-	ofertasCarreras := []*OfertaCarreraSiu{
+	ofertasCarreras := []OfertaCarreraSiu{
 		{Cuatri: Cuatri{1, 2025}, Materias: []MateriaSiu{m}},
 		{Cuatri: Cuatri{2, 2024}, Materias: []MateriaSiu{m}},
 		{Cuatri: Cuatri{1, 2023}, Materias: []MateriaSiu{m}},
@@ -66,7 +66,7 @@ func TestFiltrarConOfertasNoDisjuntas(t *testing.T) {
 func TestFiltrarConOfertasIguales(t *testing.T) {
 	m := MateriaSiu{Nombre: "Análisis Matemático II"}
 
-	ofertasCarreras := []*OfertaCarreraSiu{
+	ofertasCarreras := []OfertaCarreraSiu{
 		{Cuatri: Cuatri{1, 2025}, Materias: []MateriaSiu{m}},
 		{Cuatri: Cuatri{1, 2025}, Materias: []MateriaSiu{m}},
 	}
@@ -79,7 +79,7 @@ func TestFiltrarConOfertasIguales(t *testing.T) {
 func TestFiltrarConOfertasConflictivas(t *testing.T) {
 	m := MateriaSiu{Nombre: "Análisis Matemático II"}
 
-	ofertasCarreras := []*OfertaCarreraSiu{
+	ofertasCarreras := []OfertaCarreraSiu{
 		{Cuatri: Cuatri{1, 2025}, Materias: []MateriaSiu{m}},
 		{Cuatri: Cuatri{1, 2025}, Materias: []MateriaSiu{m}},
 	}

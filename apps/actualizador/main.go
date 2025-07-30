@@ -2,21 +2,20 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/tui"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/resolvedor"
 )
 
 func main() {
 	setupLogger()
 
-	i := patch.Indexador{
+	i := patcher.Indexador{
 		DbUrl:         os.Getenv("DATABASE_URL"),
 		DbInitTimeout: time.Second * 3,
 		DbOpTimeout:   time.Second * 10,
@@ -31,11 +30,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	for _, p := range patches[:10] {
-		fmt.Println(p)
+	if len(patches) == 0 {
+		slog.Info("no hay materias por actualizar")
+		return
 	}
 
-	tui.ResolvePatches([]patch.Patch{})
+	resolvedor.ResolvePatches(patches)
 }
 
 func setupLogger() {

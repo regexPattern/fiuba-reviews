@@ -1,4 +1,4 @@
-package tui
+package resolvedor
 
 import (
 	"log/slog"
@@ -6,7 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
 )
 
 type indiceVista uint
@@ -17,48 +17,48 @@ const (
 	enVistaDocente
 )
 
-type AppModelo struct {
+type Modelo struct {
 	indiceVista
-	selectorMateria  listaMateriasModel
-	selectorDocentes listaDocentesModel
-	vistaDocente     vistaDocenteModel
-	windowSize       tea.WindowSizeMsg
+	listaMaterias listaMateriasModel
+	listaDocentes listaDocentesModel
+	vistaDocente  vistaDocenteModel
+	windowSize    tea.WindowSizeMsg
 }
 
-func newApp(patches []patch.Patch) AppModelo {
-	// Ordenamos las materias según cantidad de docentes, de mayor a menor, para así dar prioridad
-	// (al menos visual) a las materias que tengan más docentes.
+func NewModel(patches []patcher.Patch) Modelo {
+	// Ordenamos los patches de materias según cantidad de docentes, de mayor a menor, para así
+	// dar prioridad (al menos visual) a las materias que tengan más docentes.
 	nDocentes := make(map[string]int, len(patches))
 	for _, p := range patches {
 		docentes := make(map[string]bool)
-		for _, c := range p.Catedras {
+		for _, c := range p.Materia.Catedras {
 			for _, d := range c.Docentes {
 				docentes[d.Nombre] = true
 			}
 		}
-		nDocentes[p.Nombre] = len(docentes)
+		nDocentes[p.Materia.Codigo] = len(docentes)
 	}
 
 	sort.Slice(patches, func(i, j int) bool {
-		return nDocentes[patches[i].Nombre] > nDocentes[patches[j].Nombre]
+		return nDocentes[patches[i].Materia.Codigo] > nDocentes[patches[j].Materia.Codigo]
 	})
 
-	return AppModelo{
-		selectorMateria:  newSelectorMateria(patches),
-		selectorDocentes: newSelectorDocentes(),
-		vistaDocente:     newVistaMateria(),
+	return Modelo{
+		listaMaterias: newListaMaterias(patches),
+		listaDocentes: newListaDocentes(),
+		vistaDocente:  newVistaMateria(),
 	}
 }
 
-func (m AppModelo) Init() tea.Cmd {
+func (m Modelo) Init() tea.Cmd {
 	slog.Info("iniciando resolvedor de patches gráfico")
-	return m.selectorMateria.Init()
+	return m.listaMaterias.Init()
 }
 
-func (m AppModelo) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Modelo) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case materiaSeleccionadaMsg:
-		m.selectorDocentes.setDocentes(msg.patch)
+		m.listaDocentes.setDocentes(msg.patch)
 		return m, nil
 
 	case tea.KeyMsg:
@@ -95,27 +95,27 @@ func (m AppModelo) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch m.indiceVista {
 	case enListaMaterias:
-		m.selectorMateria, cmd = m.selectorMateria.Update(msg)
+		m.listaMaterias, cmd = m.listaMaterias.Update(msg)
 	case enListaDocentes:
-		m.selectorDocentes, cmd = m.selectorDocentes.Update(msg)
+		m.listaDocentes, cmd = m.listaDocentes.Update(msg)
 	}
 
 	return m, cmd
 }
 
-func (m AppModelo) View() string {
+func (m Modelo) View() string {
 	var panel0, panel1, panel2 string
 
 	if m.indiceVista == enListaMaterias {
-		panel0 = estiloPanelActivo.Render(m.selectorMateria.View())
+		panel0 = estiloPanelActivo.Render(m.listaMaterias.View())
 	} else {
-		panel0 = estiloPanelInactivo.Render(m.selectorMateria.View())
+		panel0 = estiloPanelInactivo.Render(m.listaMaterias.View())
 	}
 
 	if m.indiceVista == enListaDocentes {
-		panel1 = estiloPanelActivo.Render(m.selectorDocentes.View())
+		panel1 = estiloPanelActivo.Render(m.listaDocentes.View())
 	} else {
-		panel1 = estiloPanelInactivo.Render(m.selectorDocentes.View())
+		panel1 = estiloPanelInactivo.Render(m.listaDocentes.View())
 	}
 
 	anchoPanel0 := lipgloss.Width(panel0)
@@ -131,12 +131,7 @@ func (m AppModelo) View() string {
 	return lipgloss.JoinHorizontal(lipgloss.Top, panel0, panel1, panel2) + "\n"
 }
 
-func ResolvePatches(patches []patch.Patch) {
-	if len(patches) == 0 {
-		slog.Info("no hay materias por actualizar")
-		return
-	}
-
-	p := tea.NewProgram(newApp(patches))
+func ResolvePatches(patches []patcher.Patch) {
+	p := tea.NewProgram(NewModel(patches))
 	_, _ = p.Run()
 }

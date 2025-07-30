@@ -1,4 +1,4 @@
-package tui
+package resolvedor
 
 import (
 	"fmt"
@@ -8,16 +8,16 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patch"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
 )
 
 type listaDocentesModel struct {
-	docentesMaterias    map[string][]patch.DocenteSiu
+	docentesMaterias    map[string][]patcher.DocenteSiu
 	nombreMateriaActual string
 	widgetLista         list.Model
 }
 
-type docenteItem patch.DocenteSiu
+type docenteItem patcher.DocenteSiu
 
 func (i docenteItem) Title() string {
 	return fmt.Sprintf("%s (%s)", i.Nombre, i.Rol)
@@ -31,12 +31,12 @@ func (i docenteItem) FilterValue() string {
 	return i.Nombre
 }
 
-func newSelectorDocentes() listaDocentesModel {
+func newListaDocentes() listaDocentesModel {
 	l := newDefaultList()
 	l.Title = "Docentes"
 
 	return listaDocentesModel{
-		docentesMaterias: make(map[string][]patch.DocenteSiu),
+		docentesMaterias: make(map[string][]patcher.DocenteSiu),
 		widgetLista:      l,
 	}
 }
@@ -55,11 +55,11 @@ func (m listaDocentesModel) View() string {
 	return m.widgetLista.View()
 }
 
-func (m *listaDocentesModel) setDocentes(p *patch.Patch) {
-	m.nombreMateriaActual = p.Nombre
-	if _, ok := m.docentesMaterias[p.Nombre]; !ok {
-		docentesUnicos := make(map[patch.DocenteSiu]bool)
-		for _, c := range p.Catedras {
+func (m *listaDocentesModel) setDocentes(p *patcher.Patch) {
+	m.nombreMateriaActual = p.Materia.Nombre
+	if _, ok := m.docentesMaterias[p.Materia.Nombre]; !ok {
+		docentesUnicos := make(map[patcher.DocenteSiu]bool)
+		for _, c := range p.Materia.Catedras {
 			for _, d := range c.Docentes {
 				docentesUnicos[d] = true
 			}
@@ -70,10 +70,10 @@ func (m *listaDocentesModel) setDocentes(p *patch.Patch) {
 			return docentesOrdenados[i].Nombre < docentesOrdenados[j].Nombre
 		})
 
-		m.docentesMaterias[p.Nombre] = docentesOrdenados
+		m.docentesMaterias[p.Materia.Nombre] = docentesOrdenados
 	}
-	items := make([]list.Item, len(m.docentesMaterias[p.Nombre]))
-	for i, d := range m.docentesMaterias[p.Nombre] {
+	items := make([]list.Item, len(m.docentesMaterias[p.Materia.Nombre]))
+	for i, d := range m.docentesMaterias[p.Materia.Nombre] {
 		items[i] = docenteItem(d)
 	}
 	m.widgetLista.SetItems(items)
