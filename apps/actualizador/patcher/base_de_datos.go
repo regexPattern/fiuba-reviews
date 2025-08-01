@@ -331,68 +331,12 @@ FROM
 	return nil
 }
 
-type InfoActualMateria struct {
-	Nombre   string
-	Docentes []DocenteDb
-}
-
-type DocenteDb struct {
-	Codigo    string  `db:"codigo"`
-	Nombre    string  `db:"nombre"`
-	NombreSiu *string `db:"nombre_siu"`
-}
-
-func GetInfoMateria(codigo string) (*InfoActualMateria, error) {
-	var nombre string
-
-	err := pool.QueryRow(context.Background(), `
-SELECT
-		nombre
-FROM
-		materia
-WHERE
-		codigo = $1
-		`, codigo).Scan(&nombre)
-
-	if err != nil {
-		return nil, err
-	}
-
-	rows, _ := pool.Query(context.Background(), `
-SELECT
-    codigo,
-    nombre,
-    nombre_siu
-FROM
-    docente
-WHERE
-    codigo_materia = $1
-		`, codigo)
-
-	docentes, err := pgx.CollectRows(rows, pgx.RowToStructByName[DocenteDb])
-	if err != nil {
-		return nil, err
-	}
-
-	info := &InfoActualMateria{
-		Nombre:   nombre,
-		Docentes: docentes,
-	}
-
-	return info, nil
-}
-
 type ContextoMateriaBD struct {
-	Nombre            string
 	CodigosDocentes   map[string]string
 	ResumenesDocentes map[string]string
 }
 
-func getContextoMateriaBD(
-	ctx context.Context,
-	materia MateriaSiu,
-	nombreBD string,
-) (ContextoMateriaBD, error) {
+func getContextoMateriaBD(ctx context.Context, materia MateriaSiu) (ContextoMateriaBD, error) {
 	var ctxMateria ContextoMateriaBD
 
 	logger := slog.Default().With("codigo", materia.Codigo, "nombre", materia.Nombre)
@@ -424,10 +368,9 @@ WHERE
 		logger.Error("error encontrando docentes para contexto de materia", "error", err)
 		return ctxMateria, err
 	} else {
-		logger.Debug(fmt.Sprintf("encontrados %v docentes materia", len(docentes)))
+		logger.Debug(fmt.Sprintf("encontrados %v docentes de materia", len(docentes)))
 	}
 
-	ctxMateria.Nombre = nombreBD
 	ctxMateria.CodigosDocentes = make(map[string]string, len(docentes))
 	ctxMateria.ResumenesDocentes = make(map[string]string)
 
@@ -440,40 +383,4 @@ WHERE
 	}
 
 	return ctxMateria, nil
-}
-
-func (i *Indexador) getNombresMateriasBD(
-	ctx context.Context,
-	codigos []string,
-) (map[string]string, error) {
-	bdCtx, bdCancel := context.WithTimeout(ctx, i.DbOpTimeout)
-	defer bdCancel()
-
-	rows, err := pool.Query(bdCtx, `
-SELECT
-    codigo,
-    nombre
-FROM
-    materia
-WHERE
-    codigo = ANY($1)
-		`, codigos)
-
-	if err != nil {
-		slog.Error("error obteniendo nombres de materias", "error", err)
-		return nil, err
-	}
-
-	materias, err := pgx.CollectRows(rows, pgx.RowToStructByName[MateriaBD])
-	if err != nil {
-		slog.Error("error procesando nombres de materias", "error", err)
-		return nil, err
-	}
-
-	nombres := make(map[string]string, len(materias))
-	for _, m := range materias {
-		nombres[m.Codigo] = m.Nombre
-	}
-
-	return nombres, nil
 }

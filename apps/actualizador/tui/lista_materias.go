@@ -1,20 +1,22 @@
-package resolvedor
+package tui
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
 )
 
 type listaMateriasModel struct {
-	patches     []patcher.Patch
-	widgetLista list.Model
+	patches []patcher.Patch
+	lista   list.Model
 }
 
 type patchItem patcher.Patch
 
 func (i patchItem) Title() string {
-	return i.ContextoMateriaBD.Nombre
+	return i.Materia.Nombre
 }
 
 func (i patchItem) Description() string {
@@ -36,33 +38,44 @@ func newListaMaterias(patches []patcher.Patch) listaMateriasModel {
 	l.SetItems(items)
 
 	return listaMateriasModel{
-		patches:     patches,
-		widgetLista: l,
+		patches: patches,
+		lista:   l,
 	}
 }
 
 func (m listaMateriasModel) Init() tea.Cmd {
-	if len(m.patches) > 0 {
-		m := &m.patches[0]
-		return materiaSeleccionadaCmd(m)
-	} else {
-		return nil
-	}
+	return seleccionarMateriaCmd(&m.patches[0])
 }
 
 func (m listaMateriasModel) Update(msg tea.Msg) (listaMateriasModel, tea.Cmd) {
-	iAnterior := m.widgetLista.GlobalIndex()
+	iAnterior := m.lista.GlobalIndex()
 
 	var cmd tea.Cmd
-	m.widgetLista, cmd = m.widgetLista.Update(msg)
+	m.lista, cmd = m.lista.Update(msg)
 
-	if iActual := m.widgetLista.GlobalIndex(); iActual != iAnterior {
-		return m, tea.Batch(cmd, materiaSeleccionadaCmd(&m.patches[iActual]))
+	if iActual := m.lista.GlobalIndex(); iActual != iAnterior {
+		return m, tea.Batch(cmd, seleccionarMateriaCmd(&m.patches[iActual]))
 	}
 
 	return m, cmd
 }
 
 func (m listaMateriasModel) View() string {
-	return m.widgetLista.View()
+	return m.lista.View()
+}
+
+type materiaSeleccionadaMsg *patcher.Patch
+
+func seleccionarMateriaCmd(patch *patcher.Patch) tea.Cmd {
+	titulo := fmt.Sprintf(
+		"fiuba-reviews • %s • %s",
+		patch.Materia.Codigo,
+		patch.Materia.Nombre,
+	)
+	return tea.Batch(
+		tea.SetWindowTitle(titulo),
+		func() tea.Msg {
+			return materiaSeleccionadaMsg(patch)
+		},
+	)
 }

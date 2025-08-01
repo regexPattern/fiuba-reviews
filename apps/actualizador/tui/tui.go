@@ -1,4 +1,4 @@
-package resolvedor
+package tui
 
 import (
 	"log/slog"
@@ -14,18 +14,18 @@ type indiceVista uint
 const (
 	enListaMaterias indiceVista = iota
 	enListaDocentes
-	enVistaDocente
+	enResolverDocente
 )
 
-type Modelo struct {
+type Model struct {
 	indiceVista
-	listaMaterias listaMateriasModel
-	listaDocentes listaDocentesModel
-	vistaDocente  vistaDocenteModel
-	windowSize    tea.WindowSizeMsg
+	listaMaterias   listaMateriasModel
+	listaDocentes   listaDocentesModel
+	resolverDocente resolverDocenteModel
+	dimensiones     tea.WindowSizeMsg
 }
 
-func NewModel(patches []patcher.Patch) Modelo {
+func NewModel(patches []patcher.Patch) Model {
 	// Ordenamos los patches de materias según cantidad de docentes, de mayor a menor, para así
 	// dar prioridad (al menos visual) a las materias que tengan más docentes.
 	nDocentes := make(map[string]int, len(patches))
@@ -43,22 +43,31 @@ func NewModel(patches []patcher.Patch) Modelo {
 		return nDocentes[patches[i].Materia.Codigo] > nDocentes[patches[j].Materia.Codigo]
 	})
 
-	return Modelo{
-		listaMaterias: newListaMaterias(patches),
-		listaDocentes: newListaDocentes(),
-		vistaDocente:  newVistaMateria(),
+	return Model{
+		listaMaterias:   newListaMaterias(patches),
+		listaDocentes:   newListaDocentes(),
+		resolverDocente: newVistaMateria(),
 	}
 }
 
-func (m Modelo) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	slog.Info("iniciando resolvedor de patches gráfico")
 	return m.listaMaterias.Init()
 }
 
-func (m Modelo) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	// Manejamos el cambio de la materia y docentes seleccionado desde el modelo principal de la app
+	// porque este es el que tiene acceso a las tres vistas. Esto tiene que ser asi ya no podemos
+	// hacer que cada componente se actualice por su cuenta, debido al conflicto de keybinds que
+	// habría entre ambas listas.
 	case materiaSeleccionadaMsg:
-		m.listaDocentes.setDocentes(msg.patch)
+		m.resolverDocente.setMateria(msg)
+		cmd := m.listaDocentes.setDocentes(msg)
+		return m, cmd
+
+	case docenteSeleccionadoMsg:
+		m.resolverDocente.setDocente(msg)
 		return m, nil
 
 	case tea.KeyMsg:
@@ -70,9 +79,9 @@ func (m Modelo) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case enListaMaterias:
 				m.indiceVista = enListaDocentes
 			case enListaDocentes:
-				m.indiceVista = enVistaDocente
-			case enVistaDocente:
-				m.indiceVista = enVistaDocente
+				m.indiceVista = enResolverDocente
+			case enResolverDocente:
+				m.indiceVista = enResolverDocente
 			}
 			return m, nil
 		case "shift+tab":
@@ -81,14 +90,15 @@ func (m Modelo) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.indiceVista = enListaMaterias
 			case enListaDocentes:
 				m.indiceVista = enListaMaterias
-			case enVistaDocente:
+			case enResolverDocente:
 				m.indiceVista = enListaDocentes
 			}
 			return m, nil
 		}
 
 	case tea.WindowSizeMsg:
-		m.windowSize = msg
+		m.dimensiones = msg
+		return m, nil
 	}
 
 	var cmd tea.Cmd
@@ -103,7 +113,7 @@ func (m Modelo) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m Modelo) View() string {
+func (m Model) View() string {
 	var panel0, panel1, panel2 string
 
 	if m.indiceVista == enListaMaterias {
@@ -120,18 +130,13 @@ func (m Modelo) View() string {
 
 	anchoPanel0 := lipgloss.Width(panel0)
 	anchoPanel1 := lipgloss.Width(panel1)
-	anchoPanel2 := m.windowSize.Width - anchoPanel0 - anchoPanel1 - 2
+	anchoPanel2 := m.dimensiones.Width - anchoPanel0 - anchoPanel1 - 2
 
-	if m.indiceVista == enVistaDocente {
-		panel2 = estiloPanelActivo.Width(anchoPanel2).Render(m.vistaDocente.View())
+	if m.indiceVista == enResolverDocente {
+		panel2 = estiloPanelActivo.Width(anchoPanel2).Render(m.resolverDocente.View())
 	} else {
-		panel2 = estiloPanelInactivo.Width(anchoPanel2).Render(m.vistaDocente.View())
+		panel2 = estiloPanelInactivo.Width(anchoPanel2).Render(m.resolverDocente.View())
 	}
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, panel0, panel1, panel2) + "\n"
-}
-
-func ResolvePatches(patches []patcher.Patch) {
-	p := tea.NewProgram(NewModel(patches))
-	_, _ = p.Run()
 }

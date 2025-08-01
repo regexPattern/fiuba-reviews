@@ -7,9 +7,10 @@ import (
 	"strings"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/log"
 	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/resolvedor"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/tui"
 )
 
 func main() {
@@ -35,7 +36,8 @@ func main() {
 		return
 	}
 
-	resolvedor.ResolvePatches(patches)
+	p := tea.NewProgram(tui.NewModel(patches))
+	_, _ = p.Run()
 }
 
 func setupLogger() {

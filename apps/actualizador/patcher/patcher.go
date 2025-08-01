@@ -59,16 +59,6 @@ func (i *Indexador) completarPatches(
 	ctx context.Context,
 	ofertas []OfertaMateriaSiu,
 ) ([]Patch, error) {
-	codigos := make([]string, len(ofertas))
-	for i, o := range ofertas {
-		codigos[i] = o.Materia.Codigo
-	}
-
-	nombres, err := i.getNombresMateriasBD(ctx, codigos)
-	if err != nil {
-		return nil, err
-	}
-
 	bdCtx, bdCancel := context.WithTimeout(ctx, i.DbOpTimeout)
 	defer bdCancel()
 
@@ -77,8 +67,7 @@ func (i *Indexador) completarPatches(
 
 	for _, o := range ofertas {
 		g.Go(func() error {
-			nombreBD := nombres[o.Materia.Codigo]
-			if c, err := getContextoMateriaBD(gCtx, o.Materia, nombreBD); err != nil {
+			if c, err := getContextoMateriaBD(gCtx, o.Materia); err != nil {
 				return err
 			} else {
 				patchesCh <- Patch{
