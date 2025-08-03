@@ -1,4 +1,4 @@
-package tui
+package resolver
 
 import (
 	"github.com/charmbracelet/bubbles/list"
@@ -6,21 +6,20 @@ import (
 )
 
 const (
-	anchoLista  = 30
-	alturaLista = 20
+	listWidth  = 30
+	listHeight = 20
 )
 
 var (
-	colorFiuba = lipgloss.Color("#4EACD4")
+	fiubaColor = lipgloss.Color("#4EACD4")
 )
 
 var (
 	estiloPanelBase = lipgloss.NewStyle().
-			Width(anchoLista+5).
-			Height(alturaLista+1).
+			Width(listWidth+5).
 			Padding(0, 1).
-			Border(lipgloss.ThickBorder())
-	estiloPanelActivo   = estiloPanelBase.BorderForeground(colorFiuba)
+			Border(lipgloss.NormalBorder())
+	estiloPanelActivo   = estiloPanelBase.BorderForeground(fiubaColor)
 	estiloPanelInactivo = estiloPanelBase.BorderForeground(lipgloss.Color("240"))
 )
 
@@ -30,7 +29,7 @@ func newDefaultList() list.Model {
 	d.SetSpacing(0)
 	d.ShowDescription = false
 
-	l := list.New([]list.Item{}, d, anchoLista, alturaLista)
+	l := list.New([]list.Item{}, d, listWidth, listHeight)
 	l.DisableQuitKeybindings()
 	l.KeyMap.ShowFullHelp.Unbind()
 	l.KeyMap.CloseFullHelp.Unbind()
@@ -40,6 +39,7 @@ func newDefaultList() list.Model {
 	l.Styles.TitleBar = l.Styles.TitleBar.UnsetPaddingLeft()
 	l.Styles.TitleBar = l.Styles.TitleBar.UnsetPaddingRight()
 	l.Styles.StatusBar = l.Styles.StatusBar.PaddingLeft(1)
+	l.Styles.NoItems = l.Styles.NoItems.PaddingLeft(1)
 	l.Styles.PaginationStyle = l.Styles.PaginationStyle.PaddingLeft(1)
 
 	return l

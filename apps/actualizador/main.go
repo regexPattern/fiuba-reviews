@@ -7,10 +7,9 @@ import (
 	"strings"
 	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/log"
 	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/tui"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/resolver"
 )
 
 func main() {
@@ -27,7 +26,6 @@ func main() {
 
 	patches, err := i.GenerarPatches(context.Background())
 	if err != nil {
-		slog.Error("no se pudieron generar los patches de actualización")
 		os.Exit(1)
 	}
 
@@ -36,8 +34,7 @@ func main() {
 		return
 	}
 
-	p := tea.NewProgram(tui.NewModel(patches))
-	_, _ = p.Run()
+	resolver.ResolverPatches(patches)
 }
 
 func setupLogger() {
@@ -48,7 +45,7 @@ func setupLogger() {
 
 	logger := log.NewWithOptions(os.Stdout, log.Options{
 		ReportTimestamp: true,
-		TimeFormat:      time.RFC3339,
+		TimeFormat:      time.TimeOnly,
 		Level:           logLvl,
 	})
 

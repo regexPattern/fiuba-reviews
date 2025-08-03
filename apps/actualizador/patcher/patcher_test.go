@@ -7,7 +7,7 @@ import (
 )
 
 func TestMapNombreCodigoMateriasDb(t *testing.T) {
-	materias := []MateriaBD{
+	materias := []MateriaDb{
 		{Codigo: "COD001", Nombre: "Análisis Matemático II"},
 		{Codigo: "COD002", Nombre: "Álgebra Lineal"},
 	}

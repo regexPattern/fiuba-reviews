@@ -14,12 +14,12 @@ import (
 
 var pool *pgxpool.Pool
 
-type MateriaBD struct {
+type MateriaDb struct {
 	Codigo string `db:"codigo"`
 	Nombre string `db:"nombre"`
 }
 
-func (i *Indexador) configPoolBD(ctx context.Context) error {
+func (i *Indexador) configPoolDb(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(ctx, i.DbInitTimeout)
 	defer cancel()
 
@@ -35,7 +35,7 @@ func (i *Indexador) configPoolBD(ctx context.Context) error {
 	return nil
 }
 
-func (i *Indexador) syncMateriasSiuConBD(ctx context.Context, ofertas []OfertaMateriaSiu) error {
+func (i *Indexador) syncMateriasSiuConDb(ctx context.Context, ofertas []OfertaMateriaSiu) error {
 	if err := i.asociarMaterias(ctx, ofertas); err != nil {
 		return err
 	} else {
@@ -49,11 +49,11 @@ func (i *Indexador) asociarMaterias(ctx context.Context, ofertas []OfertaMateria
 		return err
 	}
 
-	bdCtx, bdCancel := context.WithTimeout(ctx, i.DbOpTimeout)
-	defer bdCancel()
+	dbCtx, dbCancel := context.WithTimeout(ctx, i.DbOpTimeout)
+	defer dbCancel()
 
 	var completas int64
-	g, gCtx := errgroup.WithContext(bdCtx)
+	g, gCtx := errgroup.WithContext(dbCtx)
 
 	for _, o := range ofertas {
 		nombre := strings.ToLower(normalize(o.Materia.Nombre))
@@ -88,10 +88,10 @@ func (i *Indexador) asociarMaterias(ctx context.Context, ofertas []OfertaMateria
 }
 
 func (i *Indexador) getMateriasSinAsociar(ctx context.Context) (map[string]string, error) {
-	bdCtx, bdCancel := context.WithTimeout(ctx, i.DbOpTimeout)
-	defer bdCancel()
+	dbCtx, dbCancel := context.WithTimeout(ctx, i.DbOpTimeout)
+	defer dbCancel()
 
-	rows, _ := pool.Query(bdCtx, `
+	rows, _ := pool.Query(dbCtx, `
 SELECT
     codigo,
     nombre
@@ -101,7 +101,7 @@ WHERE
     codigo LIKE 'COD%'
 		`)
 
-	materias, err := pgx.CollectRows(rows, pgx.RowToStructByName[MateriaBD])
+	materias, err := pgx.CollectRows(rows, pgx.RowToStructByName[MateriaDb])
 	if err != nil {
 		slog.Error("error obteniendo materias con códigos desactualizados", "error", err)
 		return nil, err
@@ -112,7 +112,7 @@ WHERE
 	return mapNombreCodigo(materias), nil
 }
 
-func mapNombreCodigo(materias []MateriaBD) map[string]string {
+func mapNombreCodigo(materias []MateriaDb) map[string]string {
 	codigos := make(map[string]string, len(materias))
 	for _, m := range materias {
 		codigos[strings.ToLower(normalize(m.Nombre))] = m.Codigo
@@ -157,11 +157,11 @@ func (i *Indexador) migrarMaterias(ctx context.Context, ofertas []OfertaMateriaS
 		return err
 	}
 
-	bdCtx, bdCancel := context.WithTimeout(ctx, i.DbOpTimeout)
-	defer bdCancel()
+	dbCtx, dbCancel := context.WithTimeout(ctx, i.DbOpTimeout)
+	defer dbCancel()
 
 	var completas int64
-	g, gCtx := errgroup.WithContext(bdCtx)
+	g, gCtx := errgroup.WithContext(dbCtx)
 
 	for _, o := range ofertas {
 		if _, ok := sinMigrar[o.Materia.Nombre]; ok {
@@ -195,10 +195,10 @@ func (i *Indexador) migrarMaterias(ctx context.Context, ofertas []OfertaMateriaS
 }
 
 func (i *Indexador) getMateriasSinMigrar(ctx context.Context) (map[string]string, error) {
-	bdCtx, bdCancel := context.WithTimeout(ctx, i.DbOpTimeout)
-	defer bdCancel()
+	dbCtx, dbCancel := context.WithTimeout(ctx, i.DbOpTimeout)
+	defer dbCancel()
 
-	rows, _ := pool.Query(bdCtx, `
+	rows, _ := pool.Query(dbCtx, `
 SELECT
     m.codigo,
     m.nombre
@@ -211,7 +211,7 @@ WHERE
     AND p.esta_vigente = TRUE
 		`)
 
-	materias, err := pgx.CollectRows(rows, pgx.RowToStructByName[MateriaBD])
+	materias, err := pgx.CollectRows(rows, pgx.RowToStructByName[MateriaDb])
 	if err != nil {
 		slog.Error("error obteniendo materias con equivalencias sin migrar", "error", err)
 		return nil, err
@@ -331,13 +331,13 @@ FROM
 	return nil
 }
 
-type ContextoMateriaBD struct {
+type ContextoMateriaDb struct {
 	CodigosDocentes   map[string]string
 	ResumenesDocentes map[string]string
 }
 
-func getContextoMateriaBD(ctx context.Context, materia MateriaSiu) (ContextoMateriaBD, error) {
-	var ctxMateria ContextoMateriaBD
+func getContextoMateriaDb(ctx context.Context, materia MateriaSiu) (ContextoMateriaDb, error) {
+	var ctxMateria ContextoMateriaDb
 
 	logger := slog.Default().With("codigo", materia.Codigo, "nombre", materia.Nombre)
 

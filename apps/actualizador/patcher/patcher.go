@@ -7,6 +7,11 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+type Patch struct {
+	OfertaMateriaSiu
+	ContextoMateriaDb
+}
+
 type Indexador struct {
 	DbUrl         string
 	DbInitTimeout time.Duration
@@ -14,11 +19,6 @@ type Indexador struct {
 	S3BucketName  string
 	S3InitTimeout time.Duration
 	S3OpTimeout   time.Duration
-}
-
-type Patch struct {
-	OfertaMateriaSiu
-	ContextoMateriaBD
 }
 
 func (i *Indexador) GenerarPatches(ctx context.Context) ([]Patch, error) {
@@ -33,7 +33,7 @@ func (i *Indexador) GenerarPatches(ctx context.Context) ([]Patch, error) {
 		return nil, err
 	}
 
-	if err := i.syncMateriasSiuConBD(ctx, ofertas); err != nil {
+	if err := i.syncMateriasSiuConDb(ctx, ofertas); err != nil {
 		return nil, err
 	}
 
@@ -50,7 +50,7 @@ func (i *Indexador) configClientesDatos(ctx context.Context) error {
 		return i.configClienteS3(gCtx)
 	})
 	g.Go(func() error {
-		return i.configPoolBD(gCtx)
+		return i.configPoolDb(gCtx)
 	})
 	return g.Wait()
 }
@@ -67,12 +67,12 @@ func (i *Indexador) completarPatches(
 
 	for _, o := range ofertas {
 		g.Go(func() error {
-			if c, err := getContextoMateriaBD(gCtx, o.Materia); err != nil {
+			if c, err := getContextoMateriaDb(gCtx, o.Materia); err != nil {
 				return err
 			} else {
 				patchesCh <- Patch{
 					OfertaMateriaSiu:  o,
-					ContextoMateriaBD: c,
+					ContextoMateriaDb: c,
 				}
 				return nil
 			}

@@ -1,4 +1,4 @@
-package tui
+package resolver
 
 import (
 	"fmt"
@@ -44,7 +44,7 @@ func newListaMaterias(patches []patcher.Patch) listaMateriasModel {
 }
 
 func (m listaMateriasModel) Init() tea.Cmd {
-	return seleccionarMateriaCmd(&m.patches[0])
+	return setMateriaCmd(&m.patches[0])
 }
 
 func (m listaMateriasModel) Update(msg tea.Msg) (listaMateriasModel, tea.Cmd) {
@@ -54,7 +54,7 @@ func (m listaMateriasModel) Update(msg tea.Msg) (listaMateriasModel, tea.Cmd) {
 	m.lista, cmd = m.lista.Update(msg)
 
 	if iActual := m.lista.GlobalIndex(); iActual != iAnterior {
-		return m, tea.Batch(cmd, seleccionarMateriaCmd(&m.patches[iActual]))
+		return m, tea.Batch(cmd, setMateriaCmd(&m.patches[iActual]))
 	}
 
 	return m, cmd
@@ -64,18 +64,17 @@ func (m listaMateriasModel) View() string {
 	return m.lista.View()
 }
 
-type materiaSeleccionadaMsg *patcher.Patch
+type setMateriaMsg *patcher.Patch
 
-func seleccionarMateriaCmd(patch *patcher.Patch) tea.Cmd {
-	titulo := fmt.Sprintf(
-		"fiuba-reviews • %s • %s",
-		patch.Materia.Codigo,
-		patch.Materia.Nombre,
-	)
+func setMateriaCmd(patch *patcher.Patch) tea.Cmd {
 	return tea.Batch(
-		tea.SetWindowTitle(titulo),
+		tea.SetWindowTitle(fmt.Sprintf(
+			"fiuba-reviews • %s • %s",
+			patch.Materia.Codigo,
+			patch.Materia.Nombre,
+		)),
 		func() tea.Msg {
-			return materiaSeleccionadaMsg(patch)
+			return setMateriaMsg(patch)
 		},
 	)
 }

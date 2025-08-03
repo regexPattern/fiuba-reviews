@@ -1,17 +1,17 @@
-package tui
+package resolver
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type resolverDocenteModel struct {
-	docentesPorMateria map[string]docenteSeleccionadoMsg
+	docentesPorMateria map[string]setDocenteMsg
 	materiaActual      string
 }
 
 func newVistaMateria() resolverDocenteModel {
 	return resolverDocenteModel{
-		docentesPorMateria: make(map[string]docenteSeleccionadoMsg),
+		docentesPorMateria: make(map[string]setDocenteMsg),
 	}
 }
 
@@ -21,9 +21,9 @@ func (m resolverDocenteModel) Init() tea.Cmd {
 
 func (m resolverDocenteModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case docenteSeleccionadoMsg:
+	case setDocenteMsg:
 		m.setDocente(msg)
-	case materiaSeleccionadaMsg:
+	case setMateriaMsg:
 		m.setMateria(msg)
 	}
 	return m, nil
@@ -37,10 +37,10 @@ func (m resolverDocenteModel) View() string {
 }
 
 
-func (m *resolverDocenteModel) setMateria(msg materiaSeleccionadaMsg) {
+func (m *resolverDocenteModel) setMateria(msg setMateriaMsg) {
 	m.materiaActual = msg.Materia.Nombre
 }
 
-func (m *resolverDocenteModel) setDocente(msg docenteSeleccionadoMsg) {
+func (m *resolverDocenteModel) setDocente(msg setDocenteMsg) {
 	m.docentesPorMateria[m.materiaActual] = msg
 }
