@@ -69,13 +69,13 @@ func (i *Indexador) completarPatches(
 		g.Go(func() error {
 			if c, err := getContextoMateriaDb(gCtx, o.Materia); err != nil {
 				return err
-			} else {
+			} else if c != nil {
 				patchesCh <- Patch{
 					OfertaMateriaSiu:  o,
-					ContextoMateriaDb: c,
+					ContextoMateriaDb: *c,
 				}
-				return nil
 			}
+			return nil
 		})
 	}
 

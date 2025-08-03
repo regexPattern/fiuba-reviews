@@ -9,13 +9,13 @@ import (
 )
 
 func ResolverPatches(patches []patcher.Patch) {
-	priorizarPatches(patches)
+	sortPatchesSegunPrioridad(patches)
 
-	p := tea.NewProgram(newModel(patches[:10]))
+	p := tea.NewProgram(newModel(patches))
 	_, _ = p.Run()
 }
 
-func priorizarPatches(patches []patcher.Patch) {
+func sortPatchesSegunPrioridad(patches []patcher.Patch) {
 	nDocentes := make(map[string]int, len(patches))
 	for _, p := range patches {
 		docentesUnicos := make(map[string]bool)

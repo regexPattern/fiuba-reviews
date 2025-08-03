@@ -332,14 +332,34 @@ FROM
 }
 
 type ContextoMateriaDb struct {
+	NombreDb          string
 	CodigosDocentes   map[string]string
 	ResumenesDocentes map[string]string
 }
 
-func getContextoMateriaDb(ctx context.Context, materia MateriaSiu) (ContextoMateriaDb, error) {
+func getContextoMateriaDb(ctx context.Context, materia MateriaSiu) (*ContextoMateriaDb, error) {
 	var ctxMateria ContextoMateriaDb
 
 	logger := slog.Default().With("codigo", materia.Codigo, "nombre", materia.Nombre)
+
+	var nombreMateria string
+	err := pool.QueryRow(ctx, `
+SELECT
+	nombre
+FROM
+	materia
+WHERE
+	codigo = $1
+		`, materia.Codigo).Scan(&nombreMateria)
+
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			logger.Warn("materia no encontrada en la base de datos")
+		} else {
+			logger.Error("error obteniendo nombre de materia", "error", err)
+			return nil, err
+		}
+	}
 
 	rows, err := pool.Query(ctx, `
 SELECT
@@ -354,7 +374,7 @@ WHERE
 
 	if err != nil {
 		logger.Error("error obteniendo docentes de materia", "error", err)
-		return ctxMateria, err
+		return nil, err
 	}
 
 	type docenteDb struct {
@@ -366,11 +386,12 @@ WHERE
 	docentes, err := pgx.CollectRows(rows, pgx.RowToStructByName[docenteDb])
 	if err != nil {
 		logger.Error("error encontrando docentes para contexto de materia", "error", err)
-		return ctxMateria, err
+		return nil, err
 	} else {
 		logger.Debug(fmt.Sprintf("encontrados %v docentes de materia", len(docentes)))
 	}
 
+	ctxMateria.NombreDb = nombreMateria
 	ctxMateria.CodigosDocentes = make(map[string]string, len(docentes))
 	ctxMateria.ResumenesDocentes = make(map[string]string)
 
@@ -382,5 +403,5 @@ WHERE
 		}
 	}
 
-	return ctxMateria, nil
+	return &ctxMateria, nil
 }

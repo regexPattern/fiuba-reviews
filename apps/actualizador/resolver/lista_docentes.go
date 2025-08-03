@@ -1,25 +1,19 @@
 package resolver
 
 import (
-	"fmt"
-
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
 )
 
 type listaDocentesModel struct {
-	docentesMaterias     map[string][]patcher.DocenteSiu
-	contextosMaterias    map[string]patcher.ContextoMateriaDb
-	indicesSeleccionados map[string]int
-	nombreMateriaActual  string
-	lista                list.Model
+	lista list.Model
 }
 
 type docenteItem patcher.DocenteSiu
 
 func (i docenteItem) Title() string {
-	return fmt.Sprintf("%s (%s)", i.Nombre, i.Rol)
+	return i.Nombre
 }
 
 func (i docenteItem) Description() string {
@@ -35,10 +29,7 @@ func newListaDocentes() listaDocentesModel {
 	l.Title = "Docentes"
 
 	return listaDocentesModel{
-		docentesMaterias:     make(map[string][]patcher.DocenteSiu),
-		contextosMaterias:    make(map[string]patcher.ContextoMateriaDb),
-		indicesSeleccionados: make(map[string]int),
-		lista:                l,
+		lista: l,
 	}
 }
 
@@ -53,11 +44,10 @@ func (m listaDocentesModel) Update(msg tea.Msg) (listaDocentesModel, tea.Cmd) {
 	m.lista, cmd = m.lista.Update(msg)
 
 	if iActual := m.lista.GlobalIndex(); iActual != iAnterior {
-		m.indicesSeleccionados[m.nombreMateriaActual] = iActual
-
-		docente := m.docentesMaterias[m.nombreMateriaActual][iActual]
-		contextoMateria := m.contextosMaterias[m.nombreMateriaActual]
-		return m, tea.Batch(cmd, seleccionarDocenteCmd(docente, contextoMateria))
+		docente := m.lista.SelectedItem()
+		if d, ok := docente.(docenteItem); ok {
+			return m, tea.Batch(cmd, setDocenteCmd(patcher.DocenteSiu(d)))
+		}
 	}
 
 	return m, cmd
@@ -67,25 +57,38 @@ func (m listaDocentesModel) View() string {
 	return m.lista.View()
 }
 
-func (m *listaDocentesModel) setDocentes(msg setMateriaMsg) tea.Cmd {
+func (m *listaDocentesModel) setDocentes(patch setMateriaMsg, materiasPaginated bool) tea.Cmd {
+	items := []list.Item{}
+
+	for _, c := range patch.Materia.Catedras {
+		for _, d := range c.Docentes {
+			items = append(items, docenteItem(d))
+		}
+	}
+
+	m.lista.SetItems(items)
+	m.lista.Select(0)
+
+	height := listHeight
+	if materiasPaginated && len(items) > m.lista.Paginator.PerPage {
+		height = listHeight + 1
+	}
+
+	m.lista.SetHeight(height)
+
 	return nil
 }
 
 type patchDocente struct {
 	patcher.DocenteSiu
-	patcher.ContextoMateriaDb
 }
 
 type setDocenteMsg patchDocente
 
-func seleccionarDocenteCmd(
-	docente patcher.DocenteSiu,
-	contexto patcher.ContextoMateriaDb,
-) tea.Cmd {
+func setDocenteCmd(docente patcher.DocenteSiu) tea.Cmd {
 	return func() tea.Msg {
 		return setDocenteMsg{
 			docente,
-			contexto,
 		}
 	}
 }

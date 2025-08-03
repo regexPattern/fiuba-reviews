@@ -44,7 +44,9 @@ func newListaMaterias(patches []patcher.Patch) listaMateriasModel {
 }
 
 func (m listaMateriasModel) Init() tea.Cmd {
-	return setMateriaCmd(&m.patches[0])
+	patch := m.patches[0]
+	docente := patch.Materia.Catedras[0].Docentes[0]
+	return tea.Batch(setMateriaCmd(patch), setDocenteCmd(docente))
 }
 
 func (m listaMateriasModel) Update(msg tea.Msg) (listaMateriasModel, tea.Cmd) {
@@ -54,7 +56,7 @@ func (m listaMateriasModel) Update(msg tea.Msg) (listaMateriasModel, tea.Cmd) {
 	m.lista, cmd = m.lista.Update(msg)
 
 	if iActual := m.lista.GlobalIndex(); iActual != iAnterior {
-		return m, tea.Batch(cmd, setMateriaCmd(&m.patches[iActual]))
+		return m, tea.Batch(cmd, setMateriaCmd(m.patches[iActual]))
 	}
 
 	return m, cmd
@@ -64,17 +66,18 @@ func (m listaMateriasModel) View() string {
 	return m.lista.View()
 }
 
-type setMateriaMsg *patcher.Patch
+type setMateriaMsg patcher.Patch
 
-func setMateriaCmd(patch *patcher.Patch) tea.Cmd {
+func setMateriaCmd(patch patcher.Patch) tea.Cmd {
 	return tea.Batch(
 		tea.SetWindowTitle(fmt.Sprintf(
 			"fiuba-reviews • %s • %s",
 			patch.Materia.Codigo,
-			patch.Materia.Nombre,
+			patch.ContextoMateriaDb.NombreDb,
 		)),
 		func() tea.Msg {
 			return setMateriaMsg(patch)
 		},
+		setDocenteCmd(patch.Materia.Catedras[0].Docentes[0]),
 	)
 }

@@ -15,12 +15,9 @@ var (
 )
 
 var (
-	estiloPanelBase = lipgloss.NewStyle().
-			Width(listWidth+5).
-			Padding(0, 1).
-			Border(lipgloss.NormalBorder())
-	estiloPanelActivo   = estiloPanelBase.BorderForeground(fiubaColor)
-	estiloPanelInactivo = estiloPanelBase.BorderForeground(lipgloss.Color("240"))
+	panelStyle          = lipgloss.NewStyle().Border(lipgloss.BlockBorder())
+	focusedPanelStyle   = panelStyle.BorderForeground(fiubaColor)
+	unfocusedPanelStyle = panelStyle.BorderForeground(lipgloss.Color("240"))
 )
 
 func newDefaultList() list.Model {
@@ -30,6 +27,7 @@ func newDefaultList() list.Model {
 	d.ShowDescription = false
 
 	l := list.New([]list.Item{}, d, listWidth, listHeight)
+
 	l.DisableQuitKeybindings()
 	l.KeyMap.ShowFullHelp.Unbind()
 	l.KeyMap.CloseFullHelp.Unbind()

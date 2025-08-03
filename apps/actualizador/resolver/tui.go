@@ -16,17 +16,17 @@ const (
 
 type model struct {
 	state
-	listaMaterias   listaMateriasModel
-	listaDocentes   listaDocentesModel
-	resolverDocente resolverDocenteModel
-	dimensiones     tea.WindowSizeMsg
+	listaMaterias listaMateriasModel
+	listaDocentes listaDocentesModel
+	vistaDocente  vistaDocenteModel
+	dimensiones   tea.WindowSizeMsg
 }
 
 func newModel(patches []patcher.Patch) model {
 	return model{
-		listaMaterias:   newListaMaterias(patches),
-		listaDocentes:   newListaDocentes(),
-		resolverDocente: newVistaMateria(),
+		listaMaterias: newListaMaterias(patches),
+		listaDocentes: newListaDocentes(),
+		vistaDocente:  newVistaDocente(),
 	}
 }
 
@@ -37,12 +37,13 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case setMateriaMsg:
-		cmd := m.listaDocentes.setDocentes(msg)
-		m.resolverDocente.setMateria(msg)
+		materiasPaginated := len(m.listaMaterias.lista.Items()) > m.listaMaterias.lista.Paginator.PerPage
+		cmd := m.listaDocentes.setDocentes(msg, materiasPaginated)
+		m.vistaDocente.setMateria(msg)
 		return m, cmd
 
 	case setDocenteMsg:
-		m.resolverDocente.setDocente(msg)
+		m.vistaDocente.setDocente(msg)
 		return m, nil
 
 	case tea.KeyMsg:
@@ -93,9 +94,9 @@ func (m model) View() string {
 
 	var style0 lipgloss.Style
 	if m.state == listaMateriasFocused {
-		style0 = estiloPanelActivo
+		style0 = focusedPanelStyle
 	} else {
-		style0 = estiloPanelInactivo
+		style0 = unfocusedPanelStyle
 	}
 	panel0 = style0.Render(m.listaMaterias.View())
 
@@ -103,12 +104,12 @@ func (m model) View() string {
 
 	var style1 lipgloss.Style
 	if m.state == listaDocentesFocused {
-		style1 = estiloPanelActivo
+		style1 = focusedPanelStyle
 	} else {
-		style1 = estiloPanelInactivo
+		style1 = unfocusedPanelStyle
 	}
-	panel1 = style1.Width(width0 - style0.GetBorderLeftSize() - style0.GetBorderRightSize()).
-		Height(height0 - style0.GetBorderTopSize() - style0.GetBorderBottomSize()).
+	panel1 = style1.Width(width0 - style1.GetBorderLeftSize() - style1.GetBorderRightSize()).
+		Height(height0 - style1.GetBorderTopSize() - style1.GetBorderBottomSize()).
 		Render(m.listaDocentes.View())
 
 	width1 := lipgloss.Width(panel1)
@@ -116,13 +117,13 @@ func (m model) View() string {
 
 	var style2 lipgloss.Style
 	if m.state == resolverDocenteFocused {
-		style2 = estiloPanelActivo
+		style2 = focusedPanelStyle
 	} else {
-		style2 = estiloPanelInactivo
+		style2 = unfocusedPanelStyle
 	}
-	panel2 = style2.Width(width2 - style0.GetBorderLeftSize() - style0.GetBorderRightSize()).
-		Height(height0 - style0.GetBorderTopSize() - style0.GetBorderBottomSize()).
-		Render(m.resolverDocente.View())
+	panel2 = style2.Width(width2 - style2.GetBorderLeftSize() - style2.GetBorderRightSize()).
+		Height(height0 - style2.GetBorderTopSize() - style2.GetBorderBottomSize()).
+		Render(m.vistaDocente.View())
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, panel0, panel1, panel2) + "\n"
 }

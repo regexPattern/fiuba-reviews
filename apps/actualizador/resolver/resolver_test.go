@@ -50,7 +50,7 @@ func TestPriorizacionDePatches(t *testing.T) {
 
 	patches := []patcher.Patch{p0, p1, p2}
 
-	priorizarPatches(patches)
+	sortPatchesSegunPrioridad(patches)
 
 	// La materia con mayor cantidad de docentes queda primero en el orden de prioridades.
 	assert.Equal(t, patches[0], p0) // m0: 3 docentes
