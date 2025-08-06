@@ -3,7 +3,7 @@ package resolver
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/indexador"
 )
 
 type state uint
@@ -22,7 +22,7 @@ type model struct {
 	dimensiones   tea.WindowSizeMsg
 }
 
-func newModel(patches []patcher.Patch) model {
+func newModel(patches []indexador.OfertaMateriaSiu) model {
 	return model{
 		listaMaterias: newListaMaterias(patches),
 		listaDocentes: newListaDocentes(),

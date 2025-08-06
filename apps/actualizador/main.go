@@ -8,14 +8,14 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/indexador"
 	"github.com/regexPattern/fiuba-reviews/apps/actualizador/resolver"
 )
 
 func main() {
 	setupLogger()
 
-	i := patcher.Indexador{
+	i := indexador.Indexador{
 		DbUrl:         os.Getenv("DATABASE_URL"),
 		DbInitTimeout: time.Second * 3,
 		DbOpTimeout:   time.Second * 10,
@@ -24,17 +24,17 @@ func main() {
 		S3OpTimeout:   time.Second * 10,
 	}
 
-	patches, err := i.GenerarPatches(context.Background())
+	ofertas, err := i.ObtenerMaterias(context.Background())
 	if err != nil {
 		os.Exit(1)
 	}
 
-	if len(patches) == 0 {
+	if len(ofertas) == 0 {
 		slog.Info("no hay materias por actualizar")
 		return
 	}
 
-	resolver.ResolverPatches(patches)
+	resolver.ResolverPatches(nil)
 }
 
 func setupLogger() {

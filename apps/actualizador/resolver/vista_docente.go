@@ -32,14 +32,14 @@ func (m vistaDocenteModel) View() string {
 
 	s.WriteString(m.materia + "\n")
 
-	s.WriteString(m.docente.DocenteSiu.Nombre)
+	s.WriteString(m.docente.Nombre)
 
 	return s.String()
 }
 
 func (m *vistaDocenteModel) setMateria(patch setMateriaMsg) tea.Cmd {
-	m.materia = patch.Materia.Nombre
-	return setDocenteCmd(patch.Materia.Catedras[0].Docentes[0])
+	m.materia = patch.Nombre
+	return setDocenteCmd(patch.Catedras[0].Docentes[0])
 }
 
 func (m *vistaDocenteModel) setDocente(docente setDocenteMsg) {

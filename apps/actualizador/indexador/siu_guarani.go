@@ -1,4 +1,4 @@
-package patcher
+package indexador
 
 import (
 	"context"
@@ -18,7 +18,7 @@ import (
 var clienteS3 *s3.Client
 
 type OfertaMateriaSiu struct {
-	Materia MateriaSiu
+	MateriaSiu
 	Cuatri
 }
 
@@ -71,25 +71,25 @@ func (c Cuatri) despuesDe(otro Cuatri) bool {
 	}
 }
 
-func (i *Indexador) configClienteS3(ctx context.Context) error {
-	ctx, cancel := context.WithTimeout(ctx, i.S3InitTimeout)
-	defer cancel()
+func (i *Indexador) initClienteS3(ctx context.Context) error {
+	initctx, initcancel := context.WithTimeout(ctx, i.S3InitTimeout)
+	defer initcancel()
 
-	cfg, err := config.LoadDefaultConfig(ctx)
+	cfg, err := config.LoadDefaultConfig(initctx)
 	if err != nil {
 		slog.Error("error configurando cliente de S3", "error", err)
 		return err
 	}
+
 	clienteS3 = s3.NewFromConfig(cfg)
+
 	slog.Info("cliente de S3 configurado exitosamente")
+
 	return nil
 }
 
-func (i *Indexador) getOfertasMateriasSiu(ctx context.Context) ([]OfertaMateriaSiu, error) {
-	ctx, cancel := context.WithTimeout(ctx, i.S3OpTimeout)
-	defer cancel()
-
-	objs, err := i.descargarObjetosBucket(ctx)
+func (i *Indexador) obtenerOfertasSiu(ctx context.Context) ([]OfertaMateriaSiu, error) {
+	objs, err := i.fetchBucketObjects(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -103,18 +103,23 @@ func (i *Indexador) getOfertasMateriasSiu(ctx context.Context) ([]OfertaMateriaS
 		}
 	}
 
-	return filtrarOfertasMateriasSiu(ofertas), nil
+	return unificarOfertasSiu(ofertas), nil
 }
 
-func (i *Indexador) descargarObjetosBucket(ctx context.Context) ([]s3types.Object, error) {
-	output, err := clienteS3.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+func (i *Indexador) fetchBucketObjects(ctx context.Context) ([]s3types.Object, error) {
+	opctx, opcancel := context.WithTimeout(ctx, i.S3OpTimeout)
+	defer opcancel()
+
+	output, err := clienteS3.ListObjectsV2(opctx, &s3.ListObjectsV2Input{
 		Bucket: &i.S3BucketName,
 	})
 	if err != nil {
 		slog.Error("error enlistando archivos del bucket", "error", err)
 		return nil, err
 	}
+
 	slog.Debug(fmt.Sprintf("encontradas %v ofertas de carrera en el bucket", len(output.Contents)))
+
 	return output.Contents, nil
 }
 
@@ -124,15 +129,17 @@ func (i *Indexador) newOfertaCarreraSiu(
 ) (OfertaCarreraSiu, error) {
 	var oferta OfertaCarreraSiu
 
-	logger := slog.Default().With("key", *objKey)
+	l := slog.Default().With("key", *objKey)
 
-	obj, err := clienteS3.GetObject(ctx, &s3.GetObjectInput{
+	opctx, opcancel := context.WithTimeout(ctx, i.S3OpTimeout)
+	defer opcancel()
+
+	obj, err := clienteS3.GetObject(opctx, &s3.GetObjectInput{
 		Bucket: &i.S3BucketName,
 		Key:    objKey,
 	})
-
 	if err != nil {
-		logger.Error("error obteniendo contenido del objeto", "error", err)
+		l.Error("error obteniendo contenido del objeto", "error", err)
 		return oferta, err
 	}
 
@@ -140,14 +147,14 @@ func (i *Indexador) newOfertaCarreraSiu(
 
 	cuatri, err := newCuatri(obj.Metadata["cuatri-numero"], obj.Metadata["cuatri-anio"])
 	if err != nil {
-		logger.Error("error obteniendo cuatrimestre de la oferta",
+		l.Error("error obteniendo cuatrimestre de la oferta",
 			"carrera", carrera,
 			"error", err,
 		)
 		return oferta, err
 	}
 
-	logger = slog.Default().With(
+	l = slog.Default().With(
 		"carrera", carrera,
 		"cuatri", cuatri.Numero,
 		"anio", cuatri.Anio,
@@ -155,25 +162,24 @@ func (i *Indexador) newOfertaCarreraSiu(
 
 	defer func() { _ = obj.Body.Close() }()
 	bytes, err := io.ReadAll(obj.Body)
-
 	if err != nil {
-		logger.Error("error leyendo bytes de contenido de oferta", "error", err)
+		l.Error("error leyendo bytes de contenido de oferta", "error", err)
 		return oferta, err
 	}
 
 	var materias []MateriaSiu
 	if err := json.Unmarshal(bytes, &materias); err != nil {
-		logger.Error("error serializando contenido de oferta", "error", err)
+		l.Error("error serializando contenido de oferta", "error", err)
 		return oferta, err
 	}
 
 	for _, m := range materias {
 		if len(m.Catedras) == 0 {
-			logger.Warn("materia no tiene cátedras", "codigo", m.Codigo, "nombre", m.Nombre)
+			l.Warn("materia no tiene cátedras", "codigo_siu", m.Codigo, "nombre", m.Nombre)
 		}
 	}
 
-	logger.Info("oferta de carrera procesada exitosamente")
+	l.Info("oferta de carrera procesada exitosamente")
 
 	oferta = OfertaCarreraSiu{
 		Materias: materias,
@@ -184,20 +190,16 @@ func (i *Indexador) newOfertaCarreraSiu(
 	return oferta, nil
 }
 
-func filtrarOfertasMateriasSiu(ofertas []OfertaCarreraSiu) []OfertaMateriaSiu {
-	nMaterias := 0
-	for _, o := range ofertas {
-		nMaterias += len(o.Materias)
-	}
+func unificarOfertasSiu(ofertas []OfertaCarreraSiu) []OfertaMateriaSiu {
+	filtradas := make(map[string]OfertaMateriaSiu)
 
-	filtradas := make(map[string]OfertaMateriaSiu, nMaterias)
 	for _, o := range ofertas {
 		for _, m := range o.Materias {
 			if ofertaActual, ok := filtradas[m.Nombre]; !ok ||
 				o.despuesDe(ofertaActual.Cuatri) {
 				filtradas[m.Nombre] = OfertaMateriaSiu{
-					Materia: m,
-					Cuatri:  o.Cuatri,
+					MateriaSiu: m,
+					Cuatri:     o.Cuatri,
 				}
 			} else if ok && ofertaActual.Cuatri == o.Cuatri {
 				// Si tenemos dos ofertas para una misma materia, y ambas
@@ -206,7 +208,7 @@ func filtrarOfertasMateriasSiu(ofertas []OfertaCarreraSiu) []OfertaMateriaSiu {
 				// la materia.
 
 				catedras := make(map[int]CatedraSiu)
-				for _, c := range ofertaActual.Materia.Catedras {
+				for _, c := range ofertaActual.Catedras {
 					catedras[c.Codigo] = c
 				}
 				for _, c := range m.Catedras {
@@ -214,18 +216,20 @@ func filtrarOfertasMateriasSiu(ofertas []OfertaCarreraSiu) []OfertaMateriaSiu {
 				}
 
 				filtradas[m.Nombre] = OfertaMateriaSiu{
-					Materia: MateriaSiu{
-						Codigo:   ofertaActual.Materia.Codigo,
-						Nombre:   ofertaActual.Materia.Nombre,
+					MateriaSiu: MateriaSiu{
+						Codigo:   ofertaActual.Codigo,
+						Nombre:   ofertaActual.Nombre,
 						Catedras: slices.Collect(maps.Values(catedras)),
 					},
 					Cuatri: o.Cuatri,
 				}
+
+				slog.Debug("unificadas cátedras de materia",
+					"codigo_siu", m.Codigo, "nombre", m.Nombre, "cuatri", o.Cuatri.Numero, "anio", o.Cuatri.Anio)
 			}
 		}
 	}
 
-	slog.Debug(fmt.Sprintf("filtrado ofertas de %v materias", nMaterias-len(filtradas)))
 	slog.Info(fmt.Sprintf("extraído ofertas de %v materias", len(filtradas)))
 
 	return slices.Collect(maps.Values(filtradas))

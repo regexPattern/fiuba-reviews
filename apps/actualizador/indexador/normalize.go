@@ -1,4 +1,4 @@
-package patcher
+package indexador
 
 import (
 	"strings"

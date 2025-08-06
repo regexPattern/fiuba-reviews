@@ -3,14 +3,14 @@ package resolver
 import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/indexador"
 )
 
 type listaDocentesModel struct {
 	lista list.Model
 }
 
-type docenteItem patcher.DocenteSiu
+type docenteItem indexador.DocenteSiu
 
 func (i docenteItem) Title() string {
 	return i.Nombre
@@ -46,7 +46,7 @@ func (m listaDocentesModel) Update(msg tea.Msg) (listaDocentesModel, tea.Cmd) {
 	if iActual := m.lista.GlobalIndex(); iActual != iAnterior {
 		docente := m.lista.SelectedItem()
 		if d, ok := docente.(docenteItem); ok {
-			return m, tea.Batch(cmd, setDocenteCmd(patcher.DocenteSiu(d)))
+			return m, tea.Batch(cmd, setDocenteCmd(indexador.DocenteSiu(d)))
 		}
 	}
 
@@ -60,7 +60,7 @@ func (m listaDocentesModel) View() string {
 func (m *listaDocentesModel) setDocentes(patch setMateriaMsg, materiasPaginated bool) tea.Cmd {
 	items := []list.Item{}
 
-	for _, c := range patch.Materia.Catedras {
+	for _, c := range patch.Catedras {
 		for _, d := range c.Docentes {
 			items = append(items, docenteItem(d))
 		}
@@ -80,12 +80,12 @@ func (m *listaDocentesModel) setDocentes(patch setMateriaMsg, materiasPaginated 
 }
 
 type patchDocente struct {
-	patcher.DocenteSiu
+	indexador.DocenteSiu
 }
 
 type setDocenteMsg patchDocente
 
-func setDocenteCmd(docente patcher.DocenteSiu) tea.Cmd {
+func setDocenteCmd(docente indexador.DocenteSiu) tea.Cmd {
 	return func() tea.Msg {
 		return setDocenteMsg{
 			docente,

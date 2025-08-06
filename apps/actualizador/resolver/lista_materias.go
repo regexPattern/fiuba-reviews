@@ -5,18 +5,18 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/indexador"
 )
 
 type listaMateriasModel struct {
-	patches []patcher.Patch
+	patches []indexador.OfertaMateriaSiu
 	lista   list.Model
 }
 
-type patchItem patcher.Patch
+type patchItem indexador.OfertaMateriaSiu
 
 func (i patchItem) Title() string {
-	return i.Materia.Nombre
+	return i.Nombre
 }
 
 func (i patchItem) Description() string {
@@ -24,10 +24,10 @@ func (i patchItem) Description() string {
 }
 
 func (i patchItem) FilterValue() string {
-	return i.Materia.Nombre
+	return i.Nombre
 }
 
-func newListaMaterias(patches []patcher.Patch) listaMateriasModel {
+func newListaMaterias(patches []indexador.OfertaMateriaSiu) listaMateriasModel {
 	l := newDefaultList()
 	l.Title = "Materias"
 
@@ -45,7 +45,7 @@ func newListaMaterias(patches []patcher.Patch) listaMateriasModel {
 
 func (m listaMateriasModel) Init() tea.Cmd {
 	patch := m.patches[0]
-	docente := patch.Materia.Catedras[0].Docentes[0]
+	docente := patch.Catedras[0].Docentes[0]
 	return tea.Batch(setMateriaCmd(patch), setDocenteCmd(docente))
 }
 
@@ -66,18 +66,18 @@ func (m listaMateriasModel) View() string {
 	return m.lista.View()
 }
 
-type setMateriaMsg patcher.Patch
+type setMateriaMsg indexador.OfertaMateriaSiu
 
-func setMateriaCmd(patch patcher.Patch) tea.Cmd {
+func setMateriaCmd(patch indexador.OfertaMateriaSiu) tea.Cmd {
 	return tea.Batch(
 		tea.SetWindowTitle(fmt.Sprintf(
 			"fiuba-reviews • %s • %s",
-			patch.Materia.Codigo,
-			patch.ContextoMateriaDb.NombreDb,
+			patch.Codigo,
+			patch.Nombre,
 		)),
 		func() tea.Msg {
 			return setMateriaMsg(patch)
 		},
-		setDocenteCmd(patch.Materia.Catedras[0].Docentes[0]),
+		setDocenteCmd(patch.Catedras[0].Docentes[0]),
 	)
 }

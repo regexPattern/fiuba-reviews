@@ -1,4 +1,4 @@
-package patcher
+package indexador
 
 import (
 	"testing"
@@ -13,9 +13,9 @@ func TestComparacionCuatrimestres(t *testing.T) {
 }
 
 func TestFiltrarSinOfertas(t *testing.T) {
-	ofertas := filtrarOfertasMateriasSiu([]OfertaCarreraSiu{})
+	materias := unificarOfertasSiu([]OfertaCarreraSiu{})
 
-	assert.Empty(t, ofertas)
+	assert.Empty(t, materias)
 }
 
 func TestFiltrarConOfertasDisjuntas(t *testing.T) {
@@ -27,23 +27,23 @@ func TestFiltrarConOfertasDisjuntas(t *testing.T) {
 		{Cuatri: Cuatri{1, 2025}, Materias: []MateriaSiu{m1}},
 	}
 
-	ofertasMaterias := filtrarOfertasMateriasSiu(ofertasCarreras)
+	materias := unificarOfertasSiu(ofertasCarreras)
 
-	assert.Len(t, ofertasMaterias, 2)
+	assert.Len(t, materias, 2)
 	assert.Contains(
 		t,
-		ofertasMaterias,
+		materias,
 		OfertaMateriaSiu{
-			Materia: m0,
-			Cuatri:  Cuatri{1, 2025},
+			MateriaSiu: m0,
+			Cuatri:     Cuatri{1, 2025},
 		},
 	)
 	assert.Contains(
 		t,
-		ofertasMaterias,
+		materias,
 		OfertaMateriaSiu{
-			Materia: m1,
-			Cuatri:  Cuatri{1, 2025},
+			MateriaSiu: m1,
+			Cuatri:     Cuatri{1, 2025},
 		},
 	)
 }
@@ -57,10 +57,10 @@ func TestFiltrarConOfertasNoDisjuntas(t *testing.T) {
 		{Cuatri: Cuatri{1, 2023}, Materias: []MateriaSiu{m}},
 	}
 
-	ofertasMaterias := filtrarOfertasMateriasSiu(ofertasCarreras)
+	materias := unificarOfertasSiu(ofertasCarreras)
 
-	assert.Len(t, ofertasMaterias, 1)
-	assert.Equal(t, ofertasMaterias[0].Cuatri, Cuatri{1, 2025})
+	assert.Len(t, materias, 1)
+	assert.Equal(t, materias[0].Cuatri, Cuatri{1, 2025})
 }
 
 func TestFiltrarConOfertasIguales(t *testing.T) {
@@ -71,9 +71,9 @@ func TestFiltrarConOfertasIguales(t *testing.T) {
 		{Cuatri: Cuatri{1, 2025}, Materias: []MateriaSiu{m}},
 	}
 
-	ofertasMaterias := filtrarOfertasMateriasSiu(ofertasCarreras)
+	materias := unificarOfertasSiu(ofertasCarreras)
 
-	assert.Len(t, ofertasMaterias, 1)
+	assert.Len(t, materias, 1)
 }
 
 func TestFiltrarConOfertasConflictivas(t *testing.T) {
@@ -92,10 +92,10 @@ func TestFiltrarConOfertasConflictivas(t *testing.T) {
 	ofertasCarreras[0].Materias[0].Catedras = []CatedraSiu{{Codigo: 1}, {Codigo: 2}}
 	ofertasCarreras[1].Materias[0].Catedras = []CatedraSiu{{Codigo: 2}, {Codigo: 3}}
 
-	ofertasMaterias := filtrarOfertasMateriasSiu(ofertasCarreras)
+	materias := unificarOfertasSiu(ofertasCarreras)
 
-	assert.Len(t, ofertasMaterias[0].Materia.Catedras, 3)
-	assert.Contains(t, ofertasMaterias[0].Materia.Catedras, CatedraSiu{Codigo: 1})
-	assert.Contains(t, ofertasMaterias[0].Materia.Catedras, CatedraSiu{Codigo: 2})
-	assert.Contains(t, ofertasMaterias[0].Materia.Catedras, CatedraSiu{Codigo: 3})
+	assert.Len(t, materias[0].Catedras, 3)
+	assert.Contains(t, materias[0].Catedras, CatedraSiu{Codigo: 1})
+	assert.Contains(t, materias[0].Catedras, CatedraSiu{Codigo: 2})
+	assert.Contains(t, materias[0].Catedras, CatedraSiu{Codigo: 3})
 }

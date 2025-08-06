@@ -5,29 +5,29 @@ import (
 	"slices"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/regexPattern/fiuba-reviews/apps/actualizador/patcher"
+	"github.com/regexPattern/fiuba-reviews/apps/actualizador/indexador"
 )
 
-func ResolverPatches(patches []patcher.Patch) {
+func ResolverPatches(patches []indexador.OfertaMateriaSiu) {
 	sortPatchesSegunPrioridad(patches)
 
 	p := tea.NewProgram(newModel(patches))
 	_, _ = p.Run()
 }
 
-func sortPatchesSegunPrioridad(patches []patcher.Patch) {
+func sortPatchesSegunPrioridad(patches []indexador.OfertaMateriaSiu) {
 	nDocentes := make(map[string]int, len(patches))
 	for _, p := range patches {
 		docentesUnicos := make(map[string]bool)
-		for _, c := range p.Materia.Catedras {
+		for _, c := range p.Catedras {
 			for _, d := range c.Docentes {
 				docentesUnicos[d.Nombre] = true
 			}
 		}
-		nDocentes[p.Materia.Codigo] = len(docentesUnicos)
+		nDocentes[p.Codigo] = len(docentesUnicos)
 	}
 
-	slices.SortFunc(patches, func(a, b patcher.Patch) int {
-		return cmp.Compare(nDocentes[b.Materia.Codigo], nDocentes[a.Materia.Codigo])
+	slices.SortFunc(patches, func(a, b indexador.OfertaMateriaSiu) int {
+		return cmp.Compare(nDocentes[b.Codigo], nDocentes[a.Codigo])
 	})
 }

@@ -10,9 +10,7 @@ const (
 	listHeight = 20
 )
 
-var (
-	fiubaColor = lipgloss.Color("#4EACD4")
-)
+var fiubaColor = lipgloss.Color("#4EACD4")
 
 var (
 	panelStyle          = lipgloss.NewStyle().Border(lipgloss.BlockBorder())
