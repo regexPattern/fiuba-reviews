@@ -9,75 +9,74 @@ import (
 )
 
 type listaMateriasModel struct {
-	patches []indexador.OfertaMateriaSiu
-	lista   list.Model
+	materias []indexador.Materia
+	widget   list.Model
 }
 
-type patchItem indexador.OfertaMateriaSiu
+type materiaItem indexador.Materia
 
-func (i patchItem) Title() string {
-	return i.Nombre
+func (i materiaItem) Title() string {
+	return i.MateriaSiu.Nombre
 }
 
-func (i patchItem) Description() string {
+func (i materiaItem) Description() string {
 	return ""
 }
 
-func (i patchItem) FilterValue() string {
-	return i.Nombre
+func (i materiaItem) FilterValue() string {
+	return i.MateriaSiu.Nombre
 }
 
-func newListaMaterias(patches []indexador.OfertaMateriaSiu) listaMateriasModel {
+func newListaMaterias(materias []indexador.Materia) listaMateriasModel {
 	l := newDefaultList()
 	l.Title = "Materias"
 
-	items := make([]list.Item, len(patches))
-	for i, p := range patches {
-		items[i] = patchItem(p)
+	items := make([]list.Item, len(materias))
+	for i, m := range materias {
+		items[i] = materiaItem(m)
 	}
 	l.SetItems(items)
 
 	return listaMateriasModel{
-		patches: patches,
-		lista:   l,
+		materias: materias,
+		widget:   l,
 	}
 }
 
 func (m listaMateriasModel) Init() tea.Cmd {
-	patch := m.patches[0]
-	docente := patch.Catedras[0].Docentes[0]
-	return tea.Batch(setMateriaCmd(patch), setDocenteCmd(docente))
+	materia := m.materias[0]
+	docente := materia.Catedras[0].Docentes[0]
+	return tea.Batch(setMateriaCmd(materia), setDocenteCmd(docente))
 }
 
 func (m listaMateriasModel) Update(msg tea.Msg) (listaMateriasModel, tea.Cmd) {
-	iAnterior := m.lista.GlobalIndex()
+	iAnterior := m.widget.GlobalIndex()
 
 	var cmd tea.Cmd
-	m.lista, cmd = m.lista.Update(msg)
+	m.widget, cmd = m.widget.Update(msg)
 
-	if iActual := m.lista.GlobalIndex(); iActual != iAnterior {
-		return m, tea.Batch(cmd, setMateriaCmd(m.patches[iActual]))
+	if iActual := m.widget.GlobalIndex(); iActual != iAnterior {
+		return m, tea.Batch(cmd, setMateriaCmd(m.materias[iActual]))
 	}
 
 	return m, cmd
 }
 
 func (m listaMateriasModel) View() string {
-	return m.lista.View()
+	return m.widget.View()
 }
 
-type setMateriaMsg indexador.OfertaMateriaSiu
+type setMateriaMsg indexador.Materia
 
-func setMateriaCmd(patch indexador.OfertaMateriaSiu) tea.Cmd {
+func setMateriaCmd(m indexador.Materia) tea.Cmd {
 	return tea.Batch(
 		tea.SetWindowTitle(fmt.Sprintf(
 			"fiuba-reviews • %s • %s",
-			patch.Codigo,
-			patch.Nombre,
+			m.MateriaSiu.Codigo,
+			m.MateriaDb.Nombre,
 		)),
 		func() tea.Msg {
-			return setMateriaMsg(patch)
+			return setMateriaMsg(m)
 		},
-		setDocenteCmd(patch.Catedras[0].Docentes[0]),
 	)
 }

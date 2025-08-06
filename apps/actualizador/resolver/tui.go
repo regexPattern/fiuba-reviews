@@ -22,9 +22,9 @@ type model struct {
 	dimensiones   tea.WindowSizeMsg
 }
 
-func newModel(patches []indexador.OfertaMateriaSiu) model {
+func newModel(materias []indexador.Materia) model {
 	return model{
-		listaMaterias: newListaMaterias(patches),
+		listaMaterias: newListaMaterias(materias),
 		listaDocentes: newListaDocentes(),
 		vistaDocente:  newVistaDocente(),
 	}
@@ -37,13 +37,17 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case setMateriaMsg:
-		materiasPaginated := len(m.listaMaterias.lista.Items()) > m.listaMaterias.lista.Paginator.PerPage
-		cmd := m.listaDocentes.setDocentes(msg, materiasPaginated)
-		m.vistaDocente.setMateria(msg)
+		paginated := len(m.listaMaterias.widget.Items()) > m.listaMaterias.widget.Paginator.PerPage
+		m.listaDocentes.setDocentes(msg, paginated)
+		cmd := m.vistaDocente.setMateria(msg)
 		return m, cmd
 
 	case setDocenteMsg:
 		m.vistaDocente.setDocente(msg)
+		return m, nil
+
+	case infoDocentesMsg:
+		m.vistaDocente.setInfoDocentes(msg)
 		return m, nil
 
 	case tea.KeyMsg:

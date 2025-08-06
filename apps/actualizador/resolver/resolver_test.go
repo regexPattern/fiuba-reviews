@@ -9,7 +9,7 @@ import (
 
 func TestPriorizacionDePatches(t *testing.T) {
 	// Materia con 3 docentes.
-	m0 := indexador.OfertaMateriaSiu{
+	m0 := indexador.Materia{
 		MateriaSiu: indexador.MateriaSiu{
 			Codigo: "CB001",
 			Nombre: "Análisis Matemático II",
@@ -24,7 +24,7 @@ func TestPriorizacionDePatches(t *testing.T) {
 	}
 
 	// Materia con 2 docentes.
-	m1 := indexador.OfertaMateriaSiu{
+	m1 := indexador.Materia{
 		MateriaSiu: indexador.MateriaSiu{
 			Codigo: "CB002",
 			Nombre: "Álgebra Lineal",
@@ -38,7 +38,7 @@ func TestPriorizacionDePatches(t *testing.T) {
 	}
 
 	// Materia con 1 docente.
-	m2 := indexador.OfertaMateriaSiu{
+	m2 := indexador.Materia{
 		MateriaSiu: indexador.MateriaSiu{
 			Codigo: "CB003",
 			Nombre: "Probabilidad y Estadística",
@@ -50,11 +50,12 @@ func TestPriorizacionDePatches(t *testing.T) {
 		},
 	}
 
-	materias := []indexador.OfertaMateriaSiu{m0, m1, m2}
+	materias := []indexador.Materia{m0, m1, m2}
 
-	sortPatchesSegunPrioridad(materias)
+	sortSegunPrioridad(materias)
 
-	// La materia con mayor cantidad de docentes queda primero en el orden de prioridades.
+	// La materia con mayor cantidad de docentes queda primero en el orden de
+	// prioridades.
 	assert.Equal(t, materias[0], m0) // m0: 3 docentes
 	assert.Equal(t, materias[1], m1) // m1: 2 docentes
 	assert.Equal(t, materias[2], m2) // m2: 1 docente

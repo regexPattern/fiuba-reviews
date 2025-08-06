@@ -57,10 +57,10 @@ func (m listaDocentesModel) View() string {
 	return m.lista.View()
 }
 
-func (m *listaDocentesModel) setDocentes(patch setMateriaMsg, materiasPaginated bool) tea.Cmd {
+func (m *listaDocentesModel) setDocentes(materia setMateriaMsg, paginated bool) {
 	items := []list.Item{}
 
-	for _, c := range patch.Catedras {
+	for _, c := range materia.Catedras {
 		for _, d := range c.Docentes {
 			items = append(items, docenteItem(d))
 		}
@@ -70,13 +70,11 @@ func (m *listaDocentesModel) setDocentes(patch setMateriaMsg, materiasPaginated 
 	m.lista.Select(0)
 
 	height := listHeight
-	if materiasPaginated && len(items) > m.lista.Paginator.PerPage {
+	if paginated && len(items) > m.lista.Paginator.PerPage {
 		height = listHeight + 1
 	}
 
 	m.lista.SetHeight(height)
-
-	return nil
 }
 
 type patchDocente struct {

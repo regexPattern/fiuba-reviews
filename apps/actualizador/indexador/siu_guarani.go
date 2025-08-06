@@ -88,7 +88,9 @@ func (i *Indexador) initClienteS3(ctx context.Context) error {
 	return nil
 }
 
-func (i *Indexador) obtenerOfertasSiu(ctx context.Context) ([]OfertaMateriaSiu, error) {
+func (i *Indexador) obtenerOfertasSiu(
+	ctx context.Context,
+) ([]OfertaMateriaSiu, error) {
 	objs, err := i.fetchBucketObjects(ctx)
 	if err != nil {
 		return nil, err
@@ -106,7 +108,9 @@ func (i *Indexador) obtenerOfertasSiu(ctx context.Context) ([]OfertaMateriaSiu, 
 	return unificarOfertasSiu(ofertas), nil
 }
 
-func (i *Indexador) fetchBucketObjects(ctx context.Context) ([]s3types.Object, error) {
+func (i *Indexador) fetchBucketObjects(
+	ctx context.Context,
+) ([]s3types.Object, error) {
 	opctx, opcancel := context.WithTimeout(ctx, i.S3OpTimeout)
 	defer opcancel()
 
@@ -118,7 +122,12 @@ func (i *Indexador) fetchBucketObjects(ctx context.Context) ([]s3types.Object, e
 		return nil, err
 	}
 
-	slog.Debug(fmt.Sprintf("encontradas %v ofertas de carrera en el bucket", len(output.Contents)))
+	slog.Debug(
+		fmt.Sprintf(
+			"encontradas %v ofertas de carrera en el bucket",
+			len(output.Contents),
+		),
+	)
 
 	return output.Contents, nil
 }
@@ -145,11 +154,17 @@ func (i *Indexador) newOfertaCarreraSiu(
 
 	carrera := obj.Metadata["carrera"]
 
-	cuatri, err := newCuatri(obj.Metadata["cuatri-numero"], obj.Metadata["cuatri-anio"])
+	cuatri, err := newCuatri(
+		obj.Metadata["cuatri-numero"],
+		obj.Metadata["cuatri-anio"],
+	)
 	if err != nil {
-		l.Error("error obteniendo cuatrimestre de la oferta",
-			"carrera", carrera,
-			"error", err,
+		l.Error(
+			"error obteniendo cuatrimestre de la oferta",
+			"carrera",
+			carrera,
+			"error",
+			err,
 		)
 		return oferta, err
 	}
@@ -174,8 +189,17 @@ func (i *Indexador) newOfertaCarreraSiu(
 	}
 
 	for _, m := range materias {
+		l := l.With("codigo_siu", m.Codigo, "nombre", m.Nombre)
 		if len(m.Catedras) == 0 {
-			l.Warn("materia no tiene cátedras", "codigo_siu", m.Codigo, "nombre", m.Nombre)
+			l.Warn("materia no tiene cátedras")
+		} else {
+			for _, c := range m.Catedras {
+				for _, d := range c.Docentes {
+					if d.Nombre == "" {
+						l.Warn("docente no tienen nombre", "catedra", c.Codigo)
+					}
+				}
+			}
 		}
 	}
 

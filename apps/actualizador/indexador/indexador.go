@@ -4,12 +4,11 @@ import (
 	"context"
 	"time"
 
-	"golang.org/x/sync/errgroup"
+	"github.com/jackc/pgx/v5"
 )
 
 type Indexador struct {
-	DbUrl         string
-	DbInitTimeout time.Duration
+	DbConn        *pgx.Conn
 	DbOpTimeout   time.Duration
 	DbTxTimeout   time.Duration
 	S3BucketName  string
@@ -19,13 +18,7 @@ type Indexador struct {
 
 func (i *Indexador) ObtenerMaterias(ctx context.Context) ([]Materia, error) {
 	var err error
-
-	g, gCtx := errgroup.WithContext(ctx)
-
-	g.Go(func() error { return i.initClienteS3(gCtx) })
-	g.Go(func() error { return i.initPoolDb(gCtx) })
-
-	if err = g.Wait(); err != nil {
+	if err = i.initClienteS3(ctx); err != nil {
 		return nil, err
 	}
 

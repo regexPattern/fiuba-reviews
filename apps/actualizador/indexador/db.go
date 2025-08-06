@@ -7,10 +7,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
-
-var pool *pgxpool.Pool
 
 type Materia struct {
 	MateriaSiu
@@ -22,22 +19,6 @@ type MateriaDb struct {
 	Codigo  string `db:"codigo"`
 	Nombre  string `db:"nombre"`
 	Migrada bool   `db:"docentes_migrados_de_equivalencia"`
-}
-
-func (i *Indexador) initPoolDb(ctx context.Context) error {
-	ctx, cancel := context.WithTimeout(ctx, i.DbInitTimeout)
-	defer cancel()
-
-	var err error
-	pool, err = pgxpool.New(ctx, i.DbUrl)
-	if err != nil {
-		slog.Error("error configurando pool de conexiones con la base de datos", "error", err)
-		return err
-	}
-
-	slog.Info("pool de conexiones con la base de datos configurado exitosamente")
-
-	return nil
 }
 
 func (i *Indexador) sincronizarConDb(
@@ -59,7 +40,7 @@ func (i *Indexador) asociarMaterias(
 	ctx context.Context,
 	materiasSiu []OfertaMateriaSiu,
 ) ([]Materia, error) {
-	rows, _ := pool.Query(ctx, `
+	rows, _ := i.DbConn.Query(ctx, `
 SELECT
     m.codigo,
     m.nombre,
@@ -110,13 +91,17 @@ func (i *Indexador) actualizarMaterias(
 	ctx context.Context,
 	materias []Materia,
 ) error {
-	txTimeout := i.DbInitTimeout * time.Duration(len(materias))
+	txTimeout := i.DbTxTimeout * time.Duration(len(materias))
 	txctx, txcancel := context.WithTimeout(ctx, txTimeout)
 	defer txcancel()
 
-	tx, err := pool.Begin(txctx)
+	tx, err := i.DbConn.Begin(txctx)
 	if err != nil {
-		slog.Error("error iniciando transacción de actualización de materias", "error", err)
+		slog.Error(
+			"error iniciando transacción de actualización de materias",
+			"error",
+			err,
+		)
 		return err
 	}
 
@@ -124,7 +109,7 @@ func (i *Indexador) actualizarMaterias(
 
 	for _, m := range materias {
 		if m.MateriaSiu.Codigo != m.MateriaDb.Codigo {
-			if err := i.actualizarCodigo(ctx, tx, m); err != nil {
+			if err := i.actualizarCodigo(ctx, tx, &m); err != nil {
 				return err
 			}
 		}
@@ -138,7 +123,11 @@ func (i *Indexador) actualizarMaterias(
 	return nil
 }
 
-func (i *Indexador) actualizarCodigo(ctx context.Context, tx pgx.Tx, m Materia) error {
+func (i *Indexador) actualizarCodigo(
+	ctx context.Context,
+	tx pgx.Tx,
+	m *Materia,
+) error {
 	l := slog.Default().
 		With("codigo_siu", m.MateriaSiu.Codigo,
 			"codigo_db", m.MateriaDb.Codigo, "nombre", m.MateriaDb.Nombre)
@@ -161,11 +150,21 @@ WHERE
 		l.Debug("código de materia actualizado exitosamente")
 	}
 
+	// Actualizamos también en la copia in-memory del código de la base de datos para reflejar que
+	// ahora ambos códigos están en línea con el valor obtenido del SIU. Esto por si en otra
+	// parte del código llegamos a acceder el código de la base de datos.
+	m.MateriaDb.Codigo = m.MateriaSiu.Codigo
+
 	return err
 }
 
-func (i *Indexador) migrarEquivalencias(ctx context.Context, tx pgx.Tx, m Materia) error {
-	l := slog.Default().With("codigo", m.MateriaDb.Codigo, "nombre", m.MateriaSiu.Nombre)
+func (i *Indexador) migrarEquivalencias(
+	ctx context.Context,
+	tx pgx.Tx,
+	m Materia,
+) error {
+	l := slog.Default().
+		With("codigo", m.MateriaDb.Codigo, "nombre", m.MateriaSiu.Nombre)
 
 	opctx, opcancel := context.WithTimeout(ctx, i.DbOpTimeout)
 	defer opcancel()

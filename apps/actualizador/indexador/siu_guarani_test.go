@@ -89,8 +89,14 @@ func TestFiltrarConOfertasConflictivas(t *testing.T) {
 	// son idénticas entre si, sino que solo se intersectan en la cátedra con
 	// código 2.
 
-	ofertasCarreras[0].Materias[0].Catedras = []CatedraSiu{{Codigo: 1}, {Codigo: 2}}
-	ofertasCarreras[1].Materias[0].Catedras = []CatedraSiu{{Codigo: 2}, {Codigo: 3}}
+	ofertasCarreras[0].Materias[0].Catedras = []CatedraSiu{
+		{Codigo: 1},
+		{Codigo: 2},
+	}
+	ofertasCarreras[1].Materias[0].Catedras = []CatedraSiu{
+		{Codigo: 2},
+		{Codigo: 3},
+	}
 
 	materias := unificarOfertasSiu(ofertasCarreras)
 
