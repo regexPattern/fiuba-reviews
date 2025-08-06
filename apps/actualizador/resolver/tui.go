@@ -1,6 +1,7 @@
 package resolver
 
 import (
+	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/regexPattern/fiuba-reviews/apps/actualizador/indexador"
@@ -11,14 +12,14 @@ type state uint
 const (
 	listaMateriasFocused state = iota
 	listaDocentesFocused
-	resolverDocenteFocused
+	infoDocenteFocused
 )
 
 type model struct {
 	state
 	listaMaterias listaMateriasModel
 	listaDocentes listaDocentesModel
-	vistaDocente  vistaDocenteModel
+	infoDocente   infoDocenteModel
 	dimensiones   tea.WindowSizeMsg
 }
 
@@ -26,51 +27,54 @@ func newModel(materias []indexador.Materia) model {
 	return model{
 		listaMaterias: newListaMaterias(materias),
 		listaDocentes: newListaDocentes(),
-		vistaDocente:  newVistaDocente(),
+		infoDocente:   newInfoDocente(),
 	}
 }
 
 func (m model) Init() tea.Cmd {
-	return m.listaMaterias.Init()
+	return tea.Batch(m.listaMaterias.Init(), m.infoDocente.Init())
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+
 	case setMateriaMsg:
 		paginated := len(m.listaMaterias.widget.Items()) > m.listaMaterias.widget.Paginator.PerPage
 		m.listaDocentes.setDocentes(msg, paginated)
-		cmd := m.vistaDocente.setMateria(msg)
+		cmd := m.infoDocente.setMateria(msg)
 		return m, cmd
 
 	case setDocenteMsg:
-		m.vistaDocente.setDocente(msg)
+		m.infoDocente.setDocente(msg)
 		return m, nil
 
 	case infoDocentesMsg:
-		m.vistaDocente.setInfoDocentes(msg)
+		m.infoDocente.setInfoDocentes(msg)
 		return m, nil
 
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
+
 		case "tab":
 			switch m.state {
 			case listaMateriasFocused:
 				m.state = listaDocentesFocused
 			case listaDocentesFocused:
-				m.state = resolverDocenteFocused
-			case resolverDocenteFocused:
-				m.state = resolverDocenteFocused
+				m.state = infoDocenteFocused
+			case infoDocenteFocused:
+				m.state = infoDocenteFocused
 			}
 			return m, nil
+
 		case "shift+tab":
 			switch m.state {
 			case listaMateriasFocused:
 				m.state = listaMateriasFocused
 			case listaDocentesFocused:
 				m.state = listaMateriasFocused
-			case resolverDocenteFocused:
+			case infoDocenteFocused:
 				m.state = listaDocentesFocused
 			}
 			return m, nil
@@ -79,6 +83,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.dimensiones = msg
 		return m, nil
+
+	case spinner.TickMsg:
+		var cmd tea.Cmd
+		m.infoDocente, cmd = m.infoDocente.Update(msg)
+		return m, cmd
 	}
 
 	var cmd tea.Cmd
@@ -88,6 +97,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.listaMaterias, cmd = m.listaMaterias.Update(msg)
 	case listaDocentesFocused:
 		m.listaDocentes, cmd = m.listaDocentes.Update(msg)
+	case infoDocenteFocused:
+		m.infoDocente, cmd = m.infoDocente.Update(msg)
 	}
 
 	return m, cmd
@@ -120,14 +131,14 @@ func (m model) View() string {
 	width2 := m.dimensiones.Width - width0 - width1
 
 	var style2 lipgloss.Style
-	if m.state == resolverDocenteFocused {
+	if m.state == infoDocenteFocused {
 		style2 = focusedPanelStyle
 	} else {
 		style2 = unfocusedPanelStyle
 	}
 	panel2 = style2.Width(width2 - style2.GetBorderLeftSize() - style2.GetBorderRightSize()).
 		Height(height0 - style2.GetBorderTopSize() - style2.GetBorderBottomSize()).
-		Render(m.vistaDocente.View())
+		Render(m.infoDocente.View())
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, panel0, panel1, panel2) + "\n"
 }
