@@ -15,6 +15,12 @@ INSERT INTO oferta_comisiones (codigo_carrera, codigo_cuatrimestre, contenido)
     (5, 22, pg_read_file('/ingenieria-mecanica.json')::json),
     (7, 21, pg_read_file('/ingenieria-quimica.json')::json);
 
+ALTER TABLE docente
+    ADD COLUMN nombre_siu text DEFAULT NULL;
+
+--
+--
+--
 -- DESTROY
 DO $$
 DECLARE
@@ -29,4 +35,24 @@ BEGIN
     EXECUTE 'TRUNCATE TABLE ' || tables || ' RESTART IDENTITY CASCADE';
 END
 $$;
+
+WITH materias_a_actualizar AS (
+    SELECT DISTINCT
+        m.codigo,
+        'COD' || LPAD((453 + ROW_NUMBER() OVER (ORDER BY m.codigo))::text, 3, '0') AS nuevo_codigo
+    FROM
+        materia m
+        JOIN plan_materia pm ON m.codigo = pm.codigo_materia
+        JOIN plan p ON pm.codigo_plan = p.codigo
+    WHERE
+        p.esta_vigente = TRUE
+        AND m.codigo NOT LIKE 'COD%')
+UPDATE
+    materia
+SET
+    codigo = nuevo_codigo
+FROM
+    materias_a_actualizar
+WHERE
+    materia.codigo = materias_a_actualizar.codigo;
 
