@@ -2,6 +2,7 @@ package main
 
 type OfertaCarrera struct {
 	CodigoCarrera string          `db:"codigo_carrera"`
+	NombreCarrera string          `db:"nombre_carrera"`
 	Cuatrimestre  Cuatrimestre    `db:"cuatrimestre"`
 	Materias      []OfertaMateria `db:"contenido"`
 }
@@ -39,8 +40,8 @@ type UltimaOfertaMateria struct {
 type MateriaConActualizaciones struct {
 	Codigo             string             `db:"codigo"`
 	Nombre             string             `db:"nombre"` // normalizado con lower(unaccent())
-	DocentesPendientes []DocentePendiente `json:"docentes_pendientes"`
-	CatedrasNuevas     []CatedraNueva     `json:"catedras_nuevas"`
+	DocentesPendientes []DocentePendiente `            json:"docentes_pendientes"`
+	CatedrasNuevas     []CatedraNueva     `            json:"catedras_nuevas"`
 }
 
 type DocentePendiente struct {
