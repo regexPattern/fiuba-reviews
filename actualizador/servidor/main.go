@@ -31,9 +31,9 @@ func main() {
 
 	codigos := make([]string, 0, len(ofertasMaterias))
 	nombres := make([]string, 0, len(ofertasMaterias))
-	for nombre, oferta := range ofertasMaterias {
-		codigos = append(codigos, oferta.Codigo)
-		nombres = append(nombres, nombre)
+	for codigo, oferta := range ofertasMaterias {
+		codigos = append(codigos, codigo)
+		nombres = append(nombres, oferta.Nombre)
 	}
 
 	if err := SyncMateriasDb(conn, codigos, nombres); err != nil {
@@ -43,13 +43,27 @@ func main() {
 		os.Exit(1)
 	}
 
-	materiasAActualizar, err := GetMateriasAActualizar(conn, codigos)
+	materiasPendientes, err := GetMateriasPendientes(conn, codigos, ofertasMaterias)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error obteniendo materias a actualizar: %v", err))
 		os.Exit(1)
 	}
 
-	fmt.Println(materiasAActualizar)
+	slog.Debug(
+		fmt.Sprintf(
+			"encontradas %d materias con actualizaciones pendientes",
+			len(materiasPendientes),
+		),
+	)
+
+	// for i, mat := range materiasAActualizar {
+	// 	slog.Debug(fmt.Sprintf("materia %d: %s - %d docentes pendientes - %d catedras nuevas",
+	// 		i+1, mat.Nombre, len(mat.DocentesPendientes), len(mat.CatedrasNuevas)))
+	// }
+
+	for _, m := range materiasPendientes {
+		fmt.Println(m)
+	}
 }
 
 func GetOfertasMaterias(conn *pgx.Conn) (map[string]UltimaOfertaMateria, error) {
@@ -77,13 +91,13 @@ ORDER BY
 		fmt.Sprintf("encontradas %v ofertas de comisiones de carreras", len(ofertasCarreras)),
 	)
 
-	ofertasMaterias := make(map[string]UltimaOfertaMateria)
+	ofertasMaterias := make(map[string]UltimaOfertaMateria) // clave: codigo de materia
 	materiasPorCuatrimestre := make(map[Cuatrimestre]int)
 
 	for _, oc := range ofertasCarreras {
 		for _, om := range oc.Materias {
-			if _, ok := ofertasMaterias[om.Nombre]; !ok {
-				ofertasMaterias[om.Nombre] = UltimaOfertaMateria{
+			if _, ok := ofertasMaterias[om.Codigo]; !ok {
+				ofertasMaterias[om.Codigo] = UltimaOfertaMateria{
 					OfertaMateria: om,
 					Cuatrimestre:  oc.Cuatrimestre,
 				}
@@ -380,7 +394,11 @@ func WarnMateriasNoRegistradas(conn *pgx.Conn, codigos, nombres []string) error 
 	return nil
 }
 
-func GetMateriasAActualizar(conn *pgx.Conn, codigos []string) ([]Materia, error) {
+func GetMateriasPendientes(
+	conn *pgx.Conn,
+	codigos []string,
+	ofertasMaterias map[string]UltimaOfertaMateria,
+) ([]MateriaConActualizaciones, error) {
 	rows, err := conn.Query(context.Background(), `
 		SELECT DISTINCT
 			mat.codigo,
@@ -393,79 +411,394 @@ func GetMateriasAActualizar(conn *pgx.Conn, codigos []string) ([]Materia, error)
 		  AND mat.cuatrimestre_ultima_actualizacion IS DISTINCT FROM (SELECT max(codigo) FROM cuatrimestre);
 	`, codigos)
 	if err != nil {
-		return nil, fmt.Errorf("error consultando materias pendientes de actualización: %w", err)
+		return nil, fmt.Errorf("error consultando materias candidatas a actualizarse: %w", err)
 	}
 
-	materias, err := pgx.CollectRows(rows, pgx.RowToStructByName[Materia])
+	materiasCandidatas, err := pgx.CollectRows(rows, pgx.RowToStructByName[Materia])
 	if err != nil {
-		return nil, fmt.Errorf("error procesando materias pendientes de actualización: %v", err)
+		return nil, fmt.Errorf("error procesando materias candidatas a actualizarse: %v", err)
 	}
 
-	// TODO: Quedarme solo con las materias que realmente tienen cambios
+	materiasPendientes := make([]any, 0, len(materiasCandidatas))
 
-	// Las materias a actualizar que tenemos en la variable anterior `materias` incluyen todas las
-	// materias que no han sido actualizadas al ultimo cuatrimestre. Pero realmente podrian ya estar
-	// totalmente al dia en cuanto a su oferta de comisiones y planilla de docentes, que son las
-	// cosas que a mi me interesa actualizar en mi app.
+	for _, m := range materiasCandidatas {
+		oferta, ok := ofertasMaterias[m.Codigo]
+		if !ok {
+			continue
+		}
 
-	// La oferta de comisiones de cada materia proveniente del siu posee tanto un listado de
-	// comisiones/catedras como de los docentes que las componen. Actualizar la oferta de comisiones
-	// en la base de datos implica tener armadas las catedras que estan presentes en esta ultima
-	// version de la oferta de comisiones que se tiene para cada materia disponible. Como una
-	// catedra no es mucho mas que una agrupacion de docentes, esto implica que deben estar
-	// registrados los docentes listados en el siu en la base de datos. Contamos con el listado de
-	// docentes que necesitamos encontrar en la base de datos para armar las catedras de una
-	// materia, son justamente los que traemos del siu.
+		if tiene, err := OfertaTieneCambios(conn, oferta); err != nil {
+			return nil, fmt.Errorf(
+				"error determinando si oferta de materia %v tiene cambios: %w",
+				m.Codigo,
+				err,
+			)
+		} else if tiene {
+			materiasPendientes = append(materiasPendientes, oferta)
+		}
+	}
 
-	// # Matcheo de docentes
-	//
-	// Para cada docente de esta lista se pueden presentar 3 situaciones:
-	// 1. Hay un docente en la base de datos cuyo `nombre_siu` coincide con el nombre del docente
-	// encontrado en el siu. En este caso podemos considerar al docente como resuelto.
-	// 2. No hay un docente en la base de datos cuyo `nombre_siu` coincida, pero hay varios docentes
-	// cuyo campo `nombre` coincide con el nombre del docente encontrado en el siu. Estos otros
-	// docentes no deben tener un `nombre_siu` asignado, ya que esto significa que ya estan
-	// "asociados" con otro docente del siu. Para esto se utilizara fuzzy matching.
-	// 3. No hay ningun docente que matchee en nombre con el docente del siu. En este caso significa
-	// que estamos ante un docente totalmente nuevo que hay que registrar.
-
-	// # Armado de catedras/comisiones
-	//
-	// Una catedra no es mas que una agrupacion de docentes. Si bien en la base de datos estan
-	// identificadas con un codigo, lo verdaderamente representativo de las catedras es su nombre,
-	// que se puede obtener concatenando los nombres de los docentes que la componen. Asi, por
-	// ejemplo, la catedra de los docentes "Carlos Castillo", "Irene Cardona" y "Lionel Messi",
-	// seria la catedra "Cardona-Castillo-Messi", ordenada en orden alfabetico.
-	//
-	// NOTE: Estaria bueno agregar el campo `apellido` a los docentes en la base de datos, para que
-	// tengan un nombre que los represente de manera corta en vez de tener que usar siempre su
-	// nombre completo real. Quiza incluso podamos ocupar el campo `nombre` que ya existe.
-	//
-	// De un cuatrimestre a otro, las catedras pueden continuar existiendo. Es decir, si la catedra
-	// "Cardona-Castillo-Messi" ya existe, no hay necesidad de eliminar este registro y crear uno
-	// nuevo con los mismos docentes. Si se diera el caso en el que se agregara un docente
-	// adicional, para simplificar, ahi si deberiamos crear una nueva catedra. Lo mismo para si se
-	// retira un docente.
-	//
-	// A medida vayan pasando los cuatrimestres de actualizacion, van a ir quedando catedras
-	// registradas en la base de datos que no existan. Para esto tenemos dos opciones: borramos
-	// siempre todas las catedras que no se mantienen en cada cuatrimestre, o usamos algun tipo de
-	// flag para saber si estan activas o son de cuatrimestres anteriores. Para elegir alguna de
-	// estas dos opciones, hay que tener en consideracion que pasa cuando una materia no tiene
-	// actualizaciones para este cuatrimestre.
-
-	// # Problema principal
-	//
-	// Justo ahi recae el problema. Quiero filtrar las materias que si tengan actualizaciones
-	// pendientes, ya sea para crear registrar docentes que no estan registrados, y/o para registrar
-	// catedras (reagrupaciones de estos docentes). Quiero en un arreglo tener solo estas materias.
-	// La informacion que debe quedar en el arreglo final es:
-	// - codigo y nombre (normalizado con lower(unaccent())) de la materia
-	// - listado de docentes que no estan resueltos, y sus respectivos matches (tanto el nombre
-	// fuzzy matcheado como el codigo del match en la db).
-	// - listado de catedras a crear (nombre concatenado de los docentes).
-	// Pero, nuevamente, el tema es que solo quiero esta informacion de las materias que tienen
-	// actualizaciones.
-
-	return materias, nil
+	return nil, nil
 }
+
+func OfertaTieneCambios(conn *pgx.Conn, oferta UltimaOfertaMateria) (bool, error) {
+	// // 2. Para cada materia candidata, analizar si tiene actualizaciones pendientes
+	// for _, mat := range materiasCandidatas {
+	// 	oferta, ok := ofertasMaterias[mat.Codigo]
+	// 	if !ok {
+	// 		continue
+	// 	}
+	//
+	// 	// 3. Extraer todos los docentes únicos de la oferta
+	// 	docentesSiu := extraerDocentesUnicos(oferta.Catedras)
+	//
+	// 	// 4. Buscar matches para cada docente
+	// 	docentesPendientes, err := resolverDocentes(conn, mat.Codigo, docentesSiu)
+	// 	if err != nil {
+	// 		return nil, fmt.Errorf(
+	// 			"error resolviendo docentes para materia %s: %w",
+	// 			mat.Codigo,
+	// 			err,
+	// 		)
+	// 	}
+	//
+	// 	// 5. Verificar qué cátedras son nuevas
+	// 	catedrasNuevas, err := verificarCatedras(
+	// 		conn,
+	// 		mat.Codigo,
+	// 		oferta.Catedras,
+	// 		docentesPendientes,
+	// 	)
+	// 	if err != nil {
+	// 		return nil, fmt.Errorf(
+	// 			"error verificando catedras para materia %s: %w",
+	// 			mat.Codigo,
+	// 			err,
+	// 		)
+	// 	}
+	//
+	// 	// 6. Si hay algo pendiente, incluir en resultado
+	// 	if len(docentesPendientes) > 0 || len(catedrasNuevas) > 0 {
+	// 		materiasPendientes = append(materiasPendientes, MateriaConActualizaciones{
+	// 			Codigo:             mat.Codigo,
+	// 			Nombre:             mat.Nombre,
+	// 			DocentesPendientes: docentesPendientes,
+	// 			CatedrasNuevas:     catedrasNuevas,
+	// 		})
+	// 	}
+	// }
+
+	return false, nil
+}
+
+// // extraerDocentesUnicos extrae todos los docentes únicos de las catedras de una oferta
+// func extraerDocentesUnicos(catedras []Catedra) map[string]string {
+// 	docentes := make(map[string]string) // nombre_siu -> rol
+//
+// 	for _, catedra := range catedras {
+// 		for _, docente := range catedra.Docentes {
+// 			// Guardar el rol más "importante" si hay duplicados
+// 			if rolExistente, existe := docentes[docente.Nombre]; !existe ||
+// 				(docente.Rol == "profesor titular" || docente.Rol == "profesor asociado") {
+// 				docentes[docente.Nombre] = docente.Rol
+// 			} else if existe && (docente.Rol == "profesor titular" || docente.Rol == "profesor asociado")
+// {
+// 				// Reemplazar si el nuevo rol es más importante
+// 				docentes[docente.Nombre] = docente.Rol
+// 			} else {
+// 				// Mantener el rol existente
+// 				docentes[docente.Nombre] = rolExistente
+// 			}
+// 		}
+// 	}
+//
+// 	return docentes
+// }
+//
+// // resolverDocentes busca matches para docentes del SIU en la base de datos
+// func resolverDocentes(
+// 	conn *pgx.Conn,
+// 	codigoMateria string,
+// 	docentesSiu map[string]string,
+// ) ([]DocentePendiente, error) {
+// 	if len(docentesSiu) == 0 {
+// 		return nil, nil
+// 	}
+//
+// 	// Convertir mapa a array para la query
+// 	nombresSiu := make([]string, 0, len(docentesSiu))
+// 	for nombre := range docentesSiu {
+// 		nombresSiu = append(nombresSiu, nombre)
+// 	}
+//
+// 	// Query para buscar matches fuzzy
+// 	rows, err := conn.Query(context.Background(), `
+// 		WITH docentes_siu AS (
+// 			SELECT unnest($1::text[]) AS nombre_siu
+// 		),
+// 		matches AS (
+// 			SELECT
+// 				ds.nombre_siu,
+// 				d.codigo,
+// 				d.nombre AS nombre_db,
+// 				d.nombre_siu AS nombre_siu_actual,
+// 				similarity(
+// 					lower(unaccent(d.nombre)),
+// 					lower(unaccent(split_part(ds.nombre_siu, ' ', 1)))
+// 				) AS similitud
+// 			FROM docentes_siu ds
+// 			LEFT JOIN docente d ON d.codigo_materia = $2
+// 			WHERE d.nombre_siu IS NULL  -- solo docentes no resueltos
+// 			  AND similarity(
+// 					lower(unaccent(d.nombre)),
+// 					lower(unaccent(split_part(ds.nombre_siu, ' ', 1)))
+// 				  ) > 0.5  -- umbral mínimo
+// 		)
+// 		SELECT
+// 			ds.nombre_siu,
+// 			COALESCE(
+// 				json_agg(
+// 					json_build_object(
+// 						'codigo', matches.codigo,
+// 						'nombre_db', matches.nombre_db,
+// 						'similitud', matches.similitud
+// 					) ORDER BY matches.similitud DESC
+// 				) FILTER (WHERE matches.codigo IS NOT NULL),
+// 				'[]'::json
+// 			) AS matches
+// 		FROM docentes_siu ds
+// 		LEFT JOIN matches ON matches.nombre_siu = ds.nombre_siu
+// 		WHERE NOT EXISTS (
+// 			-- Excluir docentes ya resueltos exactamente
+// 			SELECT 1 FROM docente d2
+// 			WHERE d2.codigo_materia = $2
+// 			  AND d2.nombre_siu = ds.nombre_siu
+// 		)
+// 		GROUP BY ds.nombre_siu;
+// 	`, nombresSiu, codigoMateria)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("error buscando matches de docentes: %w", err)
+// 	}
+// 	defer rows.Close()
+//
+// 	var docentesPendientes []DocentePendiente
+//
+// 	for rows.Next() {
+// 		var nombreSiu string
+// 		var matchesJSON string
+//
+// 		if err := rows.Scan(&nombreSiu, &matchesJSON); err != nil {
+// 			return nil, fmt.Errorf("error escaneando matches de docentes: %w", err)
+// 		}
+//
+// 		// Parsear matches JSON
+// 		var matches []DocenteMatch
+// 		if matchesJSON != "null" && matchesJSON != "[]" {
+// 			if err := json.Unmarshal([]byte(matchesJSON), &matches); err != nil {
+// 				return nil, fmt.Errorf("error parseando matches JSON: %w", err)
+// 			}
+// 		}
+//
+// 		// Solo incluir si no hay matches o hay múltiples (requiere intervención manual)
+// 		if len(matches) == 0 || len(matches) > 1 ||
+// 			(len(matches) == 1 && matches[0].Similitud < 0.8) {
+// 			docentesPendientes = append(docentesPendientes, DocentePendiente{
+// 				NombreSiu:       nombreSiu,
+// 				Rol:             docentesSiu[nombreSiu],
+// 				PosiblesMatches: matches,
+// 			})
+// 		}
+// 	}
+//
+// 	return docentesPendientes, nil
+// }
+//
+// // verificarCatedras identifica qué cátedras del SIU son nuevas
+// func verificarCatedras(
+// 	conn *pgx.Conn,
+// 	codigoMateria string,
+// 	catedrasSiu []Catedra,
+// 	docentesPendientes []DocentePendiente,
+// ) ([]CatedraNueva, error) {
+// 	if len(catedrasSiu) == 0 {
+// 		return nil, nil
+// 	}
+//
+// 	// Crear mapa de docentes pendientes para referencia rápida
+// 	docentesPendientesMap := make(map[string]bool)
+// 	for _, dp := range docentesPendientes {
+// 		docentesPendientesMap[dp.NombreSiu] = true
+// 	}
+//
+// 	var catedrasNuevas []CatedraNueva
+//
+// 	for _, catedraSiu := range catedrasSiu {
+// 		// Verificar si todos los docentes de esta cátedra están resueltos
+// 		tieneDocentesPendientes := false
+// 		for _, docente := range catedraSiu.Docentes {
+// 			if docentesPendientesMap[docente.Nombre] {
+// 				tieneDocentesPendientes = true
+// 				break
+// 			}
+// 		}
+//
+// 		// Si hay docentes pendientes, la cátedra es nueva por definición
+// 		if tieneDocentesPendientes {
+// 			catedraNueva := CatedraNueva{
+// 				Nombre:   generarNombreCatedra(catedraSiu.Docentes),
+// 				Docentes: make([]DocenteCatedra, 0, len(catedraSiu.Docentes)),
+// 			}
+//
+// 			for _, docente := range catedraSiu.Docentes {
+// 				dc := DocenteCatedra{
+// 					NombreSiu: docente.Nombre,
+// 					Rol:       docente.Rol,
+// 				}
+// 				catedraNueva.Docentes = append(catedraNueva.Docentes, dc)
+// 			}
+//
+// 			catedrasNuevas = append(catedrasNuevas, catedraNueva)
+// 			continue
+// 		}
+//
+// 		// Si todos los docentes están resueltos, verificar si la cátedra existe
+// 		existe, err := verificarCatedraExistente(conn, codigoMateria, catedraSiu.Docentes)
+// 		if err != nil {
+// 			// Si hay error porque no se encontró algún docente, significa que hay docentes
+// 			// pendientes
+// 			// En ese caso, la cátedra se considera nueva
+// 			if strings.Contains(err.Error(), "docente no encontrado") {
+// 				catedraNueva := CatedraNueva{
+// 					Nombre:   generarNombreCatedra(catedraSiu.Docentes),
+// 					Docentes: make([]DocenteCatedra, 0, len(catedraSiu.Docentes)),
+// 				}
+//
+// 				for _, docente := range catedraSiu.Docentes {
+// 					dc := DocenteCatedra{
+// 						NombreSiu: docente.Nombre,
+// 						Rol:       docente.Rol,
+// 					}
+// 					catedraNueva.Docentes = append(catedraNueva.Docentes, dc)
+// 				}
+//
+// 				catedrasNuevas = append(catedrasNuevas, catedraNueva)
+// 				continue
+// 			}
+// 			return nil, fmt.Errorf("error verificando si existe catedra: %w", err)
+// 		}
+//
+// 		if !existe {
+// 			// La cátedra no existe, es nueva
+// 			catedraNueva := CatedraNueva{
+// 				Nombre:   generarNombreCatedra(catedraSiu.Docentes),
+// 				Docentes: make([]DocenteCatedra, 0, len(catedraSiu.Docentes)),
+// 			}
+//
+// 			// Para docentes resueltos, obtener sus códigos
+// 			for _, docente := range catedraSiu.Docentes {
+// 				codigoDocente, err := obtenerCodigoDocentePorNombreSiu(
+// 					conn,
+// 					codigoMateria,
+// 					docente.Nombre,
+// 				)
+// 				if err != nil {
+// 					return nil, fmt.Errorf("error obteniendo código de docente: %w", err)
+// 				}
+//
+// 				dc := DocenteCatedra{
+// 					NombreSiu:     docente.Nombre,
+// 					Rol:           docente.Rol,
+// 					CodigoDocente: &codigoDocente,
+// 				}
+// 				catedraNueva.Docentes = append(catedraNueva.Docentes, dc)
+// 			}
+//
+// 			catedrasNuevas = append(catedrasNuevas, catedraNueva)
+// 		}
+// 	}
+//
+// 	return catedrasNuevas, nil
+// }
+//
+// // generarNombreCatedra genera el nombre representativo de una cátedra
+// func generarNombreCatedra(docentes []Docente) string {
+// 	apellidos := make([]string, 0, len(docentes))
+// 	for _, d := range docentes {
+// 		// Extraer primer token (apellido) del nombre del SIU
+// 		parts := strings.Split(d.Nombre, " ")
+// 		if len(parts) > 0 {
+// 			apellido := strings.Title(parts[0])
+// 			apellidos = append(apellidos, apellido)
+// 		}
+// 	}
+// 	sort.Strings(apellidos)
+// 	return strings.Join(apellidos, "-")
+// }
+//
+// // verificarCatedraExistente verifica si una cátedra con esos docentes ya existe
+// func verificarCatedraExistente(
+// 	conn *pgx.Conn,
+// 	codigoMateria string,
+// 	docentesSiu []Docente,
+// ) (bool, error) {
+// 	// Obtener códigos de docentes para esta materia
+// 	codigosDocentes := make([]string, 0, len(docentesSiu))
+// 	for _, docente := range docentesSiu {
+// 		codigo, err := obtenerCodigoDocentePorNombreSiu(conn, codigoMateria, docente.Nombre)
+// 		if err != nil {
+// 			return false, err
+// 		}
+// 		codigosDocentes = append(codigosDocentes, codigo)
+// 	}
+//
+// 	// Ordenar códigos para comparación
+// 	sort.Strings(codigosDocentes)
+//
+// 	// Verificar si existe una cátedra con exactamente estos docentes
+// 	var existe bool
+// 	err := conn.QueryRow(context.Background(), `
+// 		WITH catedras_existentes AS (
+// 			SELECT
+// 				c.codigo,
+// 				array_agg(cd.codigo_docente ORDER BY cd.codigo_docente) AS docentes
+// 			FROM catedra c
+// 			JOIN catedra_docente cd ON cd.codigo_catedra = c.codigo
+// 			WHERE c.codigo_materia = $1
+// 			GROUP BY c.codigo
+// 		)
+// 		SELECT EXISTS (
+// 			SELECT 1 FROM catedras_existentes
+// 			WHERE docentes = $2::uuid[]
+// 		);
+// 	`, codigoMateria, codigosDocentes).Scan(&existe)
+// 	if err != nil {
+// 		// Si no hay filas, significa que no hay catedras existentes
+// 		if err.Error() == "no rows in result set" {
+// 			return false, nil
+// 		}
+// 		return false, err
+// 	}
+//
+// 	return existe, nil
+// }
+//
+// // obtenerCodigoDocentePorNombreSiu obtiene el código de un docente por su nombre_siu
+// func obtenerCodigoDocentePorNombreSiu(
+// 	conn *pgx.Conn,
+// 	codigoMateria, nombreSiu string,
+// ) (string, error) {
+// 	var codigo string
+// 	err := conn.QueryRow(context.Background(), `
+// 		SELECT codigo FROM docente
+// 		WHERE codigo_materia = $1 AND nombre_siu = $2
+// 	`, codigoMateria, nombreSiu).Scan(&codigo)
+// 	if err != nil {
+// 		// Si no hay filas, significa que el docente no existe
+// 		if err.Error() == "no rows in result set" {
+// 			return "", fmt.Errorf("docente no encontrado: %s", nombreSiu)
+// 		}
+// 		return "", err
+// 	}
+//
+// 	return codigo, nil
+// }
