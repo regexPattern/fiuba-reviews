@@ -43,7 +43,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	materiasPendientes, err := getMateriasPendientes(conn, codigosMaterias, ofertasMaterias)
+	materiasPendientes, err := getPatchesMateria(conn, codigosMaterias, ofertasMaterias)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error obteniendo materias a actualizar: %v", err))
 		os.Exit(1)
@@ -62,7 +62,7 @@ func main() {
 	// }
 
 	for _, m := range materiasPendientes {
-		fmt.Println(m)
+		_ = m
 	}
 }
 
@@ -70,13 +70,13 @@ func getOfertasMaterias(conn *pgx.Conn) (map[string]UltimaOfertaMateria, error) 
 	rows, err := conn.Query(context.Background(), `
 SELECT
     oc.codigo_carrera,
-		lower(unaccent(carr.nombre)) AS nombre_carrera,
+    lower(unaccent (carr.nombre)) AS nombre_carrera,
     json_build_object('numero', cuat.numero, 'anio', cuat.anio) AS cuatrimestre,
     oc.contenido
 FROM
     oferta_comisiones oc
     INNER JOIN cuatrimestre cuat ON cuat.codigo = oc.codigo_cuatrimestre
-		INNER JOIN carrera carr ON carr.codigo = oc.codigo_carrera
+    INNER JOIN carrera carr ON carr.codigo = oc.codigo_carrera
 ORDER BY
     cuat.codigo DESC;
 		`)
@@ -98,17 +98,32 @@ ORDER BY
 		fmt.Sprintf("encontradas %v ofertas de comisiones de carreras", len(ofertasCarreras)),
 	)
 
-	ofertasMaterias := make(map[string]UltimaOfertaMateria) // clave: codigo de materia
-	materiasPorCuatrimestre := make(map[Cuatrimestre]int)
+	ofertasMaterias := make(map[string]UltimaOfertaMateria)
+	materiasPorCuatri := make(map[Cuatrimestre]int)
 
 	for _, oc := range ofertasCarreras {
 		for _, om := range oc.Materias {
-			docentesCatedras := 0
+			var docentesCatedra int
+
 			for _, c := range om.Catedras {
-				docentesCatedras += len(c.Docentes)
+				if n := len(c.Docentes); n == 0 {
+					slog.Warn(
+						fmt.Sprintf("cátedra de materia %v no tiene docentes", om.Codigo),
+						"carrera",
+						oc.Carrera,
+						"cuatrimestre",
+						fmt.Sprintf("%vQ%v", oc.Cuatrimestre.Numero, oc.Cuatrimestre.Anio),
+					)
+				} else {
+					docentesCatedra += len(c.Docentes)
+				}
+
+				for _, d := range c.Docentes {
+					_ = d
+				}
 			}
 
-			if docentesCatedras == 0 {
+			if docentesCatedra == 0 {
 				slog.Warn(
 					fmt.Sprintf(
 						"oferta de comisiones de materia %v (%v) no tiene docentes",
@@ -116,24 +131,26 @@ ORDER BY
 						om.Nombre,
 					),
 					"carrera",
-					oc.NombreCarrera,
+					oc.Carrera,
 					"cuatrimestre",
 					fmt.Sprintf("%vQ%v", oc.Cuatrimestre.Numero, oc.Cuatrimestre.Anio),
 				)
+				continue
 			}
 
 			if _, ok := ofertasMaterias[om.Codigo]; !ok {
 				ofertasMaterias[om.Codigo] = UltimaOfertaMateria{
+					NombreCarrera: oc.Carrera,
 					OfertaMateria: om,
 					Cuatrimestre:  oc.Cuatrimestre,
 				}
 
-				materiasPorCuatrimestre[oc.Cuatrimestre]++
+				materiasPorCuatri[oc.Cuatrimestre]++
 			}
 		}
 	}
 
-	for c, n := range materiasPorCuatrimestre {
+	for c, n := range materiasPorCuatri {
 		slog.Debug(
 			fmt.Sprintf(
 				"encontradas %v ofertas de comisiones de materias de cuatrimestre %vQ%v",
