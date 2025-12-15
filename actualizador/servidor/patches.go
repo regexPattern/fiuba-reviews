@@ -63,6 +63,8 @@ func buildPatchesActualizacionMaterias(
 	)
 
 	patches := make([]patchActualizacionMateria, 0, len(candidatas))
+	totalDocentes := 0
+	docentesSinMatches := 0
 
 	for _, mat := range candidatas {
 		oferta, ok := ofertas[mat.Codigo]
@@ -78,16 +80,26 @@ func buildPatchesActualizacionMaterias(
 				err,
 			)
 		} else if p != nil {
-			fmt.Println(p.Materia)
+			totalDocentes += len(p.Docentes)
 			for _, d := range p.Docentes {
-				fmt.Println(d)
+				if len(d.Matches) == 0 {
+					docentesSinMatches++
+				}
 			}
-			fmt.Println()
 			patches = append(patches, *p)
 		}
 	}
 
 	slog.Debug(fmt.Sprintf("encontradas %v materias con actualizaciones pendientes", len(patches)))
+	slog.Debug(
+		fmt.Sprintf(
+			"encontradas %v docentes con matches en la base de datos",
+			totalDocentes-docentesSinMatches,
+		),
+	)
+	slog.Debug(
+		fmt.Sprintf("encontradas %v docentes sin matches en la base de datos", docentesSinMatches),
+	)
 
 	return patches, nil
 }
