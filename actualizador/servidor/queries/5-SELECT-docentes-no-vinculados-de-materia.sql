@@ -1,7 +1,6 @@
 -- Parámetros
 -- $1: Código de la materia.
 -- $2: Arreglo de strings con los nombres de los docentes de la materia del SIU.
--- Normalización: case-insensitive, sin tildes, sin espacios extra al inicio/final
 WITH nombres_siu AS (
     SELECT
         unnest($2::text[]) AS nombre,
@@ -39,15 +38,11 @@ SELECT
     sme.nombre AS nombre_siu,
     d.codigo::text AS codigo,
     d.nombre AS nombre_db,
-    -- Scores: preferencia casi perfecta si hay substring normalizado, sino similarity normalizada
-    CASE WHEN strpos(sme.nombre_norm, d.nombre_norm) > 0 THEN
-        1.0 - 0.001 * ABS(LENGTH(sme.nombre_norm) - LENGTH(d.nombre_norm))
-    ELSE
-        similarity (d.nombre_norm, sme.nombre_norm)
-    END AS similitud
+    -- Scores: word_similarity para comparar cadenas de distinta longitud
+    word_similarity (d.nombre_norm, sme.nombre_norm) AS similitud
 FROM
     sin_match_exacto sme
-    INNER JOIN LATERAL (
+    LEFT JOIN LATERAL (
         SELECT
             codigo,
             nombre,
@@ -57,7 +52,28 @@ FROM
         WHERE
             codigo_materia = $1
             AND nombre_siu IS NULL
-            AND similarity (trim(regexp_replace(lower(unaccent (nombre)), '\s+', ' ', 'g')), sme.nombre_norm) >= 0.4) d ON TRUE
+            AND word_similarity (trim(regexp_replace(lower(unaccent (nombre)), '\s+', ' ', 'g')), sme.nombre_norm) >= 0.3) d ON TRUE
+WHERE
+    d.codigo IS NOT NULL
+UNION ALL
+SELECT
+    sme.nombre AS nombre_siu,
+    NULL::text AS codigo,
+    NULL::text AS nombre_db,
+    NULL::float AS similitud
+FROM
+    sin_match_exacto sme
+WHERE
+    NOT EXISTS (
+        SELECT
+            1
+        FROM
+            docente d
+        WHERE
+            d.codigo_materia = $1
+            AND nombre_siu IS NULL
+            AND word_similarity (trim(regexp_replace(lower(unaccent (d.nombre)), '\s+', ' ', 'g')), sme.nombre_norm) >= 0.3)
 ORDER BY
-    sme.nombre,
-    similitud DESC
+    nombre_siu,
+    similitud DESC NULLS LAST;
+
