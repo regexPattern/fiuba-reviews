@@ -1,8 +1,10 @@
 package main
 
+import "fmt"
+
 type OfertaCarrera struct {
 	CodigoCarrera string          `db:"codigo_carrera"`
-	Carrera string          `db:"nombre_carrera"`
+	Carrera       string          `db:"nombre_carrera"`
 	Cuatrimestre  Cuatrimestre    `db:"cuatrimestre"`
 	Materias      []OfertaMateria `db:"contenido"`
 }
@@ -10,6 +12,10 @@ type OfertaCarrera struct {
 type Cuatrimestre struct {
 	Numero int `json:"numero"`
 	Anio   int `json:"anio"`
+}
+
+func (c Cuatrimestre) String() string {
+	return fmt.Sprintf("%vQ%v", c.Numero, c.Anio)
 }
 
 type Materia struct {
