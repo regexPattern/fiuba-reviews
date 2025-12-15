@@ -36,4 +36,3 @@ WHERE
         WHERE
             fdb.firma_docentes = cs.firma_docentes);
 
-

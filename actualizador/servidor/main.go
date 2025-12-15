@@ -38,48 +38,6 @@ func main() {
 		)
 		os.Exit(1)
 	}
-	//
-	// ofertasMaterias, err := getOfertasMaterias(conn)
-	// if err != nil {
-	// 	slog.Error(fmt.Sprintf("error obteniendo ofertas de comisiones de materias: %v", err))
-	// 	os.Exit(1)
-	// }
-	//
-	// codigosMaterias := make([]string, 0, len(ofertasMaterias))
-	// nombresMaterias := make([]string, 0, len(ofertasMaterias))
-	// for codigo, oferta := range ofertasMaterias {
-	// 	codigosMaterias = append(codigosMaterias, codigo)
-	// 	nombresMaterias = append(nombresMaterias, oferta.Nombre)
-	// }
-	//
-	// if err := syncMateriasDb(conn, codigosMaterias, nombresMaterias); err != nil {
-	// 	slog.Error(
-	// 		fmt.Sprintf("error sincronizando materias de la base de datos con el siu: %v", err),
-	// 	)
-	// 	os.Exit(1)
-	// }
-	//
-	// materiasPendientes, err := getPatchesMateria(conn, codigosMaterias, ofertasMaterias)
-	// if err != nil {
-	// 	slog.Error(fmt.Sprintf("error obteniendo materias a actualizar: %v", err))
-	// 	os.Exit(1)
-	// }
-	//
-	// slog.Debug(
-	// 	fmt.Sprintf(
-	// 		"encontradas %d materias con actualizaciones pendientes",
-	// 		len(materiasPendientes),
-	// 	),
-	// )
-	//
-	// // for i, mat := range materiasAActualizar {
-	// // 	slog.Debug(fmt.Sprintf("materia %d: %s - %d docentes pendientes - %d catedras nuevas",
-	// // 		i+1, mat.Nombre, len(mat.DocentesPendientes), len(mat.CatedrasNuevas)))
-	// // }
-	//
-	// for _, m := range materiasPendientes {
-	// 	_ = m
-	// }
 }
 
 func getPatchesActualizacionMaterias(conn *pgx.Conn) ([]patchActualizacionMateria, error) {

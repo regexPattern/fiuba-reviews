@@ -8,3 +8,4 @@ lint:
 
 format:
 	@golangci-lint fmt
+	@pg_format -i queries/*.sql
