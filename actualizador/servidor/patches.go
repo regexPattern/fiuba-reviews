@@ -21,7 +21,7 @@ var selectDocentesNoVinculadosDeMateriaQuery string
 //go:embed queries/6-SELECT-catedras-no-registradas-de-materia.sql
 var selectCatedrasNoRegistradasDeMateriaQuery string
 
-type patchActualizacionMateria struct {
+type patchMateria struct {
 	Materia
 	Docentes []patchDocente
 	Catedras []patchCatedra
@@ -42,11 +42,11 @@ type patchCatedra struct {
 	Catedra
 }
 
-func buildPatchesActualizacionMaterias(
+func buildPatchesMaterias(
 	conn *pgx.Conn,
 	codigos []string,
 	ofertas map[string]UltimaOfertaMateria,
-) ([]patchActualizacionMateria, error) {
+) ([]patchMateria, error) {
 	rows, err := conn.Query(
 		context.Background(),
 		selectMateriasConPosibleActualizacionQuery,
@@ -69,7 +69,7 @@ func buildPatchesActualizacionMaterias(
 	)
 
 	var totalDocentes, docentesNuevos, totalCatedras, catedrasNuevas int
-	patches := make([]patchActualizacionMateria, 0, len(candidatas))
+	patches := make([]patchMateria, 0, len(candidatas))
 
 	for _, mat := range candidatas {
 		oferta, ok := ofertas[mat.Codigo]
@@ -110,7 +110,7 @@ func buildPatchesActualizacionMaterias(
 func newPatchMateria(
 	conn *pgx.Conn,
 	oferta UltimaOfertaMateria,
-) (*patchActualizacionMateria, error) {
+) (*patchMateria, error) {
 	patchesDocentes, err := newPatchesDocentes(conn, oferta)
 	if err != nil {
 		return nil, nil
@@ -163,7 +163,7 @@ func newPatchMateria(
 		),
 	)
 
-	return &patchActualizacionMateria{
+	return &patchMateria{
 		Materia:  oferta.Materia,
 		Docentes: patchesDocentes,
 		Catedras: patchesCatedras,

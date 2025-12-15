@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 
 	"github.com/charmbracelet/log"
@@ -29,7 +31,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := startServer(conn, patches); err != nil {
+	addr := fmt.Sprintf("%v:%v", os.Getenv("BACKEND_HOST"), os.Getenv("BACKEND_PORT"))
+	if err := startServer(conn, patches, addr); err != nil {
 		slog.Error(
 			fmt.Sprintf(
 				"error ejecutando servidor de resolución de actualización de ofertas de materias: %v",
@@ -40,7 +43,7 @@ func main() {
 	}
 }
 
-func getPatchesActualizacionMaterias(conn *pgx.Conn) ([]patchActualizacionMateria, error) {
+func getPatchesActualizacionMaterias(conn *pgx.Conn) ([]patchMateria, error) {
 	ofertas, err := getOfertasMaterias(conn)
 	if err != nil {
 		return nil, fmt.Errorf(
@@ -64,10 +67,10 @@ func getPatchesActualizacionMaterias(conn *pgx.Conn) ([]patchActualizacionMateri
 		)
 	}
 
-	patches, err := buildPatchesActualizacionMaterias(conn, codigos, ofertas)
+	patches, err := buildPatchesMaterias(conn, codigos, ofertas)
 	if err != nil {
 		return nil, fmt.Errorf(
-			"error construyendo patches de actualización de ofertas de comisiones de materias: %w",
+			"error construyendo patches de actualización de materias: %w",
 			err,
 		)
 	}
@@ -75,6 +78,18 @@ func getPatchesActualizacionMaterias(conn *pgx.Conn) ([]patchActualizacionMateri
 	return patches, nil
 }
 
-func startServer(_ *pgx.Conn, _ any) error {
-	return nil
+func startServer(_ *pgx.Conn, patches []patchMateria, addr string) error {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(patches); err != nil {
+			slog.Error(
+				fmt.Sprintf("error serializando patches de actualización de materias: %v", err),
+			)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
+
+	slog.Info(fmt.Sprintf("servidor escuchando peticiones en address %v", addr))
+
+	return http.ListenAndServe(addr, nil)
 }
