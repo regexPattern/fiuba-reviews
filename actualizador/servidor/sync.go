@@ -16,14 +16,14 @@ var updateSyncMateriasQuery string
 var selectMateriasNoRegistradasQuery string
 
 func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
-	tx, err := conn.Begin(context.Background())
+	tx, err := conn.Begin(context.TODO())
 	if err != nil {
 		return fmt.Errorf("error iniciando transacción de sincronización de materias: %w", err)
 	}
 
-	defer tx.Rollback(context.Background())
+	defer tx.Rollback(context.TODO())
 
-	type MateriaSincronizadaRow struct {
+	type materiaSincronizadaRow struct {
 		Codigo                 string   `db:"codigo"`
 		Nombre                 string   `db:"nombre"`
 		DocentesMigrados       int      `db:"docentes_migrados"`
@@ -32,17 +32,17 @@ func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
 		CodigosEquivalencias   []string `db:"codigos_equivalencias"`
 	}
 
-	rows, err := tx.Query(context.Background(), updateSyncMateriasQuery, nombres, codigos)
+	rows, err := tx.Query(context.TODO(), updateSyncMateriasQuery, nombres, codigos)
 	if err != nil {
 		return fmt.Errorf("error ejecutando query de sincronización de materias: %w", err)
 	}
 
 	materiasSincronizadas, err := pgx.CollectRows(
 		rows,
-		pgx.RowToStructByName[MateriaSincronizadaRow],
+		pgx.RowToStructByName[materiaSincronizadaRow],
 	)
 	if err != nil {
-		return fmt.Errorf("error procesando materias sincronizadas: %w", err)
+		return fmt.Errorf("error serializando materias sincronizadas: %w", err)
 	}
 
 	for _, m := range materiasSincronizadas {
@@ -57,7 +57,7 @@ func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
 
 	slog.Info(fmt.Sprintf("sincronizadas %d materias en total", len(materiasSincronizadas)))
 
-	if err := tx.Commit(context.Background()); err != nil {
+	if err := tx.Commit(context.TODO()); err != nil {
 		return fmt.Errorf(
 			"error haciendo commit de la transacción de sincronización de materias: %w",
 			err,
@@ -73,7 +73,7 @@ func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
 
 func checkMateriasNoRegistradas(conn *pgx.Conn, codigos, nombres []string) error {
 	rows, err := conn.Query(
-		context.Background(),
+		context.TODO(),
 		selectMateriasNoRegistradasQuery,
 		nombres,
 		codigos,
@@ -84,12 +84,16 @@ func checkMateriasNoRegistradas(conn *pgx.Conn, codigos, nombres []string) error
 
 	materiasNoRegistradas, err := pgx.CollectRows(rows, pgx.RowToStructByName[Materia])
 	if err != nil {
-		return fmt.Errorf("error procesando materias no registradas: %v", err)
+		return fmt.Errorf("error serializando materias no registradas: %v", err)
 	}
 
 	for _, m := range materiasNoRegistradas {
 		slog.Warn(
-			fmt.Sprintf("materia %v (%v) no registrada en la base de datos", m.Codigo, m.Nombre),
+			fmt.Sprintf(
+				"materia %v (%v) no está registrada en la base de datos",
+				m.Codigo,
+				m.Nombre,
+			),
 		)
 	}
 

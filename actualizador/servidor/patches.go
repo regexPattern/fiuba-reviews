@@ -23,19 +23,20 @@ var selectCatedrasNoRegistradasDeMateriaQuery string
 
 type patchMateria struct {
 	Materia
-	Docentes []patchDocente
-	Catedras []patchCatedra
+	Docentes     []patchDocente `json:"docentes"`
+	Catedras     []patchCatedra `json:"catedras"`
+	Cuatrimestre `               json:"cuatrimestre"`
 }
 
 type patchDocente struct {
 	Docente
-	Matches []matchDocente
+	Matches []matchDocente `json:"matches"`
 }
 
 type matchDocente struct {
-	Codigo    *string
-	NombreDb  *string
-	Similitud *float64
+	Codigo    *string  `json:"codigo"`
+	NombreDb  *string  `json:"nombre"`
+	Similitud *float64 `json:"similitud"`
 }
 
 type patchCatedra struct {
@@ -44,13 +45,13 @@ type patchCatedra struct {
 
 func buildPatchesMaterias(
 	conn *pgx.Conn,
-	codigos []string,
+	codMaterias []string,
 	ofertas map[string]UltimaOfertaMateria,
-) ([]patchMateria, error) {
+) (map[string]patchMateria, error) {
 	rows, err := conn.Query(
-		context.Background(),
+		context.TODO(),
 		selectMateriasConPosibleActualizacionQuery,
-		codigos,
+		codMaterias,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error consultando materias candidatas a actualizarse: %w", err)
@@ -58,18 +59,18 @@ func buildPatchesMaterias(
 
 	candidatas, err := pgx.CollectRows(rows, pgx.RowToStructByName[Materia])
 	if err != nil {
-		return nil, fmt.Errorf("error procesando materias candidatas a actualizarse: %v", err)
+		return nil, fmt.Errorf("error deserializando materias candidatas a actualizarse: %v", err)
 	}
 
 	slog.Debug(
 		fmt.Sprintf(
-			"encontradas %v materias con posible actualización de oferta",
+			"encontradas %v materias con posible actualización",
 			len(candidatas),
 		),
 	)
 
 	var totalDocentes, docentesNuevos, totalCatedras, catedrasNuevas int
-	patches := make([]patchMateria, 0, len(candidatas))
+	patches := make(map[string]patchMateria, len(candidatas))
 
 	for _, mat := range candidatas {
 		oferta, ok := ofertas[mat.Codigo]
@@ -79,7 +80,7 @@ func buildPatchesMaterias(
 
 		if p, err := newPatchMateria(conn, oferta); err != nil {
 			return nil, fmt.Errorf(
-				"error determinando si oferta de materia %v (%v) tiene actualización de oferta disponible: %w",
+				"error determinando si oferta de materia %v (%v) tiene actualización disponible: %w",
 				mat.Codigo,
 				mat.Nombre,
 				err,
@@ -87,19 +88,19 @@ func buildPatchesMaterias(
 		} else if p != nil {
 			totalDocentes += len(p.Docentes)
 			totalCatedras += len(p.Catedras)
-			for _, pd := range p.Docentes {
-				if len(pd.Matches) == 0 {
+			for _, d := range p.Docentes {
+				if len(d.Matches) == 0 {
 					docentesNuevos++
 				}
 			}
 			catedrasNuevas += len(p.Catedras)
-			patches = append(patches, *p)
+			patches[p.Codigo] = *p
 		}
 	}
 
 	slog.Info(
 		fmt.Sprintf(
-			"encontradas %v materias con actualizaciones de oferta disponible",
+			"encontradas %v materias con actualización disponible",
 			len(patches),
 		),
 	)
@@ -113,15 +114,32 @@ func newPatchMateria(
 ) (*patchMateria, error) {
 	patchesDocentes, err := newPatchesDocentes(conn, oferta)
 	if err != nil {
-		return nil, nil
+		return nil, fmt.Errorf(
+			"error generando patch de actualización de docentes de materia %v (%v): %w",
+			oferta.Codigo,
+			oferta.Nombre,
+			err,
+		)
 	}
 
 	patchesCatedras, err := newPatchesCatedras(conn, oferta)
 	if err != nil {
-		return nil, nil
+		return nil, fmt.Errorf(
+			"error generando patch de actualización de cátedras de materia %v (%v): %w",
+			oferta.Codigo,
+			oferta.Nombre,
+			err,
+		)
 	}
 
 	if len(patchesDocentes) == 0 && len(patchesCatedras) == 0 {
+		slog.Debug(
+			fmt.Sprintf(
+				"materia %v (%v) no tiene cambios disponibles",
+				oferta.Codigo,
+				oferta.Nombre,
+			),
+		)
 		return nil, nil
 	}
 
@@ -136,9 +154,9 @@ func newPatchMateria(
 	}
 
 	docentesUnicos := make(map[string]Docente)
-	for _, c := range oferta.Catedras {
-		for _, d := range c.Docentes {
-			docentesUnicos[d.Nombre] = d
+	for _, cat := range oferta.Catedras {
+		for _, doc := range cat.Docentes {
+			docentesUnicos[doc.Nombre] = doc
 		}
 	}
 	docentesExistentes := len(docentesUnicos) - len(patchesDocentes)
@@ -164,33 +182,33 @@ func newPatchMateria(
 	)
 
 	return &patchMateria{
-		Materia:  oferta.Materia,
-		Docentes: patchesDocentes,
-		Catedras: patchesCatedras,
+		Materia:      oferta.Materia,
+		Docentes:     patchesDocentes,
+		Catedras:     patchesCatedras,
+		Cuatrimestre: oferta.Cuatrimestre,
 	}, nil
 }
 
 func newPatchesDocentes(conn *pgx.Conn, oferta UltimaOfertaMateria) ([]patchDocente, error) {
 	docentesUnicos := make(map[string]Docente)
 
-	for _, c := range oferta.Catedras {
-		for _, d := range c.Docentes {
-			docentesUnicos[d.Nombre] = d
+	for _, cat := range oferta.Catedras {
+		for _, doc := range cat.Docentes {
+			docentesUnicos[doc.Nombre] = doc
 		}
 	}
 
 	nombresDocentes := slices.Collect(maps.Keys(docentesUnicos))
 
 	rows, err := conn.Query(
-		context.Background(),
+		context.TODO(),
 		selectDocentesNoVinculadosDeMateriaQuery,
 		oferta.Codigo,
 		nombresDocentes,
 	)
 	if err != nil {
 		return nil, fmt.Errorf(
-			"error consultando docentes no vinculados al siu de materia %v: %w",
-			oferta.Codigo,
+			"error consultando docentes no vinculados al siu de materia: %w",
 			err,
 		)
 	}
@@ -206,11 +224,7 @@ func newPatchesDocentes(conn *pgx.Conn, oferta UltimaOfertaMateria) ([]patchDoce
 		pgx.RowToStructByName[docenteSinMatchRow],
 	)
 	if err != nil {
-		return nil, fmt.Errorf(
-			"error procesando docentes sin match de materia %v: %w",
-			oferta.Codigo,
-			err,
-		)
+		return nil, fmt.Errorf("error serializando docentes sin matches de materia: %w", err)
 	}
 
 	matchesPorDocente := make(map[string][]matchDocente)
@@ -241,15 +255,11 @@ func newPatchesDocentes(conn *pgx.Conn, oferta UltimaOfertaMateria) ([]patchDoce
 func newPatchesCatedras(conn *pgx.Conn, oferta UltimaOfertaMateria) ([]patchCatedra, error) {
 	catedrasJson, err := json.Marshal(oferta.Catedras)
 	if err != nil {
-		return nil, fmt.Errorf(
-			"error serializando cátedras de materia %v a json: %w",
-			oferta.Codigo,
-			err,
-		)
+		return nil, fmt.Errorf("error serializando cátedras de materia: %w", err)
 	}
 
 	rows, err := conn.Query(
-		context.Background(),
+		context.TODO(),
 		selectCatedrasNoRegistradasDeMateriaQuery,
 		oferta.Codigo,
 		string(catedrasJson),
