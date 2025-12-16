@@ -62,7 +62,7 @@ func buildPatchesMaterias(
 		return nil, fmt.Errorf("error deserializando materias candidatas a actualizarse: %v", err)
 	}
 
-	slog.Debug(
+	slog.Info(
 		fmt.Sprintf(
 			"encontradas %v materias con posible actualización",
 			len(candidatas),
@@ -133,7 +133,7 @@ func newPatchMateria(
 	}
 
 	if len(patchesDocentes) == 0 && len(patchesCatedras) == 0 {
-		slog.Debug(
+		slog.Info(
 			fmt.Sprintf(
 				"materia %v (%v) no tiene cambios disponibles",
 				oferta.Codigo,

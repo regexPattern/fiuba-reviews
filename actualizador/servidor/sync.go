@@ -47,7 +47,7 @@ func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
 
 	for _, m := range materiasSincronizadas {
 		slog.Debug(
-			fmt.Sprintf("sincronizado materia %s %s", m.Codigo, m.Nombre),
+			fmt.Sprintf("sincronizada materia %v (%v)", m.Codigo, m.Nombre),
 			"docentes", m.DocentesMigrados,
 			"calificaciones", m.CalificacionesMigradas,
 			"comentarios", m.ComentariosMigrados,

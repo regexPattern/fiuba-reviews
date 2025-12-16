@@ -84,7 +84,11 @@ func getOfertasMaterias(conn *pgx.Conn) (map[string]UltimaOfertaMateria, error) 
 			for _, cat := range om.Catedras {
 				if n := len(cat.Docentes); n == 0 {
 					slog.Warn(
-						fmt.Sprintf("cátedra de materia %v no tiene docentes", om.Codigo),
+						fmt.Sprintf(
+							"cátedra de materia %v (%v) no tiene docentes",
+							om.Codigo,
+							om.Nombre,
+						),
 						"carrera",
 						oc.Carrera,
 						"cuatrimestre",
@@ -92,6 +96,24 @@ func getOfertasMaterias(conn *pgx.Conn) (map[string]UltimaOfertaMateria, error) 
 					)
 				} else {
 					docentesCatedra += len(cat.Docentes)
+				}
+
+				for _, doc := range cat.Docentes {
+					if doc.Nombre == "" {
+						slog.Warn(
+							fmt.Sprintf(
+								"docente sin nombre encontrado en cátedra de materia %v (%v)",
+								om.Codigo,
+								om.Nombre,
+							),
+							"carrera",
+							oc.Carrera,
+							"cuatrimestre",
+							oc.Cuatrimestre,
+							"cátedra",
+							cat.Codigo,
+						)
+					}
 				}
 			}
 
@@ -102,10 +124,8 @@ func getOfertasMaterias(conn *pgx.Conn) (map[string]UltimaOfertaMateria, error) 
 						om.Codigo,
 						om.Nombre,
 					),
-					"carrera",
-					oc.Carrera,
-					"cuatrimestre",
-					fmt.Sprintf("%vQ%v", oc.Cuatrimestre.Numero, oc.Cuatrimestre.Anio),
+					"carrera", oc.Carrera,
+					"cuatrimestre", oc.Cuatrimestre,
 				)
 				continue
 			}
@@ -123,7 +143,7 @@ func getOfertasMaterias(conn *pgx.Conn) (map[string]UltimaOfertaMateria, error) 
 	}
 
 	for cuat, n := range materiasPorCuatri {
-		slog.Debug(
+		slog.Info(
 			fmt.Sprintf(
 				"encontradas %v ofertas de comisiones de materias de cuatrimestre %v",
 				n,
@@ -132,7 +152,7 @@ func getOfertasMaterias(conn *pgx.Conn) (map[string]UltimaOfertaMateria, error) 
 		)
 	}
 
-	slog.Debug(
+	slog.Info(
 		fmt.Sprintf(
 			"encontradas %v ofertas de comisiones de materias en total",
 			len(ofertasMaterias),

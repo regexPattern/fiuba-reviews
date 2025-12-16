@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/jackc/pgx/v5"
@@ -14,7 +15,11 @@ import (
 
 func main() {
 	logger := log.New(os.Stderr)
-	logger.SetLevel(log.DebugLevel)
+
+	if strings.ToLower(os.Getenv("LOG_LEVEL")) == "debug" {
+		logger.SetLevel(log.DebugLevel)
+	}
+
 	slog.SetDefault(slog.New(logger))
 
 	dbUrl := os.Getenv("DATABASE_URL")
