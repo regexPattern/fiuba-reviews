@@ -5,27 +5,9 @@
 	let { data }: PageProps = $props();
 
 	let docentesResueltos = $state(new SvelteMap<string, string>());
-
-	const handleSubmit = async (
-		e: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement }
-	) => {
-		e.preventDefault();
-
-		const resoluciones = new Map<string, string | null>();
-
-		for (const [nombreSiu, codMatch] of docentesResueltos) {
-			resoluciones.set(nombreSiu, codMatch);
-		}
-
-		for (const nombreSiu of data.docentesNuevos) {
-			resoluciones.set(nombreSiu, null);
-		}
-
-		console.log(resoluciones);
-	};
 </script>
 
-<form method="POST" onsubmit={handleSubmit}>
+<form method="POST">
 	<header class="mb-4 px-6 py-4 flex justify-between border-b border-gray-300">
 		<h1 class="text-3xl">
 			<span class="font-mono">{data.patch.codigo}</span><span class="mx-2">•</span><span
@@ -34,7 +16,7 @@
 		</h1>
 
 		<button class="rounded-lg border border-gray-300 text-green-700 font-medium px-3"
-			>✅ Actualizar</button
+			>Aplicar cambios</button
 		>
 	</header>
 
@@ -67,13 +49,13 @@
 									</label>
 								{/each}
 								<label>
-									<input type="radio" />
+									<input type="radio" name={doc.nombre} value="" />
 									Registrar nuevo docente
 								</label>
 							</div>
 						{:else}
 							<label>
-								<input type="radio" checked={true} />
+								<input type="radio" name={doc.nombre} value="" checked={true} />
 								Registrar nuevo docente
 							</label>
 						{/if}
@@ -92,8 +74,6 @@
 							<div>
 								{#if docentesResueltos.has(doc.nombre)}
 									✅
-								{:else if data.docentesNuevos.has(doc.nombre)}
-									🆕
 								{:else}
 									❓
 								{/if}

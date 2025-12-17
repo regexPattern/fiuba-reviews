@@ -40,9 +40,11 @@ export const load: PageServerLoad = async ({ params }) => {
 		}
 	}
 
-	return { patch, docentesNuevos };
+	return { patch };
 };
 
 export const actions = {
-	default: async () => {}
+	default: async ({ request }) => {
+		console.log(await request.formData());
+	}
 } satisfies Actions;
