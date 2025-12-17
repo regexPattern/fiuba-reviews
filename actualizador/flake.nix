@@ -18,6 +18,7 @@
         devShells.cliente = pkgs.mkShell {
           packages = with pkgs; [
             bun
+            prettierd
             svelte-language-server
             tailwindcss-language-server
             typescript-language-server

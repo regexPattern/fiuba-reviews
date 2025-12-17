@@ -52,7 +52,7 @@ FROM
         WHERE
             codigo_materia = $1
             AND nombre_siu IS NULL
-            AND word_similarity (trim(regexp_replace(lower(unaccent (nombre)), '\s+', ' ', 'g')), sme.nombre_norm) >= 0.3) d ON TRUE
+            AND word_similarity (trim(regexp_replace(lower(unaccent (nombre)), '\s+', ' ', 'g')), sme.nombre_norm) >= 0.5) d ON TRUE
 WHERE
     d.codigo IS NOT NULL
 UNION ALL
@@ -72,7 +72,7 @@ WHERE
         WHERE
             d.codigo_materia = $1
             AND nombre_siu IS NULL
-            AND word_similarity (trim(regexp_replace(lower(unaccent (d.nombre)), '\s+', ' ', 'g')), sme.nombre_norm) >= 0.3)
+            AND word_similarity (trim(regexp_replace(lower(unaccent (d.nombre)), '\s+', ' ', 'g')), sme.nombre_norm) >= 0.5)
 ORDER BY
     nombre_siu,
     similitud DESC NULLS LAST;

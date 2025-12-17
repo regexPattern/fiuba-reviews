@@ -102,7 +102,7 @@ func getOfertasMaterias(conn *pgx.Conn) (map[string]UltimaOfertaMateria, error) 
 					if doc.Nombre == "" {
 						slog.Warn(
 							fmt.Sprintf(
-								"docente sin nombre encontrado en cátedra de materia %v (%v)",
+								"encontrado docente sin nombre en cátedra de materia %v (%v)",
 								om.Codigo,
 								om.Nombre,
 							),
@@ -113,6 +113,7 @@ func getOfertasMaterias(conn *pgx.Conn) (map[string]UltimaOfertaMateria, error) 
 							"cátedra",
 							cat.Codigo,
 						)
+						continue
 					}
 				}
 			}
