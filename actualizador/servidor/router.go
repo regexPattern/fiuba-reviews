@@ -6,24 +6,27 @@ import (
 	"log/slog"
 	"net/http"
 	"slices"
+	"strings"
+
+	"github.com/jackc/pgx/v5"
 )
 
 func handleGetAllPatches(w http.ResponseWriter, patches map[string]patchMateria) {
-	type PatchRes struct {
+	type patchRes struct {
 		Codigo   string `json:"codigo"`
 		Nombre   string `json:"nombre"`
 		Docentes int    `json:"docentes"`
 	}
 
-	patchesRes := make([]PatchRes, 0)
+	patchesRes := make([]patchRes, 0)
 	for cod, pat := range patches {
 		patchesRes = append(
 			patchesRes,
-			PatchRes{Codigo: cod, Nombre: pat.Nombre, Docentes: len(pat.Docentes)},
+			patchRes{Codigo: cod, Nombre: pat.Nombre, Docentes: len(pat.Docentes)},
 		)
 	}
 
-	slices.SortFunc(patchesRes, func(a, b PatchRes) int {
+	slices.SortFunc(patchesRes, func(a, b patchRes) int {
 		if a.Docentes != b.Docentes {
 			return b.Docentes - a.Docentes
 		}
@@ -50,8 +53,14 @@ func handleGetPatchMateria(
 	r *http.Request,
 	patches map[string]patchMateria,
 ) {
-	codMateria := r.PathValue("codigoMateria")
-	patchRes := patches[codMateria]
+	codigoMateria := r.PathValue("codigoMateria")
+	patchRes := patches[codigoMateria]
+
+	for _, cat := range patchRes.Catedras {
+		slices.SortFunc(cat.Docentes, func(a, b Docente) int {
+			return strings.Compare(a.Nombre, b.Nombre)
+		})
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(patchRes); err != nil {
@@ -67,16 +76,36 @@ func handleGetPatchMateria(
 	}
 }
 
-func handleApplyPatchMateria(
+type docenteFormData struct {
+	NombreDb    string `json:"nombre_db"`
+	CodigoMatch string `json:"codigo_match"`
+}
+
+func handleAplicarPatchMateria(
 	w http.ResponseWriter,
 	r *http.Request,
+	conn *pgx.Conn,
 	patches map[string]patchMateria,
 ) {
-	codMateria := r.PathValue("codigoMateria")
-	if pat, ok := patches[codMateria]; ok {
-		slog.Info(
-			fmt.Sprintf("eliminado patch de materia %v (%v) del registro", pat.Codigo, pat.Nombre),
-		)
+	var resoluciones map[string]struct {
+		NombreDb    string  `json:"nombre_db"`
+		CodigoMatch *string `json:"codigo_match"`
 	}
+
+	if err := json.NewDecoder(r.Body).Decode(&resoluciones); err != nil {
+		slog.Error(fmt.Sprintf("error parseando JSON de docentes: %v", err))
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	for k, r := range resoluciones {
+		fmt.Println(k, r)
+	}
+
+	codigoMateria := r.PathValue("codigoMateria")
+	patch := patches[codigoMateria]
+
+	_ = patch
+
 	w.WriteHeader(http.StatusNoContent)
 }

@@ -305,3 +305,14 @@ func newPatchesCatedras(conn *pgx.Conn, oferta UltimaOfertaMateria) ([]patchCate
 
 	return patches, nil
 }
+
+func aplicarPatchMateria(conn *pgx.Conn, patch patchMateria, docentesResueltos map[string]string) {
+	for nombreSiu, codMatch := range docentesResueltos {
+		// crear el docente en la base de datos usando sql
+		// asociar el nombre siu del docente
+		// TODO: por el momento poner el campo nombre del docente igual al nombre del siu
+		_, _ = nombreSiu, codMatch
+	}
+
+	fmt.Println(patch.Materia, docentesResueltos)
+}

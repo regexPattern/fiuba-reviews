@@ -92,7 +92,7 @@ func genPatchesMaterias(conn *pgx.Conn) (map[string]patchMateria, error) {
 	return patches, nil
 }
 
-func startServer(_ *pgx.Conn, addr string, patches map[string]patchMateria) error {
+func startServer(conn *pgx.Conn, addr string, patches map[string]patchMateria) error {
 	http.HandleFunc("GET /patches", func(w http.ResponseWriter, _ *http.Request) {
 		handleGetAllPatches(w, patches)
 	})
@@ -100,7 +100,7 @@ func startServer(_ *pgx.Conn, addr string, patches map[string]patchMateria) erro
 		handleGetPatchMateria(w, r, patches)
 	})
 	http.HandleFunc("PATCH /patches/{codigoMateria}", func(w http.ResponseWriter, r *http.Request) {
-		handleApplyPatchMateria(w, r, patches)
+		handleAplicarPatchMateria(w, r, conn, patches)
 	})
 
 	slog.Info(fmt.Sprintf("servidor escuchando peticiones en dirección %v", addr))
