@@ -56,8 +56,11 @@ func handleGetPatchMateria(
 	codigoMateria := r.PathValue("codigoMateria")
 	patchRes := patches[codigoMateria]
 
-	for _, cat := range patchRes.Catedras {
-		slices.SortFunc(cat.Docentes, func(a, b docente) int {
+	for i := range patchRes.Catedras {
+		slices.SortFunc(patchRes.Catedras[i].DocentesResueltos, func(a, b docente) int {
+			return strings.Compare(a.Nombre, b.Nombre)
+		})
+		slices.SortFunc(patchRes.Catedras[i].DocentesNoResueltos, func(a, b docente) int {
 			return strings.Compare(a.Nombre, b.Nombre)
 		})
 	}

@@ -12,13 +12,13 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-//go:embed queries/4-SELECT-materias-con-posible-actualizacion.sql
+//go:embed queries/SELECT-materias-con-posible-actualizacion.sql
 var selectMateriasConPosibleActualizacionQuery string
 
-//go:embed queries/5-SELECT-docentes-no-vinculados-de-materia.sql
+//go:embed queries/SELECT-docentes-no-resueltos-de-materia.sql
 var selectDocentesNoVinculadosDeMateriaQuery string
 
-//go:embed queries/6-SELECT-catedras-no-registradas-de-materia.sql
+//go:embed queries/SELECT-catedras-no-registradas-de-materia.sql
 var selectCatedrasNoRegistradasDeMateriaQuery string
 
 type patchMateria struct {
@@ -273,14 +273,7 @@ func newPatchesCatedras(conn *pgx.Conn, oferta ultimaOfertaMateria) ([]patchCate
 	}
 	defer rows.Close()
 
-	type catedraNoRegistradaRow struct {
-		CodigoSiu int `db:"codigo_siu"`
-	}
-
-	catedrasNoRegistradas, err := pgx.CollectRows(
-		rows,
-		pgx.RowToStructByName[catedraNoRegistradaRow],
-	)
+	catedrasNoRegistradas, err := pgx.CollectRows(rows, pgx.RowTo[int])
 	if err != nil {
 		return nil, fmt.Errorf(
 			"error procesando cátedras no registradas de materia %v: %w",
@@ -291,8 +284,8 @@ func newPatchesCatedras(conn *pgx.Conn, oferta ultimaOfertaMateria) ([]patchCate
 
 	patches := make([]patchCatedra, 0, len(catedrasNoRegistradas))
 	codigosCatedrasNuevas := make(map[int]bool)
-	for _, row := range catedrasNoRegistradas {
-		codigosCatedrasNuevas[row.CodigoSiu] = true
+	for _, cod := range catedrasNoRegistradas {
+		codigosCatedrasNuevas[cod] = true
 	}
 
 	for _, cat := range oferta.Catedras {

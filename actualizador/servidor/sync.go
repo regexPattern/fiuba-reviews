@@ -9,10 +9,10 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-//go:embed queries/2-UPDATE-sync-materias-query.sql
+//go:embed queries/UPDATE-sync-materias-query.sql
 var updateSyncMateriasQuery string
 
-//go:embed queries/3-SELECT-materias-no-registradas.sql
+//go:embed queries/SELECT-materias-no-registradas.sql
 var selectMateriasNoRegistradasQuery string
 
 func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
@@ -31,6 +31,11 @@ func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
 		}
 	}()
 
+	rows, err := tx.Query(context.TODO(), updateSyncMateriasQuery, nombres, codigos)
+	if err != nil {
+		return fmt.Errorf("error ejecutando query de sincronización de materias: %w", err)
+	}
+
 	type materiaSincronizadaRow struct {
 		Codigo                 string   `db:"codigo"`
 		Nombre                 string   `db:"nombre"`
@@ -38,11 +43,6 @@ func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
 		ComentariosMigrados    int      `db:"comentarios_migrados"`
 		CalificacionesMigradas int      `db:"calificaciones_migradas"`
 		CodigosEquivalencias   []string `db:"codigos_equivalencias"`
-	}
-
-	rows, err := tx.Query(context.TODO(), updateSyncMateriasQuery, nombres, codigos)
-	if err != nil {
-		return fmt.Errorf("error ejecutando query de sincronización de materias: %w", err)
 	}
 
 	materiasSincronizadas, err := pgx.CollectRows(

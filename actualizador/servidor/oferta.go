@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-//go:embed queries/1-SELECT-ofertas-carreras.sql
+//go:embed queries/SELECT-ofertas-carreras.sql
 var selectOfertasCarrerasQuery string
 
 type ofertaCarrera struct {

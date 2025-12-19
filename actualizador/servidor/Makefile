@@ -1,7 +1,10 @@
-.PHONY: all lint format
+.PHONY: run build lint format
 
-all:
+run:
 	@go run .
+
+build:
+	@go build .
 
 lint:
 	@golangci-lint run
