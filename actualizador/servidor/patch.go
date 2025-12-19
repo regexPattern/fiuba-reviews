@@ -27,6 +27,9 @@ var crearNuevoDocenteQuery string
 //go:embed queries/patch/UPDATE-asociar-docente-existente.sql
 var asociarDocenteExistenteQuery string
 
+//go:embed queries/patch/SELECT-docentes-resueltos-de-catedras.sql
+var docentesResueltosDeCatedrasQuery string
+
 type patchMateria struct {
 	materia
 	Docentes     []patchDocente `json:"docentes"`
@@ -48,6 +51,17 @@ type matchDocente struct {
 type patchCatedra struct {
 	catedra
 	Resuelta bool `json:"resuelta"`
+}
+
+// Tipos de respuesta específicos para el endpoint GET /patches/{codigoMateria}
+type docenteCatedraResponse struct {
+	Nombre   string `json:"nombre"`
+	Resuelto bool   `json:"resuelto"`
+}
+
+type catedraResponse struct {
+	Docentes []docenteCatedraResponse `json:"docentes"`
+	Resuelta bool                     `json:"resuelta"`
 }
 
 func buildPatchesMaterias(
@@ -307,6 +321,57 @@ func newPatchesCatedras(conn *pgx.Conn, oferta ultimaOfertaMateria) ([]patchCate
 	}
 
 	return patches, nil
+}
+
+func getDocentesResueltosDeCatedras(
+	conn *pgx.Conn,
+	codigoMateria string,
+	catedras []patchCatedra,
+) (map[int]map[string]bool, error) {
+	catedrasJson, err := json.Marshal(catedras)
+	if err != nil {
+		return nil, fmt.Errorf("error serializando cátedras de materia: %w", err)
+	}
+
+	type docenteResueltoRow struct {
+		CodigoCatedra int    `db:"codigo_catedra_siu"`
+		NombreDocente string `db:"nombre_docente_siu"`
+		Resuelto      bool   `db:"resuelto"`
+	}
+
+	rows, err := conn.Query(
+		context.TODO(),
+		docentesResueltosDeCatedrasQuery,
+		codigoMateria,
+		string(catedrasJson),
+	)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"error consultando docentes resueltos de cátedras de materia %v: %w",
+			codigoMateria,
+			err,
+		)
+	}
+	defer rows.Close()
+
+	docentesResueltos, err := pgx.CollectRows(rows, pgx.RowToStructByName[docenteResueltoRow])
+	if err != nil {
+		return nil, fmt.Errorf(
+			"error serializando docentes resueltos de cátedras de materia %v: %w",
+			codigoMateria,
+			err,
+		)
+	}
+
+	resueltos := make(map[int]map[string]bool)
+	for _, doc := range docentesResueltos {
+		if _, ok := resueltos[doc.CodigoCatedra]; !ok {
+			resueltos[doc.CodigoCatedra] = make(map[string]bool)
+		}
+		resueltos[doc.CodigoCatedra][doc.NombreDocente] = doc.Resuelto
+	}
+
+	return resueltos, nil
 }
 
 func aplicarPatchMateria(

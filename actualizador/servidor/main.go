@@ -97,7 +97,7 @@ func startServer(conn *pgx.Conn, addr string, patches map[string]patchMateria) e
 		handleGetAllPatches(w, patches)
 	})
 	http.HandleFunc("GET /patches/{codigoMateria}", func(w http.ResponseWriter, r *http.Request) {
-		handleGetPatchMateria(w, r, patches)
+		handleGetPatchMateria(w, r, conn, patches)
 	})
 	http.HandleFunc("PATCH /patches/{codigoMateria}", func(w http.ResponseWriter, r *http.Request) {
 		handleAplicarPatchMateria(w, r, conn, patches)

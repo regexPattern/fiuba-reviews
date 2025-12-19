@@ -48,22 +48,72 @@ func handleGetAllPatches(w http.ResponseWriter, patches map[string]patchMateria)
 	}
 }
 
+type patchMateriaResponse struct {
+	materia
+	DocentesSinResolver []patchDocente    `json:"docentes_sin_resolver"`
+	Catedras            []catedraResponse `json:"catedras"`
+	cuatrimestre        `json:"cuatrimestre"`
+}
+
 func handleGetPatchMateria(
 	w http.ResponseWriter,
 	r *http.Request,
+	conn *pgx.Conn,
 	patches map[string]patchMateria,
 ) {
 	codigoMateria := r.PathValue("codigoMateria")
 	patchRes := patches[codigoMateria]
 
-	for i := range patchRes.Catedras {
-		slices.SortFunc(patchRes.Catedras[i].Docentes, func(a, b docente) int {
+	docentesResueltos, err := getDocentesResueltosDeCatedras(conn, codigoMateria, patchRes.Catedras)
+	if err != nil {
+		slog.Error(
+			fmt.Sprintf(
+				"error obteniendo estado de resolución de docentes de materia %v: %v",
+				codigoMateria,
+				err,
+			),
+		)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	catedrasResponse := make([]catedraResponse, 0, len(patchRes.Catedras))
+	for _, cat := range patchRes.Catedras {
+		docentesResponse := make([]docenteCatedraResponse, 0, len(cat.Docentes))
+
+		for _, doc := range cat.Docentes {
+			resuelto := false
+			if docentesPorCatedra, ok := docentesResueltos[cat.Codigo]; ok {
+				if estado, ok := docentesPorCatedra[doc.Nombre]; ok {
+					resuelto = estado
+				}
+			}
+
+			docentesResponse = append(docentesResponse, docenteCatedraResponse{
+				Nombre:   doc.Nombre,
+				Resuelto: resuelto,
+			})
+		}
+
+		slices.SortFunc(docentesResponse, func(a, b docenteCatedraResponse) int {
 			return strings.Compare(a.Nombre, b.Nombre)
+		})
+
+		catedrasResponse = append(catedrasResponse, catedraResponse{
+			Docentes: docentesResponse,
+			Resuelta: cat.Resuelta,
 		})
 	}
 
+	res := patchMateriaResponse{
+		materia:             patchRes.materia,
+		DocentesSinResolver: patchRes.Docentes,
+		Catedras:            catedrasResponse,
+		cuatrimestre:        patchRes.cuatrimestre,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(patchRes); err != nil {
+	if err := json.NewEncoder(w).Encode(res); err != nil {
 		slog.Error(
 			fmt.Sprintf(
 				"error serializando patches de materias %v (%v): %v",
