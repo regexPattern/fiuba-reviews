@@ -12,60 +12,60 @@ import (
 //go:embed queries/1-SELECT-ofertas-carreras.sql
 var selectOfertasCarrerasQuery string
 
-type OfertaCarrera struct {
-	CodigoCarrera string          `db:"codigo_carrera"`
-	Carrera       string          `db:"nombre_carrera"`
-	Cuatrimestre  Cuatrimestre    `db:"cuatrimestre"`
-	Materias      []OfertaMateria `db:"contenido"`
+type ofertaCarrera struct {
+	CodigoCarrera   string          `db:"codigo_carrera"`
+	NombreCarrera   string          `db:"nombre_carrera"`
+	Cuatrimestre    cuatrimestre    `db:"cuatrimestre"`
+	OfertasMaterias []ofertaMateria `db:"contenido"`
 }
 
-type Cuatrimestre struct {
+type cuatrimestre struct {
 	Numero int `json:"numero"`
 	Anio   int `json:"anio"`
 }
 
-func (c Cuatrimestre) String() string {
+func (c cuatrimestre) String() string {
 	return fmt.Sprintf("%vQ%v", c.Numero, c.Anio)
 }
 
-type Materia struct {
+type materia struct {
 	Codigo string `db:"codigo" json:"codigo"`
 	Nombre string `db:"nombre" json:"nombre"`
 }
 
-type OfertaMateria struct {
-	Materia
-	Catedras []Catedra `json:"catedras"`
+type ofertaMateria struct {
+	materia
+	Catedras []catedra `json:"catedras"`
 }
 
-type Catedra struct {
+type catedra struct {
 	Codigo   int       `json:"codigo"`
-	Docentes []Docente `json:"docentes"`
+	Docentes []docente `json:"docentes"`
 }
 
-type Docente struct {
+type docente struct {
 	Nombre string `json:"nombre"`
 	Rol    string `json:"rol"`
 }
 
-type UltimaOfertaMateria struct {
+type ultimaOfertaMateria struct {
 	NombreCarrera string
-	OfertaMateria
-	Cuatrimestre
+	ofertaMateria
+	cuatrimestre
 }
 
-func getOfertasMaterias(conn *pgx.Conn) (map[string]UltimaOfertaMateria, error) {
+func getOfertasMaterias(conn *pgx.Conn) (map[string]ultimaOfertaMateria, error) {
 	rows, err := conn.Query(context.TODO(), selectOfertasCarrerasQuery)
 	if err != nil {
 		return nil, fmt.Errorf("error consultando ofertas de comisiones de carreras: %w", err)
 	}
 
-	ofertasCarreras, err := pgx.CollectRows(rows, pgx.RowToStructByName[OfertaCarrera])
+	ofertasCarreras, err := pgx.CollectRows(rows, pgx.RowToStructByName[ofertaCarrera])
 	if err != nil {
 		return nil, fmt.Errorf("error serializando ofertas de comisiones de carreras")
 	}
 
-	ofertasPorCuatri := make(map[Cuatrimestre]int)
+	ofertasPorCuatri := make(map[cuatrimestre]int)
 	for _, oc := range ofertasCarreras {
 		ofertasPorCuatri[oc.Cuatrimestre]++
 	}
@@ -74,25 +74,24 @@ func getOfertasMaterias(conn *pgx.Conn) (map[string]UltimaOfertaMateria, error) 
 		fmt.Sprintf("encontradas %v ofertas de comisiones de carreras", len(ofertasCarreras)),
 	)
 
-	ofertasMaterias := make(map[string]UltimaOfertaMateria)
-	materiasPorCuatri := make(map[Cuatrimestre]int)
+	ofertasMaterias := make(map[string]ultimaOfertaMateria)
+	materiasPorCuatri := make(map[cuatrimestre]int)
 
 	for _, oc := range ofertasCarreras {
-		for _, om := range oc.Materias {
+		for _, om := range oc.OfertasMaterias {
+			logger := slog.Default().
+				With("carrera", oc.NombreCarrera, "cuatrimestre", oc.Cuatrimestre)
+
 			var docentesCatedra int
 
 			for _, cat := range om.Catedras {
 				if n := len(cat.Docentes); n == 0 {
-					slog.Warn(
+					logger.Warn(
 						fmt.Sprintf(
 							"cátedra de materia %v (%v) no tiene docentes",
 							om.Codigo,
 							om.Nombre,
 						),
-						"carrera",
-						oc.Carrera,
-						"cuatrimestre",
-						oc.Cuatrimestre,
 					)
 				} else {
 					docentesCatedra += len(cat.Docentes)
@@ -100,16 +99,12 @@ func getOfertasMaterias(conn *pgx.Conn) (map[string]UltimaOfertaMateria, error) 
 
 				for _, doc := range cat.Docentes {
 					if doc.Nombre == "" {
-						slog.Warn(
+						logger.Warn(
 							fmt.Sprintf(
 								"encontrado docente sin nombre en cátedra de materia %v (%v)",
 								om.Codigo,
 								om.Nombre,
 							),
-							"carrera",
-							oc.Carrera,
-							"cuatrimestre",
-							oc.Cuatrimestre,
 							"cátedra",
 							cat.Codigo,
 						)
@@ -119,23 +114,21 @@ func getOfertasMaterias(conn *pgx.Conn) (map[string]UltimaOfertaMateria, error) 
 			}
 
 			if docentesCatedra == 0 {
-				slog.Warn(
+				logger.Warn(
 					fmt.Sprintf(
 						"oferta de comisiones de materia %v (%v) no tiene docentes",
 						om.Codigo,
 						om.Nombre,
 					),
-					"carrera", oc.Carrera,
-					"cuatrimestre", oc.Cuatrimestre,
 				)
 				continue
 			}
 
 			if _, ok := ofertasMaterias[om.Codigo]; !ok {
-				ofertasMaterias[om.Codigo] = UltimaOfertaMateria{
-					NombreCarrera: oc.Carrera,
-					OfertaMateria: om,
-					Cuatrimestre:  oc.Cuatrimestre,
+				ofertasMaterias[om.Codigo] = ultimaOfertaMateria{
+					NombreCarrera: oc.NombreCarrera,
+					ofertaMateria: om,
+					cuatrimestre:  oc.Cuatrimestre,
 				}
 
 				materiasPorCuatri[oc.Cuatrimestre]++
@@ -143,12 +136,12 @@ func getOfertasMaterias(conn *pgx.Conn) (map[string]UltimaOfertaMateria, error) 
 		}
 	}
 
-	for cuat, n := range materiasPorCuatri {
+	for cuatri, n := range materiasPorCuatri {
 		slog.Info(
 			fmt.Sprintf(
 				"encontradas %v ofertas de comisiones de materias de cuatrimestre %v",
 				n,
-				cuat,
+				cuatri,
 			),
 		)
 	}

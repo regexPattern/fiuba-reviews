@@ -21,7 +21,15 @@ func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
 		return fmt.Errorf("error iniciando transacción de sincronización de materias: %w", err)
 	}
 
-	defer tx.Rollback(context.TODO())
+	defer func() {
+		if err := tx.Rollback(context.TODO()); err != nil {
+			slog.Error(
+				fmt.Sprintf(
+					"error haciendo rollback de transacción de sincronización de materias: %v", err,
+				),
+			)
+		}
+	}()
 
 	type materiaSincronizadaRow struct {
 		Codigo                 string   `db:"codigo"`
@@ -82,7 +90,7 @@ func checkMateriasNoRegistradas(conn *pgx.Conn, codigos, nombres []string) error
 		return fmt.Errorf("error consultando materias no registradas: %w", err)
 	}
 
-	materiasNoRegistradas, err := pgx.CollectRows(rows, pgx.RowToStructByName[Materia])
+	materiasNoRegistradas, err := pgx.CollectRows(rows, pgx.RowToStructByName[materia])
 	if err != nil {
 		return fmt.Errorf("error serializando materias no registradas: %v", err)
 	}

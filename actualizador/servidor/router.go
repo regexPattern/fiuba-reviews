@@ -57,7 +57,7 @@ func handleGetPatchMateria(
 	patchRes := patches[codigoMateria]
 
 	for _, cat := range patchRes.Catedras {
-		slices.SortFunc(cat.Docentes, func(a, b Docente) int {
+		slices.SortFunc(cat.Docentes, func(a, b docente) int {
 			return strings.Compare(a.Nombre, b.Nombre)
 		})
 	}
@@ -74,11 +74,6 @@ func handleGetPatchMateria(
 		)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-}
-
-type docenteFormData struct {
-	NombreDb    string `json:"nombre_db"`
-	CodigoMatch string `json:"codigo_match"`
 }
 
 func handleAplicarPatchMateria(

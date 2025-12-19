@@ -22,14 +22,14 @@ var selectDocentesNoVinculadosDeMateriaQuery string
 var selectCatedrasNoRegistradasDeMateriaQuery string
 
 type patchMateria struct {
-	Materia
+	materia
 	Docentes     []patchDocente `json:"docentes"`
 	Catedras     []patchCatedra `json:"catedras"`
-	Cuatrimestre `               json:"cuatrimestre"`
+	cuatrimestre `               json:"cuatrimestre"`
 }
 
 type patchDocente struct {
-	Docente
+	docente
 	Matches []matchDocente `json:"matches"`
 }
 
@@ -40,13 +40,13 @@ type matchDocente struct {
 }
 
 type patchCatedra struct {
-	Catedra
+	catedra
 }
 
 func buildPatchesMaterias(
 	conn *pgx.Conn,
 	codMaterias []string,
-	ofertas map[string]UltimaOfertaMateria,
+	ofertas map[string]ultimaOfertaMateria,
 ) (map[string]patchMateria, error) {
 	rows, err := conn.Query(
 		context.TODO(),
@@ -57,7 +57,7 @@ func buildPatchesMaterias(
 		return nil, fmt.Errorf("error consultando materias candidatas a actualizarse: %w", err)
 	}
 
-	candidatas, err := pgx.CollectRows(rows, pgx.RowToStructByName[Materia])
+	materiasCandidatas, err := pgx.CollectRows(rows, pgx.RowToStructByName[materia])
 	if err != nil {
 		return nil, fmt.Errorf("error deserializando materias candidatas a actualizarse: %v", err)
 	}
@@ -65,14 +65,14 @@ func buildPatchesMaterias(
 	slog.Info(
 		fmt.Sprintf(
 			"encontradas %v materias con posible actualización",
-			len(candidatas),
+			len(materiasCandidatas),
 		),
 	)
 
 	var totalDocentes, docentesNuevos, totalCatedras, catedrasNuevas int
-	patches := make(map[string]patchMateria, len(candidatas))
+	patches := make(map[string]patchMateria, len(materiasCandidatas))
 
-	for _, mat := range candidatas {
+	for _, mat := range materiasCandidatas {
 		oferta, ok := ofertas[mat.Codigo]
 		if !ok {
 			continue
@@ -110,7 +110,7 @@ func buildPatchesMaterias(
 
 func newPatchMateria(
 	conn *pgx.Conn,
-	oferta UltimaOfertaMateria,
+	oferta ultimaOfertaMateria,
 ) (*patchMateria, error) {
 	patchesDocentes, err := newPatchesDocentes(conn, oferta)
 	if err != nil {
@@ -143,8 +143,8 @@ func newPatchMateria(
 		return nil, nil
 	}
 
-	docentesConMatches := 0
-	docentesSinMatches := 0
+	var docentesConMatches, docentesSinMatches int
+
 	for _, patch := range patchesDocentes {
 		if len(patch.Matches) > 0 {
 			docentesConMatches++
@@ -153,7 +153,7 @@ func newPatchMateria(
 		}
 	}
 
-	docentesUnicos := make(map[string]Docente)
+	docentesUnicos := make(map[string]docente)
 	for _, cat := range oferta.Catedras {
 		for _, doc := range cat.Docentes {
 			docentesUnicos[doc.Nombre] = doc
@@ -182,15 +182,15 @@ func newPatchMateria(
 	)
 
 	return &patchMateria{
-		Materia:      oferta.Materia,
+		materia:      oferta.materia,
 		Docentes:     patchesDocentes,
 		Catedras:     patchesCatedras,
-		Cuatrimestre: oferta.Cuatrimestre,
+		cuatrimestre: oferta.cuatrimestre,
 	}, nil
 }
 
-func newPatchesDocentes(conn *pgx.Conn, oferta UltimaOfertaMateria) ([]patchDocente, error) {
-	docentesUnicos := make(map[string]Docente)
+func newPatchesDocentes(conn *pgx.Conn, oferta ultimaOfertaMateria) ([]patchDocente, error) {
+	docentesUnicos := make(map[string]docente)
 
 	for _, cat := range oferta.Catedras {
 		for _, doc := range cat.Docentes {
@@ -244,7 +244,7 @@ func newPatchesDocentes(conn *pgx.Conn, oferta UltimaOfertaMateria) ([]patchDoce
 	patches := make([]patchDocente, 0, len(matchesPorDocente))
 	for doc, matches := range matchesPorDocente {
 		patches = append(patches, patchDocente{
-			Docente: docentesUnicos[doc],
+			docente: docentesUnicos[doc],
 			Matches: matches,
 		})
 	}
@@ -252,7 +252,7 @@ func newPatchesDocentes(conn *pgx.Conn, oferta UltimaOfertaMateria) ([]patchDoce
 	return patches, nil
 }
 
-func newPatchesCatedras(conn *pgx.Conn, oferta UltimaOfertaMateria) ([]patchCatedra, error) {
+func newPatchesCatedras(conn *pgx.Conn, oferta ultimaOfertaMateria) ([]patchCatedra, error) {
 	catedrasJson, err := json.Marshal(oferta.Catedras)
 	if err != nil {
 		return nil, fmt.Errorf("error serializando cátedras de materia: %w", err)
@@ -298,7 +298,7 @@ func newPatchesCatedras(conn *pgx.Conn, oferta UltimaOfertaMateria) ([]patchCate
 	for _, cat := range oferta.Catedras {
 		if codigosCatedrasNuevas[cat.Codigo] {
 			patches = append(patches, patchCatedra{
-				Catedra: cat,
+				catedra: cat,
 			})
 		}
 	}
@@ -314,5 +314,5 @@ func aplicarPatchMateria(conn *pgx.Conn, patch patchMateria, docentesResueltos m
 		_, _ = nombreSiu, codMatch
 	}
 
-	fmt.Println(patch.Materia, docentesResueltos)
+	fmt.Println(patch.materia, docentesResueltos)
 }
