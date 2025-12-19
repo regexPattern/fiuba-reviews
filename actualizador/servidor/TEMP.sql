@@ -18,6 +18,9 @@ INSERT INTO oferta_comisiones (codigo_carrera, codigo_cuatrimestre, contenido)
 ALTER TABLE docente
     ADD COLUMN nombre_siu text DEFAULT NULL;
 
+ALTER TABLE docente
+    DROP CONSTRAINT docente_nombre_codigo_materia_key;
+
 --
 --
 --

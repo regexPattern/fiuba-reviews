@@ -30,6 +30,12 @@ var asociarDocenteExistenteQuery string
 //go:embed queries/patch/SELECT-docentes-resueltos-de-catedras.sql
 var docentesResueltosDeCatedrasQuery string
 
+//go:embed queries/patch/UPDATE-desactivar-catedras-materia.sql
+var desactivarCatedrasMateriaQuery string
+
+//go:embed queries/patch/UPSERT-catedras-resueltas.sql
+var upsertCatedrasResueltasQuery string
+
 type patchMateria struct {
 	materia
 	Docentes     []patchDocente `json:"docentes"`
@@ -378,29 +384,45 @@ func aplicarPatchMateria(
 	patch patchMateria,
 	resolucion resolucionMateria,
 ) error {
-	tx, _ := conn.Begin(context.TODO())
+	tx, err := conn.Begin(context.TODO())
+	if err != nil {
+		return fmt.Errorf("error iniciando transacción: %w", err)
+	}
 	defer tx.Rollback(context.TODO())
 
+	// Recolectar todos los códigos de docentes resueltos
+	codigosResueltos := make([]string, 0, len(resolucion.CodigosYaResueltos)+len(resolucion.ResolucionesDocentes))
+
+	// Agregar los que ya estaban resueltos
+	codigosResueltos = append(codigosResueltos, resolucion.CodigosYaResueltos...)
+
+	// Procesar resoluciones de docentes y recolectar códigos
 	for nombreSiu, res := range resolucion.ResolucionesDocentes {
+		var codigo string
+		var err error
+
 		if res.CodigoMatch == nil {
-			_ = crearNuevoDocente(
-				tx,
-				patch.Codigo,
-				nombreSiu,
-				res.NombreDb,
-			)
+			codigo, err = crearNuevoDocente(tx, patch.Codigo, nombreSiu, res.NombreDb)
 		} else {
-			_ = asociarDocenteExistente(
-				tx,
-				patch.Codigo,
-				*res.CodigoMatch,
-				nombreSiu,
-				res.NombreDb,
-			)
+			codigo, err = asociarDocenteExistente(tx, patch.Codigo, *res.CodigoMatch, nombreSiu, res.NombreDb)
 		}
+
+		if err != nil {
+			return err
+		}
+
+		codigosResueltos = append(codigosResueltos, codigo)
 	}
 
-	_ = tx.Commit(context.TODO())
+	// Sincronizar cátedras
+	if err := sincronizarCatedras(tx, patch.Codigo, patch.Catedras, codigosResueltos); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(context.TODO()); err != nil {
+		return fmt.Errorf("error confirmando transacción: %w", err)
+	}
+
 	return nil
 }
 
@@ -409,25 +431,31 @@ func crearNuevoDocente(
 	codigoMateria string,
 	nombreSiu string,
 	nombreDb string,
-) error {
-	_, _ = tx.Exec(
+) (string, error) {
+	var codigo string
+	err := tx.QueryRow(
 		context.TODO(),
 		crearNuevoDocenteQuery,
 		nombreDb,
 		codigoMateria,
 		nombreSiu,
-	)
+	).Scan(&codigo)
+
+	if err != nil {
+		return "", fmt.Errorf("error creando nuevo docente: %w", err)
+	}
 
 	slog.Debug(
 		fmt.Sprintf(
-			"creado nuevo docente %v (%v) de materia %v",
+			"creado nuevo docente %v (%v) de materia %v con código %v",
 			nombreSiu,
 			nombreDb,
 			codigoMateria,
+			codigo,
 		),
 	)
 
-	return nil
+	return codigo, nil
 }
 
 func asociarDocenteExistente(
@@ -436,8 +464,8 @@ func asociarDocenteExistente(
 	codigoDocente string,
 	nombreSiu string,
 	nombreDb string,
-) error {
-	_, _ = tx.Exec(
+) (string, error) {
+	_, err := tx.Exec(
 		context.TODO(),
 		asociarDocenteExistenteQuery,
 		nombreDb,
@@ -445,12 +473,66 @@ func asociarDocenteExistente(
 		codigoDocente,
 	)
 
+	if err != nil {
+		return "", fmt.Errorf("error asociando docente existente: %w", err)
+	}
+
 	slog.Debug(
 		fmt.Sprintf(
 			"resuelto docente existente %v (%v) de materia %v",
 			nombreSiu,
 			nombreDb,
 			codigoMateria,
+		),
+	)
+
+	return codigoDocente, nil
+}
+
+func sincronizarCatedras(
+	tx pgx.Tx,
+	codigoMateria string,
+	catedras []patchCatedra,
+	codigosResueltos []string,
+) error {
+	// Desactivar todas las cátedras de la materia
+	_, err := tx.Exec(context.TODO(), desactivarCatedrasMateriaQuery, codigoMateria)
+	if err != nil {
+		return fmt.Errorf("error desactivando cátedras de materia %v: %w", codigoMateria, err)
+	}
+
+	// Serializar cátedras a JSON
+	catedrasJson, err := json.Marshal(catedras)
+	if err != nil {
+		return fmt.Errorf("error serializando cátedras: %w", err)
+	}
+
+	// Serializar códigos resueltos a JSON
+	codigosJson, err := json.Marshal(codigosResueltos)
+	if err != nil {
+		return fmt.Errorf("error serializando códigos resueltos: %w", err)
+	}
+
+	// Ejecutar upsert de cátedras
+	var catedrasActivadas, catedrasCreadas int
+	err = tx.QueryRow(
+		context.TODO(),
+		upsertCatedrasResueltasQuery,
+		codigoMateria,
+		string(catedrasJson),
+		string(codigosJson),
+	).Scan(&catedrasActivadas, &catedrasCreadas)
+
+	if err != nil {
+		return fmt.Errorf("error sincronizando cátedras de materia %v: %w", codigoMateria, err)
+	}
+
+	slog.Debug(
+		fmt.Sprintf(
+			"sincronizadas cátedras de materia %v: %v activadas, %v creadas",
+			codigoMateria,
+			catedrasActivadas,
+			catedrasCreadas,
 		),
 	)
 
