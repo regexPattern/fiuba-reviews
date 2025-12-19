@@ -376,29 +376,26 @@ func getDocentesResueltosDeCatedras(
 func aplicarPatchMateria(
 	conn *pgx.Conn,
 	patch patchMateria,
-	resoluciones map[string]struct {
-		NombreDb    string  `json:"nombre_db"`
-		CodigoMatch *string `json:"codigo_match"`
-	},
+	resolucion resolucionMateria,
 ) error {
 	tx, _ := conn.Begin(context.TODO())
 	defer tx.Rollback(context.TODO())
 
-	for nombreSiu, resolucion := range resoluciones {
-		if resolucion.CodigoMatch == nil {
+	for nombreSiu, res := range resolucion.ResolucionesDocentes {
+		if res.CodigoMatch == nil {
 			_ = crearNuevoDocente(
 				tx,
 				patch.Codigo,
 				nombreSiu,
-				resolucion.NombreDb,
+				res.NombreDb,
 			)
 		} else {
 			_ = asociarDocenteExistente(
 				tx,
 				patch.Codigo,
-				*resolucion.CodigoMatch,
+				*res.CodigoMatch,
 				nombreSiu,
-				resolucion.NombreDb,
+				res.NombreDb,
 			)
 		}
 	}

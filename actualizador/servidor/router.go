@@ -126,21 +126,25 @@ func handleGetPatchMateria(
 	}
 }
 
+type resolucionMateria struct {
+	CodigosYaResueltos   []string                     `json:"codigos_ya_resueltos"`
+	ResolucionesDocentes map[string]resolucionDocente `json:"resoluciones_actuales"`
+}
+
+type resolucionDocente struct {
+	NombreDb    string  `json:"nombre_db"`
+	CodigoMatch *string `json:"codigo_match"`
+}
+
 func handleAplicarPatchMateria(
 	w http.ResponseWriter,
 	r *http.Request,
 	conn *pgx.Conn,
 	patches map[string]patchMateria,
 ) {
-	var resoluciones struct {
-		CodigosYaResueltos   []string `json:"codigos_ya_resueltos"`
-		ResolucionesActuales map[string]struct {
-			NombreDb    string  `json:"nombre_db"`
-			CodigoMatch *string `json:"codigo_match"`
-		} `json:"resoluciones_actuales"`
-	}
+	var res resolucionMateria
 
-	if err := json.NewDecoder(r.Body).Decode(&resoluciones); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&res); err != nil {
 		slog.Error(fmt.Sprintf("error deserializando JSON de docentes: %v", err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -149,15 +153,11 @@ func handleAplicarPatchMateria(
 	codigoMateria := r.PathValue("codigoMateria")
 	patch := patches[codigoMateria]
 
-	fmt.Println(resoluciones)
-
-	// if err := aplicarPatchMateria(conn, patch, resoluciones); err != nil {
-	// 	slog.Error(fmt.Sprintf("error aplicando patch de materia %v: %v", codigoMateria, err))
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
-
-	_ = patch
+	if err := aplicarPatchMateria(conn, patch, res); err != nil {
+		slog.Error(fmt.Sprintf("error aplicando resolución de materia %v: %v", codigoMateria, err))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	w.WriteHeader(http.StatusNoContent)
 }
