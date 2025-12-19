@@ -1,6 +1,14 @@
--- Parámetros
+-- DESCRIPCIÓN
+-- Retorna los códigos de las cátedras del SIU de las cátedras que aún no estan
+-- resueltas. Una cátedra está resuelta si ya existe una cátedra en la base de
+-- datos que tenga el mismo nombre que una cátedra del SIU. Para hacer esta
+-- comparación se concatenan (y normalizan) los nombres de los docentes de una
+-- cátedra.
+--
+-- PARÁMETROS
 -- $1: Código de la materia.
 -- $2: Arreglo JSONB con las cátedras de la materia del SIU.
+--
 WITH catedras_siu AS (
     SELECT
         cat_elem ->> 'codigo' AS codigo_siu,

@@ -12,14 +12,14 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-//go:embed queries/SELECT-materias-con-posible-actualizacion.sql
-var selectMateriasConPosibleActualizacionQuery string
+//go:embed queries/patch/SELECT-materias-con-posible-actualizacion.sql
+var materiasConPosibleActualizacionQuery string
 
-//go:embed queries/SELECT-docentes-no-resueltos-de-materia.sql
-var selectDocentesNoVinculadosDeMateriaQuery string
+//go:embed queries/patch/SELECT-docentes-no-resueltos-de-materia.sql
+var docentesNoResueltosDeMateriaQuery string
 
-//go:embed queries/SELECT-catedras-no-registradas-de-materia.sql
-var selectCatedrasNoRegistradasDeMateriaQuery string
+//go:embed queries/patch/SELECT-catedras-no-resueltas-de-materia.sql
+var catedrasNoResueltasDeMateriaQuery string
 
 type patchMateria struct {
 	materia
@@ -34,9 +34,9 @@ type patchDocente struct {
 }
 
 type matchDocente struct {
-	Codigo    *string  `json:"codigo"`
-	NombreDb  *string  `json:"nombre"`
-	Similitud *float64 `json:"similitud"`
+	Codigo   *string  `json:"codigo"`
+	NombreDb *string  `json:"nombre"`
+	Score    *float64 `json:"score"`
 }
 
 type patchCatedra struct {
@@ -50,7 +50,7 @@ func buildPatchesMaterias(
 ) (map[string]patchMateria, error) {
 	rows, err := conn.Query(
 		context.TODO(),
-		selectMateriasConPosibleActualizacionQuery,
+		materiasConPosibleActualizacionQuery,
 		codMaterias,
 	)
 	if err != nil {
@@ -191,7 +191,6 @@ func newPatchMateria(
 
 func newPatchesDocentes(conn *pgx.Conn, oferta ultimaOfertaMateria) ([]patchDocente, error) {
 	docentesUnicos := make(map[string]docente)
-
 	for _, cat := range oferta.Catedras {
 		for _, doc := range cat.Docentes {
 			docentesUnicos[doc.Nombre] = doc
@@ -202,7 +201,7 @@ func newPatchesDocentes(conn *pgx.Conn, oferta ultimaOfertaMateria) ([]patchDoce
 
 	rows, err := conn.Query(
 		context.TODO(),
-		selectDocentesNoVinculadosDeMateriaQuery,
+		docentesNoResueltosDeMateriaQuery,
 		oferta.Codigo,
 		nombresDocentes,
 	)
@@ -214,14 +213,14 @@ func newPatchesDocentes(conn *pgx.Conn, oferta ultimaOfertaMateria) ([]patchDoce
 	}
 	defer rows.Close()
 
-	type docenteSinMatchRow struct {
+	type docenteNoResueltosRow struct {
 		NombreSiu string `db:"nombre_siu"`
 		matchDocente
 	}
 
 	docentesSinMatch, err := pgx.CollectRows(
 		rows,
-		pgx.RowToStructByName[docenteSinMatchRow],
+		pgx.RowToStructByName[docenteNoResueltosRow],
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error serializando docentes sin matches de materia: %w", err)
@@ -260,7 +259,7 @@ func newPatchesCatedras(conn *pgx.Conn, oferta ultimaOfertaMateria) ([]patchCate
 
 	rows, err := conn.Query(
 		context.TODO(),
-		selectCatedrasNoRegistradasDeMateriaQuery,
+		catedrasNoResueltasDeMateriaQuery,
 		oferta.Codigo,
 		string(catedrasJson),
 	)

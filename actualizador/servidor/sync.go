@@ -9,11 +9,11 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-//go:embed queries/UPDATE-sync-materias-query.sql
-var updateSyncMateriasQuery string
+//go:embed queries/sync/UPDATE-sync-materias-query.sql
+var syncMateriasQuery string
 
-//go:embed queries/SELECT-materias-no-registradas.sql
-var selectMateriasNoRegistradasQuery string
+//go:embed queries/sync/SELECT-materias-no-registradas.sql
+var materiasNoRegistradasQuery string
 
 func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
 	tx, err := conn.Begin(context.TODO())
@@ -21,17 +21,9 @@ func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
 		return fmt.Errorf("error iniciando transacción de sincronización de materias: %w", err)
 	}
 
-	defer func() {
-		if err := tx.Rollback(context.TODO()); err != nil {
-			slog.Error(
-				fmt.Sprintf(
-					"error haciendo rollback de transacción de sincronización de materias: %v", err,
-				),
-			)
-		}
-	}()
+	defer tx.Rollback(context.TODO())
 
-	rows, err := tx.Query(context.TODO(), updateSyncMateriasQuery, nombres, codigos)
+	rows, err := tx.Query(context.TODO(), syncMateriasQuery, nombres, codigos)
 	if err != nil {
 		return fmt.Errorf("error ejecutando query de sincronización de materias: %w", err)
 	}
@@ -82,7 +74,7 @@ func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
 func checkMateriasNoRegistradas(conn *pgx.Conn, codigos, nombres []string) error {
 	rows, err := conn.Query(
 		context.TODO(),
-		selectMateriasNoRegistradasQuery,
+		materiasNoRegistradasQuery,
 		nombres,
 		codigos,
 	)

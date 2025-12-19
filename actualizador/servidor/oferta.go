@@ -9,8 +9,8 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-//go:embed queries/SELECT-ofertas-carreras.sql
-var selectOfertasCarrerasQuery string
+//go:embed queries/oferta/SELECT-ofertas-carreras.sql
+var ofertasCarrerasQuery string
 
 type ofertaCarrera struct {
 	CodigoCarrera   string          `db:"codigo_carrera"`
@@ -55,7 +55,7 @@ type ultimaOfertaMateria struct {
 }
 
 func getOfertasMaterias(conn *pgx.Conn) (map[string]ultimaOfertaMateria, error) {
-	rows, err := conn.Query(context.TODO(), selectOfertasCarrerasQuery)
+	rows, err := conn.Query(context.TODO(), ofertasCarrerasQuery)
 	if err != nil {
 		return nil, fmt.Errorf("error consultando ofertas de comisiones de carreras: %w", err)
 	}

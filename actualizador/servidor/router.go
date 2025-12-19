@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net/http"
 	"slices"
-	"strings"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -56,14 +55,14 @@ func handleGetPatchMateria(
 	codigoMateria := r.PathValue("codigoMateria")
 	patchRes := patches[codigoMateria]
 
-	for i := range patchRes.Catedras {
-		slices.SortFunc(patchRes.Catedras[i].DocentesResueltos, func(a, b docente) int {
-			return strings.Compare(a.Nombre, b.Nombre)
-		})
-		slices.SortFunc(patchRes.Catedras[i].DocentesNoResueltos, func(a, b docente) int {
-			return strings.Compare(a.Nombre, b.Nombre)
-		})
-	}
+	// for i := range patchRes.Catedras {
+	// 	// slices.SortFunc(patchRes.Catedras[i].DocentesResueltos, func(a, b docente) int {
+	// 	// 	return strings.Compare(a.Nombre, b.Nombre)
+	// 	// })
+	// 	// slices.SortFunc(patchRes.Catedras[i].DocentesNoResueltos, func(a, b docente) int {
+	// 	// 	return strings.Compare(a.Nombre, b.Nombre)
+	// 	// })
+	// }
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(patchRes); err != nil {
