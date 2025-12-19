@@ -1,9 +1,8 @@
 -- DESCRIPCIÓN
--- Retorna los códigos de las cátedras del SIU de las cátedras que aún no estan
--- resueltas. Una cátedra está resuelta si ya existe una cátedra en la base de
--- datos que tenga el mismo nombre que una cátedra del SIU. Para hacer esta
--- comparación se concatenan (y normalizan) los nombres de los docentes de una
--- cátedra.
+-- Retorna todas las cátedras del SIU de una materia con su estado de resolución.
+-- Una cátedra está resuelta si ya existe una cátedra en la base de datos que
+-- tenga el mismo nombre que una cátedra del SIU. Para hacer esta comparación
+-- se concatenan (y normalizan) los nombres de los docentes de una cátedra.
 --
 -- PARÁMETROS
 -- $1: Código de la materia.
@@ -32,15 +31,14 @@ firmas_catedras_db AS (
         c.codigo
 )
 SELECT
-    cs.codigo_siu::int AS codigo_siu
-FROM
-    catedras_siu cs
-WHERE
-    NOT EXISTS (
+    cs.codigo_siu::int AS codigo_siu,
+    EXISTS (
         SELECT
             1
         FROM
             firmas_catedras_db fdb
         WHERE
-            fdb.firma_docentes = cs.firma_docentes);
+            fdb.firma_docentes = cs.firma_docentes) AS resuelta
+FROM
+    catedras_siu cs;
 

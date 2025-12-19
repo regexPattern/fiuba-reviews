@@ -18,8 +18,8 @@ var materiasConPosibleActualizacionQuery string
 //go:embed queries/patch/SELECT-docentes-no-resueltos-de-materia.sql
 var docentesNoResueltosDeMateriaQuery string
 
-//go:embed queries/patch/SELECT-catedras-no-resueltas-de-materia.sql
-var catedrasNoResueltasDeMateriaQuery string
+//go:embed queries/patch/SELECT-catedras-de-materia.sql
+var catedrasDeMateriaQuery string
 
 //go:embed queries/patch/INSERT-nuevo-docente.sql
 var crearNuevoDocenteQuery string
@@ -47,6 +47,7 @@ type matchDocente struct {
 
 type patchCatedra struct {
 	catedra
+	Resuelta bool `json:"resuelta"`
 }
 
 func buildPatchesMaterias(
@@ -263,42 +264,46 @@ func newPatchesCatedras(conn *pgx.Conn, oferta ultimaOfertaMateria) ([]patchCate
 		return nil, fmt.Errorf("error serializando cátedras de materia: %w", err)
 	}
 
+	type catedraConEstadoRow struct {
+		Codigo   int  `db:"codigo_siu"`
+		Resuelta bool `db:"resuelta"`
+	}
+
 	rows, err := conn.Query(
 		context.TODO(),
-		catedrasNoResueltasDeMateriaQuery,
+		catedrasDeMateriaQuery,
 		oferta.Codigo,
 		string(catedrasJson),
 	)
 	if err != nil {
 		return nil, fmt.Errorf(
-			"error consultando cátedras no registradas de materia %v: %w",
+			"error consultando cátedras de materia %v: %w",
 			oferta.Codigo,
 			err,
 		)
 	}
 	defer rows.Close()
 
-	catedrasNoRegistradas, err := pgx.CollectRows(rows, pgx.RowTo[int])
+	catedrasConEstado, err := pgx.CollectRows(rows, pgx.RowToStructByName[catedraConEstadoRow])
 	if err != nil {
 		return nil, fmt.Errorf(
-			"error procesando cátedras no registradas de materia %v: %w",
+			"error procesando cátedras de materia %v: %w",
 			oferta.Codigo,
 			err,
 		)
 	}
 
-	patches := make([]patchCatedra, 0, len(catedrasNoRegistradas))
-	codigosCatedrasNuevas := make(map[int]bool)
-	for _, cod := range catedrasNoRegistradas {
-		codigosCatedrasNuevas[cod] = true
+	estadoPorCodigo := make(map[int]bool)
+	for _, cat := range catedrasConEstado {
+		estadoPorCodigo[cat.Codigo] = cat.Resuelta
 	}
 
+	patches := make([]patchCatedra, 0, len(oferta.Catedras))
 	for _, cat := range oferta.Catedras {
-		if codigosCatedrasNuevas[cat.Codigo] {
-			patches = append(patches, patchCatedra{
-				catedra: cat,
-			})
-		}
+		patches = append(patches, patchCatedra{
+			catedra:  cat,
+			Resuelta: estadoPorCodigo[cat.Codigo],
+		})
 	}
 
 	return patches, nil
