@@ -21,6 +21,12 @@ var docentesNoResueltosDeMateriaQuery string
 //go:embed queries/patch/SELECT-catedras-no-resueltas-de-materia.sql
 var catedrasNoResueltasDeMateriaQuery string
 
+//go:embed queries/patch/INSERT-nuevo-docente.sql
+var crearNuevoDocenteQuery string
+
+//go:embed queries/patch/UPDATE-asociar-docente-existente.sql
+var asociarDocenteExistenteQuery string
+
 type patchMateria struct {
 	materia
 	Docentes     []patchDocente `json:"docentes"`
@@ -298,13 +304,89 @@ func newPatchesCatedras(conn *pgx.Conn, oferta ultimaOfertaMateria) ([]patchCate
 	return patches, nil
 }
 
-func aplicarPatchMateria(conn *pgx.Conn, patch patchMateria, docentesResueltos map[string]string) {
-	for nombreSiu, codMatch := range docentesResueltos {
-		// crear el docente en la base de datos usando sql
-		// asociar el nombre siu del docente
-		// TODO: por el momento poner el campo nombre del docente igual al nombre del siu
-		_, _ = nombreSiu, codMatch
+func aplicarPatchMateria(
+	conn *pgx.Conn,
+	patch patchMateria,
+	resoluciones map[string]struct {
+		NombreDb    string  `json:"nombre_db"`
+		CodigoMatch *string `json:"codigo_match"`
+	},
+) error {
+	tx, _ := conn.Begin(context.TODO())
+	defer tx.Rollback(context.TODO())
+
+	for nombreSiu, resolucion := range resoluciones {
+		if resolucion.CodigoMatch == nil {
+			_ = crearNuevoDocente(
+				tx,
+				patch.Codigo,
+				nombreSiu,
+				resolucion.NombreDb,
+			)
+		} else {
+			_ = asociarDocenteExistente(
+				tx,
+				patch.Codigo,
+				*resolucion.CodigoMatch,
+				nombreSiu,
+				resolucion.NombreDb,
+			)
+		}
 	}
 
-	fmt.Println(patch.materia, docentesResueltos)
+	_ = tx.Commit(context.TODO())
+	return nil
+}
+
+func crearNuevoDocente(
+	tx pgx.Tx,
+	codigoMateria string,
+	nombreSiu string,
+	nombreDb string,
+) error {
+	_, _ = tx.Exec(
+		context.TODO(),
+		crearNuevoDocenteQuery,
+		nombreDb,
+		codigoMateria,
+		nombreSiu,
+	)
+
+	slog.Debug(
+		fmt.Sprintf(
+			"creado nuevo docente %v (%v) de materia %v",
+			nombreSiu,
+			nombreDb,
+			codigoMateria,
+		),
+	)
+
+	return nil
+}
+
+func asociarDocenteExistente(
+	tx pgx.Tx,
+	codigoMateria string,
+	codigoDocente string,
+	nombreSiu string,
+	nombreDb string,
+) error {
+	_, _ = tx.Exec(
+		context.TODO(),
+		asociarDocenteExistenteQuery,
+		nombreDb,
+		nombreSiu,
+		codigoDocente,
+	)
+
+	slog.Debug(
+		fmt.Sprintf(
+			"resuelto docente existente %v (%v) de materia %v",
+			nombreSiu,
+			nombreDb,
+			codigoMateria,
+		),
+	)
+
+	return nil
 }

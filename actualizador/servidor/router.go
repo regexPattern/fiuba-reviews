@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"slices"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -55,14 +56,11 @@ func handleGetPatchMateria(
 	codigoMateria := r.PathValue("codigoMateria")
 	patchRes := patches[codigoMateria]
 
-	// for i := range patchRes.Catedras {
-	// 	// slices.SortFunc(patchRes.Catedras[i].DocentesResueltos, func(a, b docente) int {
-	// 	// 	return strings.Compare(a.Nombre, b.Nombre)
-	// 	// })
-	// 	// slices.SortFunc(patchRes.Catedras[i].DocentesNoResueltos, func(a, b docente) int {
-	// 	// 	return strings.Compare(a.Nombre, b.Nombre)
-	// 	// })
-	// }
+	for i := range patchRes.Catedras {
+		slices.SortFunc(patchRes.Catedras[i].Docentes, func(a, b docente) int {
+			return strings.Compare(a.Nombre, b.Nombre)
+		})
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(patchRes); err != nil {
@@ -95,14 +93,14 @@ func handleAplicarPatchMateria(
 		return
 	}
 
-	for k, r := range resoluciones {
-		fmt.Println(k, r)
-	}
-
 	codigoMateria := r.PathValue("codigoMateria")
 	patch := patches[codigoMateria]
 
-	_ = patch
+	if err := aplicarPatchMateria(conn, patch, resoluciones); err != nil {
+		slog.Error(fmt.Sprintf("error aplicando patch de materia %v: %v", codigoMateria, err))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	w.WriteHeader(http.StatusNoContent)
 }
