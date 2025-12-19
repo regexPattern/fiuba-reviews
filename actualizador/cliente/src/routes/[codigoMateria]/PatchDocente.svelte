@@ -33,7 +33,7 @@
 	{#each docente.matches as match (match.codigo)}
 		<label class="flex">
 			<input type="radio" value={match.codigo} bind:group={codigoMatch} />
-			<span>{match.nombre}</span><span>•</span><span>{match.similitud.toFixed(2)}</span>
+			<span>{match.nombre}</span><span>•</span><span>{match.score.toFixed(2)}</span>
 		</label>
 	{/each}
 

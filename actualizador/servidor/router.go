@@ -82,16 +82,16 @@ func handleGetPatchMateria(
 		docentesResponse := make([]docenteCatedraResponse, 0, len(cat.Docentes))
 
 		for _, doc := range cat.Docentes {
-			resuelto := false
+			codigoDocente := (*string)(nil)
 			if docentesPorCatedra, ok := docentesResueltos[cat.Codigo]; ok {
-				if estado, ok := docentesPorCatedra[doc.Nombre]; ok {
-					resuelto = estado
+				if codigo, ok := docentesPorCatedra[doc.Nombre]; ok {
+					codigoDocente = codigo
 				}
 			}
 
 			docentesResponse = append(docentesResponse, docenteCatedraResponse{
-				Nombre:   doc.Nombre,
-				Resuelto: resuelto,
+				Nombre:           doc.Nombre,
+				CodigoYaResuelto: codigoDocente,
 			})
 		}
 
@@ -132,13 +132,16 @@ func handleAplicarPatchMateria(
 	conn *pgx.Conn,
 	patches map[string]patchMateria,
 ) {
-	var resoluciones map[string]struct {
-		NombreDb    string  `json:"nombre_db"`
-		CodigoMatch *string `json:"codigo_match"`
+	var resoluciones struct {
+		CodigosYaResueltos   []string `json:"codigos_ya_resueltos"`
+		ResolucionesActuales map[string]struct {
+			NombreDb    string  `json:"nombre_db"`
+			CodigoMatch *string `json:"codigo_match"`
+		} `json:"resoluciones_actuales"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&resoluciones); err != nil {
-		slog.Error(fmt.Sprintf("error parseando JSON de docentes: %v", err))
+		slog.Error(fmt.Sprintf("error deserializando JSON de docentes: %v", err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -146,11 +149,15 @@ func handleAplicarPatchMateria(
 	codigoMateria := r.PathValue("codigoMateria")
 	patch := patches[codigoMateria]
 
-	if err := aplicarPatchMateria(conn, patch, resoluciones); err != nil {
-		slog.Error(fmt.Sprintf("error aplicando patch de materia %v: %v", codigoMateria, err))
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	fmt.Println(resoluciones)
+
+	// if err := aplicarPatchMateria(conn, patch, resoluciones); err != nil {
+	// 	slog.Error(fmt.Sprintf("error aplicando patch de materia %v: %v", codigoMateria, err))
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+
+	_ = patch
 
 	w.WriteHeader(http.StatusNoContent)
 }

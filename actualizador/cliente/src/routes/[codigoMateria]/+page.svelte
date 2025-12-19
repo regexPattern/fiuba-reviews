@@ -7,14 +7,14 @@
 
 	let { data }: PageProps = $props();
 
-	let resolucionesMatches = $derived.by(() => {
+	let resolucionesActuales = $derived.by(() => {
 		const map = new SvelteMap<string, string | null>();
-		for (const docente of data.patch.docentes)
+		for (const docente of data.patch.docentes_sin_resolver)
 			map.set(docente.nombre, docente.matches.at(0)?.codigo ?? null);
 		return map;
 	});
 
-	$inspect(resolucionesMatches);
+	$inspect(resolucionesActuales);
 </script>
 
 <form method="POST" use:enhance>
@@ -34,8 +34,8 @@
 		<section class="col-span-2">
 			<h2 class="text-2xl mb-3">Docentes</h2>
 			<div class="h-full overflow-y-scroll space-y-3">
-				{#each data.patch.docentes as docente (docente.nombre)}
-					<PatchDocente {docente} resoluciones={resolucionesMatches} />
+				{#each data.patch.docentes_sin_resolver as docente (docente.nombre)}
+					<PatchDocente {docente} resoluciones={resolucionesActuales} />
 				{/each}
 			</div>
 		</section>
@@ -43,8 +43,8 @@
 		<section class="col-span-3">
 			<h2 class="text-2xl mb-3">Cátedras</h2>
 			<div class="grid grid-cols-2 gap-3">
-				{#each data.patch.catedras as catedra (catedra.codigo)}
-					<PatchCatedra {catedra} resoluciones={resolucionesMatches} />
+				{#each data.patch.catedras as catedra, i (i)}
+					<PatchCatedra {catedra} {resolucionesActuales} />
 				{/each}
 			</div>
 		</section>

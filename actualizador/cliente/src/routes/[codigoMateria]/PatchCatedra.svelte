@@ -3,20 +3,23 @@
 
 	interface Props {
 		catedra: PatchCatedra;
-		resoluciones: Map<string, string | null>;
+		resolucionesActuales: Map<string, string | null>;
 	}
 
-	let { catedra, resoluciones }: Props = $props();
+	let { catedra, resolucionesActuales: _ }: Props = $props();
 </script>
 
 <div class="border">
 	<ul>
 		{#each catedra.docentes as docente (docente.nombre)}
 			<li>
-				{#if resoluciones.has(docente.nombre)}
+				{#if docente.codigo_ya_resuelto !== null}
 					✅
-				{:else}
-					❌
+					<input
+						type="hidden"
+						name={docente.nombre}
+						value={JSON.stringify(docente.codigo_ya_resuelto)}
+					/>
 				{/if}
 				<span>{docente.nombre}</span>
 			</li>

@@ -53,10 +53,9 @@ type patchCatedra struct {
 	Resuelta bool `json:"resuelta"`
 }
 
-// Tipos de respuesta específicos para el endpoint GET /patches/{codigoMateria}
 type docenteCatedraResponse struct {
-	Nombre   string `json:"nombre"`
-	Resuelto bool   `json:"resuelto"`
+	Nombre           string  `json:"nombre"`
+	CodigoYaResuelto *string `json:"codigo_ya_resuelto"`
 }
 
 type catedraResponse struct {
@@ -327,16 +326,16 @@ func getDocentesResueltosDeCatedras(
 	conn *pgx.Conn,
 	codigoMateria string,
 	catedras []patchCatedra,
-) (map[int]map[string]bool, error) {
+) (map[int]map[string]*string, error) {
 	catedrasJson, err := json.Marshal(catedras)
 	if err != nil {
 		return nil, fmt.Errorf("error serializando cátedras de materia: %w", err)
 	}
 
 	type docenteResueltoRow struct {
-		CodigoCatedra int    `db:"codigo_catedra_siu"`
-		NombreDocente string `db:"nombre_docente_siu"`
-		Resuelto      bool   `db:"resuelto"`
+		CodigoCatedra int     `db:"codigo_catedra_siu"`
+		NombreDocente string  `db:"nombre_docente_siu"`
+		CodigoDocente *string `db:"codigo_docente"`
 	}
 
 	rows, err := conn.Query(
@@ -363,12 +362,12 @@ func getDocentesResueltosDeCatedras(
 		)
 	}
 
-	resueltos := make(map[int]map[string]bool)
+	resueltos := make(map[int]map[string]*string)
 	for _, doc := range docentesResueltos {
 		if _, ok := resueltos[doc.CodigoCatedra]; !ok {
-			resueltos[doc.CodigoCatedra] = make(map[string]bool)
+			resueltos[doc.CodigoCatedra] = make(map[string]*string)
 		}
-		resueltos[doc.CodigoCatedra][doc.NombreDocente] = doc.Resuelto
+		resueltos[doc.CodigoCatedra][doc.NombreDocente] = doc.CodigoDocente
 	}
 
 	return resueltos, nil
