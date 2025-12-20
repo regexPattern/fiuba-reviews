@@ -3,25 +3,30 @@
 
 	interface Props {
 		catedra: PatchCatedra;
-		resolucionesActuales: Map<string, string | null>;
+		resoluciones: Map<string, string | null>;
 	}
 
-	let { catedra, resolucionesActuales: _ }: Props = $props();
+	let { catedra, resoluciones }: Props = $props();
 </script>
 
-<div class="border">
+<div class="rounded-xl border border-gray-300 p-3">
 	<ul>
 		{#each catedra.docentes as docente (docente.nombre)}
 			<li>
 				{#if docente.codigo_ya_resuelto !== null}
-					✅
 					<input
 						type="hidden"
 						name={docente.nombre}
 						value={JSON.stringify(docente.codigo_ya_resuelto)}
 					/>
 				{/if}
-				<span>{docente.nombre}</span>
+				<div class="space-x-1">
+					<input
+						type="checkbox"
+						checked={resoluciones.has(docente.nombre)}
+						onclick={(e) => e.preventDefault()}
+					/><span>{docente.nombre}</span>
+				</div>
 			</li>
 		{/each}
 	</ul>

@@ -52,7 +52,7 @@ type patchMateriaResponse struct {
 	materia
 	DocentesSinResolver []patchDocente    `json:"docentes_sin_resolver"`
 	Catedras            []catedraResponse `json:"catedras"`
-	cuatrimestre        `json:"cuatrimestre"`
+	cuatrimestre        `                  json:"cuatrimestre"`
 }
 
 func handleGetPatchMateria(
@@ -62,9 +62,21 @@ func handleGetPatchMateria(
 	patches map[string]patchMateria,
 ) {
 	codigoMateria := r.PathValue("codigoMateria")
-	patchRes := patches[codigoMateria]
+	patch, ok := patches[codigoMateria]
 
-	docentesResueltos, err := getDocentesResueltosDeCatedras(conn, codigoMateria, patchRes.Catedras)
+	if !ok {
+		http.Error(
+			w,
+			fmt.Sprintf(
+				"Patch de actualización para materia %v no encontrado",
+				codigoMateria,
+			),
+			http.StatusNotFound,
+		)
+		return
+	}
+
+	docentesResueltos, err := getDocentesResueltos(conn, codigoMateria, patch.Catedras)
 	if err != nil {
 		slog.Error(
 			fmt.Sprintf(
@@ -77,8 +89,8 @@ func handleGetPatchMateria(
 		return
 	}
 
-	catedrasResponse := make([]catedraResponse, 0, len(patchRes.Catedras))
-	for _, cat := range patchRes.Catedras {
+	catedrasResponse := make([]catedraResponse, 0, len(patch.Catedras))
+	for _, cat := range patch.Catedras {
 		docentesResponse := make([]docenteCatedraResponse, 0, len(cat.Docentes))
 
 		for _, doc := range cat.Docentes {
@@ -106,10 +118,10 @@ func handleGetPatchMateria(
 	}
 
 	res := patchMateriaResponse{
-		materia:             patchRes.materia,
-		DocentesSinResolver: patchRes.Docentes,
+		materia:             patch.materia,
+		DocentesSinResolver: patch.Docentes,
 		Catedras:            catedrasResponse,
-		cuatrimestre:        patchRes.cuatrimestre,
+		cuatrimestre:        patch.cuatrimestre,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -117,8 +129,8 @@ func handleGetPatchMateria(
 		slog.Error(
 			fmt.Sprintf(
 				"error serializando patches de materias %v (%v): %v",
-				patchRes.Codigo,
-				patchRes.Nombre,
+				patch.Codigo,
+				patch.Nombre,
 				err,
 			),
 		)
@@ -158,6 +170,8 @@ func handleAplicarPatchMateria(
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	delete(patches, codigoMateria)
 
 	w.WriteHeader(http.StatusNoContent)
 }

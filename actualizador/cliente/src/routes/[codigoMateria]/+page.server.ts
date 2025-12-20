@@ -2,9 +2,16 @@ import { BACKEND_URL } from "$env/static/private";
 import type { PatchMateria } from "$lib";
 import type { PageServerLoad } from "./$types";
 import type { Actions } from "./$types";
+import { error } from "@sveltejs/kit";
 
 export const load: PageServerLoad = async ({ params }) => {
 	const res = await fetch(`${BACKEND_URL}/patches/${params.codigoMateria}`);
+
+	if (res.statusText !== "OK") {
+		const errMsg = await res.text();
+		error(res.status, { message: errMsg });
+	}
+
 	const patch = (await res.json()) as PatchMateria;
 
 	patch.docentes_sin_resolver.sort((a, b) =>
@@ -12,7 +19,6 @@ export const load: PageServerLoad = async ({ params }) => {
 	);
 
 	const docentesNuevos = new Set<string>();
-
 	for (const doc of patch.docentes_sin_resolver) {
 		if (doc.matches.length === 0) {
 			docentesNuevos.add(doc.nombre);
@@ -48,5 +54,7 @@ export const actions = {
 				resoluciones_actuales: resolucionesActuales
 			})
 		});
+
+		return { success: true };
 	}
 } satisfies Actions;

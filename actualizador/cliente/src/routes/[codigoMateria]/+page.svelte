@@ -1,50 +1,52 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { SvelteMap } from "svelte/reactivity";
 	import type { PageProps } from "./$types";
-	import PatchDocente from "./PatchDocente.svelte";
 	import PatchCatedra from "./PatchCatedra.svelte";
+	import PatchDocente from "./PatchDocente.svelte";
+	import { SvelteMap } from "svelte/reactivity";
 
 	let { data }: PageProps = $props();
 
-	let resolucionesActuales = $derived.by(() => {
+	let resoluciones = $derived.by(() => {
 		const map = new SvelteMap<string, string | null>();
-		for (const docente of data.patch.docentes_sin_resolver)
-			map.set(docente.nombre, docente.matches.at(0)?.codigo ?? null);
+		for (const docente of data.patch.docentes_sin_resolver) {
+			if (docente.matches.length === 0) {
+				map.set(docente.nombre, null);
+			}
+		}
 		return map;
 	});
-
-	$inspect(resolucionesActuales);
 </script>
 
 <form method="POST" use:enhance>
-	<header class="mb-4 px-6 py-4 flex justify-between border-b border-gray-300">
+	<header class="flex h-18 items-center justify-between border-b border-gray-300 px-6">
 		<h1 class="text-3xl">
-			<span class="font-mono">{data.patch.codigo}</span><span class="mx-2">•</span><span
-				>{data.patch.nombre}</span
-			>
+			<span class="font-mono font-semibold">{data.patch.codigo}</span><span class="mx-2">•</span
+			><span>{data.patch.nombre}</span>
 		</h1>
 
-		<button type="submit" class="rounded-lg border border-gray-300 text-green-700 font-medium px-3"
+		<button
+			type="submit"
+			class="rounded-lg border border-green-700/50 px-3 py-1 font-medium text-green-700 transition-colors hover:cursor-pointer hover:bg-green-200 focus:bg-green-200"
 			>Aplicar cambios</button
 		>
 	</header>
 
-	<div class="mx-6 grid grid-cols-5 gap-8">
-		<section class="col-span-2">
-			<h2 class="text-2xl mb-3">Docentes</h2>
-			<div class="h-full overflow-y-scroll space-y-3">
+	<div class="flex space-x-6 px-6 pt-4" style="height: calc(100vh - 4.5rem);">
+		<section class="flex h-full w-4/12 flex-col">
+			<h2 class="mb-3 text-2xl font-semibold">Docentes</h2>
+			<div class="flex flex-1 flex-col gap-3 overflow-y-auto pb-3">
 				{#each data.patch.docentes_sin_resolver as docente (docente.nombre)}
-					<PatchDocente {docente} resoluciones={resolucionesActuales} />
+					<PatchDocente {docente} {resoluciones} />
 				{/each}
 			</div>
 		</section>
 
-		<section class="col-span-3">
-			<h2 class="text-2xl mb-3">Cátedras</h2>
-			<div class="grid grid-cols-2 gap-3">
+		<section class="flex flex-1 flex-col">
+			<h2 class="mb-3 text-2xl font-semibold">Cátedras</h2>
+			<div class="grid grid-cols-2 gap-3 overflow-y-auto pb-3">
 				{#each data.patch.catedras as catedra, i (i)}
-					<PatchCatedra {catedra} {resolucionesActuales} />
+					<PatchCatedra {catedra} {resoluciones} />
 				{/each}
 			</div>
 		</section>

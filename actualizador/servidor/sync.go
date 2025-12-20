@@ -21,7 +21,7 @@ func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
 		return fmt.Errorf("error iniciando transacción de sincronización de materias: %w", err)
 	}
 
-	defer tx.Rollback(context.TODO())
+	defer func() { _ = tx.Rollback(context.TODO()) }()
 
 	rows, err := tx.Query(context.TODO(), syncMateriasQuery, nombres, codigos)
 	if err != nil {

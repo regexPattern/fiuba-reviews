@@ -138,7 +138,39 @@ func newPatchMateria(
 	conn *pgx.Conn,
 	oferta ultimaOfertaMateria,
 ) (*patchMateria, error) {
-	patchesDocentes, err := newPatchesDocentes(conn, oferta)
+	catedrasFiltradas := make([]catedra, 0, len(oferta.Catedras))
+	var catedrasDescartadas int
+
+	for _, cat := range oferta.Catedras {
+		tieneDocenteVacio := false
+		for _, doc := range cat.Docentes {
+			if doc.Nombre == "" {
+				tieneDocenteVacio = true
+				break
+			}
+		}
+		if !tieneDocenteVacio {
+			catedrasFiltradas = append(catedrasFiltradas, cat)
+		} else {
+			catedrasDescartadas++
+		}
+	}
+
+	if catedrasDescartadas > 0 {
+		slog.Warn(
+			fmt.Sprintf(
+				"descartadas %v cátedras de materia %v (%v) por tener docentes con nombre vacío",
+				catedrasDescartadas,
+				oferta.Codigo,
+				oferta.Nombre,
+			),
+		)
+	}
+
+	ofertaFiltrada := oferta
+	ofertaFiltrada.Catedras = catedrasFiltradas
+
+	patchesDocentes, err := newPatchesDocentes(conn, ofertaFiltrada)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"error generando patch de actualización de docentes de materia %v (%v): %w",
@@ -148,7 +180,7 @@ func newPatchMateria(
 		)
 	}
 
-	patchesCatedras, err := newPatchesCatedras(conn, oferta)
+	patchesCatedras, err := newPatchesCatedras(conn, ofertaFiltrada)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"error generando patch de actualización de cátedras de materia %v (%v): %w",
@@ -192,9 +224,8 @@ func newPatchMateria(
 
 	slog.Debug(
 		fmt.Sprintf(
-			"generado patch de actualización para materia %v (%v)",
+			"generado patch de actualización para materia %v",
 			oferta.Codigo,
-			oferta.Nombre,
 		),
 		slog.Group("docentes",
 			"sin_matches", docentesSinMatches,
@@ -208,10 +239,10 @@ func newPatchMateria(
 	)
 
 	return &patchMateria{
-		materia:      oferta.materia,
+		materia:      ofertaFiltrada.materia,
 		Docentes:     patchesDocentes,
 		Catedras:     patchesCatedras,
-		cuatrimestre: oferta.cuatrimestre,
+		cuatrimestre: ofertaFiltrada.cuatrimestre,
 	}, nil
 }
 
@@ -328,7 +359,7 @@ func newPatchesCatedras(conn *pgx.Conn, oferta ultimaOfertaMateria) ([]patchCate
 	return patches, nil
 }
 
-func getDocentesResueltosDeCatedras(
+func getDocentesResueltos(
 	conn *pgx.Conn,
 	codigoMateria string,
 	catedras []patchCatedra,
@@ -388,15 +419,16 @@ func aplicarPatchMateria(
 	if err != nil {
 		return fmt.Errorf("error iniciando transacción: %w", err)
 	}
-	defer tx.Rollback(context.TODO())
+	defer func() { _ = tx.Rollback(context.TODO()) }()
 
-	// Recolectar todos los códigos de docentes resueltos
-	codigosResueltos := make([]string, 0, len(resolucion.CodigosYaResueltos)+len(resolucion.ResolucionesDocentes))
+	codigosResueltos := make(
+		[]string,
+		0,
+		len(resolucion.CodigosYaResueltos)+len(resolucion.ResolucionesDocentes),
+	)
 
-	// Agregar los que ya estaban resueltos
 	codigosResueltos = append(codigosResueltos, resolucion.CodigosYaResueltos...)
 
-	// Procesar resoluciones de docentes y recolectar códigos
 	for nombreSiu, res := range resolucion.ResolucionesDocentes {
 		var codigo string
 		var err error
@@ -414,7 +446,6 @@ func aplicarPatchMateria(
 		codigosResueltos = append(codigosResueltos, codigo)
 	}
 
-	// Sincronizar cátedras
 	if err := sincronizarCatedras(tx, patch.Codigo, patch.Catedras, codigosResueltos); err != nil {
 		return err
 	}
@@ -440,7 +471,6 @@ func crearNuevoDocente(
 		codigoMateria,
 		nombreSiu,
 	).Scan(&codigo)
-
 	if err != nil {
 		return "", fmt.Errorf("error creando nuevo docente: %w", err)
 	}
@@ -472,7 +502,6 @@ func asociarDocenteExistente(
 		nombreSiu,
 		codigoDocente,
 	)
-
 	if err != nil {
 		return "", fmt.Errorf("error asociando docente existente: %w", err)
 	}
@@ -495,25 +524,21 @@ func sincronizarCatedras(
 	catedras []patchCatedra,
 	codigosResueltos []string,
 ) error {
-	// Desactivar todas las cátedras de la materia
 	_, err := tx.Exec(context.TODO(), desactivarCatedrasMateriaQuery, codigoMateria)
 	if err != nil {
 		return fmt.Errorf("error desactivando cátedras de materia %v: %w", codigoMateria, err)
 	}
 
-	// Serializar cátedras a JSON
 	catedrasJson, err := json.Marshal(catedras)
 	if err != nil {
 		return fmt.Errorf("error serializando cátedras: %w", err)
 	}
 
-	// Serializar códigos resueltos a JSON
 	codigosJson, err := json.Marshal(codigosResueltos)
 	if err != nil {
 		return fmt.Errorf("error serializando códigos resueltos: %w", err)
 	}
 
-	// Ejecutar upsert de cátedras
 	var catedrasActivadas, catedrasCreadas int
 	err = tx.QueryRow(
 		context.TODO(),
@@ -522,7 +547,6 @@ func sincronizarCatedras(
 		string(catedrasJson),
 		string(codigosJson),
 	).Scan(&catedrasActivadas, &catedrasCreadas)
-
 	if err != nil {
 		return fmt.Errorf("error sincronizando cátedras de materia %v: %w", codigoMateria, err)
 	}
