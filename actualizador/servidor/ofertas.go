@@ -7,10 +7,8 @@ import (
 	"log/slog"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/regexPattern/fiuba-reviews/actualizador/queries"
 )
-
-//go:embed queries/oferta/SELECT-ofertas-carreras.sql
-var ofertasCarrerasQuery string
 
 type ofertaCarrera struct {
 	CodigoCarrera   string          `db:"codigo_carrera"`
@@ -19,23 +17,14 @@ type ofertaCarrera struct {
 	OfertasMaterias []ofertaMateria `db:"contenido"`
 }
 
-type cuatrimestre struct {
-	Numero int `json:"numero"`
-	Anio   int `json:"anio"`
-}
-
-func (c cuatrimestre) String() string {
-	return fmt.Sprintf("%vQ%v", c.Numero, c.Anio)
+type ofertaMateria struct {
+	materia
+	Catedras []catedra `json:"catedras"`
 }
 
 type materia struct {
 	Codigo string `db:"codigo" json:"codigo"`
 	Nombre string `db:"nombre" json:"nombre"`
-}
-
-type ofertaMateria struct {
-	materia
-	Catedras []catedra `json:"catedras"`
 }
 
 type catedra struct {
@@ -48,14 +37,19 @@ type docente struct {
 	Rol    string `json:"rol"`
 }
 
-type ultimaOfertaMateria struct {
+type cuatrimestre struct {
+	Numero int `json:"numero"`
+	Anio   int `json:"anio"`
+}
+
+type ofertaMateriaMasReciente struct {
 	NombreCarrera string
 	ofertaMateria
 	cuatrimestre
 }
 
-func getOfertasMaterias(conn *pgx.Conn) (map[string]ultimaOfertaMateria, error) {
-	rows, err := conn.Query(context.TODO(), ofertasCarrerasQuery)
+func newOfertasMaterias(conn *pgx.Conn) (map[string]ofertaMateriaMasReciente, error) {
+	rows, err := conn.Query(context.TODO(), queries.OfertasCarreras)
 	if err != nil {
 		return nil, fmt.Errorf("error consultando ofertas de comisiones de carreras: %w", err)
 	}
@@ -74,64 +68,46 @@ func getOfertasMaterias(conn *pgx.Conn) (map[string]ultimaOfertaMateria, error) 
 		fmt.Sprintf("encontradas %v ofertas de comisiones de carreras", len(ofertasCarreras)),
 	)
 
-	ofertasMaterias := make(map[string]ultimaOfertaMateria)
+	ofertasMaterias := make(map[string]ofertaMateriaMasReciente)
 	materiasPorCuatri := make(map[cuatrimestre]int)
 
-	for _, oc := range ofertasCarreras {
-		for _, om := range oc.OfertasMaterias {
+	for _, ofCarr := range ofertasCarreras {
+		for _, ofMat := range ofCarr.OfertasMaterias {
 			logger := slog.Default().
-				With("carrera", oc.NombreCarrera, "cuatrimestre", oc.Cuatrimestre)
+				With("carrera", ofCarr.NombreCarrera, "cuatrimestre", ofCarr.Cuatrimestre)
 
 			var docentesCatedra int
-
-			for _, cat := range om.Catedras {
+			for _, cat := range ofMat.Catedras {
 				if n := len(cat.Docentes); n == 0 {
 					logger.Warn(
 						fmt.Sprintf(
-							"cátedra de materia %v (%v) no tiene docentes",
-							om.Codigo,
-							om.Nombre,
+							"cátedra de materia %v no tiene docentes",
+							ofMat.Codigo,
 						),
 					)
 				} else {
 					docentesCatedra += len(cat.Docentes)
-				}
-
-				for _, doc := range cat.Docentes {
-					if doc.Nombre == "" {
-						logger.Warn(
-							fmt.Sprintf(
-								"encontrado docente sin nombre en cátedra de materia %v (%v)",
-								om.Codigo,
-								om.Nombre,
-							),
-							"cátedra",
-							cat.Codigo,
-						)
-						continue
-					}
 				}
 			}
 
 			if docentesCatedra == 0 {
 				logger.Warn(
 					fmt.Sprintf(
-						"oferta de comisiones de materia %v (%v) no tiene docentes",
-						om.Codigo,
-						om.Nombre,
+						"oferta de comisiones de materia %v no tiene docentes",
+						ofMat.Codigo,
 					),
 				)
 				continue
 			}
 
-			if _, ok := ofertasMaterias[om.Codigo]; !ok {
-				ofertasMaterias[om.Codigo] = ultimaOfertaMateria{
-					NombreCarrera: oc.NombreCarrera,
-					ofertaMateria: om,
-					cuatrimestre:  oc.Cuatrimestre,
+			if _, ok := ofertasMaterias[ofMat.Codigo]; !ok {
+				ofertasMaterias[ofMat.Codigo] = ofertaMateriaMasReciente{
+					NombreCarrera: ofCarr.NombreCarrera,
+					ofertaMateria: ofMat,
+					cuatrimestre:  ofCarr.Cuatrimestre,
 				}
 
-				materiasPorCuatri[oc.Cuatrimestre]++
+				materiasPorCuatri[ofCarr.Cuatrimestre]++
 			}
 		}
 	}

@@ -7,23 +7,17 @@ import (
 	"log/slog"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/regexPattern/fiuba-reviews/actualizador/queries"
 )
 
-//go:embed queries/sync/UPDATE-sync-materias-query.sql
-var syncMateriasQuery string
-
-//go:embed queries/sync/SELECT-materias-no-registradas.sql
-var materiasNoRegistradasQuery string
-
-func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
+func sincronizarMaterias(conn *pgx.Conn, codigos, nombres []string) error {
 	tx, err := conn.Begin(context.TODO())
 	if err != nil {
 		return fmt.Errorf("error iniciando transacción de sincronización de materias: %w", err)
 	}
-
 	defer func() { _ = tx.Rollback(context.TODO()) }()
 
-	rows, err := tx.Query(context.TODO(), syncMateriasQuery, nombres, codigos)
+	rows, err := tx.Query(context.TODO(), queries.SincronizarMaterias, nombres, codigos)
 	if err != nil {
 		return fmt.Errorf("error ejecutando query de sincronización de materias: %w", err)
 	}
@@ -45,13 +39,13 @@ func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
 		return fmt.Errorf("error serializando materias sincronizadas: %w", err)
 	}
 
-	for _, m := range materiasSincronizadas {
+	for _, mat := range materiasSincronizadas {
 		slog.Debug(
-			fmt.Sprintf("sincronizada materia %v (%v)", m.Codigo, m.Nombre),
-			"docentes", m.DocentesMigrados,
-			"calificaciones", m.CalificacionesMigradas,
-			"comentarios", m.ComentariosMigrados,
-			"equivalencias", m.CodigosEquivalencias,
+			fmt.Sprintf("sincronizada materia %v", mat.Codigo),
+			"docentes", mat.DocentesMigrados,
+			"calificaciones", mat.CalificacionesMigradas,
+			"comentarios", mat.ComentariosMigrados,
+			"equivalencias", mat.CodigosEquivalencias,
 		)
 	}
 
@@ -65,7 +59,7 @@ func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
 	}
 
 	if err := checkMateriasNoRegistradas(conn, codigos, nombres); err != nil {
-		return fmt.Errorf("error verificando materias no registradas en la base de datos: %w", err)
+		return fmt.Errorf("error checkeando materias no registradas en la base de datos: %w", err)
 	}
 
 	return nil
@@ -74,7 +68,7 @@ func syncDb(conn *pgx.Conn, codigos, nombres []string) error {
 func checkMateriasNoRegistradas(conn *pgx.Conn, codigos, nombres []string) error {
 	rows, err := conn.Query(
 		context.TODO(),
-		materiasNoRegistradasQuery,
+		queries.MateriasNoRegistradasEnDb,
 		nombres,
 		codigos,
 	)
@@ -87,12 +81,11 @@ func checkMateriasNoRegistradas(conn *pgx.Conn, codigos, nombres []string) error
 		return fmt.Errorf("error serializando materias no registradas: %v", err)
 	}
 
-	for _, m := range materiasNoRegistradas {
+	for _, mat := range materiasNoRegistradas {
 		slog.Warn(
 			fmt.Sprintf(
-				"materia %v (%v) no está registrada en la base de datos",
-				m.Codigo,
-				m.Nombre,
+				"materia %v no está registrada en la base de datos",
+				mat.Codigo,
 			),
 		)
 	}

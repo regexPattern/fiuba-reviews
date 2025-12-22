@@ -11,6 +11,22 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+func iniciarServidor(conn *pgx.Conn, addr string, patches map[string]patchMateria) error {
+	http.HandleFunc("GET /patches", func(w http.ResponseWriter, _ *http.Request) {
+		handleGetAllPatches(w, patches)
+	})
+	http.HandleFunc("GET /patches/{codigoMateria}", func(w http.ResponseWriter, r *http.Request) {
+		handleGetPatchMateria(w, r, conn, patches)
+	})
+	http.HandleFunc("PATCH /patches/{codigoMateria}", func(w http.ResponseWriter, r *http.Request) {
+		handleResolverMateria(w, r, conn, patches)
+	})
+
+	slog.Info(fmt.Sprintf("servidor escuchando peticiones en dirección %v", addr))
+
+	return http.ListenAndServe(addr, nil)
+}
+
 func handleGetAllPatches(w http.ResponseWriter, patches map[string]patchMateria) {
 	type patchRes struct {
 		Codigo   string `json:"codigo"`
@@ -46,13 +62,6 @@ func handleGetAllPatches(w http.ResponseWriter, patches map[string]patchMateria)
 		)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-}
-
-type patchMateriaResponse struct {
-	materia
-	DocentesSinResolver []patchDocente    `json:"docentes_sin_resolver"`
-	Catedras            []catedraResponse `json:"catedras"`
-	cuatrimestre        `                  json:"cuatrimestre"`
 }
 
 func handleGetPatchMateria(
@@ -117,7 +126,14 @@ func handleGetPatchMateria(
 		})
 	}
 
-	res := patchMateriaResponse{
+	type patchMateriaRes struct {
+		materia
+		DocentesSinResolver []patchDocente    `json:"docentes_sin_resolver"`
+		Catedras            []catedraResponse `json:"catedras"`
+		cuatrimestre        `                  json:"cuatrimestre"`
+	}
+
+	res := patchMateriaRes{
 		materia:             patch.materia,
 		DocentesSinResolver: patch.Docentes,
 		Catedras:            catedrasResponse,
@@ -148,7 +164,7 @@ type resolucionDocente struct {
 	CodigoMatch *string `json:"codigo_match"`
 }
 
-func handleAplicarPatchMateria(
+func handleResolverMateria(
 	w http.ResponseWriter,
 	r *http.Request,
 	conn *pgx.Conn,
@@ -165,7 +181,7 @@ func handleAplicarPatchMateria(
 	codigoMateria := r.PathValue("codigoMateria")
 	patch := patches[codigoMateria]
 
-	if err := aplicarPatchMateria(conn, patch, res); err != nil {
+	if err := resolverMateria(conn, patch, res); err != nil {
 		slog.Error(fmt.Sprintf("error aplicando resolución de materia %v: %v", codigoMateria, err))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -5,5 +5,7 @@ formatters:
     - goimports
     - golines
   settings:
+    gofumpt:
+      extra-rules: true
     golines:
       shorten-comments: true
