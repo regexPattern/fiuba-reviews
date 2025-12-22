@@ -20,6 +20,7 @@ SELECT
     d.codigo AS codigo_docente
 FROM
     docentes_siu ds
-    LEFT JOIN docente d ON d.codigo_materia = $1 
+    LEFT JOIN docente d ON d.codigo_materia = $1
         AND d.nombre_siu = ds.nombre_docente_siu
         AND d.nombre_siu IS NOT NULL;
+

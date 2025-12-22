@@ -11,4 +11,4 @@ lint:
 
 format:
 	@golangci-lint fmt
-	@pg_format -i queries/*.sql
+	@pg_format -i queries/**/*.sql
