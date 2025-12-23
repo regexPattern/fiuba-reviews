@@ -64,9 +64,7 @@ func newOfertasMaterias(conn *pgx.Conn) (map[string]ofertaMateriaMasReciente, er
 		ofertasPorCuatri[oc.Cuatrimestre]++
 	}
 
-	slog.Debug(
-		fmt.Sprintf("encontradas %v ofertas de comisiones de carreras", len(ofertasCarreras)),
-	)
+	slog.Debug("ofertas_carreras_encontradas", "count", len(ofertasCarreras))
 
 	ofertasMaterias := make(map[string]ofertaMateriaMasReciente)
 	materiasPorCuatri := make(map[cuatrimestre]int)
@@ -74,29 +72,28 @@ func newOfertasMaterias(conn *pgx.Conn) (map[string]ofertaMateriaMasReciente, er
 	for _, ofCarr := range ofertasCarreras {
 		for _, ofMat := range ofCarr.OfertasMaterias {
 			logger := slog.Default().
-				With("carrera", ofCarr.NombreCarrera, "cuatrimestre", ofCarr.Cuatrimestre)
+				With("codigo_materia", ofMat.Codigo, "carrera", ofCarr.NombreCarrera, "cuatrimestre", ofCarr.Cuatrimestre)
+
+			// Si la oferta de la materia no tiene cátedras o solo tiene cátedras sin docentes, no
+			// se agregan a listado de ofertas disponibles. Lo más probable es que haya sido
+			// producto de un error con el parser de ofertas.
+
+			if len(ofMat.Catedras) == 0 {
+				logger.Warn("oferta_materia_sin_catedras")
+				continue
+			}
 
 			var docentesCatedra int
 			for _, cat := range ofMat.Catedras {
 				if n := len(cat.Docentes); n == 0 {
-					logger.Warn(
-						fmt.Sprintf(
-							"cátedra de materia %v no tiene docentes",
-							ofMat.Codigo,
-						),
-					)
+					logger.Warn("catedra_sin_docentes")
 				} else {
 					docentesCatedra += len(cat.Docentes)
 				}
 			}
 
 			if docentesCatedra == 0 {
-				logger.Warn(
-					fmt.Sprintf(
-						"oferta de comisiones de materia %v no tiene docentes",
-						ofMat.Codigo,
-					),
-				)
+				logger.Warn("oferta_materia_sin_docentes")
 				continue
 			}
 
@@ -113,21 +110,10 @@ func newOfertasMaterias(conn *pgx.Conn) (map[string]ofertaMateriaMasReciente, er
 	}
 
 	for cuatri, n := range materiasPorCuatri {
-		slog.Info(
-			fmt.Sprintf(
-				"encontradas %v ofertas de comisiones de materias de cuatrimestre %v",
-				n,
-				cuatri,
-			),
-		)
+		slog.Info("ofertas_materias_cuatrimestre", "count", n, "cuatrimestre", cuatri)
 	}
 
-	slog.Info(
-		fmt.Sprintf(
-			"encontradas %v ofertas de comisiones de materias en total",
-			len(ofertasMaterias),
-		),
-	)
+	slog.Info("ofertas_materias_total", "count", len(ofertasMaterias))
 
 	return ofertasMaterias, nil
 }

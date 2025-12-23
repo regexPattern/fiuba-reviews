@@ -1,6 +1,7 @@
 -- DESCRIPCIÓN
 -- Retorna todos los docentes de las cátedras del SIU de una materia con su código de la base de datos.
--- Un docente está resuelto si ya existe un docente en la base de datos con el mismo nombre_siu.
+-- Un docente del SIU está resuelto si ya existe un docente en la base
+-- de datos con el campo nombre_siu igual al nombre del docente de SIU.
 --
 -- PARÁMETROS
 -- $1: Código de la materia.

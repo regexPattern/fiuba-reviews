@@ -1,33 +1,31 @@
 <script lang="ts">
 	import type { PatchCatedra } from "$lib";
+	import * as Card from "$lib/components/ui/card";
+	import { Checkbox } from "$lib/components/ui/checkbox";
+	import { Label } from "$lib/components/ui/label";
 
 	interface Props {
 		catedra: PatchCatedra;
-		resoluciones: Map<string, string | null>;
+		resoluciones: Map<string, string | undefined>;
 	}
 
 	let { catedra, resoluciones }: Props = $props();
 </script>
 
-<div class="rounded-xl border border-gray-300 p-3">
-	<ul>
-		{#each catedra.docentes as docente (docente.nombre)}
-			<li>
-				{#if docente.codigo_ya_resuelto !== null}
-					<input
-						type="hidden"
-						name={docente.nombre}
-						value={JSON.stringify(docente.codigo_ya_resuelto)}
-					/>
-				{/if}
-				<div class="space-x-1">
-					<input
-						type="checkbox"
-						checked={resoluciones.has(docente.nombre)}
-						onclick={(e) => e.preventDefault()}
-					/><span>{docente.nombre}</span>
-				</div>
-			</li>
-		{/each}
-	</ul>
-</div>
+<Card.Root>
+	<Card.Content>
+		<ul class="space-y-2">
+			{#each catedra as docente (docente.nombre)}
+				<li>
+					<div class="flex gap-1.5">
+						<Checkbox
+							checked={resoluciones.get(docente.nombre) !== ""}
+							onclick={(e) => e.preventDefault()}
+						/>
+						<Label>{docente.nombre}</Label>
+					</div>
+				</li>
+			{/each}
+		</ul>
+	</Card.Content>
+</Card.Root>

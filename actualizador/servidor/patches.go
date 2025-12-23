@@ -19,9 +19,6 @@ var crearNuevoDocenteQuery string
 //go:embed queries/patch/UPDATE-asociar-docente-existente.sql
 var asociarDocenteExistenteQuery string
 
-//go:embed queries/patch/SELECT-docentes-resueltos-de-catedras.sql
-var docentesResueltosDeCatedrasQuery string
-
 //go:embed queries/patch/UPDATE-desactivar-catedras-materia.sql
 var desactivarCatedrasMateriaQuery string
 
@@ -46,10 +43,7 @@ type matchDocente struct {
 	Score    *float64 `json:"score"`
 }
 
-type patchCatedra struct {
-	catedra
-	Resuelta bool `json:"resuelta"`
-}
+type patchCatedra catedra
 
 func getPatchesMaterias(conn *pgx.Conn) (map[string]patchMateria, error) {
 	ofertas, err := newOfertasMaterias(conn)
@@ -101,12 +95,7 @@ func newPatchesMaterias(
 		return nil, fmt.Errorf("error deserializando materias candidatas a actualizarse: %v", err)
 	}
 
-	slog.Info(
-		fmt.Sprintf(
-			"encontradas %v materias con actualización pendiente",
-			len(materiasCandidatas),
-		),
-	)
+	slog.Info("materias_actualizacion_pendiente", "count", len(materiasCandidatas))
 
 	var totalDocentes, docentesNuevos, totalCatedras, catedrasNuevas int
 	patches := make(map[string]patchMateria, len(materiasCandidatas))
@@ -114,9 +103,7 @@ func newPatchesMaterias(
 	for _, mat := range materiasCandidatas {
 		oferta, ok := ofertas[mat.Codigo]
 		if !ok {
-			slog.Debug(
-				fmt.Sprintf("materia %v no tiene oferta de comisiones disponible", mat.Codigo),
-			)
+			slog.Debug("materia_sin_oferta", "codigo_materia", mat.Codigo)
 			continue
 		}
 
@@ -139,12 +126,7 @@ func newPatchesMaterias(
 		}
 	}
 
-	slog.Info(
-		fmt.Sprintf(
-			"encontradas %v materias con actualización disponible",
-			len(patches),
-		),
-	)
+	slog.Info("materias_actualizacion_disponible", "count", len(patches))
 
 	return patches, nil
 }
@@ -173,11 +155,13 @@ func newPatchMateria(
 
 	if catedrasDescartadas > 0 {
 		slog.Warn(
-			fmt.Sprintf(
-				"descartadas %v cátedras de materia %v por tener docentes con nombre vacío",
-				catedrasDescartadas,
-				oferta.Codigo,
-			),
+			"catedras_descartadas",
+			"count",
+			catedrasDescartadas,
+			"codigo_materia",
+			oferta.Codigo,
+			"motivo",
+			"docentes_vacios",
 		)
 	}
 
@@ -203,12 +187,7 @@ func newPatchMateria(
 	}
 
 	if len(patchesDocentes) == 0 && len(patchesCatedras) == 0 {
-		slog.Debug(
-			fmt.Sprintf(
-				"materia %v no tiene cambios disponibles",
-				oferta.Codigo,
-			),
-		)
+		slog.Debug("materia_sin_cambios", "codigo_materia", oferta.Codigo)
 		return nil, nil
 	}
 
@@ -233,11 +212,7 @@ func newPatchMateria(
 	catedrasNuevas := len(patchesCatedras)
 	catedrasExistentes := len(oferta.Catedras) - catedrasNuevas
 
-	slog.Debug(
-		fmt.Sprintf(
-			"generado patch de actualización para materia %v",
-			oferta.Codigo,
-		),
+	slog.Debug("patch_materia_generado", "codigo_materia", oferta.Codigo,
 		slog.Group("docentes",
 			"sin_matches", docentesSinMatches,
 			"con_matches", docentesConMatches,
@@ -362,10 +337,7 @@ func newPatchesCatedras(conn *pgx.Conn, oferta ofertaMateriaMasReciente) ([]patc
 
 	patches := make([]patchCatedra, 0, len(oferta.Catedras))
 	for _, cat := range oferta.Catedras {
-		patches = append(patches, patchCatedra{
-			catedra:  cat,
-			Resuelta: estadoPorCodigo[cat.Codigo],
-		})
+		patches = append(patches, patchCatedra(cat))
 	}
 
 	return patches, nil

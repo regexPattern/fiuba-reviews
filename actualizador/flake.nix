@@ -27,10 +27,11 @@
         };
         devShells.servidor = pkgs.mkShell {
           packages = with pkgs; [
+            air
             go
-            gopls
             golangci-lint
             golangci-lint-langserver
+            gopls
             pgformatter
           ];
         };

@@ -1,12 +1,12 @@
 export type PatchMateria = {
 	codigo: string;
 	nombre: string;
-	docentes_sin_resolver: PatchDocente[];
-	catedras: PatchCatedra[];
 	cuatrimestre: {
 		numero: number;
 		anio: number;
 	};
+	docentes_pendientes: PatchDocente[];
+	docentes_por_catedra: PatchCatedra[];
 };
 
 export type PatchDocente = {
@@ -22,10 +22,6 @@ export type MatchDocente = {
 };
 
 export type PatchCatedra = {
-	codigo: number;
-	docentes: {
-		nombre: string;
-		codigo_ya_resuelto: string | null;
-	}[];
-	resuelta: boolean;
-};
+	nombre: string;
+	codigo: string | null;
+}[];

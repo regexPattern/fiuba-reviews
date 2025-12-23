@@ -40,16 +40,15 @@ func sincronizarMaterias(conn *pgx.Conn, codigos, nombres []string) error {
 	}
 
 	for _, mat := range materiasSincronizadas {
-		slog.Debug(
-			fmt.Sprintf("sincronizada materia %v", mat.Codigo),
-			"docentes", mat.DocentesMigrados,
-			"calificaciones", mat.CalificacionesMigradas,
-			"comentarios", mat.ComentariosMigrados,
+		slog.Debug("materia_sincronizada", "codigo_materia", mat.Codigo,
+			"docentes_migrados", mat.DocentesMigrados,
+			"calificaciones_migradas", mat.CalificacionesMigradas,
+			"comentarios_migrados", mat.ComentariosMigrados,
 			"equivalencias", mat.CodigosEquivalencias,
 		)
 	}
 
-	slog.Info(fmt.Sprintf("sincronizadas %d materias en total", len(materiasSincronizadas)))
+	slog.Info("materias_sincronizadas", "count", len(materiasSincronizadas))
 
 	if err := tx.Commit(context.TODO()); err != nil {
 		return fmt.Errorf(
@@ -82,12 +81,7 @@ func checkMateriasNoRegistradas(conn *pgx.Conn, codigos, nombres []string) error
 	}
 
 	for _, mat := range materiasNoRegistradas {
-		slog.Warn(
-			fmt.Sprintf(
-				"materia %v no está registrada en la base de datos",
-				mat.Codigo,
-			),
-		)
+		slog.Warn("materia_no_registrada_en_db", "codigo_materia", mat.Codigo)
 	}
 
 	return nil

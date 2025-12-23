@@ -23,7 +23,7 @@ func main() {
 	addr := net.JoinHostPort(host, port)
 
 	if err := run(dbUrl, addr); err != nil {
-		slog.Error(err.Error())
+		slog.Error("aplicacion_fallida", "error", err)
 		os.Exit(1)
 	}
 }
@@ -34,7 +34,7 @@ func run(dbUrl, addr string) error {
 		return fmt.Errorf("error estableciendo conexión con la base de datos: %w", err)
 	}
 
-	slog.Info("conexión establecida con la base de datos")
+	slog.Info("conexion_con_db_establecida")
 
 	patches, err := getPatchesMaterias(conn)
 	if err != nil {

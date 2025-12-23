@@ -20,14 +20,14 @@ var DocentesPendientes string
 //go:embed patch/select-catedras-con-estado.sql
 var CatedrasConEstado string
 
+//go:embed patch/select-docentes-con-estado.sql
+var DocentesConEstado string
+
 //go:embed patch/INSERT-nuevo-docente.sql
 var crearNuevoDocenteQuery string
 
 //go:embed patch/UPDATE-asociar-docente-existente.sql
 var asociarDocenteExistenteQuery string
-
-//go:embed patch/SELECT-docentes-resueltos-de-catedras.sql
-var docentesResueltosDeCatedrasQuery string
 
 //go:embed patch/UPDATE-desactivar-catedras-materia.sql
 var desactivarCatedrasMateriaQuery string

@@ -8,7 +8,7 @@ type PatchMateria = {
 };
 
 export const load: LayoutServerLoad = async () => {
-	const res = await fetch(`${BACKEND_URL}/patches`);
+	const res = await fetch(`${BACKEND_URL}/`);
 	const patches = (await res.json()) as PatchMateria[];
 	return { patches };
 };
