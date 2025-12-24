@@ -55,10 +55,12 @@ func handleGetPatchesPendientes(w http.ResponseWriter, patches map[string]*patch
 
 	patchesRes := make([]patchRes, 0)
 	for cod, pat := range patches {
-		patchesRes = append(
-			patchesRes,
-			patchRes{Codigo: cod, Nombre: pat.Nombre, Docentes: len(pat.Docentes)},
-		)
+		if pat != nil {
+			patchesRes = append(
+				patchesRes,
+				patchRes{Codigo: cod, Nombre: pat.Nombre, Docentes: len(pat.Docentes)},
+			)
+		}
 	}
 
 	slices.SortFunc(patchesRes, func(a, b patchRes) int {
@@ -101,6 +103,12 @@ func handleGetPatchMateria(
 		return
 	}
 
+	if patch == nil {
+		slog.Debug("request_patch_ya_resuelto", "codigo_materia", codigoMateria)
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
 	docentesPorCatedra, err := getDocentesConEstadoPorCatedra(conn, codigoMateria, patch.Catedras)
 	if err != nil {
 		slog.Error("get_docentes_estado_failed", "codigo_materia", codigoMateria, "error", err)
@@ -119,8 +127,14 @@ func handleGetPatchMateria(
 	}
 
 	catedras := make([]catedraRes, 0, len(patch.Catedras))
+
 	for _, cat := range patch.Catedras {
 		docentesCatedra := make([]docenteCatedraRes, 0, len(cat.Docentes))
+
+		if patch.Codigo == "TB014" {
+			fmt.Println(cat.Codigo)
+			fmt.Println(cat.Docentes)
+		}
 
 		for _, doc := range cat.Docentes {
 			docentesCatedra = append(docentesCatedra, docenteCatedraRes{
@@ -141,13 +155,15 @@ func handleGetPatchMateria(
 
 	type patchMateriaRes struct {
 		materia
-		cuatrimestre       `json:"cuatrimestre"`
+		Carrera            string `json:"carrera"`
+		cuatrimestre       `               json:"cuatrimestre"`
 		DocentesPendientes []patchDocente `json:"docentes_pendientes"`
 		Catedras           []catedraRes   `json:"catedras"`
 	}
 
 	res := patchMateriaRes{
 		materia:            patch.materia,
+		Carrera:            patch.Carrera,
 		cuatrimestre:       patch.cuatrimestre,
 		DocentesPendientes: patch.Docentes,
 		Catedras:           catedras,
@@ -199,7 +215,7 @@ func handleResolverMateria(
 		return
 	}
 
-	delete(patches, codigoMateria)
+	patches[codigoMateria] = nil
 
-	w.WriteHeader(http.StatusNoContent)
+	w.WriteHeader(http.StatusOK)
 }

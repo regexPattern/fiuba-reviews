@@ -15,14 +15,14 @@
 <Card.Root>
 	<Card.Content>
 		<ul class="space-y-2">
-			{#each catedra as docente (docente.nombre)}
+			{#each catedra.docentes as docente, i (i)}
 				<li>
-					<div class="flex gap-1.5">
+					<div class="flex items-center gap-2">
 						<Checkbox
 							checked={resoluciones.get(docente.nombre) !== ""}
 							onclick={(e) => e.preventDefault()}
 						/>
-						<Label>{docente.nombre}</Label>
+						<Label class="text-base font-normal">{docente.nombre}</Label>
 					</div>
 				</li>
 			{/each}

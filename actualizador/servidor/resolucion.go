@@ -12,6 +12,7 @@ import (
 
 type resolucion struct {
 	NombreSiu   string  `json:"nombre_siu"`
+	Rol         string  `json:"rol"`
 	NombreDb    string  `json:"nombre_db"`
 	CodigoMatch *string `json:"codigo_match"`
 }
@@ -27,17 +28,19 @@ func resolverMateria(
 	}
 	defer func() { _ = tx.Rollback(context.TODO()) }()
 
-	var codigosUpdate, nombresSiuUpdate, nombresDbUpdate []string
-	var nombresSiuInsert, nombresDbInsert []string
+	var codigosUpdate, nombresSiuUpdate, nombresDbUpdate, rolesUpdate []string
+	var nombresSiuInsert, nombresDbInsert, rolesInsert []string
 
 	for _, res := range resoluciones {
 		if res.CodigoMatch != nil {
 			codigosUpdate = append(codigosUpdate, *res.CodigoMatch)
 			nombresSiuUpdate = append(nombresSiuUpdate, res.NombreSiu)
 			nombresDbUpdate = append(nombresDbUpdate, res.NombreDb)
+			rolesUpdate = append(rolesUpdate, res.Rol)
 		} else {
 			nombresSiuInsert = append(nombresSiuInsert, res.NombreSiu)
 			nombresDbInsert = append(nombresDbInsert, res.NombreDb)
+			rolesInsert = append(rolesInsert, res.Rol)
 		}
 	}
 
@@ -48,6 +51,7 @@ func resolverMateria(
 			codigosUpdate,
 			nombresSiuUpdate,
 			nombresDbUpdate,
+			rolesUpdate,
 		)
 		if err != nil {
 			return fmt.Errorf("error actualizando docentes existentes: %w", err)
@@ -61,6 +65,7 @@ func resolverMateria(
 			patch.Codigo,
 			nombresSiuInsert,
 			nombresDbInsert,
+			rolesInsert,
 		)
 		if err != nil {
 			return fmt.Errorf("error insertando docentes nuevos: %w", err)

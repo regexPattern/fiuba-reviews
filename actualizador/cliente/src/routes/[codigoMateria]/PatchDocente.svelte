@@ -7,7 +7,7 @@
 
 	interface Props {
 		docente: PatchDocente;
-		resoluciones: Map<string, string | undefined>;
+		resoluciones: Map<string, string>;
 		matchesYaAsignados: Map<string, string>;
 	}
 
@@ -30,7 +30,13 @@
 	// La lib de UI no permite configurar el valor como undefined manualmente.
 	let codigoMatch = $state("");
 
-	let resolucionJSON = $derived(JSON.stringify({ nombre_db: nombreDb, codigo_match: codigoMatch }));
+	let resolucionJSON = $derived(
+		JSON.stringify({
+			rol: docente.rol,
+			nombre_db: nombreDb,
+			codigo_match: codigoMatch
+		})
+	);
 
 	$effect(() => {
 		const prevMatch = resoluciones.get(docente.nombre);
@@ -63,14 +69,16 @@
 			<div class="space-y-2">
 				<RadioGroup.Root bind:value={codigoMatch}>
 					{#each docente.matches as match (match.codigo)}
+						{@const id = `${docente.nombre}-${match.codigo}`}
 						{@const currMatch = matchesYaAsignados.get(match.codigo)}
 
 						<div class="flex gap-1.5">
 							<RadioGroup.Item
+								{id}
 								value={match.codigo}
 								disabled={currMatch !== undefined && currMatch !== docente.nombre}
 							/>
-							<Label
+							<Label for={id}
 								>{match.nombre}
 								<span class="text-muted-foreground">(similitud {match.score.toFixed(2)})</span
 								></Label
@@ -79,8 +87,8 @@
 					{/each}
 
 					<div class="flex gap-1">
-						<RadioGroup.Item value={"__CREATE__"} />
-						<Label>Registrar nuevo docente</Label>
+						<RadioGroup.Item id={`${docente.nombre}-__CREATE__`} value={"__CREATE__"} />
+						<Label for={`${docente.nombre}-__CREATE__`}>Registrar nuevo docente</Label>
 					</div>
 				</RadioGroup.Root>
 			</div>

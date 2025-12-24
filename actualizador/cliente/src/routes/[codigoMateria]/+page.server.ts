@@ -2,14 +2,16 @@ import { BACKEND_URL } from "$env/static/private";
 import type { PatchMateria } from "$lib";
 import type { PageServerLoad } from "./$types";
 import type { Actions } from "./$types";
-import { error, fail } from "@sveltejs/kit";
+import { error } from "@sveltejs/kit";
 
 export const load: PageServerLoad = async ({ params }) => {
 	const res = await fetch(`${BACKEND_URL}/${params.codigoMateria}`);
 
-	if (res.statusText !== "OK") {
+	if (res.status >= 400) {
 		const errMsg = await res.text();
 		error(res.status, { message: errMsg });
+	} else if (res.status === 204) {
+		return {};
 	}
 
 	const patch = (await res.json()) as PatchMateria;
@@ -26,41 +28,39 @@ export const load: PageServerLoad = async ({ params }) => {
 };
 
 export const actions = {
-	default: async ({ params: _, request }) => {
+	default: async ({ params, request }) => {
 		const formData = await request.formData();
 
 		type Resolucion = {
 			nombre_db: string;
-			codigo_match: string | null | undefined;
+			codigo_match: string | null;
 		};
 
-		const resoluciones: Record<string, Resolucion> = {};
-		const docentesFaltantes: string[] = [];
+		const resoluciones = new Map<string, Resolucion>();
 
 		for (const [nombre_siu, resJson] of formData.entries()) {
 			const res = JSON.parse(resJson as string) as Resolucion;
-			if (res.codigo_match === "__UNDEFINED__") {
-				docentesFaltantes.push(nombre_siu);
-			} else {
-				resoluciones[nombre_siu] = res;
+			switch (res.codigo_match) {
+				case "":
+					continue;
+				case "__CREATE__":
+					res.codigo_match = null;
 			}
+			resoluciones.set(nombre_siu, res);
 		}
 
-		if (docentesFaltantes.length > 0) {
-			docentesFaltantes.sort((a, b) => a.localeCompare(b));
-			return fail(400, { docentesFaltantes });
-		}
+		const body = JSON.stringify(
+			Array.from(resoluciones, ([nombreSiu, res]) => ({
+				nombre_siu: nombreSiu,
+				...res
+			}))
+		);
 
-		// await fetch(`${BACKEND_URL}/patches/${params.codigoMateria}`, {
-		// 	method: "PATCH",
-		// 	headers: {
-		// 		"Content-Type": "application/json"
-		// 	},
-		// 	body: JSON.stringify({
-		// 		codigos_ya_resueltos: Array.from(codigosYaResueltos),
-		// 		resoluciones_actuales: resolucionesActuales
-		// 	})
-		// });
+		await fetch(`${BACKEND_URL}/${params.codigoMateria}`, {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json" },
+			body
+		});
 
 		return { success: true };
 	}

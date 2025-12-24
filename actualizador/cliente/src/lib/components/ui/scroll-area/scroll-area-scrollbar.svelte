@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { ScrollArea as ScrollAreaPrimitive } from "bits-ui";
 	import { cn, type WithoutChild } from "$lib/utils.js";
+	import { ScrollArea as ScrollAreaPrimitive } from "bits-ui";
 
 	let {
 		ref = $bindable(null),
@@ -26,6 +26,6 @@
 	{@render children?.()}
 	<ScrollAreaPrimitive.Thumb
 		data-slot="scroll-area-thumb"
-		class="bg-border relative flex-1 rounded-full"
+		class="relative flex-1 rounded-full bg-border"
 	/>
 </ScrollAreaPrimitive.Scrollbar>

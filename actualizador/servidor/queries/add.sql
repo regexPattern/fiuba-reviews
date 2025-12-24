@@ -20,3 +20,9 @@ ALTER TABLE docente
 ALTER TABLE docente
     DROP CONSTRAINT docente_nombre_codigo_materia_key;
 
+ALTER TABLE docente
+    ADD CONSTRAINT docente_nombre_siu_codigo_materia_key UNIQUE (nombre_siu, codigo_materia);
+
+ALTER TABLE docente
+    ADD COLUMN rol text NULL;
+

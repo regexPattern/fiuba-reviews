@@ -14,9 +14,10 @@ import (
 
 type patchMateria struct {
 	materia
+	Carrera      string `json:"carrera"`
+	cuatrimestre `json:"cuatrimestre"`
 	Docentes     []patchDocente `json:"docentes"`
 	Catedras     []patchCatedra `json:"catedras"`
-	cuatrimestre `               json:"cuatrimestre"`
 }
 
 type patchDocente struct {
@@ -223,9 +224,10 @@ func newPatchMateria(
 
 	return &patchMateria{
 		materia:      ofertaFiltrada.materia,
+		Carrera:      ofertaFiltrada.NombreCarrera,
+		cuatrimestre: ofertaFiltrada.cuatrimestre,
 		Docentes:     patchesDocentes,
 		Catedras:     patchesCatedras,
-		cuatrimestre: ofertaFiltrada.cuatrimestre,
 	}, nil
 }
 
