@@ -8,4 +8,6 @@ SELECT
     u.nombre_siu,
     u.nombre_db
 FROM
-    unnest($2::text[], $3::text[]) AS u(nombre_siu, nombre_db);
+    unnest($2::text[], $3::text[]) AS u (nombre_siu,
+        nombre_db);
+

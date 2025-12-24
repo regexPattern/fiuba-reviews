@@ -18,7 +18,7 @@ type resolucion struct {
 
 func resolverMateria(
 	conn *pgx.Conn,
-	patch patchMateria,
+	patch *patchMateria,
 	resoluciones []resolucion,
 ) error {
 	tx, err := conn.Begin(context.TODO())
@@ -40,10 +40,6 @@ func resolverMateria(
 			nombresDbInsert = append(nombresDbInsert, res.NombreDb)
 		}
 	}
-
-	fmt.Println("codigo_update", codigosUpdate)
-	fmt.Println("nombre_update_(siu)_(db)", nombresSiuUpdate, nombresDbUpdate)
-	fmt.Println("nombres_insert_(siu)_(db)", nombresSiuInsert, nombresDbInsert)
 
 	if len(codigosUpdate) > 0 {
 		_, err := tx.Exec(
@@ -71,41 +67,37 @@ func resolverMateria(
 		}
 	}
 
-	slog.Debug(
-		"materia_resuelta",
-		slog.Group(
-			"docentes",
-			"actualizados",
-			len(codigosUpdate),
-			"creados",
-			len(nombresSiuInsert),
-		),
-	)
-
 	catedrasJson, err := json.Marshal(patch.Catedras)
-	_ = catedrasJson
 	if err != nil {
 		return fmt.Errorf("error serializando cátedras: %w", err)
 	}
 
-	// row := tx.QueryRow(context.TODO(), queries.UpsertCatedras, patch.Codigo,
-	// string(catedrasJson))
+	row := tx.QueryRow(context.TODO(), queries.UpsertCatedras, patch.Codigo,
+		string(catedrasJson))
 
 	var catedrasActivadas, catedrasCreadas int
-	// if err := row.Scan(&catedrasActivadas, &catedrasCreadas); err != nil {
-	// 	return fmt.Errorf("error sincronizando cátedras: %w", err)
-	// }
-
-	if catedrasActivadas > 0 || catedrasCreadas > 0 {
-		slog.Info("catedras_actualizadas",
-			"codigo_materia", patch.Codigo,
-			"activadas", catedrasActivadas,
-			"creadas", catedrasCreadas)
+	if err := row.Scan(&catedrasActivadas, &catedrasCreadas); err != nil {
+		return fmt.Errorf("error sincronizando cátedras: %w", err)
 	}
 
 	if err := tx.Commit(context.TODO()); err != nil {
 		return fmt.Errorf("error confirmando transacción: %w", err)
 	}
+
+	slog.Debug(
+		"materia_resuelta",
+		"codigo_materia", patch.Codigo,
+		slog.Group(
+			"docentes",
+			"actualizados", len(codigosUpdate),
+			"creados", len(nombresSiuInsert),
+		),
+		slog.Group(
+			"catedras",
+			"activadas", catedrasActivadas,
+			"creadas", catedrasCreadas,
+		),
+	)
 
 	return nil
 }

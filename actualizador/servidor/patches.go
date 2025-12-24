@@ -30,9 +30,12 @@ type matchDocente struct {
 	Score    *float64 `json:"score"`
 }
 
-type patchCatedra catedra
+type patchCatedra struct {
+	catedra
+	YaExistente bool `json:"ya_existente"`
+}
 
-func getPatchesMaterias(conn *pgx.Conn) (map[string]patchMateria, error) {
+func getPatchesMaterias(conn *pgx.Conn) (map[string]*patchMateria, error) {
 	ofertas, err := newOfertasMaterias(conn)
 	if err != nil {
 		return nil, fmt.Errorf(
@@ -71,7 +74,7 @@ func newPatchesMaterias(
 	conn *pgx.Conn,
 	codigosMaterias []string,
 	ofertas map[string]ofertaMateriaMasReciente,
-) (map[string]patchMateria, error) {
+) (map[string]*patchMateria, error) {
 	rows, err := conn.Query(context.TODO(), queries.MateriasCandidatas, codigosMaterias)
 	if err != nil {
 		return nil, fmt.Errorf("error consultando materias candidatas a actualizarse: %w", err)
@@ -85,7 +88,7 @@ func newPatchesMaterias(
 	slog.Info("materias_actualizacion_pendiente", "count", len(materiasCandidatas))
 
 	var totalDocentes, docentesNuevos, totalCatedras, catedrasNuevas int
-	patches := make(map[string]patchMateria, len(materiasCandidatas))
+	patches := make(map[string]*patchMateria, len(materiasCandidatas))
 
 	for _, mat := range materiasCandidatas {
 		oferta, ok := ofertas[mat.Codigo]
@@ -109,7 +112,7 @@ func newPatchesMaterias(
 				}
 			}
 			catedrasNuevas += len(pat.Catedras)
-			patches[pat.Codigo] = *pat
+			patches[pat.Codigo] = pat
 		}
 	}
 
@@ -196,8 +199,15 @@ func newPatchMateria(
 	}
 
 	docentesDeOfertasYaResueltos := len(docentesUnicos) - len(patchesDocentes)
-	catedrasNuevas := len(patchesCatedras)
-	catedrasExistentes := len(oferta.Catedras) - catedrasNuevas
+
+	var catedrasNuevas, catedrasExistentes int
+	for _, pat := range patchesCatedras {
+		if pat.YaExistente {
+			catedrasExistentes++
+		} else {
+			catedrasNuevas++
+		}
+	}
 
 	slog.Debug("patch_materia_generado", "codigo_materia", oferta.Codigo,
 		slog.Group("docentes",
@@ -304,27 +314,33 @@ func newPatchesCatedras(conn *pgx.Conn, oferta ofertaMateriaMasReciente) ([]patc
 	defer rows.Close()
 
 	type catedraConEstadoRow struct {
-		Codigo   int  `db:"codigo_siu"`
-		Resuelta bool `db:"resuelta"`
+		Codigo   int  `db:"codigo"`
+		Resuelta bool `db:"bool"`
 	}
 
-	catedrasConEstado, err := pgx.CollectRows(rows, pgx.RowToStructByName[catedraConEstadoRow])
+	var codigo int
+	var yaExistente bool
+
+	catedrasConEstado := make(map[int]bool, len(oferta.Catedras))
+
+	_, err = pgx.ForEachRow(rows, []any{&codigo, &yaExistente}, func() error {
+		catedrasConEstado[codigo] = yaExistente
+		return nil
+	})
 	if err != nil {
 		return nil, fmt.Errorf(
-			"error serializando cátedras de materia %v: %w",
+			"error serializando estado de cátedras de materia %v: %w",
 			oferta.Codigo,
 			err,
 		)
 	}
 
-	estadoPorCodigo := make(map[int]bool)
-	for _, cat := range catedrasConEstado {
-		estadoPorCodigo[cat.Codigo] = cat.Resuelta
-	}
-
 	patches := make([]patchCatedra, 0, len(oferta.Catedras))
 	for _, cat := range oferta.Catedras {
-		patches = append(patches, patchCatedra(cat))
+		patches = append(patches, patchCatedra{
+			catedra:     cat,
+			YaExistente: catedrasConEstado[cat.Codigo],
+		})
 	}
 
 	return patches, nil

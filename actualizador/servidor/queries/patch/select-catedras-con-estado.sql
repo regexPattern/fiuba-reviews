@@ -31,14 +31,14 @@ firmas_catedras_db AS (
         c.codigo
 )
 SELECT
-    cs.codigo_siu::int AS codigo_siu,
+    cs.codigo_siu::int AS codigo,
     EXISTS (
         SELECT
             1
         FROM
             firmas_catedras_db fdb
         WHERE
-            fdb.firma_docentes = cs.firma_docentes) AS resuelta
+            fdb.firma_docentes = cs.firma_docentes) AS ya_existente
 FROM
     catedras_siu cs;
 

@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func iniciarServidor(conn *pgx.Conn, addr string, patches map[string]patchMateria) error {
+func iniciarServidor(conn *pgx.Conn, addr string, patches map[string]*patchMateria) error {
 	http.HandleFunc("GET /", func(w http.ResponseWriter, _ *http.Request) {
 		slog.Info("get_patches_pendientes", "method", "GET", "path", "/")
 		handleGetPatchesPendientes(w, patches)
@@ -46,7 +46,7 @@ func iniciarServidor(conn *pgx.Conn, addr string, patches map[string]patchMateri
 	return http.ListenAndServe(addr, nil)
 }
 
-func handleGetPatchesPendientes(w http.ResponseWriter, patches map[string]patchMateria) {
+func handleGetPatchesPendientes(w http.ResponseWriter, patches map[string]*patchMateria) {
 	type patchRes struct {
 		Codigo   string `json:"codigo"`
 		Nombre   string `json:"nombre"`
@@ -85,7 +85,7 @@ func handleGetPatchMateria(
 	w http.ResponseWriter,
 	r *http.Request,
 	conn *pgx.Conn,
-	patches map[string]patchMateria,
+	patches map[string]*patchMateria,
 ) {
 	codigoMateria := r.PathValue("codigoMateria")
 	patch, ok := patches[codigoMateria]
@@ -113,7 +113,12 @@ func handleGetPatchMateria(
 		Codigo *string `json:"codigo"`
 	}
 
-	catedras := make([][]docenteCatedraRes, 0, len(patch.Catedras))
+	type catedraRes struct {
+		YaExistente bool                `json:"ya_existente"`
+		Docentes    []docenteCatedraRes `json:"docentes"`
+	}
+
+	catedras := make([]catedraRes, 0, len(patch.Catedras))
 	for _, cat := range patch.Catedras {
 		docentesCatedra := make([]docenteCatedraRes, 0, len(cat.Docentes))
 
@@ -128,21 +133,24 @@ func handleGetPatchMateria(
 			return strings.Compare(a.Nombre, b.Nombre)
 		})
 
-		catedras = append(catedras, docentesCatedra)
+		catedras = append(catedras, catedraRes{
+			YaExistente: cat.YaExistente,
+			Docentes:    docentesCatedra,
+		})
 	}
 
 	type patchMateriaRes struct {
 		materia
-		cuatrimestre       `                      json:"cuatrimestre"`
-		DocentesPendientes []patchDocente        `json:"docentes_pendientes"`
-		DocentesPorCatedra [][]docenteCatedraRes `json:"docentes_por_catedra"`
+		cuatrimestre       `json:"cuatrimestre"`
+		DocentesPendientes []patchDocente `json:"docentes_pendientes"`
+		Catedras           []catedraRes   `json:"catedras"`
 	}
 
 	res := patchMateriaRes{
 		materia:            patch.materia,
 		cuatrimestre:       patch.cuatrimestre,
 		DocentesPendientes: patch.Docentes,
-		DocentesPorCatedra: catedras,
+		Catedras:           catedras,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -164,7 +172,7 @@ func handleResolverMateria(
 	w http.ResponseWriter,
 	r *http.Request,
 	conn *pgx.Conn,
-	patches map[string]patchMateria,
+	patches map[string]*patchMateria,
 ) {
 	codigoMateria := r.PathValue("codigoMateria")
 	patch, ok := patches[codigoMateria]
@@ -191,7 +199,7 @@ func handleResolverMateria(
 		return
 	}
 
-	// delete(patches, codigoMateria)
+	delete(patches, codigoMateria)
 
 	w.WriteHeader(http.StatusNoContent)
 }
