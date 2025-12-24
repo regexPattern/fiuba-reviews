@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	_ "embed"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -12,18 +11,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/regexPattern/fiuba-reviews/actualizador/queries"
 )
-
-//go:embed queries/patch/INSERT-nuevo-docente.sql
-var crearNuevoDocenteQuery string
-
-//go:embed queries/patch/UPDATE-asociar-docente-existente.sql
-var asociarDocenteExistenteQuery string
-
-//go:embed queries/patch/UPDATE-desactivar-catedras-materia.sql
-var desactivarCatedrasMateriaQuery string
-
-//go:embed queries/patch/UPSERT-catedras-resueltas.sql
-var upsertCatedrasResueltasQuery string
 
 type patchMateria struct {
 	materia

@@ -23,7 +23,7 @@ func main() {
 	addr := net.JoinHostPort(host, port)
 
 	if err := run(dbUrl, addr); err != nil {
-		slog.Error("aplicacion_fallida", "error", err)
+		slog.Error("error_de_ejecucion", "error", err)
 		os.Exit(1)
 	}
 }

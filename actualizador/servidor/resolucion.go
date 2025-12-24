@@ -10,12 +10,8 @@ import (
 	"github.com/regexPattern/fiuba-reviews/actualizador/queries"
 )
 
-type resolucionMateria struct {
-	CodigosYaResueltos   []string                     `json:"codigos_ya_resueltos"`
-	ResolucionesDocentes map[string]resolucionDocente `json:"resoluciones"`
-}
-
-type resolucionDocente struct {
+type resolucion struct {
+	NombreSiu   string  `json:"nombre_siu"`
 	NombreDb    string  `json:"nombre_db"`
 	CodigoMatch *string `json:"codigo_match"`
 }
@@ -23,7 +19,7 @@ type resolucionDocente struct {
 func resolverMateria(
 	conn *pgx.Conn,
 	patch patchMateria,
-	resolucion resolucionMateria,
+	resoluciones []resolucion,
 ) error {
 	tx, err := conn.Begin(context.TODO())
 	if err != nil {
@@ -31,33 +27,80 @@ func resolverMateria(
 	}
 	defer func() { _ = tx.Rollback(context.TODO()) }()
 
-	codigosResueltos := make(
-		[]string,
-		0,
-		len(resolucion.CodigosYaResueltos)+len(resolucion.ResolucionesDocentes),
-	)
+	var codigosUpdate, nombresSiuUpdate, nombresDbUpdate []string
+	var nombresSiuInsert, nombresDbInsert []string
 
-	codigosResueltos = append(codigosResueltos, resolucion.CodigosYaResueltos...)
-
-	for nombreSiu, res := range resolucion.ResolucionesDocentes {
-		var codigo string
-		var err error
-
-		if res.CodigoMatch == nil {
-			codigo, err = crearNuevoDocente(tx, patch.Codigo, nombreSiu, res.NombreDb)
+	for _, res := range resoluciones {
+		if res.CodigoMatch != nil {
+			codigosUpdate = append(codigosUpdate, *res.CodigoMatch)
+			nombresSiuUpdate = append(nombresSiuUpdate, res.NombreSiu)
+			nombresDbUpdate = append(nombresDbUpdate, res.NombreDb)
 		} else {
-			codigo, err = asociarDocenteExistente(tx, patch.Codigo, *res.CodigoMatch, nombreSiu, res.NombreDb)
+			nombresSiuInsert = append(nombresSiuInsert, res.NombreSiu)
+			nombresDbInsert = append(nombresDbInsert, res.NombreDb)
 		}
-
-		if err != nil {
-			return err
-		}
-
-		codigosResueltos = append(codigosResueltos, codigo)
 	}
 
-	if err := sincronizarCatedras(tx, patch.Codigo, patch.Catedras, codigosResueltos); err != nil {
-		return err
+	fmt.Println("codigo_update", codigosUpdate)
+	fmt.Println("nombre_update_(siu)_(db)", nombresSiuUpdate, nombresDbUpdate)
+	fmt.Println("nombres_insert_(siu)_(db)", nombresSiuInsert, nombresDbInsert)
+
+	if len(codigosUpdate) > 0 {
+		_, err := tx.Exec(
+			context.TODO(),
+			queries.UpdateDocentes,
+			codigosUpdate,
+			nombresSiuUpdate,
+			nombresDbUpdate,
+		)
+		if err != nil {
+			return fmt.Errorf("error actualizando docentes existentes: %w", err)
+		}
+	}
+
+	if len(nombresSiuInsert) > 0 {
+		_, err := tx.Exec(
+			context.TODO(),
+			queries.InsertDocentes,
+			patch.Codigo,
+			nombresSiuInsert,
+			nombresDbInsert,
+		)
+		if err != nil {
+			return fmt.Errorf("error insertando docentes nuevos: %w", err)
+		}
+	}
+
+	slog.Debug(
+		"materia_resuelta",
+		slog.Group(
+			"docentes",
+			"actualizados",
+			len(codigosUpdate),
+			"creados",
+			len(nombresSiuInsert),
+		),
+	)
+
+	catedrasJson, err := json.Marshal(patch.Catedras)
+	_ = catedrasJson
+	if err != nil {
+		return fmt.Errorf("error serializando cátedras: %w", err)
+	}
+
+	// row := tx.QueryRow(context.TODO(), queries.UpsertCatedras, patch.Codigo,
+	// string(catedrasJson))
+
+	var catedrasActivadas, catedrasCreadas int
+	// if err := row.Scan(&catedrasActivadas, &catedrasCreadas); err != nil {
+	// 	return fmt.Errorf("error sincronizando cátedras: %w", err)
+	// }
+
+	if catedrasActivadas > 0 || catedrasCreadas > 0 {
+		slog.Info("catedras_actualizadas",
+			"codigo_materia", patch.Codigo,
+			"activadas", catedrasActivadas,
+			"creadas", catedrasCreadas)
 	}
 
 	if err := tx.Commit(context.TODO()); err != nil {
@@ -116,114 +159,4 @@ func getDocentesConEstadoPorCatedra(
 	}
 
 	return docentesPorCatedra, nil
-}
-
-func crearNuevoDocente(
-	tx pgx.Tx,
-	codigoMateria string,
-	nombreSiu string,
-	nombreDb string,
-) (string, error) {
-	var codigo string
-	err := tx.QueryRow(
-		context.TODO(),
-		crearNuevoDocenteQuery,
-		nombreDb,
-		codigoMateria,
-		nombreSiu,
-	).Scan(&codigo)
-	if err != nil {
-		return "", fmt.Errorf("error creando nuevo docente: %w", err)
-	}
-
-	slog.Debug(
-		"docente_nuevo_creado",
-		"nombre_siu",
-		nombreSiu,
-		"nombre_db",
-		nombreDb,
-		"codigo_materia",
-		codigoMateria,
-		"codigo_docente",
-		codigo,
-	)
-
-	return codigo, nil
-}
-
-func asociarDocenteExistente(
-	tx pgx.Tx,
-	codigoMateria string,
-	codigoDocente string,
-	nombreSiu string,
-	nombreDb string,
-) (string, error) {
-	_, err := tx.Exec(
-		context.TODO(),
-		asociarDocenteExistenteQuery,
-		nombreDb,
-		nombreSiu,
-		codigoDocente,
-	)
-	if err != nil {
-		return "", fmt.Errorf("error asociando docente existente: %w", err)
-	}
-
-	slog.Debug(
-		"docente_existente_asociado",
-		"nombre_siu",
-		nombreSiu,
-		"nombre_db",
-		nombreDb,
-		"codigo_materia",
-		codigoMateria,
-	)
-
-	return codigoDocente, nil
-}
-
-func sincronizarCatedras(
-	tx pgx.Tx,
-	codigoMateria string,
-	catedras []patchCatedra,
-	codigosResueltos []string,
-) error {
-	_, err := tx.Exec(context.TODO(), desactivarCatedrasMateriaQuery, codigoMateria)
-	if err != nil {
-		return fmt.Errorf("error desactivando cátedras de materia %v: %w", codigoMateria, err)
-	}
-
-	catedrasJson, err := json.Marshal(catedras)
-	if err != nil {
-		return fmt.Errorf("error serializando cátedras: %w", err)
-	}
-
-	codigosJson, err := json.Marshal(codigosResueltos)
-	if err != nil {
-		return fmt.Errorf("error serializando códigos resueltos: %w", err)
-	}
-
-	var catedrasActivadas, catedrasCreadas int
-	err = tx.QueryRow(
-		context.TODO(),
-		upsertCatedrasResueltasQuery,
-		codigoMateria,
-		string(catedrasJson),
-		string(codigosJson),
-	).Scan(&catedrasActivadas, &catedrasCreadas)
-	if err != nil {
-		return fmt.Errorf("error sincronizando cátedras de materia %v: %w", codigoMateria, err)
-	}
-
-	slog.Debug(
-		"catedras_sincronizadas",
-		"codigo_materia",
-		codigoMateria,
-		"activadas",
-		catedrasActivadas,
-		"creadas",
-		catedrasCreadas,
-	)
-
-	return nil
 }

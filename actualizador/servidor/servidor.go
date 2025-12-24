@@ -178,7 +178,7 @@ func handleResolverMateria(
 		return
 	}
 
-	var res resolucionMateria
+	var res []resolucion
 	if err := json.NewDecoder(r.Body).Decode(&res); err != nil {
 		slog.Error("decode_resolucion_failed", "codigo_materia", codigoMateria, "error", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -191,7 +191,7 @@ func handleResolverMateria(
 		return
 	}
 
-	delete(patches, codigoMateria)
+	// delete(patches, codigoMateria)
 
 	w.WriteHeader(http.StatusNoContent)
 }

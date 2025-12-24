@@ -23,14 +23,12 @@ var CatedrasConEstado string
 //go:embed patch/select-docentes-con-estado.sql
 var DocentesConEstado string
 
-//go:embed patch/INSERT-nuevo-docente.sql
-var crearNuevoDocenteQuery string
+//go:embed resolucion/update-docentes-existentes.sql
+var UpdateDocentes string
 
-//go:embed patch/UPDATE-asociar-docente-existente.sql
-var asociarDocenteExistenteQuery string
+//go:embed resolucion/insert-docentes-nuevos.sql
+var InsertDocentes string
 
-//go:embed patch/UPDATE-desactivar-catedras-materia.sql
-var desactivarCatedrasMateriaQuery string
+//go:embed resolucion/upsert-catedras.sql
+var UpsertCatedras string
 
-//go:embed patch/UPSERT-catedras-resueltas.sql
-var upsertCatedrasResueltasQuery string
