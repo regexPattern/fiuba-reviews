@@ -32,3 +32,5 @@ var InsertDocentes string
 //go:embed resolucion/upsert-catedras.sql
 var UpsertCatedras string
 
+//go:embed resolucion/update-cuatrimestre-ultima-actualizacion.sql
+var UpdateCuatrimestreUltimaActualizacion string

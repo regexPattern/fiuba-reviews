@@ -16,3 +16,4 @@ FROM
         rol)
 WHERE
     docente.codigo = u.codigo;
+

@@ -85,6 +85,17 @@ func resolverMateria(
 		return fmt.Errorf("error sincronizando cátedras: %w", err)
 	}
 
+	_, err = tx.Exec(
+		context.TODO(),
+		queries.UpdateCuatrimestreUltimaActualizacion,
+		patch.Codigo,
+		patch.Numero,
+		patch.Anio,
+	)
+	if err != nil {
+		return fmt.Errorf("error actualizando cuatrimestre de última actualización: %w", err)
+	}
+
 	if err := tx.Commit(context.TODO()); err != nil {
 		return fmt.Errorf("error confirmando transacción: %w", err)
 	}

@@ -315,11 +315,6 @@ func newPatchesCatedras(conn *pgx.Conn, oferta ofertaMateriaMasReciente) ([]patc
 	}
 	defer rows.Close()
 
-	type catedraConEstadoRow struct {
-		Codigo   int  `db:"codigo"`
-		Resuelta bool `db:"bool"`
-	}
-
 	var codigo int
 	var yaExistente bool
 
