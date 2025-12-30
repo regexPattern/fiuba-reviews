@@ -2,7 +2,7 @@ import { BACKEND_URL } from "$env/static/private";
 import type { PatchMateria } from "$lib";
 import type { PageServerLoad } from "./$types";
 import type { Actions } from "./$types";
-import { error } from "@sveltejs/kit";
+import { error, redirect } from "@sveltejs/kit";
 
 export const load: PageServerLoad = async ({ params }) => {
 	const res = await fetch(`${BACKEND_URL}/${params.codigoMateria}`);
@@ -10,8 +10,6 @@ export const load: PageServerLoad = async ({ params }) => {
 	if (res.status >= 400) {
 		const errMsg = await res.text();
 		error(res.status, { message: errMsg });
-	} else if (res.status === 204) {
-		return {};
 	}
 
 	const patch = (await res.json()) as PatchMateria;
@@ -56,12 +54,17 @@ export const actions = {
 			}))
 		);
 
-		await fetch(`${BACKEND_URL}/${params.codigoMateria}`, {
+		const res = await fetch(`${BACKEND_URL}/${params.codigoMateria}`, {
 			method: "PATCH",
 			headers: { "Content-Type": "application/json" },
 			body
 		});
 
-		return { success: true };
+		if (res.status >= 400) {
+			const errMsg = await res.text();
+			error(res.status, { message: errMsg });
+		}
+
+		redirect(303, "/success");
 	}
 } satisfies Actions;

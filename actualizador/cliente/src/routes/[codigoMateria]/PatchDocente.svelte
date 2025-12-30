@@ -1,9 +1,6 @@
 <script lang="ts">
 	import type { PatchDocente } from "$lib";
-	import * as Card from "$lib/components/ui/card";
-	import { Input } from "$lib/components/ui/input";
-	import { Label } from "$lib/components/ui/label";
-	import * as RadioGroup from "$lib/components/ui/radio-group";
+	import { Label, RadioGroup } from "bits-ui";
 
 	interface Props {
 		docente: PatchDocente;
@@ -27,7 +24,6 @@
 		return primerNombre.charAt(0).toUpperCase() + primerNombre.slice(1);
 	});
 
-	// La lib de UI no permite configurar el valor como undefined manualmente.
 	let codigoMatch = $state("");
 
 	let resolucionJSON = $derived(
@@ -50,50 +46,57 @@
 	});
 </script>
 
-<Card.Root>
-	<Card.Header>
-		<Card.Title>
-			{docente.nombre}
-		</Card.Title>
-		<Card.Description>
-			({docente.rol})
-		</Card.Description>
-	</Card.Header>
-	<Card.Content class="space-y-5">
+<div class="space-y-4 rounded-xl border bg-card p-4">
+	<div class="flex flex-col">
+		<span class="text-lg font-semibold">{docente.nombre}</span>
+		<span class="text-sm text-muted-foreground">({docente.rol})</span>
+	</div>
+	<div class="">
+		<Label.Root for={`${nombreDb}_nombre`} class="text-sm text-muted-foreground">
+			Nombre a mostrar
+		</Label.Root>
+		<input
+			id={`${nombreDb}_nombre`}
+			bind:value={nombreDb}
+			class="border-border-input w-full rounded-md border bg-background px-2 py-1"
+		/>
+	</div>
+	<div class="space-y-2">
+		<Label.Root for={`${nombreDb}_match`} class="text-sm text-muted-foreground"
+			>Matches propuestos</Label.Root
+		>
 		<div class="space-y-2">
-			<Label>Nombre a mostrar</Label>
-			<Input bind:value={nombreDb} />
-		</div>
-		<div class="space-y-2">
-			<Label>Matches propuestos</Label>
-			<div class="space-y-2">
-				<RadioGroup.Root bind:value={codigoMatch}>
-					{#each docente.matches as match (match.codigo)}
-						{@const id = `${docente.nombre}-${match.codigo}`}
-						{@const currMatch = matchesYaAsignados.get(match.codigo)}
+			<RadioGroup.Root id={`${nombreDb}_match`} bind:value={codigoMatch}>
+				{#each docente.matches as match (match.codigo)}
+					{@const id = `${docente.nombre}-${match.codigo}`}
+					{@const currMatch = matchesYaAsignados.get(match.codigo)}
 
-						<div class="flex gap-1.5">
-							<RadioGroup.Item
-								{id}
-								value={match.codigo}
-								disabled={currMatch !== undefined && currMatch !== docente.nombre}
-							/>
-							<Label for={id}
-								>{match.nombre}
-								<span class="text-muted-foreground">(similitud {match.score.toFixed(2)})</span
-								></Label
+					<div class="flex gap-1.5">
+						<RadioGroup.Item
+							{id}
+							value={match.codigo}
+							disabled={currMatch !== undefined && currMatch !== docente.nombre}
+							class="border-border-input hover:border-dark-40 size-5 shrink-0 cursor-default rounded-full border bg-background transition-all duration-100 ease-in-out data-[state=checked]:border-6 data-[state=checked]:border-foreground"
+						/>
+						<label for={id}>
+							{match.nombre}
+							<span class="text-sm text-muted-foreground">(similitud {match.score.toFixed(2)})</span
 							>
-						</div>
-					{/each}
-
-					<div class="flex gap-1">
-						<RadioGroup.Item id={`${docente.nombre}-__CREATE__`} value={"__CREATE__"} />
-						<Label for={`${docente.nombre}-__CREATE__`}>Registrar nuevo docente</Label>
+						</label>
 					</div>
-				</RadioGroup.Root>
-			</div>
+				{/each}
+
+				<div class="flex items-center gap-1.5">
+					<RadioGroup.Item
+						id={`${docente.nombre}-__CREATE__`}
+						value={"__CREATE__"}
+						class="border-border-input hover:border-dark-40 size-5 shrink-0 cursor-default rounded-full border bg-background transition-all duration-100 ease-in-out data-[state=checked]:border-6 data-[state=checked]:border-foreground"
+					/>
+					<Label.Root for={`${docente.nombre}-__CREATE__`}>Registrar nuevo docente</Label.Root>
+				</div>
+			</RadioGroup.Root>
 		</div>
-	</Card.Content>
-</Card.Root>
+	</div>
+</div>
 
 <input type="hidden" name={`${docente.nombre}`} value={resolucionJSON} />

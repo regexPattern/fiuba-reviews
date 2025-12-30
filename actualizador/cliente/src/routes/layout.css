@@ -1,13 +1,19 @@
 @import "tailwindcss";
 
-@import "tw-animate-css";
-
-@custom-variant dark (&:is(.dark *));
+body {
+	font-family: "Inter Variable", sans-serif;
+}
 
 :root {
-	--radius: 0.625rem;
 	--background: oklch(0.145 0 0);
 	--foreground: oklch(0.985 0 0);
+	--border: oklch(1 0 0 / 10%);
+	--primary: oklch(0.6 0.141 242);
+	--primary-foreground: oklch(0.205 0 0);
+	--secondary: oklch(0.269 0 0);
+	--secondary-foreground: oklch(0.985 0 0);
+
+	--radius: 0.625rem;
 	--card: oklch(0.205 0 0);
 	--card-foreground: oklch(0.985 0 0);
 	--popover: oklch(0.205 0 0);
