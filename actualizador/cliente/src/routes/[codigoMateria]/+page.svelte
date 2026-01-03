@@ -3,8 +3,8 @@
 	import type { PageProps } from "./$types";
 	import PatchCatedra from "./PatchCatedra.svelte";
 	import PatchDocente from "./PatchDocente.svelte";
-	import { ChevronRight } from "@lucide/svelte";
-	import { Button, ScrollArea } from "bits-ui";
+	import { ChevronRight, TriangleAlert } from "@lucide/svelte";
+	import { Button, ScrollArea, Tooltip } from "bits-ui";
 	import { SvelteMap } from "svelte/reactivity";
 
 	let { data }: PageProps = $props();
@@ -20,6 +20,25 @@
 	});
 
 	let matchesYaAsignados = $state(new SvelteMap<string, string>());
+
+	let posibleErrorScraper = $state.raw(
+		(() => {
+			const map: Record<string, number> = {};
+			for (const catedra of data.patch.catedras) {
+				for (const docente of catedra.docentes) {
+					const n = map[docente.nombre];
+					if (!n) {
+						map[docente.nombre] = 1;
+					} else if (n === 2) {
+						return true;
+					} else {
+						map[docente.nombre]++;
+					}
+				}
+			}
+			return false;
+		})()
+	);
 </script>
 
 <form method="POST" use:enhance>
@@ -34,7 +53,7 @@
 			<Button.Root
 				type="submit"
 				disabled={resoluciones.values().some((x) => x === "")}
-				class="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background ring-primary hover:bg-foreground/95 focus:ring-2 active:scale-[0.98] active:transition-all disabled:bg-foreground/50 disabled:active:scale-[1]"
+				class="rounded-md border border-[#33b5f9] bg-primary/85 px-4 py-2 text-sm transition-all hover:bg-primary focus:ring-2 active:bg-primary disabled:border-border disabled:bg-card disabled:text-muted-foreground"
 			>
 				Aplicar cambios
 			</Button.Root>
@@ -75,7 +94,24 @@
 		</section>
 
 		<section class="flex h-[calc(100vh-6rem)] flex-1 flex-col">
-			<h2 class="border-b p-4 text-2xl font-medium tracking-tight">Cátedras</h2>
+			<div class="flex items-center justify-between border-b p-4">
+				<h2 class="text-2xl font-medium tracking-tight">Cátedras</h2>
+				{#if posibleErrorScraper}
+					<Tooltip.Provider>
+						<Tooltip.Root>
+							<Tooltip.Trigger>
+								<TriangleAlert class="size-[20px] text-yellow-500" />
+							</Tooltip.Trigger>
+							<Tooltip.Content
+								side="left"
+								class="border-border-input mr-2 rounded-lg border bg-card px-3 py-1.5 text-yellow-500"
+							>
+								Materia tiene posible error en el scraper.
+							</Tooltip.Content>
+						</Tooltip.Root>
+					</Tooltip.Provider>
+				{/if}
+			</div>
 
 			<div class="flex-1 overflow-hidden">
 				<ScrollArea.Root class="h-full">
