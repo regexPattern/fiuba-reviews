@@ -10,6 +10,12 @@ import (
 	"github.com/regexPattern/fiuba-reviews/actualizador/queries"
 )
 
+// sincronizarMaterias sincroniza los códigos de la materia en la base de datos con los códigos
+// oficiales obtenidos del SIU.
+//
+// Luego de la primera ejecución realmente deberían ser pocas o ninguna las materias que tengan
+// que sincronizarse, salvo aquellas que no esten presentes del todo en los planes disponibles
+// al momento de la ejecución y si aparezcan en ejecuciones posteriores.
 func sincronizarMaterias(conn *pgx.Conn, codigos, nombres []string) error {
 	tx, err := conn.Begin(context.TODO())
 	if err != nil {
@@ -64,6 +70,8 @@ func sincronizarMaterias(conn *pgx.Conn, codigos, nombres []string) error {
 	return nil
 }
 
+// checkMateriasNoRegistradas imprime una alerta por cada materia proveniente del SIU que no está
+// registrada en la base de datos.
 func checkMateriasNoRegistradas(conn *pgx.Conn, codigos, nombres []string) error {
 	rows, err := conn.Query(
 		context.TODO(),

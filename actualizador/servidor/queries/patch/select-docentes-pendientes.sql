@@ -1,10 +1,12 @@
 -- DESCRIPCIÓN
 -- Retorna los docentes del SIU que no están resueltos y sus posibles
--- matches. Una match de un docente es una propuesta de qué docente ya
--- registrado en la base de datos puede corresponder a dicho docente del
--- SIU. Para determinar esto se buscan coincidencias exactas por
--- nombre_siu, luego para los restantes busca posibles matches con
--- docentes sin nombre_siu usando similitud de palabras (fuzzy match).
+-- matches.
+--
+-- Una match de un docente es una propuesta de qué docente ya registrado
+-- en la base de datos puede corresponder a dicho docente del SIU. Para
+-- determinar esto se buscan coincidencias exactas por nombre_siu, luego
+-- para los restantes busca posibles matches con docentes sin nombre_siu
+-- usando similitud de palabras (fuzzy match).
 --
 -- Un docente del SIU podría no tener matches (se considera que en este
 -- caso se trata de un docente no registra), o uno o varios matches. En

@@ -1,8 +1,10 @@
 -- DESCRIPCIÓN
--- Retorna todas las cátedras del SIU de una materia con su estado de resolución.
--- Una cátedra está resuelta si ya existe una cátedra en la base de datos que
--- tenga el mismo nombre que una cátedra del SIU. Para hacer esta comparación
--- se concatenan (y normalizan) los nombres de los docentes de una cátedra.
+-- Retorna todas las cátedras del SIU de una materia con su estado (ya
+-- existe o no existe).
+--
+-- Una cátedra del SIU ya existe en la base de datos si existe una cátedra que
+-- tenga el mismo nombre o firma. La firma de una cátedra es la concatenación
+-- de los nombres (normalizados) de los docentes de la cátedra.
 --
 -- PARÁMETROS
 -- $1: Código de la materia.

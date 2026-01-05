@@ -1,5 +1,16 @@
--- Parámetros
--- $1: Arreglo de strings con los codigos de las materias del SIU.
+-- DESCRIPCIÓN
+-- Toma un listado de códigos de las materias del SIU y retorna el código
+-- y el nombre de aquellas que son candidatas a actualización.
+--
+-- Una materia es candidata a actualización si el cuatrimestre de última
+-- actualización de la misma es anterior al cuatrimestre más reciente
+-- disponible. Esto no significa que si o si haya una actualización
+-- disponible para la materia, sino que simplemente esto aún no se ha
+-- verificado para el último cuatrimestre.
+--
+-- PARÁMETROS
+-- $1: Arreglo de strings con los códigos de las materias del SIU.
+--
 SELECT DISTINCT
     mat.codigo,
     mat.nombre

@@ -20,7 +20,10 @@ var DocentesPendientes string
 //go:embed patch/select-catedras-con-estado.sql
 var CatedrasConEstado string
 
-//go:embed patch/select-docentes-con-estado.sql
+//go:embed patch/marcar-materia-sin-cambios.sql
+var MarcarMateriaSinCambios string
+
+//go:embed resolucion/select-docentes-con-estado.sql
 var DocentesConEstado string
 
 //go:embed resolucion/update-docentes-existentes.sql

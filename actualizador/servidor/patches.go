@@ -15,7 +15,7 @@ import (
 type patchMateria struct {
 	materia
 	Carrera      string `json:"carrera"`
-	cuatrimestre `json:"cuatrimestre"`
+	cuatrimestre `               json:"cuatrimestre"`
 	Docentes     []patchDocente `json:"docentes"`
 	Catedras     []patchCatedra `json:"catedras"`
 }
@@ -36,6 +36,10 @@ type patchCatedra struct {
 	YaExistente bool `json:"ya_existente"`
 }
 
+// getPatchesMaterias descarga las ofertas de comisiones del SIU disponibles, sincroniza las
+// materias en la base de datos con los datos del SIU y retorna un hashmap donde la clave es el
+// código de una materia y el valor es el patch de actualización de la misma. Solo se incluyen las
+// materias que tienen actualización disponible.
 func getPatchesMaterias(conn *pgx.Conn) (map[string]*patchMateria, error) {
 	ofertas, err := newOfertasMaterias(conn)
 	if err != nil {
@@ -52,6 +56,9 @@ func getPatchesMaterias(conn *pgx.Conn) (map[string]*patchMateria, error) {
 		codigosMaterias = append(codigosMaterias, codMat)
 		nombresMaterias = append(nombresMaterias, ofMat.Nombre)
 	}
+
+	// Se tienen que sincronizar las materias antes de generar los patches de actualización para
+	// armar los patches ya con los códigos oficiales.
 
 	if err := sincronizarMaterias(conn, codigosMaterias, nombresMaterias); err != nil {
 		return nil, fmt.Errorf(
@@ -71,6 +78,9 @@ func getPatchesMaterias(conn *pgx.Conn) (map[string]*patchMateria, error) {
 	return patches, nil
 }
 
+// newPatchesMaterias retorna un hashmap donde la clave es el código de una materia y el valor es
+// el patch de actualización de la misma. Solo se incluyen las materias que tienen actualización
+// disponible.
 func newPatchesMaterias(
 	conn *pgx.Conn,
 	codigosMaterias []string,
@@ -104,7 +114,14 @@ func newPatchesMaterias(
 				mat.Codigo,
 				err,
 			)
-		} else if pat != nil {
+		} else if pat == nil {
+			if err := marcarMateriaSinCambios(conn, oferta); err != nil {
+				return nil, fmt.Errorf("error marcando materia sin cambios: %w", err)
+			}
+		} else {
+			patches[pat.Codigo] = pat
+
+			// Estadísticas
 			totalDocentes += len(pat.Docentes)
 			totalCatedras += len(pat.Catedras)
 			for _, doc := range pat.Docentes {
@@ -113,21 +130,32 @@ func newPatchesMaterias(
 				}
 			}
 			catedrasNuevas += len(pat.Catedras)
-			patches[pat.Codigo] = pat
 		}
 	}
 
-	slog.Info("materias_actualizacion_disponible", "count", len(patches))
+	slog.Info(
+		"materias_actualizacion_disponible",
+		"con_cambios",
+		len(patches),
+		"sin_cambios",
+		len(materiasCandidatas)-len(patches),
+	)
 
 	return patches, nil
 }
 
+// newPatchMateria retorna un puntero al patch de actualización de una materia o nil en caso de que
+// no haya cambios nuevos que hacer. Una materia tiene cambios disponibles si hay docentes del SIU
+// que no están registrados en la base de datos o si hay cátedras nuevas. TODO
 func newPatchMateria(
 	conn *pgx.Conn,
 	oferta ofertaMateriaMasReciente,
 ) (*patchMateria, error) {
 	catedrasFiltradas := make([]catedra, 0, len(oferta.Catedras))
 	var catedrasDescartadas int
+
+	// Se filtran las cátedras que tienen docentes con nombres vacios. Esto es producto de
+	// errores en el scraper.
 
 	for _, cat := range oferta.Catedras {
 		tieneDocenteVacio := false
@@ -156,10 +184,9 @@ func newPatchMateria(
 		)
 	}
 
-	ofertaFiltrada := oferta
-	ofertaFiltrada.Catedras = catedrasFiltradas
+	oferta.Catedras = catedrasFiltradas
 
-	patchesDocentes, err := newPatchesDocentes(conn, ofertaFiltrada)
+	patchesDocentes, err := newPatchesDocentes(conn, oferta)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"error generando patches de actualización de docentes de materia %v: %w",
@@ -168,7 +195,7 @@ func newPatchMateria(
 		)
 	}
 
-	patchesCatedras, err := newPatchesCatedras(conn, ofertaFiltrada)
+	patchesCatedras, err := newPatchesCatedras(conn, oferta)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"error generando patches de actualización de cátedras de materia %v: %w",
@@ -178,7 +205,6 @@ func newPatchMateria(
 	}
 
 	if len(patchesDocentes) == 0 && len(patchesCatedras) == 0 {
-		slog.Debug("materia_sin_cambios", "codigo_materia", oferta.Codigo)
 		return nil, nil
 	}
 
@@ -223,14 +249,17 @@ func newPatchMateria(
 	)
 
 	return &patchMateria{
-		materia:      ofertaFiltrada.materia,
-		Carrera:      ofertaFiltrada.NombreCarrera,
-		cuatrimestre: ofertaFiltrada.cuatrimestre,
+		materia:      oferta.materia,
+		Carrera:      oferta.NombreCarrera,
+		cuatrimestre: oferta.cuatrimestre,
 		Docentes:     patchesDocentes,
 		Catedras:     patchesCatedras,
 	}, nil
 }
 
+// newPatchesDocentes retorna un arreglo de patches de actualización para los docentes de la
+// materia. En caso de que este arreglo esté vacio, significa que no hay docentes nuevos del SIU
+// que deban ser registrados en la base de datos.
 func newPatchesDocentes(conn *pgx.Conn, oferta ofertaMateriaMasReciente) ([]patchDocente, error) {
 	docentesUnicos := make(map[string]docente)
 	for _, cat := range oferta.Catedras {
@@ -294,6 +323,9 @@ func newPatchesDocentes(conn *pgx.Conn, oferta ofertaMateriaMasReciente) ([]patc
 	return patches, nil
 }
 
+// newPatchesCatedras retorna un arreglo de patches de actualización para lás cátedras de la
+// materia. En caso de que este arreglo esté vacio, significa que no hay cátedras nuevas del SIU
+// que deban ser registradas en la base de datos.
 func newPatchesCatedras(conn *pgx.Conn, oferta ofertaMateriaMasReciente) ([]patchCatedra, error) {
 	catedrasJson, err := json.Marshal(oferta.Catedras)
 	if err != nil {
@@ -332,6 +364,25 @@ func newPatchesCatedras(conn *pgx.Conn, oferta ofertaMateriaMasReciente) ([]patc
 		)
 	}
 
+	todasExisten := true
+	for _, yaExistente := range catedrasConEstado {
+		if !yaExistente {
+			todasExisten = false
+			break
+		}
+	}
+
+	if todasExisten {
+		slog.Debug(
+			"sin_catedras_nuevas",
+			"count",
+			len(catedrasConEstado),
+			"codigo_materia",
+			oferta.Codigo,
+		)
+		return nil, nil
+	}
+
 	patches := make([]patchCatedra, 0, len(oferta.Catedras))
 	for _, cat := range oferta.Catedras {
 		patches = append(patches, patchCatedra{
@@ -341,4 +392,34 @@ func newPatchesCatedras(conn *pgx.Conn, oferta ofertaMateriaMasReciente) ([]patc
 	}
 
 	return patches, nil
+}
+
+// marcarMateriaSinCambios toma la oferta de una materia sin cambios (con patch de actualización
+// nil) y actualiza el cuatrimestre de última actualización en la base de datos para indicar que
+// aunque no haya cambios, esta información si corresponde al cuatrimestre de actualización.
+//
+// Por ejemplo, si una materia fue actualizada por última vez en 1C2025, y existe una oferta más
+// reciente de 2C2025, pero sin cambios, igualmente se considera que la materia fue actualizada por
+// última vez durante 2C2025, por lo tanto, se tiene que actualizar este valor.
+func marcarMateriaSinCambios(conn *pgx.Conn, oferta ofertaMateriaMasReciente) error {
+	_, err := conn.Exec(
+		context.TODO(),
+		queries.MarcarMateriaSinCambios,
+		oferta.Codigo,
+		oferta.Numero,
+		oferta.Anio,
+	)
+	if err != nil {
+		return fmt.Errorf("error actualizando cuatrimestre de última actualización: %w", err)
+	}
+
+	slog.Debug(
+		"materia_sin_cambios",
+		"codigo_materia",
+		oferta.Codigo,
+		"cuatrimestre",
+		oferta.cuatrimestre,
+	)
+
+	return nil
 }

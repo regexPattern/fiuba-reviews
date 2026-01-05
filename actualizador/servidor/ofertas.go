@@ -5,6 +5,9 @@ import (
 	_ "embed"
 	"fmt"
 	"log/slog"
+	"maps"
+	"slices"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/regexPattern/fiuba-reviews/actualizador/queries"
@@ -48,6 +51,9 @@ type ofertaMateriaMasReciente struct {
 	cuatrimestre
 }
 
+// newOfertasMaterias obtiene las ofertas de comisiones del SIU desde la base de datos y retorna un
+// hashmap donde la clave son los códigos de las materias encontradas y los valores las ofertas de
+// comisiones más recientes de las mismas.
 func newOfertasMaterias(conn *pgx.Conn) (map[string]ofertaMateriaMasReciente, error) {
 	rows, err := conn.Query(context.TODO(), queries.OfertasCarreras)
 	if err != nil {
@@ -74,10 +80,6 @@ func newOfertasMaterias(conn *pgx.Conn) (map[string]ofertaMateriaMasReciente, er
 			logger := slog.Default().
 				With("codigo_materia", ofMat.Codigo, "carrera", ofCarr.NombreCarrera, "cuatrimestre", ofCarr.Cuatrimestre)
 
-			// Si la oferta de la materia no tiene cátedras o solo tiene cátedras sin docentes, no
-			// se agregan a listado de ofertas disponibles. Lo más probable es que haya sido
-			// producto de un error con el parser de ofertas.
-
 			if len(ofMat.Catedras) == 0 {
 				logger.Warn("oferta_materia_sin_catedras")
 				continue
@@ -98,6 +100,33 @@ func newOfertasMaterias(conn *pgx.Conn) (map[string]ofertaMateriaMasReciente, er
 			}
 
 			if _, ok := ofertasMaterias[ofMat.Codigo]; !ok {
+				// Filtramos las cátedras únicas de una oferta. Esto se debe a que hay situaciones
+				// en las que se le asignan múltiples comisiones a una misma cátedra (un mismo
+				// grupo de docentes), por ejemplo, cuando hay cursos en diferentes horarios, como
+				// sucede en sistemas operativos, donde hay un turno los martes y otro los
+				// miércoles, pero la cátedra es la misma.
+
+				catedrasUnicas := make(map[string]catedra, len(ofMat.Catedras))
+
+				for _, cat := range ofMat.Catedras {
+					nombresDocentes := make([]string, 0, len(cat.Docentes))
+
+					for _, doc := range cat.Docentes {
+						nombresDocentes = append(nombresDocentes, doc.Nombre)
+					}
+
+					slices.Sort(nombresDocentes)
+					nombreCatedra := strings.Join(nombresDocentes, "-")
+
+					if _, ok := catedrasUnicas[nombreCatedra]; !ok {
+						catedrasUnicas[nombreCatedra] = cat
+					} else {
+						logger.Warn("oferta_con_catedra_duplicada")
+					}
+				}
+
+				ofMat.Catedras = slices.Collect(maps.Values(catedrasUnicas))
+
 				ofertasMaterias[ofMat.Codigo] = ofertaMateriaMasReciente{
 					NombreCarrera: ofCarr.NombreCarrera,
 					ofertaMateria: ofMat,
@@ -105,6 +134,8 @@ func newOfertasMaterias(conn *pgx.Conn) (map[string]ofertaMateriaMasReciente, er
 				}
 
 				materiasPorCuatri[ofCarr.Cuatrimestre]++
+			} else {
+				logger.Warn("oferta_materia_ya_existente")
 			}
 		}
 	}
