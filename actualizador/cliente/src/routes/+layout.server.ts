@@ -10,5 +10,8 @@ type PatchMateria = {
 export const load: LayoutServerLoad = async () => {
 	const res = await fetch(`${BACKEND_URL}/`);
 	const patches = (await res.json()) as PatchMateria[];
+
+	patches.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
 	return { patches };
 };

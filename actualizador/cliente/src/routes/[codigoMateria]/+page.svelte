@@ -21,7 +21,7 @@
 
 	let matchesYaAsignados = $state(new SvelteMap<string, string>());
 
-	let posibleErrorScraper = $state.raw(
+	let posibleErrorScraper = $derived(
 		(() => {
 			const map: Record<string, number> = {};
 			for (const catedra of data.patch.catedras) {
@@ -104,7 +104,7 @@
 							</Tooltip.Trigger>
 							<Tooltip.Content
 								side="left"
-								class="border-border-input mr-2 rounded-lg border bg-card px-3 py-1.5 text-yellow-500"
+								class="border-border-input mr-2 rounded-lg border bg-card px-3 py-1.5 text-sm text-yellow-500"
 							>
 								Materia tiene posible error en el scraper.
 							</Tooltip.Content>

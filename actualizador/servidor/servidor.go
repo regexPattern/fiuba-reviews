@@ -63,19 +63,6 @@ func handleGetPatchesPendientes(w http.ResponseWriter, patches map[string]*patch
 		}
 	}
 
-	slices.SortFunc(patchesRes, func(a, b patchRes) int {
-		if a.Docentes != b.Docentes {
-			return b.Docentes - a.Docentes
-		}
-		if a.Codigo < b.Codigo {
-			return -1
-		}
-		if a.Codigo > b.Codigo {
-			return 1
-		}
-		return 0
-	})
-
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(patchesRes); err != nil {
 		slog.Error("encode_patches_failed", "error", err)

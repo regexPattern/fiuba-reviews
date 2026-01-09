@@ -373,13 +373,6 @@ func newPatchesCatedras(conn *pgx.Conn, oferta ofertaMateriaMasReciente) ([]patc
 	}
 
 	if todasExisten {
-		slog.Debug(
-			"sin_catedras_nuevas",
-			"count",
-			len(catedrasConEstado),
-			"codigo_materia",
-			oferta.Codigo,
-		)
 		return nil, nil
 	}
 
