@@ -44,7 +44,7 @@ equivalencias_por_materia AS (
     SELECT
         ma.codigo_nuevo,
         array_agg(e.codigo_materia_plan_anterior) AS codigos_equivalencias
-FROM
+ FROM
     materias_actualizadas ma
     JOIN equivalencia e ON e.codigo_materia_plan_vigente = ma.codigo_antiguo
 GROUP BY

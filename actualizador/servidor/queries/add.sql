@@ -27,3 +27,20 @@ ALTER TABLE docente
     ADD COLUMN rol text NULL;
 
 ALTER TABLE catedra ADD COLUMN activa BOOLEAN NOT NULL DEFAULT FALSE;
+
+--
+
+-- Arreglar secuencia de Comentarios
+SELECT setval(pg_get_serial_sequence('public.comentario', 'codigo'), (SELECT MAX(codigo) FROM public.comentario));
+
+-- Arreglar secuencia de Carreras
+SELECT setval(pg_get_serial_sequence('public.carrera', 'codigo'), (SELECT MAX(codigo) FROM public.carrera));
+
+-- Arreglar secuencia de Cuatrimestres
+SELECT setval(pg_get_serial_sequence('public.cuatrimestre', 'codigo'), (SELECT MAX(codigo) FROM public.cuatrimestre));
+
+-- Arreglar secuencia de Planes
+SELECT setval(pg_get_serial_sequence('public.plan', 'codigo'), (SELECT MAX(codigo) FROM public.plan));
+
+-- Arreglar secuencia de Calificaciones Dolly
+SELECT setval(pg_get_serial_sequence('public.calificacion_dolly', 'codigo'), (SELECT MAX(codigo) FROM public.calificacion_dolly));

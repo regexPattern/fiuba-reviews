@@ -1,5 +1,6 @@
-actualizador-catedras
-resumidor-comentarios
+/actualizador/
+/resumidor/
+/compose.yaml
 
 LICENSE
 README.md
