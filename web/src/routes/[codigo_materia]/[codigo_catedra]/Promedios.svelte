@@ -34,7 +34,7 @@
   {#if promedio}
     <Popover.Portal>
       <Popover.Content
-        class="w-56 border border-border-muted bg-background/50 backdrop-blur-lg"
+        class="z-50 w-56 border border-border-muted bg-background/50 backdrop-blur-lg"
         align="start"
         sideOffset={6}
       >

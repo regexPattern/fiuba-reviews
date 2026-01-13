@@ -23,7 +23,7 @@
           <p class={`p-3 before:content-['"'] after:content-['"']`}>
             {docente.resumenComentario}
           </p>
-          <div class="flex items-center gap-1 p-2 text-[#495883] select-none">
+          <div class="flex items-center gap-1 p-3 text-[#495883] select-none">
             <Info class="size-[16px]" />
             <span class="text-sm">Resumen generado con IA.</span>
           </div>

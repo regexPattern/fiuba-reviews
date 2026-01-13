@@ -13,7 +13,7 @@
 </script>
 
 <header
-  class="fixed top-0 left-0 z-100 h-[56px] w-full border-b border-border-muted bg-background/50 px-4 backdrop-blur-lg"
+  class="fixed top-0 left-0 z-[100] h-[56px] w-full border-b border-border-muted bg-background/50 px-4 backdrop-blur-lg"
 >
   <ul>
     <a href="/">Inicio</a>

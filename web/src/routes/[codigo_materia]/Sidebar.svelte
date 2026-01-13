@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { SquareStop, Star } from "@lucide/svelte";
   import { ScrollArea } from "bits-ui";
   import Fuse from "fuse.js";
 
@@ -60,28 +61,41 @@
 </script>
 
 <aside
-  class="flex h-full min-h-0 flex-col divide-y divide-border-muted border-r border-border-muted pt-[56px]"
+  class="flex h-full min-h-0 flex-col divide-y divide-border-muted border-r border-border-muted md:pt-[56px]"
 >
-  <div class="shrink-0 border-b">
-    {materia.codigo} - {materia.nombre}
+  <div class="shrink-0 space-y-2 border-b p-3 font-serif text-lg font-medium">
+    {materia.nombre}
+  </div>
+
+  <div class="shrink-0 p-3 text-sm tabular-nums">
     {#if materia.cuatrimestre}
-      {materia.cuatrimestre.numero}C{materia.cuatrimestre.anio}
+      <p>
+        Última actualización de cátedras en <span class="tracking-tight">
+          {materia.cuatrimestre.numero}C{materia.cuatrimestre.anio}
+        </span>. Si ves que la oferta está desactualizada, podés colaborar enviandola
+        <a href={`/ofertas?materia=${materia.codigo}`} class="text-fiuba underline">acá</a>.
+      </p>
     {:else}
-      <ul>
-        {#each materia.equivalencias as equivalencia (equivalencia.codigo)}
-          <li>{equivalencia.codigo}</li>
-        {/each}
-      </ul>
+      La oferta de esta materia no está actualizada todavía. Se muestran las ofertas de sus
+      equivalencias en los planes anteriores: <span class="tracking-tight">
+        {materia.equivalencias.map((e) => e.codigo).join(", ")}
+      </span>. Si tenés la oferta actualizada, podés colaborar enviandola
+      <a href={`/ofertas?materia=${materia.codigo}`} class="text-fiuba underline">acá</a>.
     {/if}
   </div>
 
   <ScrollArea.Root class="min-h-0 flex-1 overflow-hidden">
     <ScrollArea.Viewport class="h-full">
-      <ul>
+      <ul class="my-2">
         {#each catedrasFiltradas as catedra (catedra.codigo)}
-          <li class="p-4">
-            <a href={`${catedra.codigo}`}>
-              {catedra.calificacion.toFixed(1)} - {catedra.nombre}
+          <li class="p-3">
+            <a
+              href={`${catedra.codigo}`}
+              class="flex items-center gap-1.5 font-serif font-medium tabular-nums"
+            >
+              {catedra.calificacion.toFixed(1)}
+              <Star class="size-[12px] shrink-0 fill-yellow-500 stroke-yellow-700" />
+              {catedra.nombre}
             </a>
           </li>
         {/each}
@@ -93,6 +107,10 @@
   </ScrollArea.Root>
 
   <div class="shrink-0">
-    <input bind:value={queryValue} />
+    <input
+      bind:value={queryValue}
+      placeholder="Filtrar por nombre de docente"
+      class="w-full p-3 placeholder:text-sm"
+    />
   </div>
 </aside>
