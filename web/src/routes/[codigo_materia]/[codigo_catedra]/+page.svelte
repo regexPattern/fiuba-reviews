@@ -6,15 +6,13 @@
   let { data } = $props();
 </script>
 
-<div class="mx-4 space-y-8 py-4 md:mx-6">
+<div class="m-4 space-y-8 md:m-6">
   {#each data.docentes as docente (docente.codigo)}
     <section id={docente.codigo} class="scroll-mt-[68px] space-y-3">
       <div>
-        <a href={`#${docente.codigo}`}>
-          <h1 class="w-fit font-serif text-4xl font-semibold tracking-tight">
-            {docente.nombre}
-          </h1>
-        </a>
+        <h1 class="w-fit font-serif text-4xl font-semibold tracking-tight">
+          {docente.nombre}
+        </h1>
         {#if docente.rol}
           <small class="text-sm">({docente.rol})</small>
         {/if}
@@ -33,7 +31,10 @@
       {/if}
 
       <div class="flex gap-2 text-sm">
-        <Promedios promedio={docente.promedioCalificaciones} />
+        <Promedios
+          promedio={docente.promedioCalificaciones}
+          cantidadCalificaciones={docente.cantidadCalificaciones}
+        />
 
         <a
           href={`/calificar?docente=${docente.codigo}`}

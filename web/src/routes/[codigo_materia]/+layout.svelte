@@ -2,6 +2,7 @@
   import Sidebar from "./Sidebar.svelte";
   import { ScrollArea, Dialog } from "bits-ui";
   import { afterNavigate } from "$app/navigation";
+  import { ChevronDown, ChevronUp } from "@lucide/svelte";
 
   let { children, data } = $props();
 
@@ -44,12 +45,20 @@
 
   <main class="min-h-0 w-full min-w-0">
     <ScrollArea.Root class="h-full min-h-0 overflow-hidden">
-      <ScrollArea.Viewport class="h-full w-full pt-[56px]" data-scroll-container="main">
+      <ScrollArea.Viewport
+        class="h-full w-full pt-[calc(56px+env(safe-area-inset-top))]"
+        data-scroll-container="main"
+      >
         <button
-          class="sticky top-0 z-200 w-full border-b border-border-muted bg-background p-3 text-left font-serif text-lg font-medium md:hidden"
+          class="sticky top-0 z-200 flex w-full items-center justify-between border-b border-border-muted bg-background p-3 text-left font-serif text-lg font-medium md:hidden"
           onclick={() => (mobileDrawerOpen = true)}
         >
           {data.materia.nombre}
+          {#if mobileDrawerOpen}
+            <ChevronUp class="size-[18px] shrink-0" />
+          {:else}
+            <ChevronDown class="size-[18px] shrink-0" />
+          {/if}
         </button>
 
         {@render children()}

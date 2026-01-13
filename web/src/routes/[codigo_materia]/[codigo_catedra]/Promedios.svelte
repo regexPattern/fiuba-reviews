@@ -2,27 +2,50 @@
   import { ChevronDown, Star } from "@lucide/svelte";
   import { Popover } from "bits-ui";
 
+  const MAX_CALIFICACION = 5;
+
+  type Promedio = {
+    general: number;
+    aceptaCritica: number;
+    asistencia: number;
+    buenTrato: number;
+    claridad: number;
+    claseOrganizada: number;
+    cumpleHorarios: number;
+    fomentaParticipacion: number;
+    panoramaAmplio: number;
+    respondeMails: number;
+  };
+
   interface Props {
-    promedio: {
-      general: number;
-      aceptaCritica: number;
-      asistencia: number;
-      buenTrato: number;
-      claridad: number;
-      claseOrganizada: number;
-      cumpleHorarios: number;
-      fomentaParticipacion: number;
-      panoramaAmplio: number;
-      respondeMails: number;
-    } | null;
+    promedio: Promedio | null;
+    cantidadCalificaciones: number;
   }
 
-  let { promedio }: Props = $props();
+  let { promedio, cantidadCalificaciones }: Props = $props();
 </script>
+
+{#snippet Criterio(label: string, valor: number)}
+  {@const MIN_CALIFICACION = 1}
+  {@const RANGO = MAX_CALIFICACION - MIN_CALIFICACION}
+  {@const porcentaje = Math.max(0, Math.min(100, ((valor - MIN_CALIFICACION) / RANGO) * 100))}
+
+  <div class="relative overflow-hidden px-2 py-1">
+    <div class="absolute inset-0 bg-fiuba/5"></div>
+    <div class="absolute inset-y-0 left-0 bg-fiuba/20" style:width={`${porcentaje}%`}></div>
+
+    <div
+      class="relative z-10 grid grid-cols-[1fr_auto] items-center gap-3 text-foreground tabular-nums"
+    >
+      <span>{label}</span>
+      <span>{valor.toFixed(1)}</span>
+    </div>
+  </div>
+{/snippet}
 
 <Popover.Root>
   <Popover.Trigger
-    class="flex items-center gap-2 border border-foreground-muted bg-foreground-muted/50 px-3 py-2"
+    class="flex items-center gap-2 border border-fiuba bg-fiuba/20 px-3 py-2 transition-colors hover:bg-fiuba/30"
   >
     <Star class="size-[16px] fill-yellow-500 stroke-yellow-700" />
     <span>Promedio: {promedio?.general.toFixed(1) || "–"}</span>
@@ -34,11 +57,25 @@
   {#if promedio}
     <Popover.Portal>
       <Popover.Content
-        class="z-50 w-56 border border-border-muted bg-background/50 backdrop-blur-lg"
+        class="z-50 w-56 border border-fiuba/30 bg-background/95 p-3 text-sm shadow-md backdrop-blur-xl"
         align="start"
         sideOffset={6}
       >
-        {JSON.stringify(promedio, null, 2)}
+        <div class="divide-y divide-border-muted/50">
+          {@render Criterio("Acepta Crítica", promedio.aceptaCritica)}
+          {@render Criterio("Asistencia", promedio.asistencia)}
+          {@render Criterio("Buen Trato", promedio.buenTrato)}
+          {@render Criterio("Claridad", promedio.claridad)}
+          {@render Criterio("Clase Organizada", promedio.claseOrganizada)}
+          {@render Criterio("Cumple Horario", promedio.cumpleHorarios)}
+          {@render Criterio("Fomenta Participación", promedio.fomentaParticipacion)}
+          {@render Criterio("Panorama Amplio", promedio.panoramaAmplio)}
+          {@render Criterio("Responde Mails", promedio.respondeMails)}
+        </div>
+
+        <div class="pt-3 text-center text-foreground-muted/80">
+          {cantidadCalificaciones} calificacion{cantidadCalificaciones === 1 ? "" : "es"}
+        </div>
       </Popover.Content>
     </Popover.Portal>
   {/if}
