@@ -5,7 +5,10 @@
 {#each data.docentes as docente (docente.codigo)}
   <div>
     <div>
-      {docente.promedioCalificaciones?.general.toFixed(1) ?? "—"} - {docente.nombre}
+      {#if docente.promedioCalificaciones}
+        {docente.promedioCalificaciones.general.toFixed(1) ?? "—"} - {docente.nombre}
+        <div>{JSON.stringify(docente.promedioCalificaciones, null, 2)}</div>
+      {/if}
     </div>
     <div>{docente.rol}</div>
     <div>{docente.cantidadCalificaciones} calificaciones</div>

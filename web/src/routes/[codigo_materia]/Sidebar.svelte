@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { ScrollArea } from "bits-ui";
   import Fuse from "fuse.js";
 
   interface Props {
@@ -58,27 +59,39 @@
   });
 </script>
 
-<aside class="h-full border-r">
-  <!-- <input bind:value={queryValue} /> -->
-
-  <div>
+<aside class="relative flex h-full min-h-0 flex-col border-r">
+  <div class="sticky top-0">
     {materia.codigo} - {materia.nombre}
     {#if materia.cuatrimestre}
       {materia.cuatrimestre.numero}C{materia.cuatrimestre.anio}
     {:else}
-      {#each materia.equivalencias as equivalencia (equivalencia.codigo)}
-        {equivalencia.codigo}
-      {/each}
+      <ul>
+        {#each materia.equivalencias as equivalencia (equivalencia.codigo)}
+          <li>{equivalencia.codigo}</li>
+        {/each}
+      </ul>
     {/if}
   </div>
 
-  <ul class="overflow-y-auto">
-    {#each catedrasFiltradas as catedra (catedra.codigo)}
-      <li class="p-4">
-        <a href={`${catedra.codigo}`}>
-          {catedra.calificacion.toFixed(1)} - {catedra.nombre}
-        </a>
-      </li>
-    {/each}
-  </ul>
+  <ScrollArea.Root class="min-h-0 flex-1 overflow-hidden">
+    <ScrollArea.Viewport class="h-full">
+      <ul>
+        {#each catedrasFiltradas as catedra (catedra.codigo)}
+          <li class="p-4">
+            <a href={`${catedra.codigo}`}>
+              {catedra.calificacion.toFixed(1)} - {catedra.nombre}
+            </a>
+          </li>
+        {/each}
+      </ul>
+    </ScrollArea.Viewport>
+    <ScrollArea.Scrollbar orientation="vertical">
+      <ScrollArea.Thumb />
+    </ScrollArea.Scrollbar>
+    <ScrollArea.Corner />
+  </ScrollArea.Root>
+
+  <div class="sticky bottom-0">
+    <input bind:value={queryValue} />
+  </div>
 </aside>
