@@ -43,7 +43,7 @@ export const cuatrimestre = pgTable(
     numero: smallint().notNull(),
     anio: smallint().notNull()
   },
-  (_) => [check("cuatrimestre_numero_check", sql`numero = ANY (ARRAY[1, 2])`)]
+  (table) => [check("cuatrimestre_numero_check", sql`numero = ANY (ARRAY[1, 2])`)]
 );
 
 export const materia = pgTable(
@@ -192,6 +192,15 @@ export const calificacionDolly = pgTable(
       sql`(responde_mails >= (1)::numeric) AND (responde_mails <= (5)::numeric)`
     )
   ]
+);
+
+export const prioridadRol = pgTable(
+  "prioridad_rol",
+  {
+    rol: text().primaryKey().notNull(),
+    prioridad: integer().notNull()
+  },
+  (table) => [check("prioridad_rol_prioridad_check", sql`(prioridad >= 1) AND (prioridad <= 10)`)]
 );
 
 export const equivalencia = pgTable(

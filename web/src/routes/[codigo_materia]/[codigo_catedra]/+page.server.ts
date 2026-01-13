@@ -1,105 +1,185 @@
-import { db } from "$lib/server/db";
-import * as schema from "$lib/server/db/schema";
+import { db, schema } from "$lib/server/db";
+import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import { and, eq, sql } from "drizzle-orm";
-import { exprPromedioDollyPorFila } from "$lib/server/db/utils";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 
 export const load: PageServerLoad = async ({ params }) => {
-  const docentesDeCatedra = db.$with("docentes_de_catedra").as(
-    db
-      .select({
-        codigo: schema.docente.codigo,
-        nombre: schema.docente.nombre,
-        resumenComentarios: schema.docente.resumenComentarios,
-        comentariosUltimoResumen: schema.docente.comentariosUltimoResumen,
-        nombreSiu: schema.docente.nombreSiu,
-        rol: schema.docente.rol
-      })
-      .from(schema.catedra)
-      .innerJoin(
-        schema.catedraDocente,
-        eq(schema.catedraDocente.codigoCatedra, schema.catedra.codigo)
-      )
-      .innerJoin(schema.docente, eq(schema.docente.codigo, schema.catedraDocente.codigoDocente))
-      .where(
-        and(
-          eq(schema.catedra.codigo, params.codigo_catedra),
-          eq(schema.catedra.codigoMateria, params.codigo_materia)
-        )
-      )
-  );
+  const catedra = await db
+    .select({
+      codigo: schema.catedra.codigo
+    })
+    .from(schema.catedra)
+    .where(and(eq(schema.catedra.codigo, params.codigo_catedra)));
 
-  const promedioFilaDollyExpr = exprPromedioDollyPorFila(schema.calificacionDolly);
+  if (catedra.length === 0) {
+    error(404, "cátedra no encontrada para la materia");
+  }
 
-  const metricasDocente = db.$with("metricas_docente").as(
-    db
-      .select({
-        codigoDocente: schema.calificacionDolly.codigoDocente,
-        promedioCalificaciones: sql<number>`avg(${promedioFilaDollyExpr})::float8`.as(
-          "promedio_calificaciones"
+  const promedioDollyExpr = sql<number>`(
+    ${schema.calificacionDolly.aceptaCritica} +
+    ${schema.calificacionDolly.asistencia} +
+    ${schema.calificacionDolly.buenTrato} +
+    ${schema.calificacionDolly.claridad} +
+    ${schema.calificacionDolly.claseOrganizada} +
+    ${schema.calificacionDolly.cumpleHorarios} +
+    ${schema.calificacionDolly.fomentaParticipacion} +
+    ${schema.calificacionDolly.panoramaAmplio} +
+    ${schema.calificacionDolly.respondeMails}
+  ) / 9.0`;
+
+  const calificacionesPorDocente = db
+    .select({
+      codigoDocente: schema.calificacionDolly.codigoDocente,
+      cantidad: sql<number>`count(*)::int`.as("cantidad"),
+      promedio: sql<number>`avg(${promedioDollyExpr})::double precision`.as("promedio"),
+      aceptaCritica:
+        sql<number>`avg(${schema.calificacionDolly.aceptaCritica})::double precision`.as(
+          "acepta_critica"
         ),
-        cantidadCalificaciones: sql<number>`count(${schema.calificacionDolly.codigo})::int`.as(
-          "cantidad_calificaciones"
+      asistencia: sql<number>`avg(${schema.calificacionDolly.asistencia})::double precision`.as(
+        "asistencia"
+      ),
+      buenTrato: sql<number>`avg(${schema.calificacionDolly.buenTrato})::double precision`.as(
+        "buen_trato"
+      ),
+      claridad: sql<number>`avg(${schema.calificacionDolly.claridad})::double precision`.as(
+        "claridad"
+      ),
+      claseOrganizada:
+        sql<number>`avg(${schema.calificacionDolly.claseOrganizada})::double precision`.as(
+          "clase_organizada"
+        ),
+      cumpleHorarios:
+        sql<number>`avg(${schema.calificacionDolly.cumpleHorarios})::double precision`.as(
+          "cumple_horarios"
+        ),
+      fomentaParticipacion:
+        sql<number>`avg(${schema.calificacionDolly.fomentaParticipacion})::double precision`.as(
+          "fomenta_participacion"
+        ),
+      panoramaAmplio:
+        sql<number>`avg(${schema.calificacionDolly.panoramaAmplio})::double precision`.as(
+          "panorama_amplio"
+        ),
+      respondeMails:
+        sql<number>`avg(${schema.calificacionDolly.respondeMails})::double precision`.as(
+          "responde_mails"
         )
-      })
-      .from(schema.calificacionDolly)
-      .groupBy(schema.calificacionDolly.codigoDocente)
-  );
+    })
+    .from(schema.calificacionDolly)
+    .groupBy(schema.calificacionDolly.codigoDocente)
+    .as("calificaciones_por_docente");
 
-  const comentariosDocente = db.$with("comentarios_docente").as(
-    db
+  const rowsDocentes = await db
+    .select({
+      codigo: schema.docente.codigo,
+      nombre: schema.docente.nombre,
+      rol: schema.docente.rol,
+      resumenComentario: schema.docente.resumenComentarios,
+      prioridadRol: schema.prioridadRol.prioridad,
+      cantidadCalificaciones: calificacionesPorDocente.cantidad,
+      promedio: calificacionesPorDocente.promedio,
+      aceptaCritica: calificacionesPorDocente.aceptaCritica,
+      asistencia: calificacionesPorDocente.asistencia,
+      buenTrato: calificacionesPorDocente.buenTrato,
+      claridad: calificacionesPorDocente.claridad,
+      claseOrganizada: calificacionesPorDocente.claseOrganizada,
+      cumpleHorarios: calificacionesPorDocente.cumpleHorarios,
+      fomentaParticipacion: calificacionesPorDocente.fomentaParticipacion,
+      panoramaAmplio: calificacionesPorDocente.panoramaAmplio,
+      respondeMails: calificacionesPorDocente.respondeMails
+    })
+    .from(schema.catedra)
+    .innerJoin(
+      schema.catedraDocente,
+      eq(schema.catedraDocente.codigoCatedra, schema.catedra.codigo)
+    )
+    .innerJoin(schema.docente, eq(schema.docente.codigo, schema.catedraDocente.codigoDocente))
+    .leftJoin(schema.prioridadRol, eq(schema.prioridadRol.rol, schema.docente.rol))
+    .leftJoin(
+      calificacionesPorDocente,
+      eq(calificacionesPorDocente.codigoDocente, schema.docente.codigo)
+    )
+    .where(eq(schema.catedra.codigo, params.codigo_catedra));
+
+  const codigosDocente = rowsDocentes.map((d) => d.codigo);
+
+  const comentariosDocentes = new Map<
+    string,
+    {
+      codigo: number;
+      contenido: string;
+      cuatrimestre: { numero: number; anio: number };
+      esDeDolly: boolean;
+    }[]
+  >();
+
+  if (codigosDocente.length > 0) {
+    const rowsComentarios = await db
       .select({
-        codigoDocente: schema.docente.codigo,
-        comentarios: sql<
-          Array<{
-            codigo: number;
-            contenido: string;
-            anio: number;
-            numero: number;
-            fechaCreacion: string;
-            esDeDolly: boolean;
-          }>
-        >`coalesce(
-          json_agg(
-            json_build_object(
-              'codigo', ${schema.comentario.codigo},
-              'contenido', ${schema.comentario.contenido},
-              'anio', ${schema.cuatrimestre.anio},
-              'numero', ${schema.cuatrimestre.numero},
-              'fechaCreacion', ${schema.comentario.fechaCreacion},
-              'esDeDolly', ${schema.comentario.esDeDolly}
-            )
-            order by ${schema.cuatrimestre.anio} desc, ${schema.cuatrimestre.numero} desc, ${schema.comentario.fechaCreacion} desc
-          ),
-          '[]'::json
-        )`.as("comentarios")
+        codigoDocente: schema.comentario.codigoDocente,
+        codigoComentario: schema.comentario.codigo,
+        contenido: schema.comentario.contenido,
+        esDeDolly: schema.comentario.esDeDolly,
+        cuatrimestreNumero: schema.cuatrimestre.numero,
+        cuatrimestreAnio: schema.cuatrimestre.anio,
+        codigoCuatrimestre: schema.comentario.codigoCuatrimestre
       })
-      .from(docentesDeCatedra)
-      .innerJoin(schema.docente, eq(schema.docente.codigo, docentesDeCatedra.codigo))
-      .leftJoin(schema.comentario, eq(schema.comentario.codigoDocente, schema.docente.codigo))
-      .leftJoin(
+      .from(schema.comentario)
+      .innerJoin(
         schema.cuatrimestre,
         eq(schema.cuatrimestre.codigo, schema.comentario.codigoCuatrimestre)
       )
-      .groupBy(schema.docente.codigo)
-  );
+      .where(inArray(schema.comentario.codigoDocente, codigosDocente))
+      .orderBy(desc(schema.comentario.codigoCuatrimestre));
 
-  const docentes = await db
-    .with(docentesDeCatedra, metricasDocente, comentariosDocente)
-    .select({
-      codigo: docentesDeCatedra.codigo,
-      nombre: docentesDeCatedra.nombre,
-      resumenComentarios: docentesDeCatedra.resumenComentarios,
-      comentariosUltimoResumen: docentesDeCatedra.comentariosUltimoResumen,
-      nombreSiu: docentesDeCatedra.nombreSiu,
-      rol: docentesDeCatedra.rol,
-      promedioCalificaciones: metricasDocente.promedioCalificaciones,
-      cantidadCalificaciones: metricasDocente.cantidadCalificaciones,
-      comentarios: comentariosDocente.comentarios
+    for (const row of rowsComentarios) {
+      const comentarios = comentariosDocentes.get(row.codigoDocente) ?? [];
+      comentarios.push({
+        codigo: row.codigoComentario,
+        contenido: row.contenido,
+        cuatrimestre: { numero: row.cuatrimestreNumero, anio: row.cuatrimestreAnio },
+        esDeDolly: row.esDeDolly
+      });
+      comentariosDocentes.set(row.codigoDocente, comentarios);
+    }
+  }
+
+  const docentes = rowsDocentes
+    .map((row) => {
+      const prioridad = row.prioridadRol ?? Number.MAX_SAFE_INTEGER;
+
+      const promedioCalificaciones =
+        row.promedio != null
+          ? {
+              general: row.promedio,
+              aceptaCritica: row.aceptaCritica!,
+              asistencia: row.asistencia!,
+              buenTrato: row.buenTrato!,
+              claridad: row.claridad!,
+              claseOrganizada: row.claseOrganizada!,
+              cumpleHorarios: row.cumpleHorarios!,
+              fomentaParticipacion: row.fomentaParticipacion!,
+              panoramaAmplio: row.panoramaAmplio!,
+              respondeMails: row.respondeMails!
+            }
+          : null;
+
+      return {
+        nombre: row.nombre,
+        codigo: row.codigo,
+        rol: row.rol,
+        cantidadCalificaciones: row.cantidadCalificaciones ?? 0,
+        promedioCalificaciones,
+        resumenComentario: row.resumenComentario ?? null,
+        comentarios: comentariosDocentes.get(row.codigo) ?? [],
+        prioridad
+      };
     })
-    .from(docentesDeCatedra)
-    .leftJoin(metricasDocente, eq(metricasDocente.codigoDocente, docentesDeCatedra.codigo))
-    .leftJoin(comentariosDocente, eq(comentariosDocente.codigoDocente, docentesDeCatedra.codigo));
+    .sort((a, b) => {
+      if (a.prioridad !== b.prioridad) return a.prioridad - b.prioridad;
+      return a.nombre.localeCompare(b.nombre);
+    });
 
   return { docentes };
 };

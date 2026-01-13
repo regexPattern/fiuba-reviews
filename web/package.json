@@ -26,6 +26,8 @@
     "@types/pg": "^8.16.0",
     "drizzle-kit": "^0.31.8",
     "drizzle-orm": "^0.45.0",
+    "flowbite": "^4.0.1",
+    "flowbite-svelte": "^1.31.0",
     "prettier": "^3.7.4",
     "prettier-plugin-svelte": "^3.4.0",
     "prettier-plugin-tailwindcss": "^0.7.2",
@@ -37,7 +39,9 @@
     "vite-plugin-devtools-json": "^1.0.0"
   },
   "dependencies": {
+    "fuse.js": "^7.1.0",
     "pg": "^8.16.3",
-    "postgres": "^3.4.7"
+    "postgres": "^3.4.7",
+    "tailwind-merge": "^3.4.0"
   }
 }
