@@ -42,7 +42,7 @@
     if (queryDebounced.trim() === "") {
       return catedras;
     }
-    return fuse.search(queryDebounced).map((result) => result.item);
+    return fuse.search(queryDebounced).map((r) => r.item);
   });
 
   $effect(() => {
@@ -59,8 +59,10 @@
   });
 </script>
 
-<aside class="flex h-full min-h-0 flex-col border-r">
-  <div class="shrink-0">
+<aside
+  class="flex h-full min-h-0 flex-col divide-y divide-border-muted border-r border-border-muted pt-[56px]"
+>
+  <div class="shrink-0 border-b">
     {materia.codigo} - {materia.nombre}
     {#if materia.cuatrimestre}
       {materia.cuatrimestre.numero}C{materia.cuatrimestre.anio}

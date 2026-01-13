@@ -1,3 +1,18 @@
 @import "tailwindcss";
 
 @import "tw-animate-css";
+
+@theme {
+  --color-fiuba: #4facd4;
+  --font-sans: "Inter Variable", sans-serif;
+  --font-serif: "Source Serif 4 Variable", serif;
+
+  --color-foreground: #173341;
+  --color-background: #fbfef9;
+  --color-border-muted: #c2e1c2;
+}
+
+.dark {
+  --color-foreground: #ececec;
+  --color-background: #110311;
+}
