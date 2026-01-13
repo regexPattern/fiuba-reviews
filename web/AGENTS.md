@@ -1,23 +1,101 @@
-You are able to use the Svelte MCP server, where you have access to comprehensive Svelte 5 and SvelteKit documentation. Here's how to use the available tools effectively:
+# Guía para agentes de código
 
-## Available MCP Tools:
+Este documento describe cómo deben interactuar los agentes que escriben código en este proyecto, con qué herramientas cuentan y qué estilo deben respetar.
 
-### 1. list-sections
+## 1. Stack tecnológico a tener en cuenta
 
-Use this FIRST to discover all available documentation sections. Returns a structured list with titles, use_cases, and paths.
-When asked about Svelte or SvelteKit topics, ALWAYS use this tool at the start of the chat to find relevant sections.
+Los agentes deben entender que el proyecto está construido sobre el siguiente stack:
 
-### 2. get-documentation
+- **JavaScript/TypeScript** ejecutado en **Bun**
+- **Svelte 5 + SvelteKit 2** como framework frontend
+- **bits-ui** como librería de componentes UI
+- **TailwindCSS** para estilos
+- **Postgres** como base de datos, utilizando **drizzle** como ORM
 
-Retrieves full documentation content for specific sections. Accepts single or multiple sections.
-After calling the list-sections tool, you MUST analyze the returned documentation sections (especially the use_cases field) and then use the get-documentation tool to fetch ALL documentation sections that are relevant for the user's task.
+## 2. Estilo y convenciones de código
 
-### 3. svelte-autofixer
+Para garantizar coherencia y mantenibilidad, seguir estas reglas:
 
-Analyzes Svelte code and returns issues and suggestions.
-You MUST use this tool whenever writing Svelte code before sending it to the user. Keep calling it until no issues or suggestions are returned.
+### 2.1 Simplicidad y legibilidad
 
-### 4. playground-link
+- Optimizar para la claridad antes que para la “cleverness”.
+- Evitar pasos innecesarios o código demasiado indirecto.
+- Mantener bajo el número de variables intermedias salvo que aporten claridad.
 
-Generates a Svelte Playground link with the provided code.
-After completing the code, ask the user if they want a playground link. Only call this tool after user confirmation and NEVER if code was written to files in their project.
+### 2.2 Nombres de variables
+
+- Usar **nombres en español** cuando sea natural.
+- Usar inglés sólo cuando tenga más sentido (ej: `buffer`, `tmp`, `payload`, `slug`).
+- Evitar abreviaturas innecesarias.
+
+### 2.3 Formato del código
+
+Este proyecto usa `prettier`. Formatear antes de finalizar:
+
+```sh
+bunx prettier --write ./path/to/file
+```
+
+## 3. Herramientas MCP disponibles
+
+Los agentes tienen acceso a distintas herramientas que pueden usar durante la generación de código. Se describen a continuación:
+
+### 3.1 Herramientas para Svelte
+
+Los agentes cuentan con un MCP especializado para Svelte 5 + SvelteKit. Las herramientas funcionan así:
+
+#### list-sections
+
+- Usar siempre primero
+- Muestra la lista de secciones de documentación disponibles
+- Ayuda a ubicar material relevante según contexto
+
+#### get-documentation
+
+- Se usa después de list-sections
+- Recupera el contenido completo de las secciones pertinentes
+- Puede recibir una o varias secciones a la vez
+- Elegir las secciones basándose en use_cases
+
+#### svelte-autofixer
+
+- Debe ejecutarse cada vez que un agente escriba código Svelte
+- Repetir hasta que no queden sugerencias ni errores
+- Sólo entonces el código se considera entregable
+- Nota: Los agentes deben usar esta pipeline al recibir cualquier instrucción relacionada a Svelte o SvelteKit.
+
+### 3.2 Herramientas para bits-ui
+
+La documentación de bits-ui está disponible vía webfetch en https://bits-ui.com/llms.txt. Ese endpoint incluye:
+
+- Índice de componentes
+- Descripción general de la librería
+- Rutas para acceder a documentación específica
+
+bits-ui se usa como librería UI principal en combinación con Tailwind.
+
+## 3.3 Herramientas para Postgres
+
+Los agentes cuentan con acceso a Postgres en modo read-only a través del MCP. Usos recomendados:
+
+- Consultar el schema
+- Entender relaciones y tablas
+- Ver datos relevantes
+- Analizar cómo drizzle modela la base
+
+No se puede escribir ni mutar datos desde esta herramienta.
+
+# 4. Principios finales para agentes
+
+Antes de finalizar cualquier respuesta:
+
+- Validar coherencia con el stack indicado
+- Respetar estilo y convenciones de este documento
+- Minimizar complejidad innecesaria
+- Entregar código formateado con prettier
+
+En caso de trabajar con Svelte:
+
+- list-sections
+- get-documentation
+- svelte-autofixer

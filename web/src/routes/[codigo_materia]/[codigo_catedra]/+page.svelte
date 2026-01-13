@@ -1,29 +1,34 @@
 <script lang="ts">
+  import PromedioCalificaciones from "./PromedioCalificaiones.svelte";
+
   let { data } = $props();
 </script>
 
 {#each data.docentes as docente (docente.codigo)}
-  <div>
+  <section id={docente.codigo}>
     <div>
-      {#if docente.promedioCalificaciones}
-        {docente.promedioCalificaciones.general.toFixed(1) ?? "—"} - {docente.nombre}
-        <div>{JSON.stringify(docente.promedioCalificaciones, null, 2)}</div>
-      {/if}
+      <h1>{docente.nombre}</h1>
+      <small>{docente.rol}</small>
     </div>
-    <div>{docente.rol}</div>
-    <div>{docente.cantidadCalificaciones} calificaciones</div>
+
     {#if docente.resumenComentario}
-      <div>Resumen: {docente.resumenComentario}</div>
+      <div class="border">
+        {docente.resumenComentario}
+      </div>
     {/if}
+
     <div>
-      Comentarios:
+      <PromedioCalificaciones promedio={docente.promedioCalificaciones} />
+    </div>
+
+    <div>
       {#each docente.comentarios as comentario (comentario.codigo)}
         <div>
-          ({comentario.cuatrimestre.anio} - {comentario.cuatrimestre.numero})
+          ({comentario.cuatrimestre.anio}C{comentario.cuatrimestre.numero})
           {comentario.contenido}
           {#if comentario.esDeDolly}(Dolly){/if}
         </div>
       {/each}
     </div>
-  </div>
+  </section>
 {/each}

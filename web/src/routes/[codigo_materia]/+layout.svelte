@@ -10,7 +10,7 @@
 <div class="container mx-auto flex h-[calc(100vh-56px)] overflow-hidden">
   {#if data.catedras.length > 0}
     <!-- Desktop sidebar -->
-    <div class="hidden md:flex">
+    <div class="hidden w-[280px] shrink-0 md:flex">
       <Sidebar materia={data.materia} catedras={data.catedras} />
     </div>
 

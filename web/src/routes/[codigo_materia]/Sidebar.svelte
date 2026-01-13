@@ -59,8 +59,8 @@
   });
 </script>
 
-<aside class="relative flex h-full min-h-0 flex-col border-r">
-  <div class="sticky top-0">
+<aside class="flex h-full min-h-0 flex-col border-r">
+  <div class="shrink-0">
     {materia.codigo} - {materia.nombre}
     {#if materia.cuatrimestre}
       {materia.cuatrimestre.numero}C{materia.cuatrimestre.anio}
@@ -88,10 +88,9 @@
     <ScrollArea.Scrollbar orientation="vertical">
       <ScrollArea.Thumb />
     </ScrollArea.Scrollbar>
-    <ScrollArea.Corner />
   </ScrollArea.Root>
 
-  <div class="sticky bottom-0">
+  <div class="shrink-0">
     <input bind:value={queryValue} />
   </div>
 </aside>
