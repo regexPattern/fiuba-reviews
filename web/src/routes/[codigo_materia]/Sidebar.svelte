@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { SquareStop, Star } from "@lucide/svelte";
+  import { ListFilter, SquareStop, Star } from "@lucide/svelte";
   import { ScrollArea } from "bits-ui";
   import Fuse from "fuse.js";
 
@@ -72,15 +72,19 @@
       <p>
         Última actualización de cátedras en <span class="tracking-tight">
           {materia.cuatrimestre.numero}C{materia.cuatrimestre.anio}
-        </span>. Si ves que la oferta está desactualizada, podés colaborar enviandola
-        <a href={`/ofertas?materia=${materia.codigo}`} class="text-fiuba underline">acá</a>.
+        </span>. Si ves que la oferta está desactualizada, podés colaborar
+        <a href={`/ofertas?materia=${materia.codigo}`} class="text-fiuba underline">
+          enviándola acá
+        </a>.
       </p>
     {:else}
       La oferta de esta materia no está actualizada todavía. Se muestran las ofertas de sus
       equivalencias en los planes anteriores: <span class="tracking-tight">
         {materia.equivalencias.map((e) => e.codigo).join(", ")}
-      </span>. Si tenés la oferta actualizada, podés colaborar enviandola
-      <a href={`/ofertas?materia=${materia.codigo}`} class="text-fiuba underline">acá</a>.
+      </span>. Si tenés la oferta actualizada, podés colaborar
+      <a href={`/ofertas?materia=${materia.codigo}`} class="text-fiuba underline">
+        enviándola acá
+      </a>.
     {/if}
   </div>
 
@@ -88,12 +92,14 @@
     <ScrollArea.Viewport class="h-full">
       <ul class="my-2">
         {#each catedrasFiltradas as catedra (catedra.codigo)}
+          {@const calificacion = catedra.calificacion.toFixed(1)}
+
           <li class="p-3">
             <a
               href={`${catedra.codigo}`}
               class="flex items-center gap-1.5 font-serif font-medium tabular-nums"
             >
-              {catedra.calificacion.toFixed(1)}
+              {calificacion === "0.0" ? "–" : calificacion}
               <Star class="size-[12px] shrink-0 fill-yellow-500 stroke-yellow-700" />
               {catedra.nombre}
             </a>
@@ -106,11 +112,16 @@
     </ScrollArea.Scrollbar>
   </ScrollArea.Root>
 
-  <div class="shrink-0">
+  <div class="relative shrink-0">
     <input
       bind:value={queryValue}
       placeholder="Filtrar por nombre de docente"
-      class="w-full p-3 placeholder:text-sm"
+      class="w-full py-3 pr-12 pl-3 placeholder:text-sm"
     />
+    <span
+      class="pointer-events-none absolute top-1/2 right-3 flex size-[26px] -translate-y-1/2 items-center justify-center rounded-full border border-border-muted text-foreground/60"
+    >
+      <ListFilter class="size-[12px]" aria-hidden="true" />
+    </span>
   </div>
 </aside>

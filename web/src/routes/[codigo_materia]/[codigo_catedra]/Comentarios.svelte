@@ -57,7 +57,9 @@
       </Collapsible.Content>
 
       <div class="w-full text-center">
-        <Collapsible.Trigger class="mt-2 cursor-pointer text-[#AB9E9C] hover:underline text-sm p-2 w-full md:w-content">
+        <Collapsible.Trigger
+          class="md:w-content mt-2 w-full cursor-pointer p-2 text-sm text-foreground-muted hover:underline"
+        >
           {estaExpandido
             ? "Mostrar menos"
             : `Mostrar ${cantidadOcultos} comentario${cantidadOcultos === 1 ? "" : "s"} más`}

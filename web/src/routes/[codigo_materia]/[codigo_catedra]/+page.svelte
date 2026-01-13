@@ -6,12 +6,14 @@
   let { data } = $props();
 </script>
 
-<div class="mx-4 space-y-6 py-4 md:mx-6">
+<div class="mx-4 space-y-8 py-4 md:mx-6">
   {#each data.docentes as docente (docente.codigo)}
     <section id={docente.codigo} class="scroll-mt-[68px] space-y-3">
       <div>
         <a href={`#${docente.codigo}`}>
-          <h1 class="font-serif text-4xl font-semibold tracking-tight">{docente.nombre}</h1>
+          <h1 class="w-fit font-serif text-4xl font-semibold tracking-tight">
+            {docente.nombre}
+          </h1>
         </a>
         {#if docente.rol}
           <small class="text-sm">({docente.rol})</small>
@@ -35,14 +37,18 @@
 
         <a
           href={`/calificar?docente=${docente.codigo}`}
-          class="flex items-center gap-2 border border-[#AB9E9C] bg-[#AB9E9C]/50 px-3 py-2"
+          class="flex items-center gap-2 border border-foreground-muted bg-foreground-muted/50 px-3 py-2"
         >
           <span>Calificar</span>
           <MessageSquarePlus class="size-[16px] fill-fiuba/50 stroke-[#665889]" />
         </a>
       </div>
 
-      <Comentarios comentarios={docente.comentarios} />
+      {#if docente.comentarios.length > 0}
+        <Comentarios comentarios={docente.comentarios} />
+      {:else}
+        <p class="py-2 text-sm text-foreground-muted">Docente sin comentarios</p>
+      {/if}
     </section>
   {/each}
 </div>

@@ -22,10 +22,10 @@
 
 <Popover.Root>
   <Popover.Trigger
-    class="flex items-center gap-2 border border-[#AB9E9C] bg-[#AB9E9C]/50 px-3 py-2"
+    class="flex items-center gap-2 border border-foreground-muted bg-foreground-muted/50 px-3 py-2"
   >
     <Star class="size-[16px] fill-yellow-500 stroke-yellow-700" />
-    <span>Promedio: {promedio?.general.toFixed(1) || "-"}</span>
+    <span>Promedio: {promedio?.general.toFixed(1) || "–"}</span>
     {#if promedio}
       <ChevronDown class="size-[16px]" />
     {/if}

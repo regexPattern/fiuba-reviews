@@ -46,7 +46,7 @@
     <ScrollArea.Root class="h-full min-h-0 overflow-hidden">
       <ScrollArea.Viewport class="h-full w-full pt-[56px]" data-scroll-container="main">
         <button
-          class="sticky top-0 z-200 w-full border-b border-border-muted bg-background p-4 text-left md:hidden"
+          class="sticky top-0 z-200 w-full border-b border-border-muted bg-background p-3 text-left font-serif text-lg font-medium md:hidden"
           onclick={() => (mobileDrawerOpen = true)}
         >
           {data.materia.nombre}
