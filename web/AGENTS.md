@@ -21,6 +21,7 @@ Para garantizar coherencia y mantenibilidad, seguir estas reglas:
 - Optimizar para la claridad antes que para la “cleverness”.
 - Evitar pasos innecesarios o código demasiado indirecto.
 - Mantener bajo el número de variables intermedias salvo que aporten claridad.
+- Para condicionales o bucles de una sola línea, siempre incluí las llaves.
 
 ### 2.2 Nombres de variables
 
@@ -73,6 +74,8 @@ La documentación de bits-ui está disponible vía webfetch en https://bits-ui.c
 - Rutas para acceder a documentación específica
 
 bits-ui se usa como librería UI principal en combinación con Tailwind.
+
+Cuando utilices los ejemplos de la documentación, mantene solo los estilos necesarios para tener un componentes básico. En la documentación hay bastantes ejemplos con clases con propiedades o variables custom de tamaño o de color, etc. Ignoralas, mantene los estilos mínimos.
 
 ## 3.3 Herramientas para Postgres
 

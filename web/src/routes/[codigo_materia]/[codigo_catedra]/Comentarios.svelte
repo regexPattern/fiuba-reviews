@@ -33,18 +33,18 @@
     </p>
 
     <div class="inline-flex items-center gap-2 text-xs text-[#495883] select-none">
-      <span class="rounded border border-fiuba/30 bg-fiuba/10 px-1.5 py-0.5">
+      <span class="border border-fiuba/30 bg-fiuba/10 px-1.5 py-0.5">
         {comentario.cuatrimestre.numero}C{comentario.cuatrimestre.anio}
       </span>
       {#if comentario.esDeDolly}
-        <span class="rounded border border-fiuba/30 bg-fiuba/10 px-1.5 py-0.5">Dolly FIUBA</span>
+        <span class="border border-fiuba/30 bg-fiuba/10 px-1.5 py-0.5">Dolly FIUBA</span>
       {/if}
     </div>
   </div>
 {/snippet}
 
 <Collapsible.Root open={estaExpandido} onOpenChange={(open) => (estaExpandido = open)}>
-  <div class="divide-y divide-border-muted/75">
+  <div class="divide-y divide-layout-border">
     {#each comentariosVisibles as comentario (comentario.codigo)}
       {@render ComentarioItem(comentario)}
     {/each}

@@ -19,18 +19,18 @@
       </div>
 
       {#if docente.resumenComentario}
-        <div class="divide-y divide-fiuba border border-fiuba bg-[#E6ADEC]/50">
+        <div class="divide-y divide-fiuba border border-fiuba bg-fiuba/45">
           <p class={`p-3 before:content-['"'] after:content-['"']`}>
             {docente.resumenComentario}
           </p>
-          <div class="flex items-center gap-1 p-3 text-[#495883] select-none">
+          <div class="flex items-center gap-1 p-3 text-button-foreground select-none">
             <Info class="size-[16px]" />
             <span class="text-sm">Resumen generado con IA.</span>
           </div>
         </div>
       {/if}
 
-      <div class="flex gap-2 text-sm">
+      <div class="flex gap-2 text-sm transition-colors">
         <Promedios
           promedio={docente.promedioCalificaciones}
           cantidadCalificaciones={docente.cantidadCalificaciones}
@@ -38,7 +38,7 @@
 
         <a
           href={`/calificar?docente=${docente.codigo}`}
-          class="flex items-center gap-2 border border-foreground-muted bg-foreground-muted/50 px-3 py-2"
+          class="flex items-center gap-2 border border-button-border bg-button-background px-3 py-2 hover:bg-button-hover"
         >
           <span>Calificar</span>
           <MessageSquarePlus class="size-[16px] fill-fiuba/50 stroke-[#665889]" />
@@ -48,7 +48,7 @@
       {#if docente.comentarios.length > 0}
         <Comentarios comentarios={docente.comentarios} />
       {:else}
-        <p class="py-2 text-sm text-foreground-muted">Docente sin comentarios</p>
+        <p class="text-foreground-muted py-2 text-sm">Docente sin comentarios</p>
       {/if}
     </section>
   {/each}

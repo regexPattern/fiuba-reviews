@@ -31,11 +31,11 @@
     <Dialog.Root bind:open={mobileDrawerOpen}>
       <Dialog.Portal>
         <Dialog.Overlay
-          class="fixed inset-0 z-300 bg-background/25 backdrop-blur-lg data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:duration-200 data-[state=open]:fade-in md:hidden"
+          class="fixed inset-0 z-300 bg-overlay-background backdrop-filter-(--backdrop-filter-overlay-blur) data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:fade-in md:hidden"
         />
         <Dialog.Content
           onclick={onClickDrawer}
-          class="fixed inset-y-0 left-0 z-301 h-full w-4/5 overflow-hidden bg-background data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=closed]:slide-out-to-left data-[state=open]:animate-in data-[state=open]:duration-200 data-[state=open]:slide-in-from-left md:hidden"
+          class="fixed inset-y-0 left-0 z-301 h-full w-4/5 overflow-hidden bg-background data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:animate-in data-[state=open]:slide-in-from-left md:hidden"
         >
           <Sidebar materia={data.materia} catedras={data.catedras} />
         </Dialog.Content>
@@ -50,7 +50,7 @@
         data-scroll-container="main"
       >
         <button
-          class="sticky top-0 z-200 flex w-full items-center justify-between border-b border-border-muted bg-background p-3 text-left font-serif text-lg font-medium md:hidden"
+          class="sticky top-0 z-200 flex w-full items-center justify-between border-b border-layout-border bg-background p-3 text-left font-serif text-lg font-medium md:hidden"
           onclick={() => (mobileDrawerOpen = true)}
         >
           {data.materia.nombre}

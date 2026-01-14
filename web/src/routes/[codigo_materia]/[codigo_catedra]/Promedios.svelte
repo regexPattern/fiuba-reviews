@@ -45,7 +45,8 @@
 
 <Popover.Root>
   <Popover.Trigger
-    class="flex items-center gap-2 border border-fiuba bg-fiuba/20 px-3 py-2 transition-colors hover:bg-fiuba/30"
+    class="flex items-center gap-2 border border-button-border bg-button-background px-3 py-2
+      {promedio ? 'hover:bg-button-hover' : 'pointer-events-none'}"
   >
     <Star class="size-[16px] fill-yellow-500 stroke-yellow-700" />
     <span>Promedio: {promedio?.general.toFixed(1) || "–"}</span>
@@ -61,7 +62,7 @@
         align="start"
         sideOffset={6}
       >
-        <div class="divide-y divide-border-muted/50">
+        <div class="divide-y-2 divide-background">
           {@render Criterio("Acepta Crítica", promedio.aceptaCritica)}
           {@render Criterio("Asistencia", promedio.asistencia)}
           {@render Criterio("Buen Trato", promedio.buenTrato)}
@@ -73,7 +74,7 @@
           {@render Criterio("Responde Mails", promedio.respondeMails)}
         </div>
 
-        <div class="pt-3 text-center text-foreground-muted/80">
+        <div class="text-foreground-muted/80 pt-3 text-center">
           {cantidadCalificaciones} calificacion{cantidadCalificaciones === 1 ? "" : "es"}
         </div>
       </Popover.Content>

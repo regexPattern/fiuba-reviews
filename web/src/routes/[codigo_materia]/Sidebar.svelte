@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { ListFilter, SquareStop, Star } from "@lucide/svelte";
+  import { ListFilter, Star } from "@lucide/svelte";
   import { ScrollArea } from "bits-ui";
   import Fuse from "fuse.js";
+  import { page } from "$app/state";
 
   interface Props {
     materia: {
@@ -61,7 +62,7 @@
 </script>
 
 <aside
-  class="flex h-full min-h-0 flex-col divide-y divide-border-muted border-r border-border-muted md:pt-[56px]"
+  class="flex h-full min-h-0 flex-col divide-y divide-layout-border border-r border-layout-border md:pt-[56px]"
 >
   <div class="shrink-0 space-y-2 border-b p-3 font-serif text-lg font-medium">
     {materia.nombre}
@@ -73,7 +74,7 @@
         Última actualización de cátedras en <span class="tracking-tight">
           {materia.cuatrimestre.numero}C{materia.cuatrimestre.anio}
         </span>. Si ves que la oferta está desactualizada, podés colaborar
-        <a href={`/ofertas?materia=${materia.codigo}`} class="text-fiuba underline">
+        <a href={`/colaborar?materia=${materia.codigo}`} class="text-fiuba underline">
           enviándola acá
         </a>.
       </p>
@@ -82,7 +83,7 @@
       equivalencias en los planes anteriores: <span class="tracking-tight">
         {materia.equivalencias.map((e) => e.codigo).join(", ")}
       </span>. Si tenés la oferta actualizada, podés colaborar
-      <a href={`/ofertas?materia=${materia.codigo}`} class="text-fiuba underline">
+      <a href={`/colaborar?materia=${materia.codigo}`} class="text-fiuba underline">
         enviándola acá
       </a>.
     {/if}
@@ -95,13 +96,12 @@
           {@const calificacion = catedra.calificacion.toFixed(1)}
 
           <li class="p-3">
-            <a
-              href={`${catedra.codigo}`}
-              class="flex items-center gap-1.5 font-serif font-medium tabular-nums"
-            >
+            <a href={`${catedra.codigo}`} class="flex items-center gap-1.5 tabular-nums">
               {calificacion === "0.0" ? "–" : calificacion}
               <Star class="size-[12px] shrink-0 fill-yellow-500 stroke-yellow-700" />
-              {catedra.nombre}
+              <span class={page.params.codigo_catedra === catedra.codigo ? "text-fiuba" : ""}
+                >{catedra.nombre}</span
+              >
             </a>
           </li>
         {/each}
@@ -116,10 +116,10 @@
     <input
       bind:value={queryValue}
       placeholder="Filtrar por nombre de docente"
-      class="w-full py-3 pr-12 pl-3 placeholder:text-sm"
+      class="w-full py-3 pr-12 pl-3 outline-none placeholder:text-sm"
     />
     <span
-      class="pointer-events-none absolute top-1/2 right-3 flex size-[26px] -translate-y-1/2 items-center justify-center rounded-full border border-border-muted text-foreground/60"
+      class="pointer-events-none absolute top-1/2 right-3 flex size-[26px] -translate-y-1/2 items-center justify-center rounded-full border border-border text-foreground/50"
     >
       <ListFilter class="size-[12px]" aria-hidden="true" />
     </span>
