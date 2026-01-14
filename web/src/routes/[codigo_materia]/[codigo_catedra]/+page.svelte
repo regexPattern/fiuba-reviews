@@ -30,7 +30,7 @@
         </div>
       {/if}
 
-      <div class="flex gap-2 text-sm text-button-foreground transition-colors">
+      <div class="flex gap-2 text-sm text-button-foreground">
         <Promedios
           promedio={docente.promedioCalificaciones}
           cantidadCalificaciones={docente.cantidadCalificaciones}
@@ -38,10 +38,12 @@
 
         <a
           href={`/calificar?docente=${docente.codigo}`}
-          class="flex items-center gap-2 border border-button-border bg-button-background px-3 py-2 hover:bg-button-hover"
+          class="flex items-center gap-2 border border-button-border bg-button-background px-3 py-2 hover:transition-colors hover:bg-button-hover"
         >
           <span>Calificar</span>
-          <MessageSquarePlus class="size-[16px] fill-fiuba/50 stroke-[#665889]" />
+          <MessageSquarePlus
+            class="size-[16px] fill-fiuba/50 stroke-[#665889] dark:fill-[#F7AEF8] dark:stroke-[#9E4770]"
+          />
         </a>
       </div>
 

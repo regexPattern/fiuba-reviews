@@ -3,16 +3,18 @@ import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 
-export const load: PageServerLoad = async ({ params }) => {
-  const catedra = await db
-    .select({
-      codigo: schema.catedra.codigo
-    })
-    .from(schema.catedra)
-    .where(and(eq(schema.catedra.codigo, params.codigo_catedra)));
+export const load: PageServerLoad = async ({ params, parent }) => {
+  const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-  if (catedra.length === 0) {
-    error(404, "cátedra no encontrada para la materia");
+  if (!uuidV4Regex.test(params.codigo_catedra)) {
+    error(400, "Código de cátedra inválido.");
+  }
+
+  const { catedras: catedrasValidas } = await parent();
+  const catedra = catedrasValidas.find((c) => c.codigo === params.codigo_catedra);
+
+  if (!catedra) {
+    error(404, "Cátedra no encontrada para la materia.");
   }
 
   const promedioDollyExpr = sql<number>`(

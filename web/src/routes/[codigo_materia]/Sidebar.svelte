@@ -101,7 +101,9 @@
           <li class="p-3">
             <a href={`${catedra.codigo}`} class="flex items-center gap-1.5 tabular-nums">
               {calificacion === "0.0" ? "–" : calificacion}
-              <Star class="size-[12px] shrink-0 fill-yellow-500 stroke-yellow-700" />
+              <Star
+                class="size-[12px] shrink-0 fill-yellow-500 stroke-yellow-700 dark:stroke-yellow-400"
+              />
               <span class={page.params.codigo_catedra === catedra.codigo ? "text-fiuba" : ""}
                 >{catedra.nombre}</span
               >
@@ -122,7 +124,7 @@
       class="w-full py-3 pr-12 pl-3 outline-none placeholder:text-sm"
     />
     <span
-      class="pointer-events-none absolute top-1/2 right-3 flex size-[26px] -translate-y-1/2 items-center justify-center rounded-full border border-border text-foreground/50"
+      class="border-border pointer-events-none absolute top-1/2 right-3 flex size-[26px] -translate-y-1/2 items-center justify-center rounded-full border text-foreground/50"
     >
       <ListFilter class="size-[12px]" aria-hidden="true" />
     </span>

@@ -45,10 +45,10 @@
 
 <Popover.Root>
   <Popover.Trigger
-    class="flex items-center gap-2 border border-button-border bg-button-background px-3 py-2
+    class="flex items-center gap-2 border border-button-border bg-button-background px-3 py-2 hover:transition-colors
       {promedio ? 'hover:bg-button-hover' : 'pointer-events-none'}"
   >
-    <Star class="size-[16px] fill-yellow-500 stroke-yellow-700" />
+    <Star class="size-[16px] fill-yellow-500 stroke-yellow-700 dark:stroke-yellow-400" />
     <span>Promedio: {promedio?.general.toFixed(1) || "–"}</span>
     {#if promedio}
       <ChevronDown class="size-[16px]" />
@@ -74,7 +74,7 @@
           {@render Criterio("Responde Mails", promedio.respondeMails)}
         </div>
 
-        <div class="text-secondary-foreground pt-3 text-center">
+        <div class="pt-3 text-center text-secondary-foreground">
           {cantidadCalificaciones} calificacion{cantidadCalificaciones === 1 ? "" : "es"}
         </div>
       </Popover.Content>

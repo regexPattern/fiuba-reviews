@@ -24,7 +24,7 @@ export const load: LayoutServerLoad = async ({ params }) => {
     );
 
   if (materiasVigentes.length === 0) {
-    error(404, "materia no encontrada en los planes vigentes");
+    error(404, "Materia no encontrada en los planes vigentes.");
   }
 
   const materia = materiasVigentes[0];

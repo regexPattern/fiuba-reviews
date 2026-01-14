@@ -97,7 +97,7 @@
 
 <Dialog.Root bind:open={dialogOpen}>
   <Dialog.Trigger
-    class="flex items-center gap-2 rounded-full border border-button-border bg-button-background px-3 py-2 text-sm text-button-foreground transition-colors hover:bg-button-hover"
+    class="flex items-center gap-2 rounded-full border border-button-border bg-button-background px-3 py-2 text-sm text-button-foreground hover:bg-button-hover hover:transition-colors"
   >
     <span class="hidden items-center gap-2 md:flex">
       <Search class="size-4" />

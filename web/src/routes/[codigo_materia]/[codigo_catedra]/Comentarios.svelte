@@ -33,11 +33,13 @@
     </p>
 
     <div class="inline-flex items-center gap-2 text-xs text-button-foreground select-none">
-      <span class="border border-fiuba/30 bg-fiuba/10 px-1.5 py-0.5">
+      <span class="border border-fiuba/30 bg-fiuba/10 px-1.5 py-0.5 dark:bg-[#315659]">
         {comentario.cuatrimestre.numero}C{comentario.cuatrimestre.anio}
       </span>
       {#if comentario.esDeDolly}
-        <span class="border border-fiuba/30 bg-fiuba/10 px-1.5 py-0.5">Dolly FIUBA</span>
+        <span class="border border-fiuba/30 bg-fiuba/10 px-1.5 py-0.5 dark:bg-[#315659]"
+          >Dolly FIUBA</span
+        >
       {/if}
     </div>
   </div>
@@ -50,7 +52,7 @@
     {/each}
 
     {#if cantidadOcultos > 0}
-      <Collapsible.Content class="divide-y divide-border-muted/75">
+      <Collapsible.Content class="divide-border-muted/75 divide-y">
         {#each comentariosOcultos as comentario (comentario.codigo)}
           {@render ComentarioItem(comentario)}
         {/each}
