@@ -4,6 +4,9 @@
   import Fuse from "fuse.js";
   import { page } from "$app/state";
 
+  const FUZZY_SEARCH_THRESHOLD = 0.15;
+  const FUZZY_SEARCH_DEBOUNCE_TIMEOUT_MS = 300;
+
   interface Props {
     materia: {
       codigo: string;
@@ -27,8 +30,6 @@
 
   let { materia, catedras }: Props = $props();
 
-  const DEBOUNCE_TIMEOUT_MS = 300;
-
   let queryValue = $state("");
   let queryDebounced = $state("");
   let fuse = $derived(
@@ -36,7 +37,7 @@
       ignoreDiacritics: true,
       shouldSort: false,
       includeScore: false,
-      threshold: 0.5,
+      threshold: FUZZY_SEARCH_THRESHOLD,
       keys: ["nombre"]
     })
   );
@@ -55,7 +56,7 @@
 
     const handler = setTimeout(() => {
       queryDebounced = queryValue;
-    }, DEBOUNCE_TIMEOUT_MS);
+    }, FUZZY_SEARCH_DEBOUNCE_TIMEOUT_MS);
 
     return () => clearTimeout(handler);
   });

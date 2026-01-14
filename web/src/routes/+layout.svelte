@@ -64,4 +64,6 @@
 <ModeWatcher />
 <Navbar {materias} />
 
-{@render children()}
+<div class="pt-[calc(56px+env(safe-area-inset-top))]">
+  {@render children()}
+</div>

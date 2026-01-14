@@ -20,7 +20,7 @@
   });
 </script>
 
-<div class="container mx-auto flex h-screen overflow-hidden">
+<div class="container mx-auto mt-[calc(-56px-env(safe-area-inset-top))] flex h-dvh overflow-hidden">
   {#if data.catedras.length > 0}
     <!-- Desktop sidebar -->
     <div class="hidden w-[280px] shrink-0 md:flex">

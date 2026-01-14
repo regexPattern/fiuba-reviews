@@ -3,6 +3,9 @@
   import Fuse from "fuse.js";
   import { Search } from "@lucide/svelte";
 
+  const FUZZY_SEARCH_THRESHOLD = 0.25;
+  const FUZZY_SEARCH_DEBOUNCE_TIMEOUT_MS = 300;
+
   interface Props {
     materias: {
       codigo: string;
@@ -11,9 +14,6 @@
   }
 
   let { materias }: Props = $props();
-
-  const FUZZY_SEARCH_THRESHOLD = 0.75;
-  const FUZZY_SEARCH_DEBOUNCE_TIMEOUT_MS = 300;
 
   let dialogOpen = $state(false);
   let queryValue = $state("");

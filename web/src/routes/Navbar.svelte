@@ -49,7 +49,7 @@
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content
-          class="border-border-muted z-500 w-fit border bg-background p-1 shadow-lg data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:fade-in"
+          class="border-layout-border z-500 w-fit border bg-background p-1 shadow-lg data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:fade-in"
           sideOffset={8}
           align="end"
         >

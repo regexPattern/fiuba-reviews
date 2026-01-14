@@ -30,7 +30,7 @@
         </div>
       {/if}
 
-      <div class="flex gap-2 text-sm transition-colors">
+      <div class="flex gap-2 text-sm text-button-foreground transition-colors">
         <Promedios
           promedio={docente.promedioCalificaciones}
           cantidadCalificaciones={docente.cantidadCalificaciones}

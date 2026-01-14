@@ -58,7 +58,7 @@
   {#if promedio}
     <Popover.Portal>
       <Popover.Content
-        class="z-50 w-56 border border-fiuba/30 bg-background/95 p-3 text-sm shadow-md backdrop-blur-xl"
+        class="z-50 w-56 border border-button-border/30 bg-background/95 p-3 text-sm shadow-md backdrop-blur-xl"
         align="start"
         sideOffset={6}
       >
@@ -74,7 +74,7 @@
           {@render Criterio("Responde Mails", promedio.respondeMails)}
         </div>
 
-        <div class="text-foreground-muted/80 pt-3 text-center">
+        <div class="text-secondary-foreground pt-3 text-center">
           {cantidadCalificaciones} calificacion{cantidadCalificaciones === 1 ? "" : "es"}
         </div>
       </Popover.Content>
