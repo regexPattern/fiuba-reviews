@@ -2,8 +2,24 @@
   let { data } = $props();
 </script>
 
-{#each data.materias as materia (materia.codigo)}
-  <div>
-    <a href={`${materia.codigo}`}>{materia.codigo} - {materia.nombre}</a>
+<main class="container mx-auto grid md:grid-cols-2">
+  <div class="text-center">
+    <h1 class="xs:text-7xl text-6xl">
+      <span class="font-serif font-bold tracking-tight text-fiuba">FIUBA</span>
+      <span class="font-semibold tracking-tighter">Reviews</span>
+    </h1>
+
+    <p>
+      Encontrá calificaciones y comentarios de los docentes de la facultad, subidos por otros
+      estudiantes de la FIUBA. Basado en el legendario Dolly FIUBA.
+    </p>
   </div>
-{/each}
+
+  <div>
+    {#each data.materias as materia (materia.codigo)}
+      <div>
+        <a href={`${materia.codigo}`}>{materia.codigo} - {materia.nombre}</a>
+      </div>
+    {/each}
+  </div>
+</main>

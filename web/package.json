@@ -44,6 +44,7 @@
     "bits-ui": "^2.15.4",
     "fuse.js": "^7.1.0",
     "pg": "^8.16.3",
-    "postgres": "^3.4.7"
+    "postgres": "^3.4.7",
+    "svelte-rough-notation": "^0.1.5"
   }
 }

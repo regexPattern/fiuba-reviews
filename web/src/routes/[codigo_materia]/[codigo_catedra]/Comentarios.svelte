@@ -28,11 +28,11 @@
 
 {#snippet ComentarioItem(comentario: Comentario)}
   <div class="space-x-0.5 py-3">
-    <p class={`inline before:content-['"'] after:content-['"']`}>
+    <p class={`inline w-fit before:content-['"'] after:content-['"']`}>
       {comentario.contenido.trim()}
     </p>
 
-    <div class="inline-flex items-center gap-2 text-xs text-[#495883] select-none">
+    <div class="inline-flex items-center gap-2 text-xs text-button-foreground select-none">
       <span class="border border-fiuba/30 bg-fiuba/10 px-1.5 py-0.5">
         {comentario.cuatrimestre.numero}C{comentario.cuatrimestre.anio}
       </span>

@@ -42,9 +42,9 @@
         class="hidden size-9 items-center justify-center text-sm font-medium md:inline-flex"
       >
         {#if mode.current === "light"}
-          <SunMedium />
+          <SunMedium class="size-[22px]" />
         {:else}
-          <Moon />
+          <Moon class="size-[20px]" />
         {/if}
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>

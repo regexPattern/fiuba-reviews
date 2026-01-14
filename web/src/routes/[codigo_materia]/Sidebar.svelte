@@ -32,6 +32,7 @@
 
   let queryValue = $state("");
   let queryDebounced = $state("");
+
   let fuse = $derived(
     new Fuse(catedras, {
       ignoreDiacritics: true,
@@ -41,6 +42,7 @@
       keys: ["nombre"]
     })
   );
+
   let catedrasFiltradas = $derived.by(() => {
     if (queryDebounced.trim() === "") {
       return catedras;

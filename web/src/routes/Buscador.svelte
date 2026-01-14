@@ -16,8 +16,10 @@
   let { materias }: Props = $props();
 
   let dialogOpen = $state(false);
+
   let queryValue = $state("");
   let queryDebounced = $state("");
+  let debouceTimeoutHandler: ReturnType<typeof setTimeout> | null = null;
 
   let fuse = $derived(
     new Fuse(materias, {
@@ -46,20 +48,41 @@
       return;
     }
 
-    const handler = setTimeout(() => {
+    debouceTimeoutHandler = setTimeout(() => {
       queryDebounced = queryValue;
     }, FUZZY_SEARCH_DEBOUNCE_TIMEOUT_MS);
 
-    return () => clearTimeout(handler);
+    return () => {
+      if (debouceTimeoutHandler) {
+        clearTimeout(debouceTimeoutHandler);
+      }
+    };
   });
 
-  function handleKeydown(e: KeyboardEvent) {
+  let commandRoot: ReturnType<typeof Command.Root>;
+
+  $effect(() => {
+    materiasFiltradas;
+    queueMicrotask(() => {
+      if (commandRoot) {
+        commandRoot.updateSelectedToIndex(0);
+      }
+    });
+  });
+
+  function limpiarEstado() {
+    dialogOpen = false;
+    queryValue = "";
+    if (debouceTimeoutHandler) {
+      clearTimeout(debouceTimeoutHandler);
+    }
+  }
+
+  function handleKeyDownGlobal(e: KeyboardEvent) {
     const target = e.target as HTMLElement | null;
     const tag = target?.tagName?.toLowerCase();
-    const estaEscribiendo =
-      tag === "input" || tag === "textarea" || tag === "select" || target?.isContentEditable;
 
-    if (estaEscribiendo) {
+    if (tag === "input" || tag === "textarea" || tag === "select" || target?.isContentEditable) {
       return;
     }
 
@@ -70,7 +93,7 @@
   }
 </script>
 
-<svelte:document onkeydown={handleKeydown} />
+<svelte:document onkeydown={handleKeyDownGlobal} />
 
 <Dialog.Root bind:open={dialogOpen}>
   <Dialog.Trigger
@@ -95,7 +118,9 @@
       class="fixed top-1/2 left-1/2 z-501 w-full max-w-[min(560px,94vw)] -translate-x-1/2 -translate-y-1/2 border border-secondary-border bg-background shadow-xl data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:zoom-in-95 data-[state=open]:fade-in"
     >
       <Command.Root
+        bind:this={commandRoot}
         shouldFilter={false}
+        vimBindings
         class="flex h-full w-full flex-col divide-y divide-secondary-border self-start overflow-hidden bg-background"
       >
         <div class="relative">
@@ -108,7 +133,7 @@
             bind:value={queryValue}
             autofocus
             placeholder="Código o nombre de materia"
-            class="w-full truncate bg-transparent p-3 pr-3 pl-10 text-sm focus:ring-0 focus:outline-hidden md:pr-14"
+            class="w-full truncate p-3 pr-3 pl-10 text-base focus:ring-0 focus:outline-hidden md:pr-14"
           />
 
           <kbd
@@ -117,33 +142,27 @@
             esc
           </kbd>
         </div>
+
         <Command.List class="max-h-[280px] overflow-x-hidden overflow-y-auto pb-2">
           <Command.Viewport>
-            {#if materiasFiltradas.length === 0}
-              <Command.Empty
-                class="text-muted-foreground flex w-full items-center justify-center pt-8 pb-6 text-sm"
+            {#each materiasFiltradas as materia (materia.codigo)}
+              <Command.LinkItem
+                href="/{materia.codigo}"
+                onSelect={limpiarEstado}
+                class="flex h-10 cursor-pointer items-center gap-3 p-3 text-sm outline-hidden select-none data-selected:text-fiuba"
               >
-                Sin resultados
-              </Command.Empty>
-            {:else}
-              <Command.Group>
-                <Command.GroupItems>
-                  {#each materiasFiltradas as materia (materia.codigo)}
-                    <Command.LinkItem
-                      value={materia.codigo}
-                      href={`/${materia.codigo}`}
-                      onSelect={() => (dialogOpen = false)}
-                      class="data-selected:bg-muted flex h-10 cursor-pointer items-center gap-3 p-3 text-sm outline-hidden select-none"
-                    >
-                      <span class="font-mono text-xs text-foreground/60 tabular-nums">
-                        {materia.codigo}
-                      </span>
-                      <span>{materia.nombre}</span>
-                    </Command.LinkItem>
-                  {/each}
-                </Command.GroupItems>
-              </Command.Group>
-            {/if}
+                <span class="font-mono text-xs text-foreground/60 tabular-nums">
+                  {materia.codigo}
+                </span>
+                <span class={""}>{materia.nombre}</span>
+              </Command.LinkItem>
+            {/each}
+
+            <Command.Empty
+              class="text-muted-foreground flex w-full items-center justify-center pt-8 pb-6 text-sm"
+            >
+              Sin resultados.
+            </Command.Empty>
           </Command.Viewport>
         </Command.List>
       </Command.Root>
