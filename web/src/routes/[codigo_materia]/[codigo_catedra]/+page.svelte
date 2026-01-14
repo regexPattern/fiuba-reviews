@@ -38,11 +38,11 @@
 
         <a
           href={`/calificar?docente=${docente.codigo}`}
-          class="flex items-center gap-2 border border-button-border bg-button-background px-3 py-2 hover:transition-colors hover:bg-button-hover"
+          class="flex items-center gap-2 border border-button-border bg-button-background px-3 py-2 hover:bg-button-hover hover:transition-colors"
         >
           <span>Calificar</span>
           <MessageSquarePlus
-            class="size-[16px] fill-fiuba/50 stroke-[#665889] dark:fill-[#F7AEF8] dark:stroke-[#9E4770]"
+            class="size-[16px] fill-fiuba/50 stroke-[#665889] dark:fill-[#D1BCE3]"
           />
         </a>
       </div>

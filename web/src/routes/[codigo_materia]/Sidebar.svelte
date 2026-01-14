@@ -100,7 +100,9 @@
 
           <li class="p-3">
             <a href={`${catedra.codigo}`} class="flex items-center gap-1.5 tabular-nums">
-              {calificacion === "0.0" ? "–" : calificacion}
+              <span class="inline-block w-[3ch] shrink-0 text-center">
+                {calificacion === "0.0" ? "–" : calificacion}
+              </span>
               <Star
                 class="size-[12px] shrink-0 fill-yellow-500 stroke-yellow-700 dark:stroke-yellow-400"
               />
