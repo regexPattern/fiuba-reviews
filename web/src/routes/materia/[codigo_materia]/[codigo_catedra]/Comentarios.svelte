@@ -50,7 +50,7 @@
     {/each}
 
     {#if cantidadOcultos > 0}
-      <Collapsible.Content class="divide-y divide-border-muted/75">
+      <Collapsible.Content class="divide-border-muted/75 divide-y">
         {#each comentariosOcultos as comentario (comentario.codigo)}
           {@render ComentarioItem(comentario)}
         {/each}

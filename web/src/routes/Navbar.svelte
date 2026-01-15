@@ -1,9 +1,9 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
+  import Buscador from "./Buscador.svelte";
   import { Github, Menu, Monitor, Moon, SunMedium } from "@lucide/svelte";
   import { DropdownMenu } from "bits-ui";
   import { mode, resetMode, setMode } from "mode-watcher";
-  import Buscador from "./Buscador.svelte";
 
   interface Props {
     materias: {
@@ -49,7 +49,7 @@
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content
-          class="border-layout-border z-500 w-fit border bg-background p-1 shadow-lg data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:fade-in"
+          class="z-500 w-fit border border-layout-border bg-background p-1 shadow-lg data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:fade-in"
           sideOffset={8}
           align="end"
         >

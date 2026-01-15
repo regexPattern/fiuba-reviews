@@ -1,6 +1,6 @@
 import { db, schema } from "$lib/server/db";
-import { desc, eq, sql } from "drizzle-orm";
 import type { LayoutServerLoad } from "./$types";
+import { desc, eq, sql } from "drizzle-orm";
 
 export const load: LayoutServerLoad = async () => {
   const cantidadPlanesExpr = sql<number>`count(distinct ${schema.plan.codigo})::int`;

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import Sidebar from "./Sidebar.svelte";
-  import { ScrollArea, Dialog } from "bits-ui";
   import { afterNavigate } from "$app/navigation";
+  import Sidebar from "./Sidebar.svelte";
   import { ChevronDown, ChevronUp } from "@lucide/svelte";
+  import { ScrollArea, Dialog } from "bits-ui";
 
   let { children, data } = $props();
 
@@ -20,7 +20,10 @@
   });
 </script>
 
-<div class="container mx-auto mt-[calc(-56px-env(safe-area-inset-top))] flex h-dvh overflow-hidden">
+<div
+  class="container mx-auto mt-[calc(-56px-env(safe-area-inset-top))] flex h-dvh overflow-hidden"
+  style="height: 100vh; height: -webkit-fill-available; height: 100dvh;"
+>
   {#if data.catedras.length > 0}
     <!-- Desktop sidebar -->
     <div class="hidden w-[280px] shrink-0 md:flex">

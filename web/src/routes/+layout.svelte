@@ -1,27 +1,13 @@
 <script lang="ts">
-  import "./layout.css";
   import favicon from "$lib/assets/favicon.svg";
   import Navbar from "./Navbar.svelte";
-  import { ModeWatcher } from "mode-watcher";
-  import Fuse from "fuse.js";
-  import { afterNavigate } from "$app/navigation";
+  import "./layout.css";
   import "@fontsource-variable/inter";
   import "@fontsource-variable/source-serif-4";
+  import Fuse from "fuse.js";
+  import { ModeWatcher } from "mode-watcher";
 
   let { children, data } = $props();
-
-  afterNavigate((navigation) => {
-    if (navigation.type === "popstate" || navigation.to?.url.hash) {
-      return;
-    }
-
-    const contenedor = document.querySelector<HTMLElement>('[data-scroll-container="main"]');
-    if (contenedor) {
-      contenedor.scrollTo({ top: 0, left: 0 });
-    } else {
-      window.scrollTo({ top: 0, left: 0 });
-    }
-  });
 
   const DEBOUNCE_TIMEOUT_MS = 300;
 

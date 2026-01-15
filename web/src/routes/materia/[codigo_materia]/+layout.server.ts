@@ -1,8 +1,8 @@
 import { db, schema } from "$lib/server/db";
-import { eq, and } from "drizzle-orm";
-import { error } from "@sveltejs/kit";
 import { obtenerCatedras } from "$lib/server/db/utils";
 import type { LayoutServerLoad } from "./$types";
+import { error } from "@sveltejs/kit";
+import { eq, and } from "drizzle-orm";
 
 export const load: LayoutServerLoad = async ({ params }) => {
   const materiasVigentes = await db

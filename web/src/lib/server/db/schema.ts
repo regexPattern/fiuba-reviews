@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   pgTable,
   foreignKey,
@@ -14,7 +15,6 @@ import {
   primaryKey,
   jsonb
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 
 export const docente = pgTable(
   "docente",

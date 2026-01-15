@@ -1,7 +1,7 @@
 <script lang="ts">
+  import Comentarios from "./Comentarios.svelte";
   import Promedios from "./Promedios.svelte";
   import { Info, MessageSquarePlus } from "@lucide/svelte";
-  import Comentarios from "./Comentarios.svelte";
 
   let { data } = $props();
 </script>

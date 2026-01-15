@@ -1,7 +1,8 @@
 <script lang="ts">
+  import { beforeNavigate } from "$app/navigation";
+  import { Search } from "@lucide/svelte";
   import { Command, Dialog } from "bits-ui";
   import Fuse from "fuse.js";
-  import { Search } from "@lucide/svelte";
 
   const FUZZY_SEARCH_THRESHOLD = 0.25;
   const FUZZY_SEARCH_DEBOUNCE_TIMEOUT_MS = 300;
@@ -70,13 +71,13 @@
     });
   });
 
-  function limpiarEstado() {
+  beforeNavigate(() => {
     dialogOpen = false;
     queryValue = "";
     if (debouceTimeoutHandler) {
       clearTimeout(debouceTimeoutHandler);
     }
-  }
+  });
 
   function handleKeyDownGlobal(e: KeyboardEvent) {
     const target = e.target as HTMLElement | null;
@@ -115,7 +116,7 @@
       class="fixed inset-0 z-500 bg-overlay-background backdrop-filter-(--backdrop-filter-overlay-blur) data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:fade-in"
     />
     <Dialog.Content
-      class="fixed top-1/2 left-1/2 z-501 w-full max-w-[min(560px,94vw)] -translate-x-1/2 -translate-y-1/2 border border-secondary-border bg-background shadow-xl data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:zoom-in-95 data-[state=open]:fade-in"
+      class="fixed top-[calc(56px+env(safe-area-inset-top)+16px)] left-1/2 z-501 max-h-[calc(100dvh-(56px+env(safe-area-inset-top)+32px))] w-full max-w-[min(560px,94vw)] -translate-x-1/2 border border-secondary-border bg-background shadow-xl data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:zoom-in-95 data-[state=open]:fade-in"
     >
       <Command.Root
         bind:this={commandRoot}
@@ -131,7 +132,6 @@
 
           <Command.Input
             bind:value={queryValue}
-            autofocus
             placeholder="Código o nombre de materia"
             class="w-full truncate p-3 pr-3 pl-10 text-base focus:ring-0 focus:outline-hidden md:pr-14"
           />
@@ -147,14 +147,13 @@
           <Command.Viewport>
             {#each materiasFiltradas as materia (materia.codigo)}
               <Command.LinkItem
-                href="/{materia.codigo}"
-                onSelect={limpiarEstado}
+                href="/materia/{materia.codigo}"
                 class="flex h-10 cursor-pointer items-center gap-3 p-3 text-sm outline-hidden select-none data-selected:text-fiuba"
               >
-                <span class="font-mono text-xs text-foreground/60 tabular-nums">
+                <span class="text-xs text-foreground tabular-nums">
                   {materia.codigo}
                 </span>
-                <span class={""}>{materia.nombre}</span>
+                <span>{materia.nombre}</span>
               </Command.LinkItem>
             {/each}
 

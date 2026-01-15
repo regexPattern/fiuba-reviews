@@ -1,5 +1,4 @@
 <script lang="ts">
-  let { data } = $props();
 </script>
 
 <main class="container mx-auto grid md:grid-cols-2">
@@ -15,11 +14,5 @@
     </p>
   </div>
 
-  <div>
-    {#each data.materias as materia (materia.codigo)}
-      <div>
-        <a href={`${materia.codigo}`}>{materia.codigo} - {materia.nombre}</a>
-      </div>
-    {/each}
-  </div>
+  <div></div>
 </main>

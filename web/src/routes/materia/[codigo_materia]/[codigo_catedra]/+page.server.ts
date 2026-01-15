@@ -1,7 +1,7 @@
 import { db, schema } from "$lib/server/db";
-import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { error } from "@sveltejs/kit";
+import { desc, eq, inArray, sql } from "drizzle-orm";
 
 export const load: PageServerLoad = async ({ params, parent }) => {
   const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;

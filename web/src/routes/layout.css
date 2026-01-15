@@ -2,7 +2,27 @@
 
 @import "tw-animate-css";
 
-@source "../../node_modules/layerchart/dist";
+/* iOS 26 introdujo cambios que rompen el cálculo del viewport de la manera en
+* la que se acostumbraba a calcular (gracias Apple). Así que estas propiedades
+* para los elementos html y body son para evitar estas fallas en el cálculo y
+* el overscroll. 
+*
+* https://stripearmy.medium.com/ios-26-0-be-prepared-for-viewport-changes-in-safari-e867d7eace43
+* */
+
+html {
+  height: 100vh;
+  height: -webkit-fill-available;
+  height: 100dvh;
+}
+
+body {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  position: relative;
+}
 
 @theme {
   --color-fiuba: #4facd4;
@@ -14,7 +34,7 @@
   --color-button-foreground: #495883;
   --color-button-background: #b2ebf2;
   --color-button-border: var(--color-fiuba);
-  --color-button-hover: --alpha(var(--color-fiuba) / 30%);
+  --color-button-hover: #8ee2ec;
   --color-secondary-foreground: #ab9e9c;
   --color-secondary-border: #ab9e9c;
   --color-layout-border: #c2e1c2;
@@ -29,7 +49,7 @@
   --color-button-foreground: #f4dbd8;
   --color-button-background: #342f37;
   --color-button-border: #875e6b;
-  --color-button-hover: --alpha(var(--color-fiuba) / 75%);
+  --color-button-hover: #433c46;
   --color-secondary-foreground: #998291;
   --color-secondary-border: #875e6b;
   --color-layout-border: #512d38;
