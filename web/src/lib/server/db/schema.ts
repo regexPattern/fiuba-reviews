@@ -298,3 +298,28 @@ export const ofertaComisiones = pgTable(
     })
   ]
 );
+
+export const ofertaComisionesRaw = pgTable(
+  "oferta_comisiones_raw",
+  {
+    codigoCarrera: integer("codigo_carrera").notNull(),
+    codigoCuatrimestre: integer("codigo_cuatrimestre").notNull(),
+    contenido: text().notNull()
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.codigoCarrera],
+      foreignColumns: [carrera.codigo],
+      name: "oferta_comisiones_raw_codigo_carrera_fkey"
+    }),
+    foreignKey({
+      columns: [table.codigoCuatrimestre],
+      foreignColumns: [cuatrimestre.codigo],
+      name: "oferta_comisiones_raw_codigo_cuatrimestre_fkey"
+    }),
+    primaryKey({
+      columns: [table.codigoCuatrimestre, table.codigoCarrera],
+      name: "oferta_comisiones_raw_pkey"
+    })
+  ]
+);

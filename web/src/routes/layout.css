@@ -1,6 +1,7 @@
 @import "tailwindcss";
-
 @import "tw-animate-css";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* iOS 26 introdujo cambios que rompen el cálculo del viewport de la manera en
 * la que se acostumbraba a calcular (gracias Apple). Así que estas propiedades
@@ -28,6 +29,7 @@ body {
   --color-fiuba: #4facd4;
   --font-sans: "Inter Variable", sans-serif;
   --font-serif: "Source Serif 4 Variable", serif;
+  --font-mono: "Google Sans Code Variable", monospace;
 
   --color-foreground: #173341;
   --color-background: #fbfef9;

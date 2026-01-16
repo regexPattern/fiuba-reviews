@@ -77,18 +77,14 @@
         Última actualización de cátedras en <span class="tracking-tight">
           {materia.cuatrimestre.numero}C{materia.cuatrimestre.anio}
         </span>. Si ves que la oferta está desactualizada, podés colaborar
-        <a href={`/colaborar?materia=${materia.codigo}`} class="text-fiuba underline">
-          enviándola acá
-        </a>.
+        <a href="/colaborar" class="text-fiuba underline">enviándola acá</a>.
       </p>
     {:else}
       La oferta de esta materia no está actualizada todavía. Se muestran las ofertas de sus
       equivalencias en los planes anteriores: <span class="tracking-tight">
         {materia.equivalencias.map((e) => e.codigo).join(", ")}
       </span>. Si tenés la oferta actualizada, podés colaborar
-      <a href={`/colaborar?materia=${materia.codigo}`} class="text-fiuba underline">
-        enviándola acá
-      </a>.
+      <a href="/colaborar" class="text-fiuba underline">enviándola acá</a>.
     {/if}
   </div>
 

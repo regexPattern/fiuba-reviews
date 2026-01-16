@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
   import Buscador from "./Buscador.svelte";
   import { Github, Menu, Monitor, Moon, SunMedium } from "@lucide/svelte";
   import { DropdownMenu } from "bits-ui";
@@ -106,21 +105,18 @@
             </DropdownMenu.GroupHeading>
             <DropdownMenu.Item
               class="data-highlighted:bg-muted block rounded-lg px-3 py-2 text-sm outline-hidden"
-              onSelect={() => goto("/")}
             >
-              Inicio
+              <a href="/">Inicio</a>
             </DropdownMenu.Item>
             <DropdownMenu.Item
               class="data-highlighted:bg-muted block rounded-lg px-3 py-2 text-sm outline-hidden"
-              onSelect={() => goto("/estadisticas")}
             >
-              Estadísticas
+              <a href="/estadisticas">Estadísticas</a>
             </DropdownMenu.Item>
             <DropdownMenu.Item
               class="data-highlighted:bg-muted block rounded-lg px-3 py-2 text-sm outline-hidden"
-              onSelect={() => goto("/oferta")}
             >
-              Colaborar
+              <a href="/colaborar">Colaborar</a>
             </DropdownMenu.Item>
           </DropdownMenu.Group>
 
