@@ -2,11 +2,12 @@
   import { PUBLIC_TURNSTILE_SITE_KEY } from "$env/static/public";
   import { extraerMetadataOferta } from "$lib/parser-ofertas";
   import { enviarOferta } from "./data.remote";
-  import { CircleAlert } from "@lucide/svelte";
+  import { Check, CircleAlert, Loader } from "@lucide/svelte";
   import { Button } from "bits-ui";
   import { mode } from "mode-watcher";
   import { Turnstile } from "svelte-turnstile";
 
+  let enviando = $state(false);
   let metadata = $derived(extraerMetadataOferta(enviarOferta.fields.contenido.value()));
 
   $effect(() => {
@@ -18,7 +19,22 @@
   });
 </script>
 
-<form {...enviarOferta} class="w-full space-y-6">
+<form
+  {...enviarOferta.enhance(async ({ form, submit }) => {
+    enviando = true;
+    try {
+      await new Promise((r) => setTimeout(r, 3000));
+      await submit();
+      if (enviarOferta.result) {
+        form.reset();
+      }
+    } catch (_) {
+    } finally {
+      enviando = false;
+    }
+  })}
+  class="w-full space-y-6"
+>
   <div class="space-y-1">
     <label class="block">
       <span class="font-medium">Contenido copiado del SIU</span>
@@ -59,10 +75,18 @@
 
     <Button.Root
       type="submit"
-      disabled={!metadata}
+      disabled={!metadata || enviando}
       class="flex w-32 shrink-0 items-center justify-center gap-1 rounded-full border border-green-700 bg-[#65eb95] py-2.5 text-sm font-medium text-green-800 transition-colors hover:bg-green-400 disabled:border-slate-400 disabled:bg-[#C4D8E2] disabled:text-slate-400 dark:disabled:border-slate-600 dark:disabled:bg-slate-900"
     >
-      Enviar
+      {#if enviando}
+        Enviando
+        <Loader class="size-[16px] animate-spin" />
+      {:else if enviarOferta.result?.success}
+        Enviado
+        <Check class="size-[16px]" />
+      {:else}
+        Enviar
+      {/if}
     </Button.Root>
   </div>
 
