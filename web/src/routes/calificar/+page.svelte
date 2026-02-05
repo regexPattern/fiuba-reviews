@@ -24,5 +24,5 @@
     </a>
   </div>
 
-  <Formulario />
+  <Formulario cuatris={data.cuatris} />
 </main>

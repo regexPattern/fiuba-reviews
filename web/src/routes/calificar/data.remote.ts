@@ -29,40 +29,38 @@ const esquemaFormulario = v.object({
       "El comentario debe tener al menos 20 caracteres."
     )
   ),
+  cuatrimestre: v.pipe(v.number(), v.integer()),
   cfTurnstileResponse: v.string()
 });
 
-export const calificarDocente = form(
-  esquemaFormulario,
-  async ({ calificaciones, comentario, cfTurnstileResponse }) => {
-    const { success } = await validateToken(cfTurnstileResponse);
+export const calificarDocente = form(esquemaFormulario, async (fields) => {
+  console.log(fields);
 
-    if (!success) {
-      invalid("CAPTCHA inválido.");
-    }
+  const { success } = await validateToken(fields.cfTurnstileResponse);
 
-    const { url } = getRequestEvent();
-
-    const codigoDocente = url.searchParams.get("docente");
-
-    if (codigoDocente === null) {
-      error(400, "Parámetro de query 'docente' no encontrado.");
-    } else if (!CODIGO_DOCENTE_REGEX.test(codigoDocente)) {
-      error(400, "Código de docente inválido.");
-    }
-
-    const docente = await db
-      .select({ codigo: schema.docente.codigo })
-      .from(schema.docente)
-      .where(eq(schema.docente.codigo, codigoDocente))
-      .limit(1);
-
-    if (docente.length === 0) {
-      error(404, "Docente no encontrado.");
-    }
-
-    console.log(docente[0], calificaciones, comentario);
-
-    return { success: true };
+  if (!success) {
+    invalid("CAPTCHA inválido.");
   }
-);
+
+  const { url } = getRequestEvent();
+
+  const codigoDocente = url.searchParams.get("docente");
+
+  if (codigoDocente === null) {
+    error(400, "Parámetro de query 'docente' no encontrado.");
+  } else if (!CODIGO_DOCENTE_REGEX.test(codigoDocente)) {
+    error(400, "Código de docente inválido.");
+  }
+
+  const docente = await db
+    .select({ codigo: schema.docente.codigo })
+    .from(schema.docente)
+    .where(eq(schema.docente.codigo, codigoDocente))
+    .limit(1);
+
+  if (docente.length === 0) {
+    error(404, "Docente no encontrado.");
+  }
+
+  return { success: true };
+});

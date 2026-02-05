@@ -2,11 +2,11 @@
   import { PUBLIC_TURNSTILE_SITE_KEY } from "$env/static/public";
   import { calificarDocente } from "./data.remote";
   import { CircleCheck, CircleAlert, Loader } from "@lucide/svelte";
-  import { Button, Label, Slider } from "bits-ui";
+  import { Button, Label, Select, Slider } from "bits-ui";
   import { mode } from "mode-watcher";
   import { Turnstile } from "svelte-turnstile";
 
-  const LABELS_CAMPOS_CALIFICACION = [
+  const CAMPOS_CALIFICACION = [
     { name: "aceptaCritica", label: "Acepta crítica" },
     { name: "asistencia", label: "Asistencia" },
     { name: "buenTrato", label: "Buen trato" },
@@ -18,30 +18,46 @@
     { name: "respondeMails", label: "Responde mails" }
   ] as const;
 
-  const VALOR_POR_DEFECTO = 2.5;
+  const CALIFICACION_POR_DEFECTO = 2.5;
 
-  let enviando = $state(false);
-
-  for (const { name } of LABELS_CAMPOS_CALIFICACION) {
+  for (const { name } of CAMPOS_CALIFICACION) {
     const campo = calificarDocente.fields.calificaciones[name];
     if (campo.value() === null) {
-      campo.set(VALOR_POR_DEFECTO);
+      campo.set(CALIFICACION_POR_DEFECTO);
     }
   }
 
+  type Cuatri = {
+    codigo: number;
+    numero: number;
+    anio: number;
+  };
+
+  interface Props {
+    cuatris: Cuatri[];
+  }
+
+  let { cuatris }: Props = $props();
+
+  let cuatriSeleccionado = $state<Cuatri | null>(null);
+
+  let enviandoFormulario = $state(false);
+
+  $inspect(cuatriSeleccionado);
+
   function resetearCalificaciones() {
-    for (const { name } of LABELS_CAMPOS_CALIFICACION) {
-      calificarDocente.fields.calificaciones[name].set(VALOR_POR_DEFECTO);
+    for (const { name } of CAMPOS_CALIFICACION) {
+      calificarDocente.fields.calificaciones[name].set(CALIFICACION_POR_DEFECTO);
     }
   }
 </script>
 
 {#snippet campoCalificacion(
-  nombreCampo: (typeof LABELS_CAMPOS_CALIFICACION)[number]["name"],
+  nombreCampo: (typeof CAMPOS_CALIFICACION)[number]["name"],
   label: string
 )}
   {@const field = calificarDocente.fields.calificaciones[nombreCampo]}
-  {@const value = field.value() ?? VALOR_POR_DEFECTO}
+  {@const value = field.value() ?? CALIFICACION_POR_DEFECTO}
   {@const inputComponent = field.as("number")}
 
   <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
@@ -95,27 +111,28 @@
 
 <form
   {...calificarDocente.enhance(async ({ form, submit }) => {
-    enviando = true;
+    enviandoFormulario = true;
     try {
       await submit();
       if (calificarDocente.result) {
         form.reset();
         resetearCalificaciones();
       }
-    } catch (_) {
+    } catch (e) {
+      console.error(e);
     } finally {
-      enviando = false;
+      enviandoFormulario = false;
     }
   })}
   class="mx-auto flex w-full flex-col gap-12 md:w-fit lg:mx-0 lg:flex-row"
 >
-  <div class="w-full mx-auto max-w-[360px] sm:max-w-none space-y-8 sm:mx-0 md:w-fit">
-    {#each LABELS_CAMPOS_CALIFICACION as { name, label } (name)}
+  <div class="mx-auto w-full max-w-[360px] space-y-6 sm:mx-0 sm:max-w-none sm:space-y-10 md:w-fit">
+    {#each CAMPOS_CALIFICACION as { name, label } (name)}
       {@render campoCalificacion(name, label)}
     {/each}
   </div>
 
-  <div class="">
+  <div>
     <Label.Root for="comentario" class="block">
       <span class="font-medium">Comentario</span>
     </Label.Root>
@@ -127,6 +144,64 @@
       class="mt-1 w-full border border-button-border bg-background p-2 dark:bg-background"
     >
     </textarea>
+
+    <div class="mt-4">
+      <Label.Root for="cuatrimestre" class="block">
+        <span class="font-medium">Cuatrimestre</span>
+      </Label.Root>
+
+      <input
+        type="hidden"
+        name={calificarDocente.fields.cuatrimestre.as("number").name}
+        value={cuatriSeleccionado?.codigo ?? ""}
+        aria-invalid={calificarDocente.fields.cuatrimestre.as("number")["aria-invalid"]}
+      />
+
+      <Select.Root
+        type="single"
+        onValueChange={(v) => {
+          cuatriSeleccionado = cuatris.find((c) => `${c.codigo}` === v) || null;
+          if (cuatriSeleccionado) {
+            calificarDocente.fields.cuatrimestre.set(cuatriSeleccionado.codigo);
+          }
+        }}
+      >
+        <Select.Trigger
+          id="cuatrimestre"
+          class="mt-1 inline-flex w-full items-center rounded-none border border-button-border bg-background px-2 py-2 text-sm data-placeholder:text-neutral-500"
+          aria-label="Seleccionar cuatrimestre"
+        >
+          <span class="truncate">
+            {#if cuatriSeleccionado}
+              {cuatriSeleccionado.numero}C{cuatriSeleccionado.anio}
+            {:else}
+              Seleccióna un cuatrimestre
+            {/if}
+          </span>
+        </Select.Trigger>
+
+        <Select.Portal>
+          <Select.Content
+            class="z-50 w-(--bits-select-anchor-width) rounded-none border border-button-border bg-background shadow-md outline-hidden"
+            sideOffset={6}
+          >
+            <Select.Viewport class="py-1">
+              {#each cuatris as cuatri (cuatri.codigo)}
+                {@const label = `${cuatri.numero}C${cuatri.anio}`}
+
+                <Select.Item
+                  value={`${cuatri.codigo}`}
+                  {label}
+                  class="flex w-full items-center px-2 py-2 text-sm select-none data-highlighted:bg-neutral-100"
+                >
+                  {label}
+                </Select.Item>
+              {/each}
+            </Select.Viewport>
+          </Select.Content>
+        </Select.Portal>
+      </Select.Root>
+    </div>
 
     <div class="mt-6 flex flex-col items-center justify-between gap-4 md:flex-row">
       <div class="h-[65px] w-[300px] overflow-hidden">
@@ -143,10 +218,10 @@
 
       <Button.Root
         type="submit"
-        disabled={enviando}
+        disabled={enviandoFormulario}
         class="flex w-32 shrink-0 items-center justify-center gap-1 rounded-full border border-green-700 bg-[#65eb95] py-2.5 text-sm font-medium text-green-800 transition-colors hover:bg-green-400 disabled:border-slate-400 disabled:bg-[#C4D8E2] disabled:text-slate-400 dark:disabled:border-slate-600 dark:disabled:bg-slate-900"
       >
-        {#if enviando}
+        {#if enviandoFormulario}
           Enviando
           <Loader class="size-[16px] animate-spin" />
         {:else if calificarDocente.result?.success}

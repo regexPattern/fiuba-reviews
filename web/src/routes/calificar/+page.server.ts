@@ -1,14 +1,13 @@
 import { db, schema } from "$lib/server/db";
+import { UUID_V4_RE } from "$lib/utils";
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
-import { asc, eq } from "drizzle-orm";
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+import { desc, eq } from "drizzle-orm";
 
 export const load: PageServerLoad = async ({ url }) => {
   const codigoCatedra = url.searchParams.get("catedra");
 
-  if (codigoCatedra && !UUID_REGEX.test(codigoCatedra)) {
+  if (codigoCatedra && !UUID_V4_RE.test(codigoCatedra)) {
     error(400, "Código de cátedra inválido.");
   }
 
@@ -18,7 +17,7 @@ export const load: PageServerLoad = async ({ url }) => {
     error(400, "Parámetro de query 'docente' no encontrado.");
   }
 
-  if (!UUID_REGEX.test(codigoDocente)) {
+  if (!UUID_V4_RE.test(codigoDocente)) {
     error(400, "Código de docente inválido.");
   }
 
@@ -38,23 +37,23 @@ export const load: PageServerLoad = async ({ url }) => {
     error(404, "Docente no encontrado.");
   }
 
-  const cuatrimestres = await db
+  const cuatris = await db
     .select({
       codigo: schema.cuatrimestre.codigo,
       numero: schema.cuatrimestre.numero,
       anio: schema.cuatrimestre.anio
     })
     .from(schema.cuatrimestre)
-    .orderBy(asc(schema.cuatrimestre.codigo))
+    .orderBy(desc(schema.cuatrimestre.codigo))
     .limit(4);
 
-  if (cuatrimestres.length === 0) {
+  if (cuatris.length === 0) {
     error(500, "No se han encontrado cuatrimestres para calificar.");
   }
 
   return {
-    cuatrimestres,
+    codigoCatedra,
     docente: docente[0],
-    codigoCatedra
+    cuatris
   };
 };
