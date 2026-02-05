@@ -1,4 +1,5 @@
 import { db, schema } from "$lib/server/db";
+import { UUID_V4_RE } from "$lib/utils";
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 import { desc, eq, inArray, sql } from "drizzle-orm";
@@ -10,9 +11,7 @@ export const config = {
 };
 
 export const load: PageServerLoad = async ({ params, parent }) => {
-  const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-  if (!uuidV4Regex.test(params.codigo_catedra)) {
+  if (!UUID_V4_RE.test(params.codigo_catedra)) {
     error(400, "Código de cátedra inválido.");
   }
 
@@ -189,5 +188,8 @@ export const load: PageServerLoad = async ({ params, parent }) => {
       return a.nombre.localeCompare(b.nombre);
     });
 
-  return { docentes };
+  return {
+    codigoCatedra: params.codigo_catedra,
+    docentes
+  };
 };

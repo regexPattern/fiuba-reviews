@@ -1,6 +1,10 @@
 import { db, schema } from "$lib/server/db";
 import type { LayoutServerLoad } from "./$types";
+import "@valibot/i18n/es";
 import { desc, eq, sql } from "drizzle-orm";
+import * as v from "valibot";
+
+v.setGlobalConfig({ lang: "es" });
 
 export const load: LayoutServerLoad = async () => {
   const cantidadPlanesExpr = sql<number>`count(distinct ${schema.plan.codigo})::int`;

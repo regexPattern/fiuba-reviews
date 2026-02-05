@@ -40,8 +40,8 @@
       <span class="font-medium">Contenido copiado del SIU</span>
       <textarea
         {...enviarOferta.fields.contenido.as("text")}
-        rows="5"
-        class="mt-1 w-full border border-button-border bg-background p-2 text-sm dark:bg-background"
+        rows={5}
+        class="mt-1 w-full border border-button-border bg-background p-2 dark:bg-background"
       >
       </textarea>
 

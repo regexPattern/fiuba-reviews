@@ -10,7 +10,7 @@
   {#each data.docentes as docente (docente.codigo)}
     <section id={docente.codigo} class="scroll-mt-[68px] space-y-3">
       <div>
-        <h1 class="w-fit font-serif text-4xl font-semibold tracking-tight">
+        <h1 class="w-fit text-4xl font-semibold tracking-tight">
           {docente.nombre}
         </h1>
         {#if docente.rol}
@@ -37,7 +37,7 @@
         />
 
         <a
-          href={`/calificar?docente=${docente.codigo}`}
+          href={`/calificar?docente=${docente.codigo}&catedra=${data.codigoCatedra}`}
           class="flex items-center gap-2 border border-button-border bg-button-background px-3 py-2 hover:bg-button-hover hover:transition-colors"
         >
           <span>Calificar</span>

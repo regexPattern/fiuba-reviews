@@ -56,3 +56,14 @@ body {
   --color-secondary-border: #875e6b;
   --color-layout-border: #512d38;
 }
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-serif;
+  }
+}

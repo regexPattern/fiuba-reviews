@@ -22,8 +22,7 @@
 
 <div
   class="container mx-auto mt-[calc(-56px-env(safe-area-inset-top))] flex h-dvh overflow-hidden"
-  style="height: 100vh; height: -webkit-fill-available; height: 100dvh;"
->
+  style="height: 100vh; height: -webkit-fill-available; height: 100dvh;">
   {#if data.catedras.length > 0}
     <!-- Desktop sidebar -->
     <div class="hidden w-[280px] shrink-0 md:flex">
@@ -34,12 +33,10 @@
     <Dialog.Root bind:open={mobileDrawerOpen}>
       <Dialog.Portal>
         <Dialog.Overlay
-          class="fixed inset-0 z-300 bg-overlay-background backdrop-filter-(--backdrop-filter-overlay-blur) data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:fade-in md:hidden"
-        />
+          class="fixed inset-0 z-300 bg-overlay-background backdrop-filter-(--backdrop-filter-overlay-blur) data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:fade-in md:hidden" />
         <Dialog.Content
           onclick={onClickDrawer}
-          class="fixed inset-y-0 left-0 z-301 h-full w-4/5 overflow-hidden bg-background data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:animate-in data-[state=open]:slide-in-from-left md:hidden"
-        >
+          class="fixed inset-y-0 left-0 z-301 h-full w-4/5 overflow-hidden bg-background data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:animate-in data-[state=open]:slide-in-from-left md:hidden">
           <Sidebar materia={data.materia} catedras={data.catedras} />
         </Dialog.Content>
       </Dialog.Portal>
@@ -50,12 +47,10 @@
     <ScrollArea.Root class="h-full min-h-0 overflow-hidden">
       <ScrollArea.Viewport
         class="h-full w-full pt-[calc(56px+env(safe-area-inset-top))]"
-        data-scroll-container="main"
-      >
+        data-scroll-container="main">
         <button
           class="sticky top-0 z-200 flex w-full items-center justify-between border-b border-layout-border bg-background p-3 text-left font-serif text-lg font-medium md:hidden"
-          onclick={() => (mobileDrawerOpen = true)}
-        >
+          onclick={() => (mobileDrawerOpen = true)}>
           {data.materia.nombre}
           {#if mobileDrawerOpen}
             <ChevronUp class="size-[18px] shrink-0" />

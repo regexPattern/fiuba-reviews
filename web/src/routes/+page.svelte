@@ -4,8 +4,8 @@
 <main class="container mx-auto grid md:grid-cols-2">
   <div class="text-center">
     <h1 class="xs:text-7xl text-6xl">
-      <span class="font-serif font-bold tracking-tight text-fiuba">FIUBA</span>
-      <span class="font-semibold tracking-tighter">Reviews</span>
+      <span class="font-bold tracking-tight text-fiuba">FIUBA</span>
+      <span class="font-sans font-semibold tracking-tighter">Reviews</span>
     </h1>
 
     <p>

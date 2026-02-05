@@ -7,7 +7,7 @@
 {/snippet}
 
 <section class="space-y-4">
-  <h1 class="font-serif text-2xl font-semibold">¿Cómo enviar tu oferta de comisiones?</h1>
+  <h1 class="text-2xl font-semibold">¿Cómo enviar tu oferta de comisiones?</h1>
   <p>
     Si querés enviar una versión más reciente de la oferta de comisiones de tu carrera, lo podés
     hacer siguiendo los pasos listado a continuación:
@@ -18,8 +18,7 @@
       <a
         href="https://guaraniautogestion.fi.uba.ar/g3w/oferta_comisiones"
         target="_blank"
-        class="inline-flex items-center border border-button-border bg-button-background px-1 py-0.5 text-sm underline hover:bg-button-hover hover:transition-colors"
-      >
+        class="inline-flex items-center border border-button-border bg-button-background px-1 py-0.5 text-sm underline hover:bg-button-hover hover:transition-colors">
         Reportes <ChevronRight class="size-4" /> Oferta de comisiones
       </a>
     </li>
@@ -38,8 +37,7 @@
     </li>
   </ol>
   <div
-    class="flex items-center gap-2 border border-orange-500 bg-[#fdbb6f] p-3 text-sm text-orange-800 dark:border-orange-400 dark:bg-orange-700 dark:text-orange-200"
-  >
+    class="flex items-center gap-2 border border-orange-500 bg-[#fdbb6f] p-3 text-sm text-orange-800 dark:border-orange-400 dark:bg-orange-700 dark:text-orange-200">
     <Hourglass class="size-[18px] shrink-0" />
     <span>
       La actualización no va a ser instantánea porque todavía hay algunos errores que corregir en el

@@ -7,7 +7,7 @@
 
 <main class="container mx-auto grid items-start lg:grid-cols-2">
   <section class="space-y-4 p-6">
-    <h1 class="font-serif text-2xl font-semibold">Actualización de ofertas</h1>
+    <h1 class="text-2xl font-semibold">Actualización de ofertas</h1>
 
     <p>
       La página de la oferta horaria de la que Dolly FIUBA solía obtener el listado de cátedras de

@@ -2,9 +2,9 @@
   import favicon from "$lib/assets/favicon.svg";
   import Navbar from "./Navbar.svelte";
   import "./layout.css";
+  import "@fontsource-variable/google-sans-code";
   import "@fontsource-variable/inter";
   import "@fontsource-variable/source-serif-4";
-  import "@fontsource-variable/google-sans-code";
   import Fuse from "fuse.js";
   import { ModeWatcher } from "mode-watcher";
 

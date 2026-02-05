@@ -65,8 +65,7 @@
 </script>
 
 <aside
-  class="flex h-full min-h-0 flex-col divide-y divide-layout-border border-r border-layout-border md:pt-[56px]"
->
+  class="flex h-full min-h-0 flex-col divide-y divide-layout-border border-r border-layout-border md:pt-[56px]">
   <div class="shrink-0 space-y-2 border-b p-3 font-serif text-lg font-medium">
     {materia.nombre}
   </div>
@@ -100,11 +99,9 @@
                 {calificacion === "0.0" ? "–" : calificacion}
               </span>
               <Star
-                class="size-[12px] shrink-0 fill-yellow-500 stroke-yellow-700 dark:stroke-yellow-400"
-              />
+                class="size-[12px] shrink-0 fill-yellow-500 stroke-yellow-700 dark:stroke-yellow-400" />
               <span class={page.params.codigo_catedra === catedra.codigo ? "text-fiuba" : ""}
-                >{catedra.nombre}</span
-              >
+                >{catedra.nombre}</span>
             </a>
           </li>
         {/each}
@@ -119,11 +116,9 @@
     <input
       bind:value={queryValue}
       placeholder="Filtrar por nombre de docente"
-      class="w-full py-3 pr-12 pl-3 outline-none placeholder:text-sm"
-    />
+      class="w-full py-3 pr-12 pl-3 outline-none placeholder:text-sm" />
     <span
-      class="border-border pointer-events-none absolute top-1/2 right-3 flex size-[26px] -translate-y-1/2 items-center justify-center rounded-full border text-foreground/50"
-    >
+      class="border-border pointer-events-none absolute top-1/2 right-3 flex size-[26px] -translate-y-1/2 items-center justify-center rounded-full border text-foreground/50">
       <ListFilter class="size-[12px]" aria-hidden="true" />
     </span>
   </div>
