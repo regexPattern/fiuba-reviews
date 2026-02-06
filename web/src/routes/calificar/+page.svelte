@@ -14,8 +14,10 @@
       {/if}
     </div>
 
-    <a href="/materia/{data.docente.codigoMateria}" class="flex items-center text-sm underline">
+    <!-- TODO: hacer que funcione el scroll del docente y poner el codigo de la catedra -->
+    <a href={`/materia/${data.docente.codigoMateria}`} class="flex items-center text-sm underline">
       <ChevronLeft class="size-[18px]" />
+
       {#if data.codigoCatedra}
         Ir a cátedra del docente
       {:else}

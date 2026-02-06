@@ -1,34 +1,34 @@
 <script lang="ts">
   import { PUBLIC_TURNSTILE_SITE_KEY } from "$env/static/public";
   import { extraerMetadataOferta } from "$lib/parser-ofertas";
-  import { enviarOferta } from "./data.remote";
+  import { submitForm } from "./form.remote";
   import { Check, CircleAlert, Loader } from "@lucide/svelte";
   import { Button } from "bits-ui";
   import { mode } from "mode-watcher";
   import { Turnstile } from "svelte-turnstile";
 
   let enviando = $state(false);
-  let metadata = $derived(extraerMetadataOferta(enviarOferta.fields.contenido.value()));
+  let metadata = $derived(extraerMetadataOferta(submitForm.fields.contenido.value()));
 
   $effect(() => {
     if (metadata) {
-      enviarOferta.fields.metadata.carrera.set(metadata.carrera);
-      enviarOferta.fields.metadata.cuatrimestre.numero.set(metadata.cuatrimestre.numero);
-      enviarOferta.fields.metadata.cuatrimestre.anio.set(metadata.cuatrimestre.anio);
+      submitForm.fields.metadata.carrera.set(metadata.carrera);
+      submitForm.fields.metadata.cuatrimestre.numero.set(metadata.cuatrimestre.numero);
+      submitForm.fields.metadata.cuatrimestre.anio.set(metadata.cuatrimestre.anio);
     }
   });
 </script>
 
 <form
-  {...enviarOferta.enhance(async ({ form, submit }) => {
+  {...submitForm.enhance(async ({ form, submit }) => {
     enviando = true;
     try {
-      await new Promise((r) => setTimeout(r, 3000));
       await submit();
-      if (enviarOferta.result) {
+      if (submitForm.result) {
         form.reset();
       }
-    } catch (_) {
+    } catch (e) {
+      console.error(e);
     } finally {
       enviando = false;
     }
@@ -39,15 +39,15 @@
     <label class="block">
       <span class="font-medium">Contenido copiado del SIU</span>
       <textarea
-        {...enviarOferta.fields.contenido.as("text")}
+        {...submitForm.fields.contenido.as("text")}
         rows={5}
         class="mt-1 w-full border border-button-border bg-background p-2 dark:bg-background"
       >
       </textarea>
 
-      <input {...enviarOferta.fields.metadata.carrera.as("text")} hidden />
-      <input {...enviarOferta.fields.metadata.cuatrimestre.numero.as("number")} hidden />
-      <input {...enviarOferta.fields.metadata.cuatrimestre.anio.as("number")} hidden />
+      <input {...submitForm.fields.metadata.carrera.as("text")} hidden />
+      <input {...submitForm.fields.metadata.cuatrimestre.numero.as("number")} hidden />
+      <input {...submitForm.fields.metadata.cuatrimestre.anio.as("number")} hidden />
     </label>
 
     <p class="text-sm">
@@ -68,7 +68,7 @@
         language="es-es"
         theme={mode.current}
         on:callback={(e) => {
-          enviarOferta.fields.cfTurnstileResponse.set(e.detail.token);
+          submitForm.fields.cfTurnstileResponse.set(e.detail.token);
         }}
       />
     </div>
@@ -81,7 +81,7 @@
       {#if enviando}
         Enviando
         <Loader class="size-[16px] animate-spin" />
-      {:else if enviarOferta.result?.success}
+      {:else if submitForm.result?.success}
         Enviado
         <Check class="size-[16px]" />
       {:else}
@@ -90,9 +90,9 @@
     </Button.Root>
   </div>
 
-  {#if enviarOferta.fields.allIssues() && enviarOferta.fields.allIssues()!.length > 0}
+  {#if submitForm.fields.allIssues() && submitForm.fields.allIssues()!.length > 0}
     <div class="space-y-1 text-sm text-red-500 dark:text-red-400">
-      {#each enviarOferta.fields.allIssues() as issue, i (i)}
+      {#each submitForm.fields.allIssues() as issue, i (i)}
         <p class="flex flex-wrap items-center gap-1">
           <CircleAlert class="size-[14px]" />{issue.message}
         </p>

@@ -58,7 +58,8 @@
 
       <div class="w-full text-center">
         <Collapsible.Trigger
-          class="md:w-content mt-2 w-full cursor-pointer p-2 text-sm text-secondary-foreground hover:underline md:w-fit">
+          class="md:w-content mt-2 w-full cursor-pointer p-2 text-sm text-secondary-foreground hover:underline md:w-fit"
+        >
           {estaExpandido
             ? "Mostrar menos"
             : `Mostrar ${cantidadOcultos} comentario${cantidadOcultos === 1 ? "" : "s"} más`}

@@ -110,7 +110,8 @@ export const comentario = pgTable(
     esDeDolly: boolean("es_de_dolly").default(false).notNull(),
     fechaCreacion: timestamp("fecha_creacion", { withTimezone: true, mode: "string" }).default(
       sql`(now() AT TIME ZONE 'America/Argentina/Buenos_Aires'::text)`
-    )
+    ),
+    codigoCalificacionDolly: integer("codigo_calificacion_dolly")
   },
   (table) => [
     index("comentario_codigo_docente_idx").using(
@@ -126,7 +127,12 @@ export const comentario = pgTable(
       columns: [table.codigoCuatrimestre],
       foreignColumns: [cuatrimestre.codigo],
       name: "comentario_codigo_cuatrimestre_fkey"
-    })
+    }),
+    foreignKey({
+      columns: [table.codigoCalificacionDolly],
+      foreignColumns: [calificacionDolly.codigo],
+      name: "comentario_codigo_calificacion_dolly_fkey"
+    }).onDelete("set null")
   ]
 );
 
@@ -143,7 +149,10 @@ export const calificacionDolly = pgTable(
     cumpleHorarios: numeric("cumple_horarios", { precision: 2, scale: 1 }).notNull(),
     fomentaParticipacion: numeric("fomenta_participacion", { precision: 2, scale: 1 }).notNull(),
     panoramaAmplio: numeric("panorama_amplio", { precision: 2, scale: 1 }).notNull(),
-    respondeMails: numeric("responde_mails", { precision: 2, scale: 1 }).notNull()
+    respondeMails: numeric("responde_mails", { precision: 2, scale: 1 }).notNull(),
+    fechaCreacion: timestamp("fecha_creacion", { withTimezone: true, mode: "string" }).default(
+      sql`(now() AT TIME ZONE 'America/Argentina/Buenos_Aires'::text)`
+    )
   },
   (table) => [
     index("calificacion_dolly_codigo_docente_idx").using(
@@ -157,39 +166,39 @@ export const calificacionDolly = pgTable(
     }),
     check(
       "calificacion_dolly_acepta_critica_check",
-      sql`(acepta_critica >= (1)::numeric) AND (acepta_critica <= (5)::numeric)`
+      sql`(acepta_critica >= (0)::numeric) AND (acepta_critica <= (5)::numeric)`
     ),
     check(
       "calificacion_dolly_asistencia_check",
-      sql`(asistencia >= (1)::numeric) AND (asistencia <= (5)::numeric)`
+      sql`(asistencia >= (0)::numeric) AND (asistencia <= (5)::numeric)`
     ),
     check(
       "calificacion_dolly_buen_trato_check",
-      sql`(buen_trato >= (1)::numeric) AND (buen_trato <= (5)::numeric)`
+      sql`(buen_trato >= (0)::numeric) AND (buen_trato <= (5)::numeric)`
     ),
     check(
       "calificacion_dolly_claridad_check",
-      sql`(claridad >= (1)::numeric) AND (claridad <= (5)::numeric)`
+      sql`(claridad >= (0)::numeric) AND (claridad <= (5)::numeric)`
     ),
     check(
       "calificacion_dolly_clase_organizada_check",
-      sql`(clase_organizada >= (1)::numeric) AND (clase_organizada <= (5)::numeric)`
+      sql`(clase_organizada >= (0)::numeric) AND (clase_organizada <= (5)::numeric)`
     ),
     check(
       "calificacion_dolly_cumple_horarios_check",
-      sql`(cumple_horarios >= (1)::numeric) AND (cumple_horarios <= (5)::numeric)`
+      sql`(cumple_horarios >= (0)::numeric) AND (cumple_horarios <= (5)::numeric)`
     ),
     check(
       "calificacion_dolly_fomenta_participacion_check",
-      sql`(fomenta_participacion >= (1)::numeric) AND (fomenta_participacion <= (5)::numeric)`
+      sql`(fomenta_participacion >= (0)::numeric) AND (fomenta_participacion <= (5)::numeric)`
     ),
     check(
       "calificacion_dolly_panorama_amplio_check",
-      sql`(panorama_amplio >= (1)::numeric) AND (panorama_amplio <= (5)::numeric)`
+      sql`(panorama_amplio >= (0)::numeric) AND (panorama_amplio <= (5)::numeric)`
     ),
     check(
       "calificacion_dolly_responde_mails_check",
-      sql`(responde_mails >= (1)::numeric) AND (responde_mails <= (5)::numeric)`
+      sql`(responde_mails >= (0)::numeric) AND (responde_mails <= (5)::numeric)`
     )
   ]
 );

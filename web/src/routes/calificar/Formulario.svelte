@@ -1,6 +1,6 @@
 <script lang="ts">
   import { PUBLIC_TURNSTILE_SITE_KEY } from "$env/static/public";
-  import { calificarDocente } from "./data.remote";
+  import { submitForm } from "./form.remote";
   import { CircleCheck, CircleAlert, Loader } from "@lucide/svelte";
   import { Button, Label, Select, Slider } from "bits-ui";
   import { mode } from "mode-watcher";
@@ -21,17 +21,13 @@
   const CALIFICACION_POR_DEFECTO = 2.5;
 
   for (const { name } of CAMPOS_CALIFICACION) {
-    const campo = calificarDocente.fields.calificaciones[name];
+    const campo = submitForm.fields.calificaciones[name];
     if (campo.value() === null) {
       campo.set(CALIFICACION_POR_DEFECTO);
     }
   }
 
-  type Cuatri = {
-    codigo: number;
-    numero: number;
-    anio: number;
-  };
+  type Cuatri = { codigo: number; numero: number; anio: number };
 
   interface Props {
     cuatris: Cuatri[];
@@ -41,13 +37,11 @@
 
   let cuatriSeleccionado = $state<Cuatri | null>(null);
 
-  let enviandoFormulario = $state(false);
-
-  $inspect(cuatriSeleccionado);
+  let enviando = $state(false);
 
   function resetearCalificaciones() {
     for (const { name } of CAMPOS_CALIFICACION) {
-      calificarDocente.fields.calificaciones[name].set(CALIFICACION_POR_DEFECTO);
+      submitForm.fields.calificaciones[name].set(CALIFICACION_POR_DEFECTO);
     }
   }
 </script>
@@ -56,7 +50,7 @@
   nombreCampo: (typeof CAMPOS_CALIFICACION)[number]["name"],
   label: string
 )}
-  {@const field = calificarDocente.fields.calificaciones[nombreCampo]}
+  {@const field = submitForm.fields.calificaciones[nombreCampo]}
   {@const value = field.value() ?? CALIFICACION_POR_DEFECTO}
   {@const inputComponent = field.as("number")}
 
@@ -110,18 +104,18 @@
 {/snippet}
 
 <form
-  {...calificarDocente.enhance(async ({ form, submit }) => {
-    enviandoFormulario = true;
+  {...submitForm.enhance(async ({ form, submit }) => {
+    enviando = true;
     try {
       await submit();
-      if (calificarDocente.result) {
+      if (submitForm.result) {
         form.reset();
         resetearCalificaciones();
       }
     } catch (e) {
       console.error(e);
     } finally {
-      enviandoFormulario = false;
+      enviando = false;
     }
   })}
   class="mx-auto flex w-full flex-col gap-12 md:w-fit lg:mx-0 lg:flex-row"
@@ -138,7 +132,7 @@
     </Label.Root>
 
     <textarea
-      {...calificarDocente.fields.comentario.as("text")}
+      {...submitForm.fields.comentario.as("text")}
       id="comentario"
       rows={5}
       class="mt-1 w-full border border-button-border bg-background p-2 dark:bg-background"
@@ -152,9 +146,9 @@
 
       <input
         type="hidden"
-        name={calificarDocente.fields.cuatrimestre.as("number").name}
+        name={submitForm.fields.cuatrimestre.as("number").name}
         value={cuatriSeleccionado?.codigo ?? ""}
-        aria-invalid={calificarDocente.fields.cuatrimestre.as("number")["aria-invalid"]}
+        aria-invalid={submitForm.fields.cuatrimestre.as("number")["aria-invalid"]}
       />
 
       <Select.Root
@@ -162,7 +156,7 @@
         onValueChange={(v) => {
           cuatriSeleccionado = cuatris.find((c) => `${c.codigo}` === v) || null;
           if (cuatriSeleccionado) {
-            calificarDocente.fields.cuatrimestre.set(cuatriSeleccionado.codigo);
+            submitForm.fields.cuatrimestre.set(cuatriSeleccionado.codigo);
           }
         }}
       >
@@ -211,20 +205,20 @@
           language="es-es"
           theme={mode.current}
           on:callback={(e) => {
-            calificarDocente.fields.cfTurnstileResponse.set(e.detail.token);
+            submitForm.fields.cfTurnstileResponse.set(e.detail.token);
           }}
         />
       </div>
 
       <Button.Root
         type="submit"
-        disabled={enviandoFormulario}
+        disabled={enviando}
         class="flex w-32 shrink-0 items-center justify-center gap-1 rounded-full border border-green-700 bg-[#65eb95] py-2.5 text-sm font-medium text-green-800 transition-colors hover:bg-green-400 disabled:border-slate-400 disabled:bg-[#C4D8E2] disabled:text-slate-400 dark:disabled:border-slate-600 dark:disabled:bg-slate-900"
       >
-        {#if enviandoFormulario}
+        {#if enviando}
           Enviando
           <Loader class="size-[16px] animate-spin" />
-        {:else if calificarDocente.result?.success}
+        {:else if submitForm.result?.success}
           Enviado
           <CircleCheck class="size-[16px]" />
         {:else}
@@ -233,9 +227,9 @@
       </Button.Root>
     </div>
 
-    {#if calificarDocente.fields.allIssues() && calificarDocente.fields.allIssues()!.length > 0}
+    {#if submitForm.fields.allIssues() && submitForm.fields.allIssues()!.length > 0}
       <div class="mt-6 space-y-1 text-sm text-red-500 dark:text-red-400">
-        {#each calificarDocente.fields.allIssues() as issue, i (i)}
+        {#each submitForm.fields.allIssues() as issue, i (i)}
           <p class="flex flex-wrap items-center gap-1">
             <CircleAlert class="size-[14px]" />{issue.message}
           </p>

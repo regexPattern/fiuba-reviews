@@ -1,20 +1,15 @@
-import { query, form } from "$app/server";
+import { form } from "$app/server";
 import { db, schema } from "$lib/server/db";
 import { validateToken } from "$lib/server/turnstile";
-import { invalid } from "@sveltejs/kit";
+import { error, invalid } from "@sveltejs/kit";
 import { eq, and, max, sql } from "drizzle-orm";
 import * as v from "valibot";
 
-export const getDocente = query(() => {});
-
-export const enviarOferta = form(
+export const submitForm = form(
   v.object({
     metadata: v.object({
       carrera: v.string(),
-      cuatrimestre: v.object({
-        numero: v.number(),
-        anio: v.number()
-      })
+      cuatrimestre: v.object({ numero: v.number(), anio: v.number() })
     }),
     contenido: v.string(),
     cfTurnstileResponse: v.string()
@@ -58,9 +53,7 @@ export const enviarOferta = form(
     }
 
     const ofertaActualCarrera = await db
-      .select({
-        maxCodigoCuatrimestre: max(schema.ofertaComisiones.codigoCuatrimestre)
-      })
+      .select({ maxCodigoCuatrimestre: max(schema.ofertaComisiones.codigoCuatrimestre) })
       .from(schema.ofertaComisiones)
       .where(eq(schema.ofertaComisiones.codigoCarrera, carreraNuevaOferta[0].codigo));
 
@@ -73,16 +66,27 @@ export const enviarOferta = form(
       invalid("Ya existe una oferta más reciente para esta carrera");
     }
 
-    // await db.insert(schema.ofertaComisionesRaw).values({
-    //   codigoCarrera: carreraNuevaOferta[0].codigo,
-    //   codigoCuatrimestre: cuatrimestreNuevaOferta[0].codigo,
-    //   contenido
-    // });
+    try {
+      await db
+        .insert(schema.ofertaComisionesRaw)
+        .values({
+          codigoCarrera: carreraNuevaOferta[0].codigo,
+          codigoCuatrimestre: cuatrimestreNuevaOferta[0].codigo,
+          contenido
+        });
+    } catch (e) {
+      console.error("[enviarOferta] Error al insertar oferta.", {
+        codigoCarrera: carreraNuevaOferta[0].codigo,
+        codigoCuatrimestre: cuatrimestreNuevaOferta[0].codigo,
+        error: e
+      });
 
-    console.log({
+      error(500, "No pudimos guardar tu oferta. Intentá nuevamente en unos minutos.");
+    }
+
+    console.info("[enviarOferta] Oferta insertada correctamente", {
       codigoCarrera: carreraNuevaOferta[0].codigo,
-      codigoCuatrimestre: cuatrimestreNuevaOferta[0].codigo,
-      contenido
+      codigoCuatrimestre: cuatrimestreNuevaOferta[0].codigo
     });
 
     return { success: true };

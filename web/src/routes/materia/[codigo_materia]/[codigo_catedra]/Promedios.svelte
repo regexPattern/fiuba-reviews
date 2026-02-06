@@ -35,7 +35,8 @@
     <div class="absolute inset-y-0 left-0 bg-fiuba/20" style:width={`${porcentaje}%`}></div>
 
     <div
-      class="relative z-10 grid grid-cols-[1fr_auto] items-center gap-3 text-foreground tabular-nums">
+      class="relative z-10 grid grid-cols-[1fr_auto] items-center gap-3 text-foreground tabular-nums"
+    >
       <span>{label}</span>
       <span>{valor.toFixed(1)}</span>
     </div>
@@ -45,7 +46,8 @@
 <Popover.Root>
   <Popover.Trigger
     class="flex items-center gap-2 border border-button-border bg-button-background px-3 py-2 hover:transition-colors
-      {promedio ? 'hover:bg-button-hover' : 'pointer-events-none'}">
+      {promedio ? 'hover:bg-button-hover' : 'pointer-events-none'}"
+  >
     <Star class="size-[16px] fill-yellow-500 stroke-yellow-700 dark:stroke-yellow-400" />
     <span>Promedio: {promedio?.general.toFixed(1) || "–"}</span>
     {#if promedio}
@@ -58,7 +60,8 @@
       <Popover.Content
         class="z-50 w-56 border border-button-border/30 bg-background/95 p-3 text-sm shadow-md backdrop-blur-xl"
         align="start"
-        sideOffset={6}>
+        sideOffset={6}
+      >
         <div class="divide-y-2 divide-background">
           {@render Criterio("Acepta Crítica", promedio.aceptaCritica)}
           {@render Criterio("Asistencia", promedio.asistencia)}
