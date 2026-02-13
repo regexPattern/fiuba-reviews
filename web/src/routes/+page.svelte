@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { PageData } from "./$types";
   import { Database, LayersPlus } from "@lucide/svelte";
   import type { Options as SplideOptions } from "@splidejs/splide";
   import { AutoScroll } from "@splidejs/splide-extension-auto-scroll";
@@ -35,8 +36,8 @@
   </article>
 {/snippet}
 
-<main class="container mx-auto grid md:grid-cols-2">
-  <section id="hero">
+<main class="container mx-auto grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-center">
+  <section id="hero" class="order-1 lg:col-start-1 lg:row-start-1">
     <div class="text-center">
       <h1 class="xs:text-7xl text-6xl">
         <span class="font-bold tracking-tight text-fiuba">FIUBA</span>
@@ -61,8 +62,8 @@
     </div>
   </section>
 
-  <section id="ultimos-comentarios">
-    <div class="grid grid-cols-2 gap-4">
+  <section id="ultimos-comentarios" class="order-2 lg:col-start-2 lg:row-span-2">
+    <div class="hidden lg:grid lg:grid-cols-2 lg:gap-4">
       <div class="relative">
         <Splide
           options={SPLIDE_OPTS}
@@ -112,9 +113,36 @@
         </div>
       </div>
     </div>
+
+    <div class="lg:hidden">
+      <div class="relative">
+        <Splide
+          options={{ ...SPLIDE_OPTS, direction: "ltr", height: "auto", perPage: 3 }}
+          extensions={{ AutoScroll }}
+          aria-label="Últimos comentarios"
+        >
+          {#each data.comentarios as comentario (comentario.codigo)}
+            <SplideSlide>
+              <article class="border border-button-border bg-button-background p-2">
+                <p class="line-clamp-4 text-sm leading-5">{comentario.contenido}</p>
+                {comentario.nombreDocente}
+              </article>
+            </SplideSlide>
+          {/each}
+        </Splide>
+        <div class="pointer-events-none absolute inset-0">
+          <div
+            class="absolute top-0 bottom-0 left-0 w-8 bg-gradient-to-r from-background to-transparent"
+          />
+          <div
+            class="absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent"
+          />
+        </div>
+      </div>
+    </div>
   </section>
 
-  <section id="acerca-del-proyecto">
+  <section id="acerca-del-proyecto" class="order-3 lg:col-start-1 lg:row-start-2">
     <h2>Acerca del proyecto</h2>
     <p>
       Cuando entré a la facultad había una aplicación llamada Dolly FIUBA que recolectaba para saber
