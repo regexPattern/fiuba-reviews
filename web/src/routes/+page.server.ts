@@ -12,6 +12,9 @@ export const load: PageServerLoad = async () => {
       codigo: schema.comentario.codigo,
       contenido: schema.comentario.contenido,
       fechaCreacion: schema.comentario.fechaCreacion,
+      nombreDocente: schema.docente.nombre,
+      codigoMateria: schema.docente.codigoMateria,
+      nombreMateria: schema.materia.nombre,
       ordenPorContenido: sql<number>`
         row_number() over (
           partition by ${schema.comentario.contenido}
@@ -21,6 +24,7 @@ export const load: PageServerLoad = async () => {
     })
     .from(schema.comentario)
     .innerJoin(schema.docente, eq(schema.docente.codigo, schema.comentario.codigoDocente))
+    .innerJoin(schema.materia, eq(schema.materia.codigo, schema.docente.codigoMateria))
     .where(
       and(
         gt(sql`char_length(${schema.comentario.contenido})`, MIN_CHARS_COMENTARIO - 1),
@@ -44,7 +48,10 @@ export const load: PageServerLoad = async () => {
   const comentarios = await db
     .select({
       codigo: comentariosUnificados.codigo,
-      contenido: comentariosUnificados.contenido
+      contenido: comentariosUnificados.contenido,
+      nombreDocente: comentariosUnificados.nombreDocente,
+      codigoMateria: comentariosUnificados.codigoMateria,
+      nombreMateria: comentariosUnificados.nombreMateria
     })
     .from(comentariosUnificados)
     .where(eq(comentariosUnificados.ordenPorContenido, 1))

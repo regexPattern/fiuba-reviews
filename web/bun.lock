@@ -5,6 +5,7 @@
     "": {
       "name": "web",
       "dependencies": {
+        "@splidejs/splide-extension-auto-scroll": "^0.5.3",
         "@splidejs/svelte-splide": "^0.2.9",
         "@valibot/i18n": "^1.0.0",
         "bits-ui": "^2.15.4",
@@ -213,6 +214,8 @@
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.55.1", "", { "os": "win32", "cpu": "x64" }, "sha512-SPEpaL6DX4rmcXtnhdrQYgzQ5W2uW3SCJch88lB2zImhJRhIIK44fkUrgIV/Q8yUNfw5oyZ5vkeQsZLhCb06lw=="],
 
     "@splidejs/splide": ["@splidejs/splide@4.1.4", "", {}, "sha512-5I30evTJcAJQXt6vJ26g2xEkG+l1nXcpEw4xpKh0/FWQ8ozmAeTbtniVtVmz2sH1Es3vgfC4SS8B2X4o5JMptA=="],
+
+    "@splidejs/splide-extension-auto-scroll": ["@splidejs/splide-extension-auto-scroll@0.5.3", "", {}, "sha512-vPJ8Tn4uebnHa6scBcIypW154HTDenkazX9Nw8T1na44n7OtLoz40R4RoirteV7taPWW7w7ZZPCiEpi2ReYFAQ=="],
 
     "@splidejs/svelte-splide": ["@splidejs/svelte-splide@0.2.9", "", { "dependencies": { "@splidejs/splide": "^4.1.3" } }, "sha512-04ekJnDIJKEAhklKQMhkg4Yx0Ihtkk18eA9JeHPON0lDTngQxlOYdEYTJWH2UON45VxmVqoLHv04I++JphO36w=="],
 

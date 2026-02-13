@@ -45,6 +45,7 @@
     "vitest": "^4.0.17"
   },
   "dependencies": {
+    "@splidejs/splide-extension-auto-scroll": "^0.5.3",
     "@splidejs/svelte-splide": "^0.2.9",
     "@valibot/i18n": "^1.0.0",
     "bits-ui": "^2.15.4",

@@ -1,8 +1,29 @@
 <script lang="ts">
   import { Database, LayersPlus } from "@lucide/svelte";
+  import type { Options as SplideOptions } from "@splidejs/splide";
+  import { AutoScroll } from "@splidejs/splide-extension-auto-scroll";
+  import { Splide, SplideSlide } from "@splidejs/svelte-splide";
+  import "@splidejs/svelte-splide/css";
   import type { Component } from "svelte";
 
   let { data } = $props();
+
+  const mitadComentarios = $derived(Math.ceil(data.comentarios.length / 2));
+  const comentariosIzquierda = $derived(data.comentarios.slice(0, mitadComentarios));
+  const comentariosDerecha = $derived(data.comentarios.slice(mitadComentarios));
+
+  const SPLIDE_OPTS: SplideOptions = {
+    type: "loop",
+    direction: "ttb",
+    height: "22rem",
+    autoHeight: true,
+    perPage: 4,
+    perMove: 1,
+    gap: "0.75rem",
+    arrows: false,
+    pagination: false,
+    autoScroll: { speed: 0.3, autoStart: true, pauseOnHover: false, pauseOnFocus: false }
+  };
 </script>
 
 {#snippet featureCard(Icono: Component, descripcion: string)}
@@ -41,9 +62,56 @@
   </section>
 
   <section id="ultimos-comentarios">
-    {#each data.comentarios as com (com.codigo)}
-      <div>{com.contenido}</div>
-    {/each}
+    <div class="grid grid-cols-2 gap-4">
+      <div class="relative">
+        <Splide
+          options={SPLIDE_OPTS}
+          extensions={{ AutoScroll }}
+          aria-label="Últimos comentarios izquierda"
+        >
+          {#each comentariosIzquierda as comentario (comentario.codigo)}
+            <SplideSlide>
+              <article class="border border-button-border bg-button-background p-2">
+                <p class="line-clamp-4 text-sm leading-5">{comentario.contenido}</p>
+                {comentario.nombreDocente}
+              </article>
+            </SplideSlide>
+          {/each}
+        </Splide>
+        <div class="pointer-events-none absolute inset-0">
+          <div
+            class="absolute top-0 right-0 left-0 h-16 bg-linear-to-b from-background to-transparent"
+          ></div>
+          <div
+            class="absolute right-0 bottom-0 left-0 h-16 bg-linear-to-t from-background to-transparent"
+          ></div>
+        </div>
+      </div>
+
+      <div class="relative">
+        <Splide
+          options={SPLIDE_OPTS}
+          extensions={{ AutoScroll }}
+          aria-label="Últimos comentarios derecha"
+        >
+          {#each comentariosDerecha as comentario (comentario.codigo)}
+            <SplideSlide>
+              <article class="translate-y-12 border border-button-border bg-button-background p-2">
+                <p class="line-clamp-4 text-sm leading-5">{comentario.contenido}</p>
+              </article>
+            </SplideSlide>
+          {/each}
+        </Splide>
+        <div class="pointer-events-none absolute inset-0">
+          <div
+            class="absolute top-0 right-0 left-0 h-8 bg-gradient-to-b from-background to-transparent"
+          />
+          <div
+            class="absolute right-0 bottom-0 left-0 h-8 bg-gradient-to-t from-background to-transparent"
+          />
+        </div>
+      </div>
+    </div>
   </section>
 
   <section id="acerca-del-proyecto">
