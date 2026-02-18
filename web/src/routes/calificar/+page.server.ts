@@ -1,8 +1,8 @@
-import { db, schema } from "$lib/server/db";
-import { UUID_V4_RE } from "$lib/utils";
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 import { desc, eq } from "drizzle-orm";
+import { db, schema } from "$lib/server/db";
+import { UUID_V4_RE } from "$lib/utils";
 
 export const load: PageServerLoad = async ({ url }) => {
   const codigoCatedra = url.searchParams.get("catedra");
@@ -51,9 +51,5 @@ export const load: PageServerLoad = async ({ url }) => {
     error(500, "No se han encontrado cuatrimestres para calificar.");
   }
 
-  return {
-    codigoCatedra,
-    docente: docente[0],
-    cuatris
-  };
+  return { codigoCatedra, docente: docente[0], cuatris };
 };

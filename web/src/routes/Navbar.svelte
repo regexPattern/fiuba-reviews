@@ -1,19 +1,10 @@
 <script lang="ts">
-  import BuscadorMateria from "./BuscadorMateria.svelte";
+  // import BuscadorMateriaTrigger from "$lib/componentes/buscador/BuscadorMateriaTrigger.svelte";
   import { Github, Menu, Monitor, Moon, SunMedium } from "@lucide/svelte";
   import { DropdownMenu } from "bits-ui";
   import { mode, resetMode, setMode } from "mode-watcher";
-
-  interface Props {
-    materias: {
-      codigo: string;
-      nombre: string;
-    }[];
-  }
-
-  const LINK_GITHUB = "https://github.com/regexPattern/fiuba-reviews";
-
-  let { materias }: Props = $props();
+  import { resolve } from "$app/paths";
+  import { PUBLIC_GITHUB_URL } from "$env/static/public";
 </script>
 
 <header
@@ -21,19 +12,19 @@
 >
   <div class="container mx-auto flex h-full items-center gap-2">
     <a
-      href="/"
+      href={resolve("/")}
       class="mr-auto shrink-0 text-xl font-semibold tracking-tight"
       aria-label="Ir al inicio"
     >
       <span class="font-serif text-fiuba">FIUBA</span> Reviews
     </a>
 
-    <BuscadorMateria {materias} />
+    <!-- <BuscadorMateriaTrigger variante="navbar" /> -->
 
     <nav class="hidden items-center gap-5 md:mx-3 md:flex" aria-label="Navegación">
-      <a href="/" class="text-sm hover:text-fiuba">Inicio</a>
+      <a href={resolve("/")} class="text-sm hover:text-fiuba">Inicio</a>
       <!-- <a href="/estadisticas" class="text-sm hover:text-fiuba">Estadísticas</a> -->
-      <a href="/colaborar" class="text-sm hover:text-fiuba">Colaborar</a>
+      <a href={resolve("/colaborar")} class="text-sm hover:text-fiuba">Colaborar</a>
     </nav>
 
     <DropdownMenu.Root>
@@ -79,7 +70,7 @@
 
     <a
       class="hidden size-9 items-center justify-center text-sm font-medium md:inline-flex"
-      href={LINK_GITHUB}
+      href={PUBLIC_GITHUB_URL}
       target="_blank"
       rel="noreferrer"
     >
@@ -106,7 +97,7 @@
             <DropdownMenu.Item
               class="data-highlighted:bg-muted block px-3 py-2 text-sm outline-hidden"
             >
-              <a href="/" class="block">Inicio</a>
+              <a href={resolve("/")} class="block">Inicio</a>
             </DropdownMenu.Item>
             <!-- <DropdownMenu.Item -->
             <!--   class="data-highlighted:bg-muted block px-3 py-2 text-sm outline-hidden"> -->
@@ -115,7 +106,7 @@
             <DropdownMenu.Item
               class="data-highlighted:bg-muted block px-3 py-2 text-sm outline-hidden"
             >
-              <a href="/colaborar">Colaborar</a>
+              <a href={resolve("/colaborar")}>Colaborar</a>
             </DropdownMenu.Item>
           </DropdownMenu.Group>
 
@@ -156,7 +147,7 @@
             </DropdownMenu.GroupHeading>
             <DropdownMenu.Item
               class="data-highlighted:bg-muted flex items-center gap-2 px-3 py-2 text-sm outline-hidden"
-              onSelect={() => window.open(LINK_GITHUB, "_blank")}
+              onSelect={() => window.open(PUBLIC_GITHUB_URL, "_blank")}
             >
               <Github class="size-4" aria-hidden="true" />
               GitHub

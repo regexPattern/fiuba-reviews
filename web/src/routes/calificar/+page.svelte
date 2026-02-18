@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Formulario from "./Formulario.svelte";
   import { ChevronLeft } from "@lucide/svelte";
+  import Formulario from "./Formulario.svelte";
 
   let { data } = $props();
 </script>

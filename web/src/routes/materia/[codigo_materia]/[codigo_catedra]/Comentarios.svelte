@@ -4,10 +4,7 @@
   type Comentario = {
     codigo: number;
     contenido: string;
-    cuatrimestre: {
-      numero: number;
-      anio: number;
-    };
+    cuatrimestre: { numero: number; anio: number };
     esDeDolly: boolean;
   };
 

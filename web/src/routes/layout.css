@@ -30,6 +30,7 @@ body {
   --font-sans: "Inter Variable", sans-serif;
   --font-serif: "Source Serif 4 Variable", serif;
   --font-mono: "Google Sans Code Variable", monospace;
+  --font-noto-serif: "Noto Serif", serif;
 
   --color-foreground: #173341;
   --color-background: #fbfef9;

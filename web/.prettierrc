@@ -6,10 +6,11 @@
   "printWidth": 100,
   "objectWrap": "collapse",
   "plugins": [
-    "@trivago/prettier-plugin-sort-imports",
+    "@ianvs/prettier-plugin-sort-imports",
     "prettier-plugin-svelte",
     "prettier-plugin-tailwindcss"
   ],
+  "importOrder": ["<TYPES>", "<THIRD_PARTY_MODULES>", "^[./]", "^\\$"],
   "overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }],
   "tailwindStylesheet": "./src/routes/layout.css"
 }

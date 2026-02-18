@@ -1,16 +1,13 @@
-import { db, schema } from "$lib/server/db";
 import type { PageServerLoad } from "./$types";
 import { asc, eq } from "drizzle-orm";
+import { db, schema } from "$lib/server/db";
 
 export const prerender = true;
 
 export const load: PageServerLoad = async () => {
   const actualizacionesOfertas = await db
     .select({
-      carrera: {
-        codigo: schema.carrera.codigo,
-        nombre: schema.carrera.nombre
-      },
+      carrera: { codigo: schema.carrera.codigo, nombre: schema.carrera.nombre },
       cuatrimestre: {
         codigo: schema.cuatrimestre.codigo,
         numero: schema.cuatrimestre.numero,

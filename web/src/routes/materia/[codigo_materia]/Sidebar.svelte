@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { page } from "$app/state";
   import { ListFilter, Star } from "@lucide/svelte";
   import { ScrollArea } from "bits-ui";
   import Fuse from "fuse.js";
+  import { page } from "$app/state";
 
   const FUZZY_SEARCH_THRESHOLD = 0.15;
   const FUZZY_SEARCH_DEBOUNCE_TIMEOUT_MS = 300;
@@ -11,21 +11,10 @@
     materia: {
       codigo: string;
       nombre: string;
-      cuatrimestre: {
-        numero: number;
-        anio: number;
-      } | null;
-      equivalencias: {
-        codigo: string;
-        nombre: string;
-      }[];
+      cuatrimestre: { numero: number; anio: number } | null;
+      equivalencias: { codigo: string; nombre: string }[];
     };
-    catedras: {
-      codigo: string;
-      codigoMateria: string;
-      nombre: string;
-      calificacion: number;
-    }[];
+    catedras: { codigo: string; codigoMateria: string; nombre: string; calificacion: number }[];
   }
 
   let { materia, catedras }: Props = $props();

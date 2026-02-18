@@ -5,9 +5,6 @@
       "type": "local",
       "command": ["bun", "x", "@modelcontextprotocol/server-postgres", "{env:DATABASE_URL}"]
     },
-    "svelte": {
-      "type": "local",
-      "command": ["bun", "x", "@sveltejs/mcp"]
-    }
+    "svelte": { "type": "local", "command": ["bun", "x", "@sveltejs/mcp"] }
   }
 }

@@ -16,11 +16,5 @@ export function extraerMetadataOferta(contenido: string) {
   const anio = parseInt(matches[2], 10);
   const numero = parseInt(matches[3], 10);
 
-  return {
-    carrera,
-    cuatrimestre: {
-      anio,
-      numero
-    }
-  };
+  return { carrera, cuatrimestre: { anio, numero } };
 }

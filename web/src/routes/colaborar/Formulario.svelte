@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { PUBLIC_TURNSTILE_SITE_KEY } from "$env/static/public";
-  import { extraerMetadataOferta } from "$lib/parser-ofertas";
-  import { submitForm } from "./form.remote";
   import { Check, CircleAlert, Loader } from "@lucide/svelte";
   import { Button } from "bits-ui";
   import { mode } from "mode-watcher";
   import { Turnstile } from "svelte-turnstile";
+  import { submitForm } from "./form.remote";
+  import { PUBLIC_TURNSTILE_SITE_KEY } from "$env/static/public";
+  import { extraerMetadataOferta } from "$lib/ofertas";
 
   let enviando = $state(false);
   let metadata = $derived(extraerMetadataOferta(submitForm.fields.contenido.value()));
@@ -27,8 +27,6 @@
       if (submitForm.result) {
         form.reset();
       }
-    } catch (e) {
-      console.error(e);
     } finally {
       enviando = false;
     }

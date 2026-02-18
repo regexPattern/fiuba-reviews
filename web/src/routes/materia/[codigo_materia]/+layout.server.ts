@@ -1,8 +1,8 @@
-import { db, schema } from "$lib/server/db";
-import { obtenerCatedras } from "$lib/server/db/utils";
 import type { LayoutServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
-import { eq, and } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
+import { db, schema } from "$lib/server/db";
+import { obtenerCatedras } from "$lib/server/db/utils";
 
 export const load: LayoutServerLoad = async ({ params }) => {
   const materiasVigentes = await db
@@ -30,10 +30,7 @@ export const load: LayoutServerLoad = async ({ params }) => {
   const materia = materiasVigentes[0];
 
   const equivalencias = await db
-    .select({
-      codigo: schema.materia.codigo,
-      nombre: schema.materia.nombre
-    })
+    .select({ codigo: schema.materia.codigo, nombre: schema.materia.nombre })
     .from(schema.equivalencia)
     .innerJoin(
       schema.materia,

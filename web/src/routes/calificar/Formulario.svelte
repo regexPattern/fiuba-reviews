@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { PUBLIC_TURNSTILE_SITE_KEY } from "$env/static/public";
-  import { submitForm } from "./form.remote";
-  import { CircleCheck, CircleAlert, Loader } from "@lucide/svelte";
+  import { CircleAlert, CircleCheck, Loader } from "@lucide/svelte";
   import { Button, Label, Select, Slider } from "bits-ui";
   import { mode } from "mode-watcher";
   import { Turnstile } from "svelte-turnstile";
+  import { submitForm } from "./form.remote";
+  import { PUBLIC_TURNSTILE_SITE_KEY } from "$env/static/public";
 
   const CAMPOS_CALIFICACION = [
     { name: "aceptaCritica", label: "Acepta crítica" },
@@ -112,8 +112,6 @@
         form.reset();
         resetearCalificaciones();
       }
-    } catch (e) {
-      console.error(e);
     } finally {
       enviando = false;
     }

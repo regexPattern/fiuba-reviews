@@ -1,14 +1,10 @@
-import { db, schema } from "$lib/server/db";
-import { UUID_V4_RE } from "$lib/utils";
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 import { desc, eq, inArray, sql } from "drizzle-orm";
+import { db, schema } from "$lib/server/db";
+import { UUID_V4_RE } from "$lib/utils";
 
-export const config = {
-  isr: {
-    expiration: false
-  }
-};
+export const config = { isr: { expiration: false } };
 
 export const load: PageServerLoad = async ({ params, parent }) => {
   if (!UUID_V4_RE.test(params.codigo_catedra)) {
@@ -188,8 +184,5 @@ export const load: PageServerLoad = async ({ params, parent }) => {
       return a.nombre.localeCompare(b.nombre);
     });
 
-  return {
-    codigoCatedra: params.codigo_catedra,
-    docentes
-  };
+  return { codigoCatedra: params.codigo_catedra, docentes };
 };

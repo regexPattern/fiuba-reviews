@@ -5,18 +5,10 @@ import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 const config = {
   preprocess: vitePreprocess(),
   kit: {
-    adapter: adapter({
-      runtime: "experimental_bun1.x"
-    }),
-    experimental: {
-      remoteFunctions: true
-    }
+    adapter: adapter({ runtime: "experimental_bun1.x" }),
+    experimental: { remoteFunctions: true }
   },
-  compilerOptions: {
-    experimental: {
-      async: true
-    }
-  }
+  compilerOptions: { experimental: { async: true } }
 };
 
 export default config;

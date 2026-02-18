@@ -1,19 +1,19 @@
 import { sql } from "drizzle-orm";
 import {
-  pgTable,
-  foreignKey,
-  uuid,
-  text,
-  integer,
+  boolean,
   check,
+  foreignKey,
+  index,
+  integer,
+  jsonb,
+  numeric,
+  pgTable,
+  primaryKey,
   serial,
   smallint,
-  boolean,
-  index,
+  text,
   timestamp,
-  numeric,
-  primaryKey,
-  jsonb
+  uuid
 } from "drizzle-orm/pg-core";
 
 export const docente = pgTable(
@@ -205,10 +205,7 @@ export const calificacionDolly = pgTable(
 
 export const prioridadRol = pgTable(
   "prioridad_rol",
-  {
-    rol: text().primaryKey().notNull(),
-    prioridad: integer().notNull()
-  },
+  { rol: text().primaryKey().notNull(), prioridad: integer().notNull() },
   (table) => [check("prioridad_rol_prioridad_check", sql`(prioridad >= 1) AND (prioridad <= 10)`)]
 );
 

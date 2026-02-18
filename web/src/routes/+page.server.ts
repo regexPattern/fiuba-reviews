@@ -1,10 +1,11 @@
-import { db, schema } from "$lib/server/db";
 import type { PageServerLoad } from "./$types";
-import { and, desc, eq, exists, gt, lt, sql } from "drizzle-orm";
+import { and, count, desc, eq, exists, gt, lt, sql } from "drizzle-orm";
+import { db, schema } from "$lib/server/db";
 
-const N_COMENTARIOS = 20;
+const N_COMENTARIOS = 12;
 const MIN_CHARS_COMENTARIO = 100; // inclusivo
 const MAX_CHARS_COMENTARIO = 200; // inclusivo
+const N_MATERIAS_POPULARES = 10;
 
 export const load: PageServerLoad = async () => {
   const comentariosUnificados = db
@@ -12,9 +13,9 @@ export const load: PageServerLoad = async () => {
       codigo: schema.comentario.codigo,
       contenido: schema.comentario.contenido,
       fechaCreacion: schema.comentario.fechaCreacion,
-      nombreDocente: schema.docente.nombre,
+      nombreDocente: sql<string>`${schema.docente.nombre}`.as("nombre_docente"),
       codigoMateria: schema.docente.codigoMateria,
-      nombreMateria: schema.materia.nombre,
+      nombreMateria: sql<string>`${schema.materia.nombre}`.as("nombre_materia"),
       ordenPorContenido: sql<number>`
         row_number() over (
           partition by ${schema.comentario.contenido}
@@ -58,5 +59,34 @@ export const load: PageServerLoad = async () => {
     .orderBy(desc(comentariosUnificados.fechaCreacion), desc(comentariosUnificados.codigo))
     .limit(N_COMENTARIOS);
 
-  return { comentarios };
+  const cantidadPlanesVigentes = count(sql`DISTINCT ${schema.plan.codigo}`).as(
+    "cantidad_planes_vigentes"
+  );
+  const cantidadComentarios = count(sql`DISTINCT ${schema.comentario.codigo}`).as(
+    "cantidad_comentarios"
+  );
+
+  const materiasPopulares = await db
+    .select({
+      codigo: schema.materia.codigo,
+      nombre: schema.materia.nombre,
+      cantidadCatedras: count(sql`DISTINCT ${schema.catedra.codigo}`).as("cantidad_catedras"),
+      cantidadDocentes: count(sql`DISTINCT ${schema.docente.codigo}`).as("cantidad_docentes"),
+      cantidadPlanesVigentes,
+      cantidadComentarios
+    })
+    .from(schema.materia)
+    .innerJoin(schema.planMateria, eq(schema.planMateria.codigoMateria, schema.materia.codigo))
+    .innerJoin(
+      schema.plan,
+      and(eq(schema.plan.codigo, schema.planMateria.codigoPlan), eq(schema.plan.estaVigente, true))
+    )
+    .leftJoin(schema.catedra, eq(schema.catedra.codigoMateria, schema.materia.codigo))
+    .leftJoin(schema.docente, eq(schema.docente.codigoMateria, schema.materia.codigo))
+    .leftJoin(schema.comentario, eq(schema.comentario.codigoDocente, schema.docente.codigo))
+    .groupBy(schema.materia.codigo, schema.materia.nombre)
+    .orderBy(desc(cantidadPlanesVigentes), desc(cantidadComentarios), schema.materia.nombre)
+    .limit(N_MATERIAS_POPULARES);
+
+  return { comentarios, materiasPopulares };
 };
