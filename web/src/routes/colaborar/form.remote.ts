@@ -81,7 +81,7 @@ export const submitForm = form(
         error: e
       });
 
-      error(500, "No pudimos guardar tu oferta. Intentá nuevamente en unos minutos.");
+      error(500, "Error interno al guardar tu oferta.");
     }
 
     console.info("[enviarOferta] Oferta insertada correctamente", {

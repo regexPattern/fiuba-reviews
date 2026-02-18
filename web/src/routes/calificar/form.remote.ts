@@ -96,7 +96,7 @@ export const submitForm = form(formSchema, async (fields) => {
         error: e
       });
 
-      error(500, "No pudimos guardar tu calificación. Intentá nuevamente en unos minutos.");
+      error(500, "Error interno al guardar tu calificación.");
     }
 
     console.info("[calificarDocente] Calificación insertada correctamente", {
@@ -131,7 +131,7 @@ export const submitForm = form(formSchema, async (fields) => {
           error: e
         });
 
-        error(500, "No pudimos guardar tu comentario. Intentá nuevamente en unos minutos.");
+        error(500, "Error interno al guardar tu comentario.");
       }
     }
   });
