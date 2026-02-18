@@ -1,7 +1,7 @@
 {
   "name": "fiuba-reviews",
   "private": true,
-  "version": "0.0.1",
+  "version": "3.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite dev",
@@ -10,8 +10,7 @@
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "format": "prettier --write .",
-    "lint": "prettier --check ."
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@fontsource-variable/google-sans-code": "^5.2.3",
@@ -50,5 +49,33 @@
     "posthog-js": "^1.351.1",
     "svelte-turnstile": "^0.11.0",
     "valibot": "^1.2.0"
+  },
+  "prettier": {
+    "useTabs": false,
+    "tabWidth": 2,
+    "singleQuote": false,
+    "trailingComma": "none",
+    "printWidth": 100,
+    "objectWrap": "collapse",
+    "plugins": [
+      "@ianvs/prettier-plugin-sort-imports",
+      "prettier-plugin-svelte",
+      "prettier-plugin-tailwindcss"
+    ],
+    "importOrder": [
+      "<TYPES>",
+      "<THIRD_PARTY_MODULES>",
+      "^[./]",
+      "^\\$"
+    ],
+    "overrides": [
+      {
+        "files": "*.svelte",
+        "options": {
+          "parser": "svelte"
+        }
+      }
+    ],
+    "tailwindStylesheet": "./src/routes/layout.css"
   }
 }

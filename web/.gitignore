@@ -1,5 +1,8 @@
-.vercel
-/.svelte-kit
-/build
-node_modules
+node_modules/
+
+# Build artifacts
+.svelte-kit/
+.vercel/
+build/
+
 .env*.local
