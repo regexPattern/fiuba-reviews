@@ -160,7 +160,7 @@
       >
         <Select.Trigger
           id="cuatrimestre"
-          class="mt-1 inline-flex w-full items-center rounded-none border border-button-border bg-background px-2 py-2 text-sm data-placeholder:text-neutral-500"
+          class="mt-1 inline-flex w-full items-center rounded-none border border-button-border bg-background px-2 py-2 text-sm text-neutral-900 data-placeholder:text-neutral-500 dark:text-neutral-100 dark:data-placeholder:text-neutral-400"
           aria-label="Seleccionar cuatrimestre"
         >
           <span class="truncate">
@@ -174,7 +174,7 @@
 
         <Select.Portal>
           <Select.Content
-            class="z-50 w-(--bits-select-anchor-width) rounded-none border border-button-border bg-background shadow-md outline-hidden"
+            class="z-50 w-(--bits-select-anchor-width) rounded-none border border-button-border bg-background text-neutral-900 shadow-md outline-hidden dark:text-neutral-100"
             sideOffset={6}
           >
             <Select.Viewport class="py-1">
@@ -184,7 +184,7 @@
                 <Select.Item
                   value={`${cuatri.codigo}`}
                   {label}
-                  class="flex w-full items-center px-2 py-2 text-sm select-none data-highlighted:bg-neutral-100"
+                  class="flex w-full items-center px-2 py-2 text-sm text-neutral-900 select-none data-highlighted:bg-neutral-100 data-highlighted:text-neutral-900 dark:text-neutral-100 dark:data-highlighted:bg-neutral-800 dark:data-highlighted:text-neutral-100"
                 >
                   {label}
                 </Select.Item>

@@ -15,10 +15,10 @@
     ></div>
   </div>
 
-  <main class="container mx-auto grid gap-12 p-6 lg:grid-cols-2 lg:flex-row">
+  <main class="container mx-auto mb-4 grid gap-12 p-6 lg:grid-cols-2 lg:flex-row">
     <section id="hero" class="space-y-8 self-center">
       <div class="mx-auto space-y-4 text-center lg:max-w-[512px]">
-        <h1 class="font-noto-serif text-5xl sm:text-6xl font-semibold tracking-tight">
+        <h1 class="font-noto-serif text-5xl font-semibold tracking-tight sm:text-6xl">
           <span class="text-fiuba">FIUBA</span>
           <span>Reviews</span>
         </h1>
@@ -158,7 +158,7 @@
     </style>
 
     <section id="materias-populares" class="space-y-4 text-center">
-      <h2 class="text-2xl font-semibold">Materias más populares</h2>
+      <h2 class="text-3xl font-semibold">Materias más populares</h2>
       <p>
         Las {data.materiasPopulares.length} más populares según la cantidad carreras que la cursan. Con
         los nuevos planes se unificaron bastantes materias que antes eran distinguidas por diferente código,
@@ -178,7 +178,7 @@
     </section>
 
     <section id="acerca-del-proyecto" class="space-y-4 text-center">
-      <h2 class="text-2xl font-semibold">Acerca del proyecto</h2>
+      <h2 class="text-3xl font-semibold">Acerca del proyecto</h2>
       <p>
         <a href="https://github.com/lugfi/dolly">Dolly FIUBA</a> era el sitio original en donde los estudiantes
         de FIUBA publicaban calificaciones y comentarios de los docentes con los que cursaban. Como alumno,

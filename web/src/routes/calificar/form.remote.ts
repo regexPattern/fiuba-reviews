@@ -33,14 +33,14 @@ const formSchema = v.object({
 });
 
 export const submitForm = form(formSchema, async (fields) => {
+  const { url } = getRequestEvent();
+
   const { success } = await validateToken(fields.cfTurnstileResponse);
 
   if (!success) {
     console.log("Usuario falló el CAPTCHA.");
     invalid("CAPTCHA inválido.");
   }
-
-  const { url } = getRequestEvent();
 
   const codigoDocente = url.searchParams.get("docente");
 
@@ -110,7 +110,7 @@ export const submitForm = form(formSchema, async (fields) => {
         const [comentarioInsertado] = await tx
           .insert(dbSchema.comentario)
           .values({
-            codigoDocente: codigoDocente + "asldfafs",
+            codigoDocente,
             codigoCuatrimestre: fields.cuatrimestre,
             contenido: fields.comentario,
             codigoCalificacionDolly: calificacionInsertada.codigo
