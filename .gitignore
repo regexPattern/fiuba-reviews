@@ -1,4 +1,10 @@
+# Misc
 .DS_Store
 .direnv
 .envrc
+
+# Build outputs
 .vercel
+
+# Herramientas de IA
+opencode.json
