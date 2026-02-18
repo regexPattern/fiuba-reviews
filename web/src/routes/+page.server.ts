@@ -1,6 +1,9 @@
 import type { PageServerLoad } from "./$types";
 import { and, count, desc, eq, exists, gt, lt, sql } from "drizzle-orm";
+import { browser } from "$app/environment";
 import { db, schema } from "$lib/server/db";
+import posthog from "posthog-js";
+import { PUBLIC_POSTHOG_PROJECT_API_KEY } from "$env/static/public";
 
 const N_COMENTARIOS = 12;
 const MIN_CHARS_COMENTARIO = 100; // inclusivo
@@ -10,6 +13,13 @@ const N_MATERIAS_POPULARES = 10;
 export const prerender = true;
 
 export const load: PageServerLoad = async () => {
+  if (browser) {
+    posthog.init(PUBLIC_POSTHOG_PROJECT_API_KEY, {
+      api_host: "https://us.i.posthog.com",
+      defaults: "2026-01-30"
+    });
+  }
+
   const comentariosUnificados = db
     .select({
       codigo: schema.comentario.codigo,
