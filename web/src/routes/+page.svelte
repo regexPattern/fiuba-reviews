@@ -169,9 +169,9 @@
         {#each data.materiasPopulares as materia (materia.codigo)}
           <a
             href={`/materia/${materia.codigo}`}
-            class="rounded-full border border-button-border bg-button-background px-3 py-1 text-sm"
+            class="line-clamp-1 rounded-full border border-button-border bg-button-background px-3 py-1 text-sm"
           >
-            {materia.nombre} • {materia.codigo}
+            {materia.codigo} • {materia.nombre}
           </a>
         {/each}
       </div>

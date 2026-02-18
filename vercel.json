@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "sveltekit",
+  "installCommand": "cd web && bun install",
+  "buildCommand": "cd web && bun run build",
+  "outputDirectory": "web/.vercel/output"
+}
