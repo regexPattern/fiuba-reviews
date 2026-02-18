@@ -21,17 +21,8 @@
   const codigoError = $derived(page.status);
 </script>
 
-<div class="relative isolate overflow-hidden">
-  <div class="pointer-events-none fixed inset-0 z-0">
-    <div
-      class="absolute -top-24 -left-28 h-112 w-180 rounded-full bg-fiuba/25 blur-[140px]"
-      aria-hidden="true"
-    ></div>
-    <div
-      class="absolute -right-16 -bottom-16 h-56 w-56 rounded-full bg-fiuba/20 blur-[110px]"
-      aria-hidden="true"
-    ></div>
-  </div>
+<div class="relative isolate">
+  <div class="fondo-decorativo fondo-superior fondo-inferior" aria-hidden="true"></div>
 
   {#if page.error}
     <div class="relative z-10 mx-auto space-y-6 p-6 sm:p-8">

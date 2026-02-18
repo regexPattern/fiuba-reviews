@@ -7,6 +7,8 @@ const MIN_CHARS_COMENTARIO = 100; // inclusivo
 const MAX_CHARS_COMENTARIO = 200; // inclusivo
 const N_MATERIAS_POPULARES = 10;
 
+export const prerender = true;
+
 export const load: PageServerLoad = async () => {
   const comentariosUnificados = db
     .select({

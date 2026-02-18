@@ -1,21 +1,23 @@
 <script lang="ts">
   import type { Component } from "svelte";
   import { Database, GraduationCap, HatGlasses, LayersPlus } from "@lucide/svelte";
+  import { resolve } from "$app/paths";
   import BuscadorMateriaTrigger from "$lib/componentes/buscador/BuscadorMateriaTrigger.svelte";
   import "@fontsource/noto-serif/600.css";
 
   let { data } = $props();
 </script>
 
-<div class="relative isolate overflow-hidden">
-  <div class="pointer-events-none fixed inset-0 z-0">
-    <div
-      class="absolute -top-24 -left-28 h-112 w-180 rounded-full bg-fiuba/25 blur-[140px]"
-      aria-hidden="true"
-    ></div>
-  </div>
+<svelte:head>
+  <title>FIUBA Reviews</title>
+</svelte:head>
 
-  <main class="container mx-auto mb-4 grid gap-12 p-6 lg:grid-cols-2 lg:flex-row">
+<div class="relative isolate">
+  <div class="fondo-decorativo fondo-superior" aria-hidden="true"></div>
+
+  <main
+    class="relative z-10 container mx-auto mb-4 grid gap-10 p-6 lg:grid-cols-2 lg:flex-row lg:gap-12"
+  >
     <section id="hero" class="space-y-8 self-center">
       <div class="mx-auto space-y-4 text-center lg:max-w-[512px]">
         <h1 class="font-noto-serif text-5xl font-semibold tracking-tight sm:text-6xl">
@@ -71,7 +73,7 @@
     <section id="ultimos-comentarios" class="space-y-4 md:h-[630px]">
       {#snippet filaComentarios(comentarios: typeof data.comentarios, claseAnimacion: string)}
         <div class="overflow-hidden">
-          <div class={`flex w-max gap-4 ${claseAnimacion} will-change-transform`}>
+          <div class={`flex w-max gap-4 ${claseAnimacion}`}>
             {#each [...comentarios, ...comentarios] as com, i (`fila-${com.codigo}-${i}`)}
               <article
                 class="max-w-[260px] min-w-[260px] shrink-0 border border-button-border bg-button-background/50 p-4"
@@ -93,7 +95,7 @@
       {#snippet columnaComentarios(comentarios: typeof data.comentarios)}
         <div class="h-[630px] overflow-hidden">
           <div
-            class="flex animate-[scroll-vertical_50s_linear_infinite] flex-col gap-4 will-change-transform md:animate-[scroll-vertical_30s_linear_infinite]"
+            class="flex animate-[scroll-vertical_50s_linear_infinite] flex-col gap-4 md:animate-[scroll-vertical_30s_linear_infinite]"
           >
             {#each [...comentarios, ...comentarios] as com, i (`${com.codigo}-${i}`)}
               <article class="border border-button-border bg-button-background/50 p-4">
@@ -168,7 +170,7 @@
       <div class="mt-4 flex flex-wrap justify-center gap-2">
         {#each data.materiasPopulares as materia (materia.codigo)}
           <a
-            href={`/materia/${materia.codigo}`}
+            href={resolve(`/materia/${materia.codigo}`)}
             class="line-clamp-1 rounded-full border border-button-border bg-button-background px-3 py-1 text-sm"
           >
             {materia.codigo} • {materia.nombre}
@@ -180,10 +182,11 @@
     <section id="acerca-del-proyecto" class="space-y-4 text-center">
       <h2 class="text-3xl font-semibold">Acerca del proyecto</h2>
       <p>
-        <a href="https://github.com/lugfi/dolly">Dolly FIUBA</a> era el sitio original en donde los estudiantes
-        de FIUBA publicaban calificaciones y comentarios de los docentes con los que cursaban. Como alumno,
-        desde que entré a la facultad fue un recurso invaluable al momento de elegir cátedras al iniciar
-        cada cuatrimestre.
+        <a href="https://github.com/lugfi/dolly" target="_blank" rel="noopener noreferrer"
+          >Dolly FIUBA</a
+        > era el sitio original en donde los estudiantes de FIUBA publicaban calificaciones y comentarios
+        de los docentes con los que cursaban. Como alumno, desde que entré a la facultad fue un recurso
+        invaluable al momento de elegir cátedras al iniciar cada cuatrimestre.
       </p>
       <p>
         Ahora que Dolly ya no está en funcionamiento, me parece necesario mantener activa una

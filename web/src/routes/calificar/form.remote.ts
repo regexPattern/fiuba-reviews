@@ -2,6 +2,7 @@ import { error, invalid } from "@sveltejs/kit";
 import { eq } from "drizzle-orm";
 import * as v from "valibot";
 import { form, getRequestEvent } from "$app/server";
+import { ISR_BYPASS_TOKEN } from "$env/static/private";
 import { db, schema as dbSchema } from "$lib/server/db";
 import { validateToken } from "$lib/server/turnstile";
 import { UUID_V4_RE } from "$lib/utils";
@@ -135,6 +136,48 @@ export const submitForm = form(formSchema, async (fields) => {
       }
     }
   });
+
+  const catedrasAfectadas = await db
+    .select({
+      codigoCatedra: dbSchema.catedra.codigo,
+      codigoMateria: dbSchema.catedra.codigoMateria
+    })
+    .from(dbSchema.catedraDocente)
+    .innerJoin(dbSchema.catedra, eq(dbSchema.catedra.codigo, dbSchema.catedraDocente.codigoCatedra))
+    .where(eq(dbSchema.catedraDocente.codigoDocente, codigoDocente));
+
+  if (catedrasAfectadas.length > 0) {
+    const resultadosRevalidacion = await Promise.allSettled(
+      catedrasAfectadas.map(async ({ codigoCatedra, codigoMateria }) => {
+        const pathCatedra = `/materia/${codigoMateria}/${codigoCatedra}`;
+        const response = await fetch(new URL(pathCatedra, url), {
+          method: "GET",
+          headers: { "x-prerender-revalidate": ISR_BYPASS_TOKEN }
+        });
+
+        if (!response.ok) {
+          throw new Error(`status=${response.status}`);
+        }
+
+        return pathCatedra;
+      })
+    );
+
+    for (let i = 0; i < resultadosRevalidacion.length; i += 1) {
+      const resultado = resultadosRevalidacion[i];
+
+      if (resultado.status === "rejected") {
+        const { codigoCatedra, codigoMateria } = catedrasAfectadas[i];
+
+        console.warn("[calificarDocente] Fallo la revalidacion ISR de catedra", {
+          codigoDocente,
+          codigoCatedra,
+          codigoMateria,
+          error: resultado.reason
+        });
+      }
+    }
+  }
 
   return { success: true };
 });

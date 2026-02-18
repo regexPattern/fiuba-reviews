@@ -18,6 +18,7 @@
 
 <svelte:head>
   <link rel="icon" href={favicon} />
+  <title>FIUBA Reviews</title>
 </svelte:head>
 
 <ModeWatcher />

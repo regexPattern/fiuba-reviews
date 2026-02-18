@@ -4,7 +4,15 @@
   import Promedios from "./Promedios.svelte";
 
   let { data } = $props();
+
+  let nombreCatedra = $derived(
+    data.catedras.find((catedra) => catedra.codigo === data.codigoCatedra)?.nombre ?? "Cátedra"
+  );
 </script>
+
+<svelte:head>
+  <title>FIUBA Reviews • {data.materia.codigo} • {nombreCatedra}</title>
+</svelte:head>
 
 <div class="m-4 space-y-8 md:m-6">
   {#each data.docentes as docente (docente.codigo)}

@@ -6,13 +6,12 @@
   let { data } = $props();
 </script>
 
-<div class="relative isolate overflow-hidden">
-  <div class="pointer-events-none fixed inset-0 z-0">
-    <div
-      class="absolute -top-24 -left-28 h-112 w-180 rounded-full bg-fiuba/20 blur-[140px]"
-      aria-hidden="true"
-    ></div>
-  </div>
+<svelte:head>
+  <title>FIUBA Reviews • Calificar</title>
+</svelte:head>
+
+<div class="relative isolate">
+  <div class="fondo-decorativo fondo-superior" aria-hidden="true"></div>
 
   <main class="relative z-10 container mx-auto space-y-12 p-6">
     <div class="flex flex-col-reverse justify-between gap-4 md:flex-row md:items-center">

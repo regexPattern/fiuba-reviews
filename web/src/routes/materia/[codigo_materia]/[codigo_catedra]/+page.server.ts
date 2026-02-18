@@ -1,10 +1,11 @@
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 import { desc, eq, inArray, sql } from "drizzle-orm";
+import { ISR_BYPASS_TOKEN } from "$env/static/private";
 import { db, schema } from "$lib/server/db";
 import { UUID_V4_RE } from "$lib/utils";
 
-export const config = { isr: { expiration: false } };
+export const config = { isr: { expiration: false, bypassToken: ISR_BYPASS_TOKEN } };
 
 export const load: PageServerLoad = async ({ params, parent }) => {
   if (!UUID_V4_RE.test(params.codigo_catedra)) {

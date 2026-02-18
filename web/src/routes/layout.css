@@ -25,6 +25,66 @@ body {
   position: relative;
 }
 
+.fondo-decorativo {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: clip;
+  contain: paint;
+}
+
+.fondo-decorativo::before,
+.fondo-decorativo::after {
+  content: "";
+  position: absolute;
+  background-repeat: no-repeat;
+  display: none;
+}
+
+.fondo-decorativo.fondo-superior::before {
+  display: block;
+  width: min(76rem, 100vw);
+  height: min(52rem, 68vh);
+  top: -16rem;
+  left: -16rem;
+  background-image: radial-gradient(
+    ellipse at center,
+    rgb(79 172 212 / 0.2) 0%,
+    rgb(79 172 212 / 0.12) 40%,
+    rgb(79 172 212 / 0) 72%
+  );
+}
+
+.fondo-decorativo.fondo-inferior::after {
+  display: block;
+  width: min(30rem, 65vw);
+  height: min(26rem, 42vh);
+  right: -10rem;
+  bottom: -10rem;
+  background-image: radial-gradient(
+    ellipse at center,
+    rgb(79 172 212 / 0.16) 0%,
+    rgb(79 172 212 / 0) 70%
+  );
+}
+
+@media (max-width: 640px) {
+  .fondo-decorativo.fondo-superior::before {
+    width: 125vw;
+    height: 48vh;
+    top: -12rem;
+    left: -13rem;
+  }
+
+  .fondo-decorativo.fondo-inferior::after {
+    width: 75vw;
+    height: 30vh;
+    right: -7rem;
+    bottom: -7rem;
+  }
+}
+
 @theme {
   --color-fiuba: #4facd4;
   --font-sans: "Inter Variable", sans-serif;
@@ -43,7 +103,7 @@ body {
   --color-layout-border: #c2e1c2;
 
   --color-overlay-background: var(--color-background)/75;
-  --backdrop-filter-overlay-blur: blur(var(--blur-xl));
+  --backdrop-filter-overlay-blur: blur(8px);
 }
 
 .dark {
