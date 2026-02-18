@@ -1,12 +1,22 @@
 import "@valibot/i18n/es";
 import type { LayoutServerLoad } from "./$types";
 import { desc, eq, sql } from "drizzle-orm";
+import posthog from "posthog-js";
 import * as v from "valibot";
+import { browser } from "$app/environment";
+import { PUBLIC_POSTHOG_PROJECT_API_KEY } from "$env/static/public";
 import { db, schema } from "$lib/server/db";
 
 v.setGlobalConfig({ lang: "es" });
 
 export const load: LayoutServerLoad = async () => {
+  if (browser) {
+    posthog.init(PUBLIC_POSTHOG_PROJECT_API_KEY, {
+      api_host: "https://us.i.posthog.com",
+      defaults: "2026-01-30"
+    });
+  }
+
   const cantidadPlanesExpr = sql<number>`count(distinct ${schema.plan.codigo})::int`;
 
   const cantidadCatedrasExpr = sql<number>`(

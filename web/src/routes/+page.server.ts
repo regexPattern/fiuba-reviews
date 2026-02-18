@@ -13,13 +13,6 @@ const N_MATERIAS_POPULARES = 10;
 export const prerender = true;
 
 export const load: PageServerLoad = async () => {
-  if (browser) {
-    posthog.init(PUBLIC_POSTHOG_PROJECT_API_KEY, {
-      api_host: "https://us.i.posthog.com",
-      defaults: "2026-01-30"
-    });
-  }
-
   const comentariosUnificados = db
     .select({
       codigo: schema.comentario.codigo,
