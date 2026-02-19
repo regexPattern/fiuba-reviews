@@ -151,10 +151,18 @@
                 </a>
               {/snippet}
             </DropdownMenu.Item>
-            <!-- <DropdownMenu.Item -->
-            <!--   class="data-highlighted:bg-muted block px-3 py-2 text-sm outline-hidden"> -->
-            <!--   <a href="/estadisticas">Estadísticas</a> -->
-            <!-- </DropdownMenu.Item> -->
+            <DropdownMenu.Item
+              class="data-highlighted:bg-muted block px-3 py-2 text-sm outline-hidden"
+            >
+              {#snippet child({ props })}
+                <a
+                  {...props}
+                  href="https://us.posthog.com/shared/c8cbP4SoFDIll_Niw7z2MaUbMRqEyA"
+                  target="_blank"
+                  rel="noreferrer">Estadísticas</a
+                >
+              {/snippet}
+            </DropdownMenu.Item>
             <DropdownMenu.Item textValue="Colaborar">
               {#snippet child({ props })}
                 <a
