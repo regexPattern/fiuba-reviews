@@ -1,4 +1,3 @@
-# allow crawling everything by default
 User-agent: *
 Disallow: /calificar
 Sitemap: https://fiuba-reviews.com/sitemap.xml
