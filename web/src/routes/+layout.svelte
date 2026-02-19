@@ -7,12 +7,16 @@
   import { mode, ModeWatcher, resetMode, setMode } from "mode-watcher";
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
-  import { PUBLIC_GITHUB_URL } from "$env/static/public";
   import favicon from "$lib/assets/favicon.svg";
   import BuscadorMateriaDialog from "$lib/componentes/buscador/BuscadorMateriaDialog.svelte";
   import BuscadorMateriaTrigger from "$lib/componentes/buscador/BuscadorMateriaTrigger.svelte";
   import { buscadorMaterias } from "$lib/componentes/buscador/materias.svelte";
   import "./layout.css";
+
+  const SEO_TITULO = "FIUBA Reviews";
+  const SEO_DESCRIPCION =
+    "Encontrá calificaciones y comentarios de los docentes de la facultad, subidos por otros estudiantes. Basado en el legendario Dolly FIUBA.";
+  const SEO_URL = "https://fiuba-reviews.com";
 
   let { children, data } = $props();
 
@@ -23,7 +27,22 @@
 
 <svelte:head>
   <link rel="icon" href={favicon} />
-  <title>FIUBA Reviews</title>
+  <title>{SEO_TITULO}</title>
+  <meta name="description" content={SEO_DESCRIPCION} />
+  <meta name="author" content="Carlos Eduardo Castillo Pereira" />
+  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large" />
+  <link rel="canonical" href={SEO_URL} />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content={SEO_TITULO} />
+  <meta property="og:locale" content="es_AR" />
+  <meta property="og:url" content={SEO_URL} />
+  <meta property="og:title" content={SEO_TITULO} />
+  <meta property="og:description" content={SEO_DESCRIPCION} />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content={SEO_TITULO} />
+  <meta name="twitter:description" content={SEO_DESCRIPCION} />
 </svelte:head>
 
 <ModeWatcher />
@@ -94,7 +113,7 @@
       type="button"
       class="hidden size-9 items-center justify-center text-sm font-medium md:inline-flex"
       aria-label="Abrir GitHub"
-      onclick={() => window.open(PUBLIC_GITHUB_URL, "_blank")}
+      onclick={() => window.open(SEO_URL, "_blank")}
     >
       <Github class="size-5" aria-hidden="true" />
     </button>
@@ -181,7 +200,7 @@
             </DropdownMenu.GroupHeading>
             <DropdownMenu.Item
               class="data-highlighted:bg-muted flex items-center gap-2 px-3 py-2 text-sm outline-hidden"
-              onSelect={() => window.open(PUBLIC_GITHUB_URL, "_blank")}
+              onSelect={() => window.open(SEO_URL, "_blank")}
             >
               <Github class="size-4" aria-hidden="true" />
               GitHub

@@ -1,10 +1,11 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { PUBLIC_GITHUB_URL } from "$env/static/public";
   import colectivo99 from "$lib/assets/colectivo-99.webp";
   import colectivo400 from "$lib/assets/colectivo-400.webp";
   import colectivo404 from "$lib/assets/colectivo-404.webp";
   import colectivo500 from "$lib/assets/colectivo-500.webp";
+
+  const SITE_URL="https://github.com/regexPattern/fiuba-reviews";
 
   function imagenColectivo(codigo: number) {
     if (codigo === 400) {
@@ -42,7 +43,7 @@
         <div class="text-sm text-foreground/75">
           Si considerás que este error no debería haber ocurrido podes reportarlo en el
           <a
-            href={PUBLIC_GITHUB_URL}
+            href={SITE_URL}
             target="_blank"
             rel="noreferrer"
             class="underline underline-offset-2"
