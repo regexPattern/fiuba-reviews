@@ -1,8 +1,8 @@
 <script lang="ts">
+  import { afterNavigate } from "$app/navigation";
   import { ChevronDown, ChevronUp } from "@lucide/svelte";
   import { Dialog, ScrollArea } from "bits-ui";
   import Sidebar from "./Sidebar.svelte";
-  import { afterNavigate } from "$app/navigation";
 
   let { children, data } = $props();
 
@@ -19,6 +19,16 @@
     mobileDrawerOpen = false;
   });
 </script>
+
+<svelte:head>
+  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large" />
+  <link
+    rel="canonical"
+    href={`https://fiuba-reviews.com/materia/${encodeURIComponent(data.materia.codigo)}`}
+  />
+  <!-- TODO: <meta property="og:image" content={`${META_BASE_URL}/og/materia/${encodeURIComponent(data.materia.codigo)}.png`} /> -->
+  <!-- TODO: <meta name="twitter:image" content={`${META_BASE_URL}/og/materia/${encodeURIComponent(data.materia.codigo)}.png`} /> -->
+</svelte:head>
 
 <div
   class="container mx-auto mt-[calc(-56px-env(safe-area-inset-top))] flex h-dvh overflow-hidden"

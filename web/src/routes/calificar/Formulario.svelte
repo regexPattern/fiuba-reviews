@@ -3,8 +3,8 @@
   import { Button, Label, Select, Slider } from "bits-ui";
   import { mode } from "mode-watcher";
   import { Turnstile } from "svelte-turnstile";
-  import { submitForm } from "./form.remote";
   import { PUBLIC_TURNSTILE_SITE_KEY } from "$env/static/public";
+  import { submitForm } from "./form.remote";
 
   const CAMPOS_CALIFICACION = [
     { name: "aceptaCritica", label: "Acepta crítica" },

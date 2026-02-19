@@ -64,9 +64,13 @@
     ],
     "importOrder": [
       "<TYPES>",
+      "^\\$",
       "<THIRD_PARTY_MODULES>",
-      "^[./]",
-      "^\\$"
+      "^@fontsource-variable/",
+      "^[./]"
+    ],
+    "importOrderSafeSideEffects": [
+      "^@fontsource-variable/"
     ],
     "overrides": [
       {

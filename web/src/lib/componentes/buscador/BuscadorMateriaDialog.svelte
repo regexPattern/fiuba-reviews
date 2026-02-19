@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Search } from "@lucide/svelte";
   import { Command, Dialog } from "bits-ui";
-  import { buscadorMaterias } from "./materias.svelte";
   import { beforeNavigate } from "$app/navigation";
+  import { buscadorMaterias } from "./materias.svelte";
 
   beforeNavigate(() => {
     buscadorMaterias.cerrarBuscador();

@@ -7,6 +7,7 @@
 
 <svelte:head>
   <title>FIUBA Reviews • Colaborar</title>
+  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large" />
 </svelte:head>
 
 <div class="relative isolate">

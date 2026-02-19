@@ -1,22 +1,22 @@
 <script lang="ts">
-  import "@fontsource-variable/google-sans-code";
-  import "@fontsource-variable/inter";
-  import "@fontsource-variable/source-serif-4";
-  import { Github, Menu, Monitor, Moon, SunMedium } from "@lucide/svelte";
-  import { DropdownMenu } from "bits-ui";
-  import { mode, ModeWatcher, resetMode, setMode } from "mode-watcher";
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
   import favicon from "$lib/assets/favicon.svg";
   import BuscadorMateriaDialog from "$lib/componentes/buscador/BuscadorMateriaDialog.svelte";
   import BuscadorMateriaTrigger from "$lib/componentes/buscador/BuscadorMateriaTrigger.svelte";
   import { buscadorMaterias } from "$lib/componentes/buscador/materias.svelte";
+  import { Github, Menu, Monitor, Moon, SunMedium } from "@lucide/svelte";
+  import { DropdownMenu } from "bits-ui";
+  import { mode, ModeWatcher, resetMode, setMode } from "mode-watcher";
+  import "@fontsource-variable/google-sans-code";
+  import "@fontsource-variable/inter";
+  import "@fontsource-variable/source-serif-4";
   import "./layout.css";
 
-  const SEO_TITULO = "FIUBA Reviews";
-  const SEO_DESCRIPCION =
+  const META_TITULO = "FIUBA Reviews";
+  const META_DESCRIPCION =
     "Encontrá calificaciones y comentarios de los docentes de la facultad, subidos por otros estudiantes. Basado en el legendario Dolly FIUBA.";
-  const SEO_URL = "https://fiuba-reviews.com";
+  const META_URL_BASE = "https://fiuba-reviews.com";
 
   let { children, data } = $props();
 
@@ -27,25 +27,25 @@
 
 <svelte:head>
   <link rel="icon" href={favicon} />
-  <title>{SEO_TITULO}</title>
-  <meta name="description" content={SEO_DESCRIPCION} />
+  <title>{META_TITULO}</title>
+  <meta name="description" content={META_DESCRIPCION} />
   <meta name="author" content="Carlos Eduardo Castillo Pereira" />
-  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large" />
-  <link rel="canonical" href={SEO_URL} />
-
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content={SEO_TITULO} />
+  <meta property="og:site_name" content={META_TITULO} />
   <meta property="og:locale" content="es_AR" />
-  <meta property="og:url" content={SEO_URL} />
-  <meta property="og:title" content={SEO_TITULO} />
-  <meta property="og:description" content={SEO_DESCRIPCION} />
+  <meta property="og:url" content={page.url.href} />
+  <meta property="og:title" content={META_TITULO} />
+  <meta property="og:description" content={META_DESCRIPCION} />
+  <!-- TODO: <meta property="og:image" content={`${META_URL_BASE}/og/home.png`} /> -->
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content={SEO_TITULO} />
-  <meta name="twitter:description" content={SEO_DESCRIPCION} />
+  <meta name="twitter:title" content={META_TITULO} />
+  <meta name="twitter:description" content={META_DESCRIPCION} />
+  <!-- TODO: <meta name="twitter:image" content={`${META_URL_BASE}/og/home.png`} /> -->
 </svelte:head>
 
 <ModeWatcher />
+
 <header
   class="fixed top-0 left-0 z-100 h-[calc(56px+env(safe-area-inset-top))] w-full border-b border-layout-border bg-background/80 px-4 pt-[env(safe-area-inset-top)] backdrop-blur-md"
 >
@@ -113,7 +113,7 @@
       type="button"
       class="hidden size-9 items-center justify-center text-sm font-medium md:inline-flex"
       aria-label="Abrir GitHub"
-      onclick={() => window.open(SEO_URL, "_blank")}
+      onclick={() => window.open(META_URL_BASE, "_blank")}
     >
       <Github class="size-5" aria-hidden="true" />
     </button>
@@ -200,7 +200,7 @@
             </DropdownMenu.GroupHeading>
             <DropdownMenu.Item
               class="data-highlighted:bg-muted flex items-center gap-2 px-3 py-2 text-sm outline-hidden"
-              onSelect={() => window.open(SEO_URL, "_blank")}
+              onSelect={() => window.open(META_URL_BASE, "_blank")}
             >
               <Github class="size-4" aria-hidden="true" />
               GitHub

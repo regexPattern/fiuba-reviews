@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { Component } from "svelte";
-  import { Database, GraduationCap, HatGlasses, LayersPlus } from "@lucide/svelte";
   import { resolve } from "$app/paths";
   import BuscadorMateriaTrigger from "$lib/componentes/buscador/BuscadorMateriaTrigger.svelte";
+  import { Database, GraduationCap, HatGlasses, LayersPlus } from "@lucide/svelte";
   import "@fontsource/noto-serif/600.css";
 
   let { data } = $props();
@@ -10,6 +10,7 @@
 
 <svelte:head>
   <title>FIUBA Reviews</title>
+  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large" />
 </svelte:head>
 
 <div class="relative isolate">

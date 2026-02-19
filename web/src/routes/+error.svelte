@@ -5,8 +5,6 @@
   import colectivo404 from "$lib/assets/colectivo-404.webp";
   import colectivo500 from "$lib/assets/colectivo-500.webp";
 
-  const SITE_URL="https://github.com/regexPattern/fiuba-reviews";
-
   function imagenColectivo(codigo: number) {
     if (codigo === 400) {
       return colectivo400;
@@ -21,6 +19,10 @@
 
   const codigoError = $derived(page.status);
 </script>
+
+<svelte:head>
+  <meta name="robots" content="noindex,nofollow" />
+</svelte:head>
 
 <div class="relative isolate">
   <div class="fondo-decorativo fondo-superior fondo-inferior" aria-hidden="true"></div>
@@ -43,7 +45,7 @@
         <div class="text-sm text-foreground/75">
           Si considerás que este error no debería haber ocurrido podes reportarlo en el
           <a
-            href={SITE_URL}
+            href="https://github.com/regexPattern/fiuba-reviews"
             target="_blank"
             rel="noreferrer"
             class="underline underline-offset-2"

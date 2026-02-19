@@ -1,13 +1,14 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
   import { ChevronLeft } from "@lucide/svelte";
   import Formulario from "./Formulario.svelte";
-  import { resolve } from "$app/paths";
 
   let { data } = $props();
 </script>
 
 <svelte:head>
   <title>FIUBA Reviews • Calificar</title>
+  <meta name="robots" content="noindex,nofollow" />
 </svelte:head>
 
 <div class="relative isolate">

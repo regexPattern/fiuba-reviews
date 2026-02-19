@@ -1,9 +1,6 @@
 import type { PageServerLoad } from "./$types";
-import { and, count, desc, eq, exists, gt, lt, sql } from "drizzle-orm";
-import { browser } from "$app/environment";
 import { db, schema } from "$lib/server/db";
-import posthog from "posthog-js";
-import { PUBLIC_POSTHOG_PROJECT_API_KEY } from "$env/static/public";
+import { and, count, desc, eq, exists, gt, lt, sql } from "drizzle-orm";
 
 const N_COMENTARIOS = 12;
 const MIN_CHARS_COMENTARIO = 100; // inclusivo
