@@ -64,7 +64,12 @@
 
     <nav class="hidden items-center gap-5 md:mx-3 md:flex" aria-label="Navegación">
       <a href={resolve("/")} class="text-sm hover:text-fiuba">Inicio</a>
-      <!-- <a href="/estadisticas" class="text-sm hover:text-fiuba">Estadísticas</a> -->
+      <a
+        href="https://us.posthog.com/shared/c8cbP4SoFDIll_Niw7z2MaUbMRqEyA"
+        target="_blank"
+        rel="noreferrer"
+        class="text-sm hover:text-fiuba">Estadísticas</a
+      >
       <a href={resolve("/colaborar")} class="text-sm hover:text-fiuba">Colaborar</a>
     </nav>
 
