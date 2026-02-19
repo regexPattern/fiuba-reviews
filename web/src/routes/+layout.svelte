@@ -8,9 +8,6 @@
   import { Github, Menu, Monitor, Moon, SunMedium } from "@lucide/svelte";
   import { DropdownMenu } from "bits-ui";
   import { mode, ModeWatcher, resetMode, setMode } from "mode-watcher";
-  import "@fontsource-variable/google-sans-code";
-  import "@fontsource-variable/inter";
-  import "@fontsource-variable/source-serif-4";
   import "./layout.css";
 
   const META_TITULO = "FIUBA Reviews";

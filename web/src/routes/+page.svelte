@@ -3,7 +3,6 @@
   import { resolve } from "$app/paths";
   import BuscadorMateriaTrigger from "$lib/componentes/buscador/BuscadorMateriaTrigger.svelte";
   import { Database, GraduationCap, HatGlasses, LayersPlus } from "@lucide/svelte";
-  import "@fontsource/noto-serif/600.css";
 
   let { data } = $props();
 </script>
@@ -21,7 +20,7 @@
   >
     <section id="hero" class="space-y-8 self-center">
       <div class="mx-auto space-y-4 text-center lg:max-w-[512px]">
-        <h1 class="font-noto-serif text-5xl font-semibold tracking-tight sm:text-6xl">
+        <h1 class="text-5xl font-semibold tracking-tighter sm:text-6xl">
           <span class="text-fiuba">FIUBA</span>
           <span>Reviews</span>
         </h1>

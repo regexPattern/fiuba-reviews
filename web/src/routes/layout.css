@@ -1,6 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@import "@fontsource/google-sans-code/latin-400.css";
+@import "@fontsource/inter/latin-400.css";
+@import "@fontsource/inter/latin-500.css";
+@import "@fontsource/inter/latin-600.css";
+@import "@fontsource/source-serif-4/latin-500.css";
+@import "@fontsource/source-serif-4/latin-600.css";
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* iOS 26 introdujo cambios que rompen el cálculo del viewport de la manera en
@@ -87,10 +94,9 @@ body {
 
 @theme {
   --color-fiuba: #4facd4;
-  --font-sans: "Inter Variable", sans-serif;
-  --font-serif: "Source Serif 4 Variable", serif;
-  --font-mono: "Google Sans Code Variable", monospace;
-  --font-noto-serif: "Noto Serif", serif;
+  --font-sans: "Inter", sans-serif;
+  --font-serif: "Source Serif 4", serif;
+  --font-mono: "Google Sans Code", monospace;
 
   --color-foreground: #173341;
   --color-background: #fbfef9;
