@@ -118,7 +118,7 @@
       type="button"
       class="hidden size-9 items-center justify-center text-sm font-medium md:inline-flex"
       aria-label="Abrir GitHub"
-      onclick={() => window.open(META_URL_BASE, "_blank")}
+      onclick={() => window.open("https://github.com/regexPattern/fiuba-reviews", "_blank")}
     >
       <Github class="size-5" aria-hidden="true" />
     </button>
@@ -213,7 +213,8 @@
             </DropdownMenu.GroupHeading>
             <DropdownMenu.Item
               class="data-highlighted:bg-muted flex items-center gap-2 px-3 py-2 text-sm outline-hidden"
-              onSelect={() => window.open(META_URL_BASE, "_blank")}
+              onSelect={() =>
+                window.open("https://github.com/regexPattern/fiuba-reviews", "_blank")}
             >
               <Github class="size-4" aria-hidden="true" />
               GitHub
