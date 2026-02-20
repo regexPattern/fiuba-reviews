@@ -28,6 +28,7 @@
       shouldSort: false,
       includeScore: false,
       threshold: FUZZY_SEARCH_THRESHOLD,
+      ignoreLocation: true,
       keys: ["nombre"]
     })
   );
