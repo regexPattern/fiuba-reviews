@@ -9,6 +9,8 @@ import sourceSerif4SemiboldWoff from "@fontsource/source-serif-4/files/source-se
 const sourceSerif4FontData = () => read(sourceSerif4Woff).arrayBuffer();
 const sourceSerif4SemiboldFontData = () => read(sourceSerif4SemiboldWoff).arrayBuffer();
 
+export const prerender = true;
+
 export const GET: RequestHandler = async () => {
   const fonts = await resolveFonts([
     new CustomFont("Source Serif 4", sourceSerif4FontData, { weight: 400 }),
