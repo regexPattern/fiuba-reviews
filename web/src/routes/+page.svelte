@@ -5,11 +5,30 @@
   import { Database, GraduationCap, HatGlasses, LayersPlus } from "@lucide/svelte";
 
   let { data } = $props();
+
+  const metaTitle = "FIUBA Reviews";
+  const metaDescription =
+    "Encontrá calificaciones y comentarios de los docentes de la facultad, subidos por otros estudiantes. Basado en el legendario Dolly FIUBA.";
+  const ogImageUrl = "https://fiuba-reviews.com/og.png";
+  const ogImageAlt = "FIUBA Reviews";
 </script>
 
 <svelte:head>
-  <title>FIUBA Reviews</title>
+  <title>{metaTitle}</title>
   <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large" />
+  <meta name="description" content={metaDescription} />
+  <link rel="canonical" href="https://fiuba-reviews.com" />
+
+  <meta property="og:title" content={metaTitle} />
+  <meta property="og:description" content={metaDescription} />
+  <meta property="og:image" content={ogImageUrl} />
+  <meta property="og:image:alt" content={ogImageAlt} />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content={metaTitle} />
+  <meta name="twitter:description" content={metaDescription} />
+  <meta name="twitter:image" content={ogImageUrl} />
+  <meta name="twitter:image:alt" content={ogImageAlt} />
 </svelte:head>
 
 <div class="relative isolate">

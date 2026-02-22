@@ -5,13 +5,33 @@
 
   let { data } = $props();
 
-  let nombreCatedra = $derived(
-    data.catedras.find((catedra) => catedra.codigo === data.codigoCatedra)?.nombre ?? "Cátedra"
+  let metaTitle = $derived(`${data.materia.codigo} • ${data.catedra.codigo} | FIUBA Reviews`);
+  let metaDescription = $derived(
+    `Promedio de la cátedra: ${data.catedra.promedio.toFixed(1)} estrellas. Visitá la página para ver las calificaciones y comentarios de la cátedra ${data.catedra.nombre}.`
+  );
+  let ogImageUrl = $derived(
+    `https://fiuba-reviews.com/materia/${data.materia.codigo}/${data.catedra.codigo}/og.png?nombre_materia=${encodeURIComponent(data.materia.nombre)}&nombre_catedra=${encodeURIComponent(data.catedra.nombre)}`
+  );
+  let ogImageAlt = $derived(
+    `FIUBA Reviews Materia ${data.materia.codigo} Cátedra ${data.catedra.codigo}`
   );
 </script>
 
 <svelte:head>
-  <title>FIUBA Reviews • {data.materia.codigo} • {nombreCatedra}</title>
+  <title>{metaTitle}</title>
+  <meta name="robots" content="noindex,follow,max-snippet:-1,max-image-preview:large" />
+  <meta name="description" content={metaDescription} />
+
+  <meta property="og:title" content={metaTitle} />
+  <meta property="og:description" content={metaDescription} />
+  <meta property="og:image" content={ogImageUrl} />
+  <meta property="og:image:alt" content={ogImageAlt} />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={metaTitle} />
+  <meta name="twitter:description" content={metaDescription} />
+  <meta name="twitter:image" content={ogImageUrl} />
+  <meta name="twitter:image:alt" content={ogImageAlt} />
 </svelte:head>
 
 <div class="m-4 space-y-8 md:m-6">
@@ -45,7 +65,7 @@
         />
 
         <a
-          href={`/calificar?docente=${docente.codigo}&catedra=${data.codigoCatedra}`}
+          href={`/calificar?docente=${docente.codigo}&catedra=${data.catedra.codigo}`}
           class="flex items-center gap-2 border border-button-border bg-button-background px-3 py-2 hover:bg-button-hover hover:transition-colors"
         >
           <span>Calificar</span>

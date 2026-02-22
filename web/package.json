@@ -37,6 +37,7 @@
     "vite": "^7.3.1"
   },
   "dependencies": {
+    "@ethercorps/sveltekit-og": "^4.2.1",
     "@fontsource/dancing-script": "^5.2.8",
     "@fontsource/google-sans-code": "^5.2.3",
     "@fontsource/inter": "^5.2.8",
@@ -49,6 +50,7 @@
     "pg": "^8.18.0",
     "postgres": "^3.4.8",
     "posthog-js": "^1.351.1",
+    "satori": "^0.19.2",
     "svelte-turnstile": "^0.11.0",
     "valibot": "^1.2.0"
   },

@@ -1,8 +1,8 @@
 import type { PageServerLoad } from "./$types";
-import { error } from "@sveltejs/kit";
-import { desc, eq } from "drizzle-orm";
 import { db, schema } from "$lib/server/db";
 import { UUID_V4_RE } from "$lib/utils";
+import { error } from "@sveltejs/kit";
+import { desc, eq } from "drizzle-orm";
 
 export const load: PageServerLoad = async ({ url }) => {
   const codigoCatedra = url.searchParams.get("catedra");
@@ -25,11 +25,13 @@ export const load: PageServerLoad = async ({ url }) => {
     .select({
       codigo: schema.docente.codigo,
       codigoMateria: schema.docente.codigoMateria,
+      nombreMateria: schema.materia.nombre,
       nombre: schema.docente.nombre,
       nombreSiu: schema.docente.nombreSiu,
       rol: schema.docente.rol
     })
     .from(schema.docente)
+    .innerJoin(schema.materia, eq(schema.materia.codigo, schema.docente.codigoMateria))
     .where(eq(schema.docente.codigo, codigoDocente))
     .limit(1);
 

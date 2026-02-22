@@ -3,11 +3,30 @@
   import Instrucciones from "./Instrucciones.svelte";
 
   let { data } = $props();
+
+  const metaTitle = "Colaborar | FIUBA Reviews";
+  const metaDescription =
+    "Ayudá a actualizar las ofertas de comisiones disponibles en FIUBA Reviews enviando tu oferta más actualizada.";
+  const ogImageUrl = "https://fiuba-reviews.com/colaborar/og.png";
+  const ogImageAlt = "FIUBA Reviews Colaborar";
 </script>
 
 <svelte:head>
-  <title>FIUBA Reviews • Colaborar</title>
+  <title>{metaTitle}</title>
   <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large" />
+  <meta name="description" content={metaDescription} />
+  <link rel="canonical" href="https://fiuba-reviews.com/colaborar" />
+
+  <meta property="og:title" content={metaTitle} />
+  <meta property="og:description" content={metaDescription} />
+  <meta property="og:image" content={ogImageUrl} />
+  <meta property="og:image:alt" content={ogImageAlt} />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content={metaTitle} />
+  <meta name="twitter:description" content={metaDescription} />
+  <meta name="twitter:image" content={ogImageUrl} />
+  <meta name="twitter:image:alt" content={ogImageAlt} />
 </svelte:head>
 
 <div class="relative isolate">

@@ -10,11 +10,6 @@
   import { mode, ModeWatcher, resetMode, setMode } from "mode-watcher";
   import "./layout.css";
 
-  const META_TITULO = "FIUBA Reviews";
-  const META_DESCRIPCION =
-    "Encontrá calificaciones y comentarios de los docentes de la facultad, subidos por otros estudiantes. Basado en el legendario Dolly FIUBA.";
-  const META_URL_BASE = "https://fiuba-reviews.com";
-
   let { children, data } = $props();
 
   $effect(() => {
@@ -24,21 +19,13 @@
 
 <svelte:head>
   <link rel="icon" href={favicon} />
-  <title>{META_TITULO}</title>
-  <meta name="description" content={META_DESCRIPCION} />
+
   <meta name="author" content="Carlos Eduardo Castillo Pereira" />
+
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content={META_TITULO} />
+  <meta property="og:site_name" content="FIUBA Reviews" />
   <meta property="og:locale" content="es_AR" />
   <meta property="og:url" content={page.url.href} />
-  <meta property="og:title" content={META_TITULO} />
-  <meta property="og:description" content={META_DESCRIPCION} />
-  <!-- TODO: <meta property="og:image" content={`${META_URL_BASE}/og/home.png`} /> -->
-
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content={META_TITULO} />
-  <meta name="twitter:description" content={META_DESCRIPCION} />
-  <!-- TODO: <meta name="twitter:image" content={`${META_URL_BASE}/og/home.png`} /> -->
 </svelte:head>
 
 <ModeWatcher />

@@ -1,9 +1,9 @@
 import type { PageServerLoad } from "./$types";
-import { error } from "@sveltejs/kit";
-import { desc, eq, inArray, sql } from "drizzle-orm";
 import { ISR_BYPASS_TOKEN } from "$env/static/private";
 import { db, schema } from "$lib/server/db";
 import { UUID_V4_RE } from "$lib/utils";
+import { error } from "@sveltejs/kit";
+import { desc, eq, inArray, sql } from "drizzle-orm";
 
 export const config = { isr: { expiration: false, bypassToken: ISR_BYPASS_TOKEN } };
 
@@ -12,8 +12,8 @@ export const load: PageServerLoad = async ({ params, parent }) => {
     error(400, "Código de cátedra inválido.");
   }
 
-  const { catedras: catedrasValidas } = await parent();
-  const catedra = catedrasValidas.find((c) => c.codigo === params.codigo_catedra);
+  const { catedras } = await parent();
+  const catedra = catedras.find((c) => c.codigo === params.codigo_catedra);
 
   if (!catedra) {
     error(404, "Cátedra no encontrada para la materia.");
@@ -185,5 +185,8 @@ export const load: PageServerLoad = async ({ params, parent }) => {
       return a.nombre.localeCompare(b.nombre);
     });
 
-  return { codigoCatedra: params.codigo_catedra, docentes };
+  return {
+    catedra: { codigo: catedra.codigo, nombre: catedra.nombre, promedio: catedra.calificacion },
+    docentes
+  };
 };

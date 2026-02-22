@@ -4,11 +4,34 @@
   import Formulario from "./Formulario.svelte";
 
   let { data } = $props();
+
+  const metaTitle = "Calificar | FIUBA Reviews";
+  let metaDescription = $derived(
+    `Deja tu calificación y comentario anónimo para el docente ${data.docente.nombre} de la materia ${data.docente.codigoMateria}.`
+  );
+  let ogImageUrl = $derived(
+    `https://fiuba-reviews.com/calificar/og.png?codigo_materia=${data.docente.codigoMateria}&nombre_materia=${encodeURIComponent(data.docente.nombreMateria)}&nombre_docente=${encodeURIComponent(data.docente.nombre)}`
+  );
+  let ogImageAlt = $derived(
+    `FIUBA Reviews Calificar Docente ${data.docente.nombre} Materia ${data.docente.codigoMateria}`
+  );
 </script>
 
 <svelte:head>
-  <title>FIUBA Reviews • Calificar</title>
+  <title>{metaTitle}</title>
   <meta name="robots" content="noindex,nofollow" />
+  <meta name="description" content={metaDescription} />
+  <link rel="canonical" href="https://fiuba-reviews.com/calificar" />
+
+  <meta property="og:title" content={metaTitle} />
+  <meta property="og:description" content={metaDescription} />
+  <meta property="og:image" content={ogImageUrl} />
+  <meta property="og:image:alt" content={ogImageAlt} />
+
+  <meta name="twitter:title" content={metaTitle} />
+  <meta name="twitter:description" content={metaDescription} />
+  <meta name="twitter:image" content={ogImageUrl} />
+  <meta name="twitter:image:alt" content={ogImageAlt} />
 </svelte:head>
 
 <div class="relative isolate">
