@@ -1,10 +1,13 @@
 import type { RequestHandler } from "./$types";
 import { read } from "$app/server";
+import { ISR_BYPASS_TOKEN } from "$env/static/private";
 import DynOGImgCalificar from "$lib/assets/open-graph/DynOGImgCalificar.svelte";
 import { ImageResponse } from "@ethercorps/sveltekit-og";
 import { CustomFont, resolveFonts } from "@ethercorps/sveltekit-og/fonts";
 import sourceSerif4Woff from "@fontsource/source-serif-4/files/source-serif-4-latin-400-normal.woff";
 import sourceSerif4SemiboldWoff from "@fontsource/source-serif-4/files/source-serif-4-latin-600-normal.woff";
+
+export const config = { isr: { expiration: false, bypassToken: ISR_BYPASS_TOKEN } };
 
 const sourceSerif4FontData = () => read(sourceSerif4Woff).arrayBuffer();
 const sourceSerif4SemiboldFontData = () => read(sourceSerif4SemiboldWoff).arrayBuffer();

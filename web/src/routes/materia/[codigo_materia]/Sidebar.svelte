@@ -1,8 +1,8 @@
 <script lang="ts">
+  import { page } from "$app/state";
   import { ListFilter, Star } from "@lucide/svelte";
   import { ScrollArea } from "bits-ui";
   import Fuse from "fuse.js";
-  import { page } from "$app/state";
 
   const FUZZY_SEARCH_THRESHOLD = 0.15;
   const FUZZY_SEARCH_DEBOUNCE_TIMEOUT_MS = 300;

@@ -1,7 +1,7 @@
 <script lang="ts">
+  import { beforeNavigate } from "$app/navigation";
   import { Search } from "@lucide/svelte";
   import { Command, Dialog } from "bits-ui";
-  import { beforeNavigate } from "$app/navigation";
   import { buscadorMaterias } from "./materias.svelte";
 
   beforeNavigate(() => {
