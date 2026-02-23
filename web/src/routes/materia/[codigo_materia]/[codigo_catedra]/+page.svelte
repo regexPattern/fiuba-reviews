@@ -7,7 +7,8 @@
 
   let metaTitle = $derived(`${data.materia.codigo} • ${data.catedra.nombre} | FIUBA Reviews`);
   let metaDescription = $derived(
-    `Promedio de la cátedra: ${data.catedra.promedio.toFixed(1)} estrellas. Visitá la página para ver las calificaciones y comentarios de la cátedra ${data.catedra.nombre}.`
+    `Promedio de la cátedra: ${data.catedra.promedio.toFixed(1)} ★.
+Visitá la página para ver las calificaciones y comentarios de la cátedra ${data.catedra.nombre}.`
   );
   let ogImageUrl = $derived(
     `https://fiuba-reviews.com/materia/${data.materia.codigo}/${data.catedra.codigo}/og.png?nombre_materia=${encodeURIComponent(data.materia.nombre)}&nombre_catedra=${encodeURIComponent(data.catedra.nombre)}`

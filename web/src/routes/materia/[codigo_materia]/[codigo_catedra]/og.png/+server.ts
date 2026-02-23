@@ -6,6 +6,7 @@ import { db, schema } from "$lib/server/db";
 import { calcularNombreCatedra } from "$lib/server/db/utils";
 import { ImageResponse } from "@ethercorps/sveltekit-og";
 import { CustomFont, resolveFonts } from "@ethercorps/sveltekit-og/fonts";
+import { addCacheTag } from "@vercel/functions";
 import { and, eq } from "drizzle-orm";
 import sourceSerif4Woff from "@fontsource/source-serif-4/files/source-serif-4-latin-400-normal.woff";
 import sourceSerif4SemiboldWoff from "@fontsource/source-serif-4/files/source-serif-4-latin-600-normal.woff";
@@ -17,6 +18,8 @@ const sourceSerif4SemiboldFontData = () => read(sourceSerif4SemiboldWoff).arrayB
 
 export const GET: RequestHandler = async ({ params }) => {
   const { codigo_materia, codigo_catedra } = params;
+
+  await addCacheTag(["og-images", `og-materia-${codigo_materia}`, `og-catedra-${codigo_catedra}`]);
 
   const materias = await db
     .select({ nombre: schema.materia.nombre })

@@ -5,6 +5,7 @@ import DynOGImgMateria from "$lib/assets/open-graph/DynOGImgMateria.svelte";
 import { db, schema } from "$lib/server/db";
 import { ImageResponse } from "@ethercorps/sveltekit-og";
 import { CustomFont, resolveFonts } from "@ethercorps/sveltekit-og/fonts";
+import { addCacheTag } from "@vercel/functions";
 import { eq } from "drizzle-orm";
 import sourceSerif4Woff from "@fontsource/source-serif-4/files/source-serif-4-latin-400-normal.woff";
 import sourceSerif4SemiboldWoff from "@fontsource/source-serif-4/files/source-serif-4-latin-600-normal.woff";
@@ -16,6 +17,8 @@ const sourceSerif4SemiboldFontData = () => read(sourceSerif4SemiboldWoff).arrayB
 
 export const GET: RequestHandler = async ({ params }) => {
   const { codigo_materia } = params;
+
+  await addCacheTag(["og-images", `og-materia-${codigo_materia}`]);
 
   const materias = await db
     .select({ nombre: schema.materia.nombre })
