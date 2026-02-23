@@ -9,9 +9,7 @@
   let metaDescription = $derived(
     `Deja tu calificación y comentario anónimo para el docente ${data.docente.nombre} de la materia ${data.docente.codigoMateria}.`
   );
-  let ogImageUrl = $derived(
-    `https://fiuba-reviews.com/calificar/og.png?codigo_materia=${data.docente.codigoMateria}&nombre_materia=${encodeURIComponent(data.docente.nombreMateria)}&nombre_docente=${encodeURIComponent(data.docente.nombre)}`
-  );
+  let ogImageUrl = "https://fiuba-reviews.com/calificar/og.png";
   let ogImageAlt = $derived(
     `FIUBA Reviews Calificar Docente ${data.docente.nombre} Materia ${data.docente.codigoMateria}`
   );
