@@ -1,6 +1,6 @@
 import type { LayoutServerLoad } from "./$types";
 import { db, schema } from "$lib/server/db";
-import { obtenerCatedras } from "$lib/server/db/utils";
+import { obtenerCatedrasMaterias } from "$lib/server/db/utils";
 import { error } from "@sveltejs/kit";
 import { and, eq } from "drizzle-orm";
 
@@ -49,7 +49,7 @@ export const load: LayoutServerLoad = async ({ params }) => {
     soloActivas = false;
   }
 
-  const catedras = await obtenerCatedras(codigosMateria, { soloActivas });
+  const catedras = await obtenerCatedrasMaterias(codigosMateria, soloActivas);
 
   return {
     materia: {

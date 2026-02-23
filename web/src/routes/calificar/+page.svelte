@@ -5,7 +5,7 @@
 
   let { data } = $props();
 
-  const metaTitle = "Calificar | FIUBA Reviews";
+  const metaTitle = "Calificar docente | FIUBA Reviews";
   let metaDescription = $derived(
     `Deja tu calificación y comentario anónimo para el docente ${data.docente.nombre} de la materia ${data.docente.codigoMateria}.`
   );

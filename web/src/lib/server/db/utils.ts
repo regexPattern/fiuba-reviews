@@ -1,9 +1,20 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { db, schema } from "./index";
 
-export async function obtenerCatedras(
+type DocenteParaNombreCatedra = { nombre: string; prioridad: number };
+
+export function calcularNombreCatedra(docentes: DocenteParaNombreCatedra[]) {
+  const docentesOrdenados = [...docentes].sort((a, b) => {
+    if (a.prioridad !== b.prioridad) return a.prioridad - b.prioridad;
+    return a.nombre.localeCompare(b.nombre);
+  });
+
+  return docentesOrdenados.map((docente) => docente.nombre).join("-");
+}
+
+export async function obtenerCatedrasMaterias(
   codigosMateria: string[],
-  opciones?: { soloActivas?: boolean }
+  soloActivas: boolean = false
 ) {
   if (codigosMateria.length === 0) {
     return [];
@@ -30,7 +41,7 @@ export async function obtenerCatedras(
     .groupBy(schema.calificacionDolly.codigoDocente)
     .as("promedios_docente");
 
-  const catedrasDocentes = await db
+  const catedraDocenteRows = await db
     .select({
       codigoCatedra: schema.catedra.codigo,
       codigoMateria: schema.catedra.codigoMateria,
@@ -52,7 +63,7 @@ export async function obtenerCatedras(
       eq(promediosDocenteSubquery.codigoDocente, schema.docente.codigo)
     )
     .where(
-      opciones?.soloActivas
+      soloActivas
         ? and(
             inArray(schema.catedra.codigoMateria, codigosMateria),
             eq(schema.catedra.activa, true)
@@ -73,7 +84,7 @@ export async function obtenerCatedras(
     }
   >();
 
-  for (const row of catedrasDocentes) {
+  for (const row of catedraDocenteRows) {
     if (!catedrasDocentesMap.has(row.codigoCatedra)) {
       catedrasDocentesMap.set(row.codigoCatedra, {
         codigoMateria: row.codigoMateria,
@@ -94,14 +105,8 @@ export async function obtenerCatedras(
   const catedras = [];
 
   for (const [codigoCatedra, grupo] of catedrasDocentesMap) {
-    const docentesOrdenados = [...grupo.docentes].sort((a, b) => {
-      if (a.prioridad !== b.prioridad) return a.prioridad - b.prioridad;
-      return a.nombre.localeCompare(b.nombre);
-    });
-
-    const nombreCatedra = docentesOrdenados.map((d) => d.nombre).join("-");
-
-    const docentesConCalif = docentesOrdenados.filter((d) => d.tieneCalificacion);
+    const nombreCatedra = calcularNombreCatedra(grupo.docentes);
+    const docentesConCalif = grupo.docentes.filter((d) => d.tieneCalificacion);
     const calificacion =
       docentesConCalif.length === 0
         ? 0

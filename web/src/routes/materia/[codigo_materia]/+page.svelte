@@ -8,9 +8,7 @@
   let metaDescription = $derived(
     `Visitá la página de ${data.materia.nombre} para ver calificaciones y comentarios de las cátedras.`
   );
-  let ogImageUrl = $derived(
-    `https://fiuba-reviews.com/materia/${data.materia.codigo}/og.png?nombre=${encodeURIComponent(data.materia.nombre)}`
-  );
+  let ogImageUrl = $derived(`https://fiuba-reviews.com/materia/${data.materia.codigo}/og.png`);
   let ogImageAlt = $derived(`FIUBA Reviews Materia ${data.materia.codigo}`);
 
   onMount(() => {
