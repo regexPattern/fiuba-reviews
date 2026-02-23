@@ -15,7 +15,8 @@
       system: let
         pkgs = nixpkgs.legacyPackages.${system};
         webDevPkgs = with pkgs; [
-          bun
+          nodejs_24
+          pnpm
           prettierd
           svelte-language-server
           tailwindcss-language-server
