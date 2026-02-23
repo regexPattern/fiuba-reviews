@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Component } from "svelte";
   import { resolve } from "$app/paths";
-  import BuscadorMateriaTrigger from "$lib/componentes/buscador/BuscadorMateriaTrigger.svelte";
+  import BuscadorMaterias from "$comps/buscador-materias";
   import { Database, GraduationCap, HatGlasses, LayersPlus } from "@lucide/svelte";
 
   let { data } = $props();
@@ -50,7 +50,7 @@
       </div>
 
       <div class="flex justify-center">
-        <BuscadorMateriaTrigger variante="hero" />
+        <BuscadorMaterias.Trigger variante="hero" />
       </div>
 
       <div class="mx-auto grid max-w-[620px] gap-6 sm:grid-cols-2">

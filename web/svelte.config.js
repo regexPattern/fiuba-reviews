@@ -4,7 +4,11 @@ import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
   preprocess: vitePreprocess(),
-  kit: { adapter: adapter({ runtime: "nodejs24.x" }), experimental: { remoteFunctions: true } },
+  kit: {
+    alias: { ["$comps"]: "src/lib/ui/components" },
+    adapter: adapter({ runtime: "nodejs24.x" }),
+    experimental: { remoteFunctions: true }
+  },
   compilerOptions: { experimental: { async: true } }
 };
 

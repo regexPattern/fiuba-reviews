@@ -1,10 +1,8 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
+  import BuscadorMaterias from "$comps/buscador-materias";
   import favicon from "$lib/assets/favicon.svg";
-  import BuscadorMateriaDialog from "$lib/componentes/buscador/BuscadorMateriaDialog.svelte";
-  import BuscadorMateriaTrigger from "$lib/componentes/buscador/BuscadorMateriaTrigger.svelte";
-  import { buscadorMaterias } from "$lib/componentes/buscador/materias.svelte";
   import { Github, Menu, Monitor, Moon, SunMedium } from "@lucide/svelte";
   import { DropdownMenu } from "bits-ui";
   import { mode, ModeWatcher, resetMode, setMode } from "mode-watcher";
@@ -13,7 +11,7 @@
   let { children, data } = $props();
 
   $effect(() => {
-    buscadorMaterias.setMaterias(data.materias);
+    BuscadorMaterias.state.setMaterias(data.materias);
   });
 </script>
 
@@ -42,8 +40,8 @@
       <span class="text-fiuba">FIUBA</span> Reviews
     </a>
 
-    {#if page.url.pathname !== resolve("/")}
-      <BuscadorMateriaTrigger variante="navbar" />
+    {#if data.mostrarTriggerBuscadorMaterias}
+      <BuscadorMaterias.Trigger variante="navbar" />
     {/if}
 
     <nav class="hidden items-center gap-5 md:mx-3 md:flex" aria-label="Navegación">
@@ -209,7 +207,7 @@
     </DropdownMenu.Root>
   </div>
 </header>
-<BuscadorMateriaDialog />
+<BuscadorMaterias.Dialog />
 
 <div class="pt-[calc(56px+env(safe-area-inset-top))]">
   {@render children()}

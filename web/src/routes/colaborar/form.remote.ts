@@ -67,13 +67,11 @@ export const submitForm = form(
     }
 
     try {
-      await db
-        .insert(schema.ofertaComisionesRaw)
-        .values({
-          codigoCarrera: carreraNuevaOferta[0].codigo,
-          codigoCuatrimestre: cuatrimestreNuevaOferta[0].codigo,
-          contenido
-        });
+      await db.insert(schema.ofertaComisionesRaw).values({
+        codigoCarrera: carreraNuevaOferta[0].codigo,
+        codigoCuatrimestre: cuatrimestreNuevaOferta[0].codigo,
+        contenido
+      });
     } catch (e) {
       console.error("[enviarOferta] Error al insertar oferta.", {
         codigoCarrera: carreraNuevaOferta[0].codigo,

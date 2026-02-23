@@ -6,7 +6,7 @@ import * as v from "valibot";
 
 v.setGlobalConfig({ lang: "es" });
 
-export const load: LayoutServerLoad = async () => {
+export const load: LayoutServerLoad = async ({ url }) => {
   const cantidadPlanesExpr = sql<number>`count(distinct ${schema.plan.codigo})::int`;
 
   const cantidadCatedrasExpr = sql<number>`(
@@ -39,5 +39,8 @@ export const load: LayoutServerLoad = async () => {
     .groupBy(schema.materia.codigo, schema.materia.nombre)
     .orderBy(desc(cantidadPlanesExpr), desc(cantidadCatedrasExpr), schema.materia.nombre);
 
-  return { materias };
+  return {
+    materias,
+    mostrarTriggerBuscadorMaterias: url.pathname !== "/"
+  };
 };

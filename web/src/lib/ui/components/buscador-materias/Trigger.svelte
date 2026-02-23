@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Search } from "@lucide/svelte";
-  import { buscadorMaterias } from "./materias.svelte";
+  import state from "./state.svelte";
 
   interface Props {
     variante?: "navbar" | "hero";
@@ -19,7 +19,7 @@
 <button
   type="button"
   class={clasesPorVariante[variante]}
-  onclick={() => buscadorMaterias.abrirBuscador()}
+  onclick={() => state.abrir()}
   aria-label="Abrir buscador de materias"
 >
   {#if variante === "hero"}

@@ -2,11 +2,11 @@
   import { beforeNavigate } from "$app/navigation";
   import { Search } from "@lucide/svelte";
   import { Command, Dialog } from "bits-ui";
-  import { buscadorMaterias } from "./materias.svelte";
+  import state from "./state.svelte";
 
   beforeNavigate(() => {
-    buscadorMaterias.cerrarBuscador();
-    buscadorMaterias.limpiarQuery();
+    state.cerrar();
+    state.clearQuery();
   });
 
   function handleKeyDownGlobal(evento: KeyboardEvent) {
@@ -19,14 +19,14 @@
 
     if (evento.key.toLowerCase() === "k" && (evento.metaKey || evento.ctrlKey)) {
       evento.preventDefault();
-      buscadorMaterias.abrirBuscador();
+      state.abrir();
     }
   }
 </script>
 
 <svelte:document onkeydown={handleKeyDownGlobal} />
 
-<Dialog.Root bind:open={buscadorMaterias.open}>
+<Dialog.Root bind:open={state.abierto}>
   <Dialog.Portal>
     <Dialog.Overlay
       class="fixed inset-0 z-500 bg-overlay-background backdrop-filter-(--backdrop-filter-overlay-blur) data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:fade-in"
@@ -47,8 +47,8 @@
           />
 
           <Command.Input
-            value={buscadorMaterias.queryValue}
-            oninput={(evento) => buscadorMaterias.setQueryValue(evento.currentTarget.value)}
+            value={state.query}
+            oninput={(evento) => state.setQuery(evento.currentTarget.value)}
             placeholder="Codigo o nombre de materia"
             class="w-full truncate p-3 pr-3 pl-10 text-base focus:ring-0 focus:outline-hidden md:pr-14"
           />
@@ -62,7 +62,7 @@
 
         <Command.List class="max-h-[280px] overflow-x-hidden overflow-y-auto pb-2">
           <Command.Viewport>
-            {#each buscadorMaterias.materiasFiltradas as materia (materia.codigo)}
+            {#each state.materiasFiltradas as materia (materia.codigo)}
               <Command.LinkItem
                 href="/materia/{materia.codigo}"
                 class="flex h-10 cursor-pointer items-center gap-3 p-3 text-sm outline-hidden select-none data-selected:text-fiuba"

@@ -92,14 +92,12 @@ export async function obtenerCatedrasMaterias(
       });
     }
 
-    catedrasDocentesMap
-      .get(row.codigoCatedra)!
-      .docentes.push({
-        nombre: row.nombreDocente,
-        promedio: row.promedioDocente ?? 0,
-        tieneCalificacion: row.promedioDocente != null,
-        prioridad: row.prioridadRol ?? Number.MAX_SAFE_INTEGER
-      });
+    catedrasDocentesMap.get(row.codigoCatedra)!.docentes.push({
+      nombre: row.nombreDocente,
+      promedio: row.promedioDocente ?? 0,
+      tieneCalificacion: row.promedioDocente != null,
+      prioridad: row.prioridadRol ?? Number.MAX_SAFE_INTEGER
+    });
   }
 
   const catedras = [];
