@@ -1,9 +1,9 @@
 import { form, getRequestEvent } from "$app/server";
-import { ISR_BYPASS_TOKEN } from "$env/static/private";
 import { db, schema as dbSchema } from "$lib/server/db";
 import { validateToken } from "$lib/server/turnstile";
 import { UUID_V4_RE } from "$lib/utils";
 import { error, invalid } from "@sveltejs/kit";
+import { invalidateByTag } from "@vercel/functions";
 import { eq } from "drizzle-orm";
 import * as v from "valibot";
 
@@ -33,14 +33,16 @@ const formSchema = v.object({
   cfTurnstileResponse: v.string()
 });
 
-export const submitForm = form(formSchema, async (fields) => {
+export const submit = form(formSchema, async (fields) => {
   const { url } = getRequestEvent();
 
-  const { success } = await validateToken(fields.cfTurnstileResponse);
+  const { success, error: captchaError } = await validateToken(fields.cfTurnstileResponse);
 
   if (!success) {
-    console.log("Usuario falló el CAPTCHA.");
-    invalid("CAPTCHA inválido.");
+    console.warn(`Usuario falló el CAPTCHA.`, {
+      error: captchaError
+    });
+    invalid(`CAPTCHA inválido: ${captchaError}`);
   }
 
   const codigoDocente = url.searchParams.get("docente");
@@ -51,24 +53,24 @@ export const submitForm = form(formSchema, async (fields) => {
     error(400, "Código de docente inválido.");
   }
 
-  const docente = await db
-    .select({ codigo: dbSchema.docente.codigo })
+  const docentesRows = await db
+    .select({ codigoMateria: dbSchema.docente.codigoMateria })
     .from(dbSchema.docente)
     .where(eq(dbSchema.docente.codigo, codigoDocente))
     .limit(1);
 
-  if (docente.length === 0) {
+  if (docentesRows.length === 0) {
     error(404, "Docente no encontrado.");
   }
 
-  const cuatrimestre = await db
+  const cuatrimestresRows = await db
     .select({ codigo: dbSchema.cuatrimestre.codigo })
     .from(dbSchema.cuatrimestre)
     .where(eq(dbSchema.cuatrimestre.codigo, fields.cuatrimestre))
     .limit(1);
 
-  if (cuatrimestre.length === 0) {
-    error(400, "Cuatrimestre no encontrado.");
+  if (cuatrimestresRows.length === 0) {
+    error(404, "Cuatrimestre no encontrado.");
   }
 
   await db.transaction(async (tx) => {
@@ -91,7 +93,7 @@ export const submitForm = form(formSchema, async (fields) => {
         })
         .returning({ codigo: dbSchema.calificacionDolly.codigo });
     } catch (e) {
-      console.error("[calificarDocente] Error al insertar calificación", {
+      console.error("error al insertar calificación", {
         codigoDocente,
         codigoCuatrimestre: fields.cuatrimestre,
         error: e
@@ -100,32 +102,34 @@ export const submitForm = form(formSchema, async (fields) => {
       error(500, "Error interno al guardar tu calificación.");
     }
 
-    console.info("[calificarDocente] Calificación insertada correctamente", {
+    console.info("calificación insertada correctamente", {
       codigoDocente,
       codigoCuatrimestre: fields.cuatrimestre,
       codigoCalificacionDolly: calificacionInsertada.codigo
     });
 
-    if (fields.comentario.length > 0) {
+    const contenidoComentario = fields.comentario.trim();
+
+    if (contenidoComentario.length > 0) {
       try {
         const [comentarioInsertado] = await tx
           .insert(dbSchema.comentario)
           .values({
             codigoDocente,
             codigoCuatrimestre: fields.cuatrimestre,
-            contenido: fields.comentario,
+            contenido: contenidoComentario,
             codigoCalificacionDolly: calificacionInsertada.codigo
           })
           .returning({ codigo: dbSchema.comentario.codigo });
 
-        console.info("[calificarDocente] Comentario insertado correctamente", {
+        console.info("comentario insertado correctamente", {
           codigoDocente,
           codigoCuatrimestre: fields.cuatrimestre,
           codigoCalificacionDolly: calificacionInsertada.codigo,
           codigoComentario: comentarioInsertado.codigo
         });
       } catch (e) {
-        console.error("[calificarDocente] Error al insertar comentario.", {
+        console.error("error al insertar comentario", {
           codigoDocente,
           codigoCuatrimestre: fields.cuatrimestre,
           codigoCalificacionDolly: calificacionInsertada.codigo,
@@ -137,46 +141,24 @@ export const submitForm = form(formSchema, async (fields) => {
     }
   });
 
-  const catedrasAfectadas = await db
-    .select({
-      codigoCatedra: dbSchema.catedra.codigo,
-      codigoMateria: dbSchema.catedra.codigoMateria
-    })
-    .from(dbSchema.catedraDocente)
-    .innerJoin(dbSchema.catedra, eq(dbSchema.catedra.codigo, dbSchema.catedraDocente.codigoCatedra))
-    .where(eq(dbSchema.catedraDocente.codigoDocente, codigoDocente));
+  // Cuando se agrega una calificación a un docente de una cátedra se invalida el cache de todas
+  // las cátedras de la materia. Esto tiene que ser así porque se tiene que volver a compilar el
+  // layout que enmarca a todas las cátedras (el layout de la materia), porque acá se muestra un
+  // listado de cátedras con sus promedios, por lo que, al agregar una calificación, se tiene que
+  // recomputar el promedio de esta cátedra y tiene que mostrarse igual para todas las cátedras que
+  // muestren el listado.
 
-  if (catedrasAfectadas.length > 0) {
-    const resultadosRevalidacion = await Promise.allSettled(
-      catedrasAfectadas.map(async ({ codigoCatedra, codigoMateria }) => {
-        const pathCatedra = `/materia/${codigoMateria}/${codigoCatedra}`;
-        const response = await fetch(new URL(pathCatedra, url), {
-          method: "GET",
-          headers: { "x-prerender-revalidate": ISR_BYPASS_TOKEN }
-        });
+  const codigoMateria = docentesRows[0].codigoMateria;
+  const tagInvalidacionCache = `materia-${codigoMateria}`;
 
-        if (!response.ok) {
-          throw new Error(`status=${response.status}`);
-        }
-
-        return pathCatedra;
-      })
-    );
-
-    for (let i = 0; i < resultadosRevalidacion.length; i += 1) {
-      const resultado = resultadosRevalidacion[i];
-
-      if (resultado.status === "rejected") {
-        const { codigoCatedra, codigoMateria } = catedrasAfectadas[i];
-
-        console.warn("[calificarDocente] Fallo la revalidacion ISR de catedra", {
-          codigoDocente,
-          codigoCatedra,
-          codigoMateria,
-          error: resultado.reason
-        });
-      }
-    }
+  try {
+    await invalidateByTag(tagInvalidacionCache);
+  } catch (e) {
+    console.warn(`error invalidando cache de materia ${codigoMateria}`, {
+      codigoDocente,
+      tagInvalidacionCache,
+      error: e
+    });
   }
 
   return { success: true };

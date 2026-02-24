@@ -3,6 +3,7 @@ import { ISR_BYPASS_TOKEN } from "$env/static/private";
 import { db, schema } from "$lib/server/db";
 import { UUID_V4_RE } from "$lib/utils";
 import { error } from "@sveltejs/kit";
+import { addCacheTag } from "@vercel/functions";
 import { desc, eq, inArray, sql } from "drizzle-orm";
 
 export const config = { isr: { expiration: false, bypassToken: ISR_BYPASS_TOKEN } };
@@ -11,6 +12,8 @@ export const load: PageServerLoad = async ({ params, parent }) => {
   if (!UUID_V4_RE.test(params.codigo_catedra)) {
     error(400, "Código de cátedra inválido.");
   }
+
+  await addCacheTag(`materia-${params.codigo_materia}`);
 
   const { catedras } = await parent();
   const catedra = catedras.find((c) => c.codigo === params.codigo_catedra);
