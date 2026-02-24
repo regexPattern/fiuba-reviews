@@ -5,26 +5,26 @@
   import { Button } from "bits-ui";
   import { mode } from "mode-watcher";
   import { Turnstile } from "svelte-turnstile";
-  import { submitForm } from "./form.remote";
+  import { formAction } from "./form.remote";
 
   let enviando = $state(false);
-  let metadata = $derived(extraerMetadataOferta(submitForm.fields.contenido.value()));
+  let metadata = $derived(extraerMetadataOferta(formAction.fields.contenido.value()));
 
   $effect(() => {
     if (metadata) {
-      submitForm.fields.metadata.carrera.set(metadata.carrera);
-      submitForm.fields.metadata.cuatrimestre.numero.set(metadata.cuatrimestre.numero);
-      submitForm.fields.metadata.cuatrimestre.anio.set(metadata.cuatrimestre.anio);
+      formAction.fields.metadata.carrera.set(metadata.carrera);
+      formAction.fields.metadata.cuatrimestre.numero.set(metadata.cuatrimestre.numero);
+      formAction.fields.metadata.cuatrimestre.anio.set(metadata.cuatrimestre.anio);
     }
   });
 </script>
 
 <form
-  {...submitForm.enhance(async ({ form, submit }) => {
+  {...formAction.enhance(async ({ form, submit }) => {
     enviando = true;
     try {
       await submit();
-      if (submitForm.result) {
+      if (formAction.result) {
         form.reset();
       }
     } finally {
@@ -37,15 +37,15 @@
     <label class="block">
       <span class="font-medium">Contenido copiado del SIU</span>
       <textarea
-        {...submitForm.fields.contenido.as("text")}
+        {...formAction.fields.contenido.as("text")}
         rows={5}
         class="mt-1 w-full border border-button-border bg-background p-2 dark:bg-background"
       >
       </textarea>
 
-      <input {...submitForm.fields.metadata.carrera.as("text")} hidden />
-      <input {...submitForm.fields.metadata.cuatrimestre.numero.as("number")} hidden />
-      <input {...submitForm.fields.metadata.cuatrimestre.anio.as("number")} hidden />
+      <input {...formAction.fields.metadata.carrera.as("text")} hidden />
+      <input {...formAction.fields.metadata.cuatrimestre.numero.as("number")} hidden />
+      <input {...formAction.fields.metadata.cuatrimestre.anio.as("number")} hidden />
     </label>
 
     <p class="text-sm">
@@ -66,7 +66,7 @@
         language="es-es"
         theme={mode.current}
         on:callback={(e) => {
-          submitForm.fields.cfTurnstileResponse.set(e.detail.token);
+          formAction.fields.cfTurnstileResponse.set(e.detail.token);
         }}
       />
     </div>
@@ -79,7 +79,7 @@
       {#if enviando}
         Enviando
         <Loader class="size-[16px] animate-spin" />
-      {:else if submitForm.result?.success}
+      {:else if formAction.result?.success}
         Enviado
         <Check class="size-[16px]" />
       {:else}
@@ -88,9 +88,9 @@
     </Button.Root>
   </div>
 
-  {#if submitForm.fields.allIssues() && submitForm.fields.allIssues()!.length > 0}
+  {#if formAction.fields.allIssues() && formAction.fields.allIssues()!.length > 0}
     <div class="space-y-1 text-sm text-red-500 dark:text-red-400">
-      {#each submitForm.fields.allIssues() as issue, i (i)}
+      {#each formAction.fields.allIssues() as issue, i (i)}
         <p class="flex flex-wrap items-center gap-1">
           <CircleAlert class="size-[14px]" />{issue.message}
         </p>

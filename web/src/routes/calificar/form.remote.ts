@@ -33,7 +33,7 @@ const formSchema = v.object({
   cfTurnstileResponse: v.string()
 });
 
-export const submit = form(formSchema, async (fields) => {
+export const formAction = form(formSchema, async (fields) => {
   const { url } = getRequestEvent();
 
   const { success, error: captchaError } = await validateToken(fields.cfTurnstileResponse);

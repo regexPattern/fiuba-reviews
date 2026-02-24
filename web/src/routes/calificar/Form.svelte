@@ -4,7 +4,7 @@
   import { Button, Label, Select, Slider } from "bits-ui";
   import { mode } from "mode-watcher";
   import { Turnstile } from "svelte-turnstile";
-  import { submitForm } from "./form.remote";
+  import { formAction } from "./form.remote";
 
   const CAMPOS_CALIFICACION = [
     { name: "aceptaCritica", label: "Acepta crítica" },
@@ -21,7 +21,7 @@
   const CALIFICACION_POR_DEFECTO = 2.5;
 
   for (const { name } of CAMPOS_CALIFICACION) {
-    const campo = submitForm.fields.calificaciones[name];
+    const campo = formAction.fields.calificaciones[name];
     if (campo.value() === null) {
       campo.set(CALIFICACION_POR_DEFECTO);
     }
@@ -41,7 +41,7 @@
 
   function resetearCalificaciones() {
     for (const { name } of CAMPOS_CALIFICACION) {
-      submitForm.fields.calificaciones[name].set(CALIFICACION_POR_DEFECTO);
+      formAction.fields.calificaciones[name].set(CALIFICACION_POR_DEFECTO);
     }
   }
 </script>
@@ -50,7 +50,7 @@
   nombreCampo: (typeof CAMPOS_CALIFICACION)[number]["name"],
   label: string
 )}
-  {@const field = submitForm.fields.calificaciones[nombreCampo]}
+  {@const field = formAction.fields.calificaciones[nombreCampo]}
   {@const value = field.value() ?? CALIFICACION_POR_DEFECTO}
   {@const inputComponent = field.as("number")}
 
@@ -104,11 +104,11 @@
 {/snippet}
 
 <form
-  {...submitForm.enhance(async ({ form, submit }) => {
+  {...formAction.enhance(async ({ form, submit }) => {
     enviando = true;
     try {
       await submit();
-      if (submitForm.result) {
+      if (formAction.result) {
         form.reset();
         resetearCalificaciones();
       }
@@ -130,7 +130,7 @@
     </Label.Root>
 
     <textarea
-      {...submitForm.fields.comentario.as("text")}
+      {...formAction.fields.comentario.as("text")}
       id="comentario"
       rows={5}
       class="mt-1 w-full border border-button-border bg-background p-2 dark:bg-background"
@@ -144,9 +144,9 @@
 
       <input
         type="hidden"
-        name={submitForm.fields.cuatrimestre.as("number").name}
+        name={formAction.fields.cuatrimestre.as("number").name}
         value={cuatriSeleccionado?.codigo ?? ""}
-        aria-invalid={submitForm.fields.cuatrimestre.as("number")["aria-invalid"]}
+        aria-invalid={formAction.fields.cuatrimestre.as("number")["aria-invalid"]}
       />
 
       <Select.Root
@@ -154,7 +154,7 @@
         onValueChange={(v) => {
           cuatriSeleccionado = cuatris.find((c) => `${c.codigo}` === v) || null;
           if (cuatriSeleccionado) {
-            submitForm.fields.cuatrimestre.set(cuatriSeleccionado.codigo);
+            formAction.fields.cuatrimestre.set(cuatriSeleccionado.codigo);
           }
         }}
       >
@@ -203,7 +203,7 @@
           language="es-es"
           theme={mode.current}
           on:callback={(e) => {
-            submitForm.fields.cfTurnstileResponse.set(e.detail.token);
+            formAction.fields.cfTurnstileResponse.set(e.detail.token);
           }}
         />
       </div>
@@ -216,7 +216,7 @@
         {#if enviando}
           Enviando
           <Loader class="size-[16px] animate-spin" />
-        {:else if submitForm.result?.success}
+        {:else if formAction.result?.success}
           Enviado
           <CircleCheck class="size-[16px]" />
         {:else}
@@ -225,9 +225,9 @@
       </Button.Root>
     </div>
 
-    {#if submitForm.fields.allIssues() && submitForm.fields.allIssues()!.length > 0}
+    {#if formAction.fields.allIssues() && formAction.fields.allIssues()!.length > 0}
       <div class="mt-6 space-y-1 text-sm text-red-500 dark:text-red-400">
-        {#each submitForm.fields.allIssues() as issue, i (i)}
+        {#each formAction.fields.allIssues() as issue, i (i)}
           <p class="flex flex-wrap items-center gap-1">
             <CircleAlert class="size-[14px]" />{issue.message}
           </p>

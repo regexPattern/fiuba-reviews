@@ -5,7 +5,7 @@ import { error, invalid } from "@sveltejs/kit";
 import { and, eq, max, sql } from "drizzle-orm";
 import * as v from "valibot";
 
-export const submitForm = form(
+export const formAction = form(
   v.object({
     metadata: v.object({
       carrera: v.string(),

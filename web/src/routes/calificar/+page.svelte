@@ -1,7 +1,7 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import { ChevronLeft } from "@lucide/svelte";
-  import Formulario from "./Formulario.svelte";
+  import Form from "./Form.svelte";
 
   let { data } = $props();
 
@@ -63,6 +63,6 @@
       </a>
     </div>
 
-    <Formulario cuatris={data.cuatris} />
+    <Form cuatris={data.cuatris} />
   </main>
 </div>

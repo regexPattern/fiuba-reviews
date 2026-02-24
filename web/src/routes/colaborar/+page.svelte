@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Formulario from "./Formulario.svelte";
+  import Form from "./Form.svelte";
   import Instrucciones from "./Instrucciones.svelte";
 
   let { data } = $props();
@@ -72,7 +72,7 @@
 
     <section class="space-y-6 p-6">
       <Instrucciones />
-      <Formulario />
+      <Form />
     </section>
   </main>
 </div>
