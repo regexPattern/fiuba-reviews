@@ -1,0 +1,19 @@
+{
+  "redirects": [
+    {
+      "source": "/materias",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/materias/:codigo",
+      "destination": "/materia/:codigo",
+      "permanent": true
+    },
+    {
+      "source": "/planes",
+      "destination": "/colaborar",
+      "permanent": true
+    }
+  ]
+}
