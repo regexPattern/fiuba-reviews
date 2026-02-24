@@ -21,7 +21,7 @@ export const GET: RequestHandler = async () => {
     .where(eq(schema.plan.estaVigente, true))
     .groupBy(schema.materia.codigo);
 
-  const rutasEstaticas = ["/", "/colaborar"];
+  const rutasEstaticas = ["/"];
   const rutasMaterias = materias.map(({ codigo }) => `/materia/${codigo}`);
   const urls = [...rutasEstaticas, ...rutasMaterias];
 

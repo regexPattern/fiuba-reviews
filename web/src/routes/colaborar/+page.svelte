@@ -13,7 +13,7 @@
 
 <svelte:head>
   <title>{metaTitle}</title>
-  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large" />
+  <meta name="robots" content="noindex,nofollow" />
   <meta name="description" content={metaDescription} />
   <link rel="canonical" href="https://fiuba-reviews.com/colaborar" />
 

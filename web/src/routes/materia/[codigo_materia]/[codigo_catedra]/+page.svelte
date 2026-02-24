@@ -20,8 +20,9 @@ Visitá la página para ver las calificaciones y comentarios de la cátedra ${da
 
 <svelte:head>
   <title>{metaTitle}</title>
-  <meta name="robots" content="noindex,follow,max-snippet:-1,max-image-preview:large" />
+  <meta name="robots" content="noindex,nofollow,max-snippet:-1,max-image-preview:large" />
   <meta name="description" content={metaDescription} />
+  <link rel="canonical" href={`https://fiuba-reviews.com/materia/${data.materia.codigo}`} />
 
   <meta property="og:title" content={metaTitle} />
   <meta property="og:description" content={metaDescription} />

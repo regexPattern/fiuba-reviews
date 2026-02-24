@@ -4,7 +4,11 @@ import { asc, eq } from "drizzle-orm";
 
 export const prerender = true;
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ setHeaders }) => {
+  setHeaders({
+    "x-robots-tag": "noindex, nofollow"
+  });
+
   const actualizacionesOfertas = await db
     .select({
       carrera: { codigo: schema.carrera.codigo, nombre: schema.carrera.nombre },

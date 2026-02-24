@@ -1,3 +1,2 @@
 User-agent: *
-Disallow: /calificar
 Sitemap: https://fiuba-reviews.com/sitemap.xml

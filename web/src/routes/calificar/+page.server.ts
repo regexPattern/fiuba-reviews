@@ -4,7 +4,11 @@ import { UUID_V4_RE } from "$lib/utils";
 import { error } from "@sveltejs/kit";
 import { desc, eq } from "drizzle-orm";
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, setHeaders }) => {
+  setHeaders({
+    "x-robots-tag": "noindex, nofollow"
+  });
+
   const codigoCatedra = url.searchParams.get("catedra");
 
   if (codigoCatedra && !UUID_V4_RE.test(codigoCatedra)) {
