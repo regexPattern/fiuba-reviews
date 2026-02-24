@@ -2,7 +2,6 @@
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
   import BuscadorMaterias from "$comps/buscador-materias";
-  import favicon from "$lib/assets/favicon.svg";
   import { Github, Menu, Monitor, Moon, SunMedium } from "@lucide/svelte";
   import { DropdownMenu } from "bits-ui";
   import { mode, ModeWatcher, resetMode, setMode } from "mode-watcher";
@@ -16,7 +15,8 @@
 </script>
 
 <svelte:head>
-  <link rel="icon" href={favicon} />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20260224" />
+  <link rel="alternate icon" type="image/x-icon" href="/favicon.ico?v=20260224" />
 
   <meta name="author" content="Carlos Eduardo Castillo Pereira" />
 
