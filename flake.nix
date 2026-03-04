@@ -35,58 +35,64 @@
     flake-utils.lib.eachDefaultSystem (
       system: let
         pkgs = nixpkgs.legacyPackages.${system};
+
+        mkShells = {
+          devPackages,
+          runtimePackages,
+        }: let
+          dev = pkgs.mkShell {
+            packages = devPackages;
+          };
+          runtime = pkgs.mkShell {
+            packages = runtimePackages;
+          };
+        in {
+          inherit dev runtime;
+          full = pkgs.mkShell {
+            inputsFrom = [dev runtime];
+          };
+        };
+        
       in {
-        devShells.web = {
-          dev = pkgs.mkShell {
-            packages = with pkgs; [
-              prettierd
-              svelte-language-server
-              tailwindcss-language-server
-              typescript-language-server
-              vscode-langservers-extracted
-            ];
-          };
-          runtime = pkgs.mkShell {
-            packages = with pkgs; [
-              nodejs_24
-              pnpm
-            ];
-          };
+        devShells.web = mkShells {
+          devPackages = with pkgs; [
+            prettierd
+            svelte-language-server
+            tailwindcss-language-server
+            typescript-language-server
+            vscode-langservers-extracted
+          ];
+          runtimePackages = with pkgs; [
+            nodejs_24
+            pnpm
+          ];
         };
 
-        devShells.actualizador.cliente = {
-          dev = pkgs.mkShell {
-            packages = with pkgs; [
-              prettierd
-              svelte-language-server
-              tailwindcss-language-server
-              typescript-language-server
-              vscode-langservers-extracted
-            ];
-          };
-          runtime = pkgs.mkShell {
-            packages = with pkgs; [
-              nodejs_24
-              pnpm
-            ];
-          };
+        devShells.actualizador.cliente = mkShells {
+          devPackages = with pkgs; [
+            prettierd
+            svelte-language-server
+            tailwindcss-language-server
+            typescript-language-server
+            vscode-langservers-extracted
+          ];
+          runtimePackages = with pkgs; [
+            nodejs_24
+            pnpm
+          ];
         };
 
-        devShells.actualizador.servidor = {
-          dev = pkgs.mkShell {
-            packages = with pkgs; [
-              golangci-lint-langserver
-              gopls
-            ];
-          };
-          runtime = pkgs.mkShell {
-            packages = with pkgs; [
-              air
-              go
-              golangci-lint
-              pgformatter
-            ];
-          };
+        devShells.actualizador.servidor = mkShells {
+          devPackages = with pkgs; [
+            golangci-lint-langserver
+            gopls
+          ];
+          runtimePackages = with pkgs; [
+            air
+            go
+            golangci-lint
+            pgformatter
+          ];
         };
 
         formatter = pkgs.alejandra;
