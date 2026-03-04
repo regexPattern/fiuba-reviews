@@ -1,12 +1,14 @@
-# Misc
-.DS_Store
-.direnv
-.envrc
+# Build artifacts
+.vercel/
+
+# Env
 .env*
 !.env.development
 
-# Build outputs
-.vercel
+# Misc
+.direnv/
+.DS_Store
+.envrc
 
 # Herramientas de IA
 opencode.json
