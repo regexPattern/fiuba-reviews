@@ -2,6 +2,8 @@
 .DS_Store
 .direnv
 .envrc
+.env*
+!.env.development
 
 # Build outputs
 .vercel
