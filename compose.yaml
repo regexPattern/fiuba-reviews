@@ -2,8 +2,6 @@ name: fiuba-reviews
 services:
   db: 
     image: docker.io/postgres:18.1
-    env_file:
-      - ./.env.development
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
