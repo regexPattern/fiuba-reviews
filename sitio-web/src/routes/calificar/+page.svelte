@@ -1,5 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
+  import BackgroundBlob from "$comps/BackgroundBlob.svelte";
   import { ChevronLeft } from "@lucide/svelte";
   import Form from "./Form.svelte";
 
@@ -33,7 +34,7 @@
 </svelte:head>
 
 <div class="relative isolate">
-  <div class="fondo-decorativo fondo-superior" aria-hidden="true"></div>
+  <BackgroundBlob upperLeft={true} lowerRight={false} />
 
   <main class="relative z-10 container mx-auto space-y-12 p-6">
     <div class="flex flex-col-reverse justify-between gap-4 md:flex-row md:items-center">

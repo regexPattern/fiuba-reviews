@@ -1,4 +1,5 @@
 <script lang="ts">
+  import BackgroundBlob from "$comps/BackgroundBlob.svelte";
   import Form from "./Form.svelte";
   import Instrucciones from "./Instrucciones.svelte";
 
@@ -30,7 +31,7 @@
 </svelte:head>
 
 <div class="relative isolate">
-  <div class="fondo-decorativo fondo-superior" aria-hidden="true"></div>
+  <BackgroundBlob upperLeft={true} lowerRight={false} />
 
   <main class="relative z-10 container mx-auto grid items-start lg:grid-cols-2">
     <section class="space-y-4 p-6">

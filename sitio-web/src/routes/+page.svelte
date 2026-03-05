@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Component } from "svelte";
   import { resolve } from "$app/paths";
+  import BackgroundBlob from "$comps/BackgroundBlob.svelte";
   import BuscadorMaterias from "$comps/buscador-materias";
   import { Database, GraduationCap, HatGlasses, LayersPlus } from "@lucide/svelte";
 
@@ -32,7 +33,7 @@
 </svelte:head>
 
 <div class="relative isolate">
-  <div class="fondo-decorativo fondo-superior" aria-hidden="true"></div>
+  <BackgroundBlob upperLeft={true} lowerRight={false} />
 
   <main
     class="relative z-10 container mx-auto mb-4 grid gap-10 p-6 lg:grid-cols-2 lg:flex-row lg:gap-12"

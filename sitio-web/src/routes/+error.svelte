@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from "$app/state";
+  import BackgroundBlob from "$comps/BackgroundBlob.svelte";
   import colectivo99 from "$lib/assets/colectivo-99.webp";
   import colectivo400 from "$lib/assets/colectivo-400.webp";
   import colectivo404 from "$lib/assets/colectivo-404.webp";
@@ -25,7 +26,7 @@
 </svelte:head>
 
 <div class="relative isolate">
-  <div class="fondo-decorativo fondo-superior fondo-inferior" aria-hidden="true"></div>
+  <BackgroundBlob upperLeft={true} lowerRight={true} />
 
   {#if page.error}
     <div class="relative z-10 mx-auto space-y-6 p-6 sm:p-8">
