@@ -50,6 +50,40 @@ body {
 
   --color-overlay-background: var(--color-background)/75;
   --backdrop-filter-overlay-blur: blur(8px);
+
+  --animate-scroll-horizontal: scroll-horizontal 68s linear infinite;
+  --animate-scroll-horizontal-sm: scroll-horizontal 56s linear infinite;
+  --animate-scroll-horizontal-reverse: scroll-horizontal-reverse 64s linear infinite;
+  --animate-scroll-horizontal-reverse-sm: scroll-horizontal-reverse 52s linear infinite;
+  --animate-scroll-vertical: scroll-vertical 50s linear infinite;
+  --animate-scroll-vertical-md: scroll-vertical 30s linear infinite;
+}
+
+@keyframes scroll-horizontal {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scroll-horizontal-reverse {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes scroll-vertical {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
 }
 
 .dark {

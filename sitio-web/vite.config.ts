@@ -1,7 +1,9 @@
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { sveltekitOG } from "@ethercorps/sveltekit-og/plugin";
+
 import { sveltekit } from "@sveltejs/kit/vite";
+
+import { sveltekitOG } from "@ethercorps/sveltekit-og/plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, loadEnv } from "vite";
 

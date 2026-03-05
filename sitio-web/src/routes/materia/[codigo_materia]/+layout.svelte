@@ -1,7 +1,9 @@
 <script lang="ts">
   import { afterNavigate } from "$app/navigation";
+
   import { ChevronDown, ChevronUp } from "@lucide/svelte";
   import { Dialog, ScrollArea } from "bits-ui";
+
   import Sidebar from "./Sidebar.svelte";
 
   let { children, data } = $props();

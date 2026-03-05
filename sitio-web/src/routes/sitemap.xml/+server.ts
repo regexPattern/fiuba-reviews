@@ -1,5 +1,7 @@
 import type { RequestHandler } from "./$types";
+
 import { db, schema } from "$lib/server/db";
+
 import { eq } from "drizzle-orm";
 
 const URL_BASE = "https://fiuba-reviews.com";

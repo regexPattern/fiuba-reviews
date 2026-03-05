@@ -1,5 +1,6 @@
 <script lang="ts">
   import BackgroundBlob from "$comps/BackgroundBlob.svelte";
+
   import Form from "./Form.svelte";
   import Instrucciones from "./Instrucciones.svelte";
 

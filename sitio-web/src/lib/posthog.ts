@@ -1,4 +1,5 @@
 import { PUBLIC_POSTHOG_PROJECT_API_KEY } from "$env/static/public";
+
 import posthog from "posthog-js";
 
 export const posthogInit = () => {

@@ -1,7 +1,9 @@
 import type { PageServerLoad } from "./$types";
+
+import { error } from "@sveltejs/kit";
 import { db, schema } from "$lib/server/db";
 import { UUID_V4_RE } from "$lib/utils";
-import { error } from "@sveltejs/kit";
+
 import { desc, eq } from "drizzle-orm";
 
 export const load: PageServerLoad = async ({ url, setHeaders }) => {

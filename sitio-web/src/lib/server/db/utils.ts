@@ -1,4 +1,5 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
+
 import { db, schema } from "./index";
 
 type DocenteParaNombreCatedra = { nombre: string; prioridad: number };

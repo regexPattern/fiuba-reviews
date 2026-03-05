@@ -1,7 +1,9 @@
 import type { LayoutServerLoad } from "./$types";
+
+import { error } from "@sveltejs/kit";
 import { db, schema } from "$lib/server/db";
 import { obtenerCatedrasMaterias } from "$lib/server/db/utils";
-import { error } from "@sveltejs/kit";
+
 import { and, eq } from "drizzle-orm";
 
 export const load: LayoutServerLoad = async ({ params }) => {

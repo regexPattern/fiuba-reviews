@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Search } from "@lucide/svelte";
+
   import state from "./state.svelte";
 
   interface Props {

@@ -2,9 +2,11 @@
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
   import BuscadorMaterias from "$comps/buscador-materias";
+
   import { Github, Menu, Monitor, Moon, SunMedium } from "@lucide/svelte";
   import { DropdownMenu } from "bits-ui";
   import { mode, ModeWatcher, resetMode, setMode } from "mode-watcher";
+
   import "./layout.css";
 
   let { children, data } = $props();

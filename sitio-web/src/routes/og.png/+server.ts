@@ -1,6 +1,8 @@
 import type { RequestHandler } from "./$types";
+
 import { read } from "$app/server";
 import StaticOGImgInicio from "$lib/assets/open-graph/StaticOGImgInicio.svelte";
+
 import { ImageResponse } from "@ethercorps/sveltekit-og";
 import { CustomFont, resolveFonts } from "@ethercorps/sveltekit-og/fonts";
 import sourceSerif4SemiboldWoff from "@fontsource/source-serif-4/files/source-serif-4-latin-600-normal.woff";
