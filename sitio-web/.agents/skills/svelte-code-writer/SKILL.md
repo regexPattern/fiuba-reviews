@@ -20,7 +20,7 @@ Lists all available Svelte 5 and SvelteKit documentation sections with titles an
 ### Get Documentation
 
 ```bash
-npx @sveltejs/mcp get-documentation "<section1>,<section2>,..."
+pnpx @sveltejs/mcp get-documentation "<section1>,<section2>,..."
 ```
 
 Retrieves full documentation for specified sections. Use after `list-sections` to fetch relevant docs.
