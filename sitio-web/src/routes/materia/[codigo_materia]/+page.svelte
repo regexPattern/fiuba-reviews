@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
+  import { PUBLIC_BASE_URL } from "$env/static/public";
 
   let { data } = $props();
 
@@ -8,7 +9,7 @@
   let metaDescription = $derived(
     `Visitá la página de ${data.materia.nombre} para ver calificaciones y comentarios de las cátedras.`
   );
-  let ogImageUrl = $derived(`https://fiuba-reviews.com/materia/${data.materia.codigo}/og.png`);
+  let ogImageUrl = $derived(`${PUBLIC_BASE_URL}/materia/${data.materia.codigo}/og.png`);
   let ogImageAlt = $derived(`FIUBA Reviews Materia ${data.materia.codigo}`);
 
   onMount(() => {
@@ -22,7 +23,7 @@
   <title>{metaTitle}</title>
   <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large" />
   <meta name="description" content={metaDescription} />
-  <link rel="canonical" href={`https://fiuba-reviews.com/materia/${data.materia.codigo}`} />
+  <link rel="canonical" href={`${PUBLIC_BASE_URL}/materia/${data.materia.codigo}`} />
 
   <meta property="og:title" content={metaTitle} />
   <meta property="og:description" content={metaDescription} />

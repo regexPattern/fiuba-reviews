@@ -1,8 +1,13 @@
 <script lang="ts">
+  import { PUBLIC_BASE_URL } from "$env/static/public";
+
   import type { Component } from "svelte";
+
   import { resolve } from "$app/paths";
   import BackgroundBlob from "$comps/BackgroundBlob.svelte";
   import BuscadorMaterias from "$comps/buscador-materias";
+  import ExternalLink from "$comps/ExternalLink.svelte";
+
   import { Database, GraduationCap, HatGlasses, LayersPlus } from "@lucide/svelte";
 
   let { data } = $props();
@@ -10,7 +15,7 @@
   const metaTitle = "FIUBA Reviews";
   const metaDescription =
     "Encontrá calificaciones y comentarios de los docentes de la facultad, subidos por otros estudiantes. Basado en el legendario Dolly FIUBA.";
-  const ogImageUrl = "https://fiuba-reviews.com/og.png";
+  const ogImageUrl = resolve("/og.png");
   const ogImageAlt = "FIUBA Reviews";
 </script>
 
@@ -18,7 +23,7 @@
   <title>{metaTitle}</title>
   <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large" />
   <meta name="description" content={metaDescription} />
-  <link rel="canonical" href="https://fiuba-reviews.com" />
+  <link rel="canonical" href={PUBLIC_BASE_URL} />
 
   <meta property="og:title" content={metaTitle} />
   <meta property="og:description" content={metaDescription} />
@@ -55,7 +60,7 @@
       </div>
 
       <div class="mx-auto grid max-w-[620px] gap-6 sm:grid-cols-2">
-        {#snippet tarjetaFeature(Icono: Component, titulo: string, descripcion: string)}
+        {#snippet feature(Icono: Component, titulo: string, descripcion: string)}
           <article class="flex flex-1 items-start gap-3">
             <div class="p-2 select-none">
               <Icono class="size-[22px] stroke-fiuba" />
@@ -67,22 +72,22 @@
           </article>
         {/snippet}
 
-        {@render tarjetaFeature(
+        {@render feature(
           HatGlasses,
           "Reviews anónimas",
           `Las calificaciones y comentarios agregados son totalmente anónimos.`
         )}
-        {@render tarjetaFeature(
+        {@render feature(
           Database,
           "Mismos datos de Dolly",
           `Usamos los datos originales de Dolly recolectados durante más de 10 años.`
         )}
-        {@render tarjetaFeature(
+        {@render feature(
           LayersPlus,
           "Nuevos planes",
           `Se agregaron las materias de los nuevos planes manteniendo comentarios de sus equivalencias.`
         )}
-        {@render tarjetaFeature(
+        {@render feature(
           GraduationCap,
           "Todas las ingenierías",
           `Están disponibles todas las materias de las 11 carreras de ingeniería.`
@@ -91,9 +96,13 @@
     </section>
 
     <section id="ultimos-comentarios" class="space-y-4 md:h-[630px]">
-      {#snippet filaComentarios(comentarios: typeof data.comentarios, claseAnimacion: string)}
+      {#snippet filaComentarios(comentarios: typeof data.comentarios, reverse: boolean = false)}
+        {@const animacion = reverse
+          ? "animate-scroll-horizontal sm:animate-scroll-horizontal-sm"
+          : "animate-scroll-horizontal-reverse sm:animate-scroll-horizontal-reverse-sm"}
+
         <div class="overflow-hidden">
-          <div class={`flex w-max gap-4 ${claseAnimacion}`}>
+          <div class={`flex w-max gap-4 ${animacion}`}>
             {#each [...comentarios, ...comentarios] as com, i (`fila-${com.codigo}-${i}`)}
               <article
                 class="max-w-[260px] min-w-[260px] shrink-0 border border-button-border bg-button-background/50 p-4"
@@ -114,9 +123,7 @@
 
       {#snippet columnaComentarios(comentarios: typeof data.comentarios)}
         <div class="h-[630px] overflow-hidden">
-          <div
-            class="flex animate-[scroll-vertical_50s_linear_infinite] flex-col gap-4 md:animate-[scroll-vertical_30s_linear_infinite]"
-          >
+          <div class="flex animate-scroll-vertical flex-col gap-4 md:animate-scroll-vertical-md">
             {#each [...comentarios, ...comentarios] as com, i (`${com.codigo}-${i}`)}
               <article class="border border-button-border bg-button-background/50 p-4">
                 <p
@@ -134,13 +141,10 @@
       {/snippet}
 
       <div class="grid gap-4 md:hidden">
-        {@render filaComentarios(
-          data.comentarios.filter((_, i) => i % 2 === 0),
-          "animate-[scroll-horizontal_68s_linear_infinite] sm:animate-[scroll-horizontal_56s_linear_infinite]"
-        )}
+        {@render filaComentarios(data.comentarios.filter((_, i) => i % 2 === 0))}
         {@render filaComentarios(
           data.comentarios.filter((_, i) => i % 2 === 1),
-          "animate-[scroll-horizontal-reverse_64s_linear_infinite] sm:animate-[scroll-horizontal-reverse_52s_linear_infinite]"
+          true
         )}
       </div>
 
@@ -149,35 +153,6 @@
         {@render columnaComentarios(data.comentarios.slice(data.comentarios.length / 2))}
       </div>
     </section>
-
-    <style>
-      @keyframes scroll-horizontal {
-        0% {
-          transform: translateX(0);
-        }
-        100% {
-          transform: translateX(-50%);
-        }
-      }
-
-      @keyframes scroll-horizontal-reverse {
-        0% {
-          transform: translateX(-50%);
-        }
-        100% {
-          transform: translateX(0);
-        }
-      }
-
-      @keyframes scroll-vertical {
-        0% {
-          transform: translateY(0);
-        }
-        100% {
-          transform: translateY(-50%);
-        }
-      }
-    </style>
 
     <section id="materias-populares" class="space-y-4 text-center">
       <h2 class="text-3xl font-semibold">Materias más populares</h2>
@@ -202,11 +177,10 @@
     <section id="acerca-del-proyecto" class="space-y-4 text-center">
       <h2 class="text-3xl font-semibold">Acerca del proyecto</h2>
       <p>
-        <a href="https://github.com/lugfi/dolly" target="_blank" rel="noopener noreferrer"
-          >Dolly FIUBA</a
-        > era el sitio original en donde los estudiantes de FIUBA publicaban calificaciones y comentarios
-        de los docentes con los que cursaban. Como alumno, desde que entré a la facultad fue un recurso
-        invaluable al momento de elegir cátedras al iniciar cada cuatrimestre.
+        <ExternalLink href="https://github.com/lugfi/dolly">Dolly FIUBA</ExternalLink> era el sitio original
+        en donde los estudiantes de FIUBA publicaban calificaciones y comentarios de los docentes con
+        los que cursaban. Como alumno, desde que entré a la facultad fue un recurso invaluable al momento
+        de elegir cáLinktedras al iniciar cada cuatrimestre.
       </p>
       <p>
         Ahora que Dolly ya no está en funcionamiento, me parece necesario mantener activa una

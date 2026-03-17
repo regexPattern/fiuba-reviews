@@ -90,8 +90,8 @@ export default {
   get abierto() {
     return abierto;
   },
-  set abierto(abierto: boolean) {
-    abierto = abierto;
+  set abierto(newAbierto: boolean) {
+    abierto = newAbierto;
   },
   get query() {
     return queryValue;
