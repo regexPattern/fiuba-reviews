@@ -180,7 +180,7 @@
         <ExternalLink href="https://github.com/lugfi/dolly">Dolly FIUBA</ExternalLink> era el sitio original
         en donde los estudiantes de FIUBA publicaban calificaciones y comentarios de los docentes con
         los que cursaban. Como alumno, desde que entré a la facultad fue un recurso invaluable al momento
-        de elegir cáLinktedras al iniciar cada cuatrimestre.
+        de elegir cátedras al iniciar cada cuatrimestre.
       </p>
       <p>
         Ahora que Dolly ya no está en funcionamiento, me parece necesario mantener activa una
