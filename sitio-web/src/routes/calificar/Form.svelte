@@ -1,12 +1,9 @@
 <script lang="ts">
   import { PUBLIC_TURNSTILE_SITE_KEY } from "$env/static/public";
-
   import { Turnstile } from "svelte-turnstile";
-
   import { CircleAlert, CircleCheck, Loader } from "@lucide/svelte";
   import { Button, Label, Select, Slider } from "bits-ui";
   import { mode } from "mode-watcher";
-
   import { formAction } from "./form.remote";
 
   const CAMPOS_CALIFICACION = [

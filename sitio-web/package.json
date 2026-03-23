@@ -63,15 +63,11 @@
     ],
     "importOrder": [
       "^\\$env",
-      "",
       "<TYPES>",
-      "",
       "^@?svelte",
       "^\\$",
-      "",
       "<THIRD_PARTY_MODULES>",
       "^@fontsource",
-      "",
       "^[./]"
     ],
     "importOrderSafeSideEffects": [

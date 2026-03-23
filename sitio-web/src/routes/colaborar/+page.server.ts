@@ -1,7 +1,5 @@
 import type { PageServerLoad } from "./$types";
-
 import { db, schema } from "$lib/server/db";
-
 import { asc, eq } from "drizzle-orm";
 
 export const prerender = true;

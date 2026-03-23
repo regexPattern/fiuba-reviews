@@ -1,9 +1,6 @@
 import { PUBLIC_BASE_URL } from "$env/static/public";
-
 import type { RequestHandler } from "./$types";
-
 import { db, schema } from "$lib/server/db";
-
 import { eq } from "drizzle-orm";
 
 const escapeXml = (value: string) =>

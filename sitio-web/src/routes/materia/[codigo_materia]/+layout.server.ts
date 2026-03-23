@@ -1,12 +1,13 @@
 import type { LayoutServerLoad } from "./$types";
-
 import { error } from "@sveltejs/kit";
 import { db, schema } from "$lib/server/db";
 import { obtenerCatedrasMaterias } from "$lib/server/db/utils";
-
+import { addCacheTag } from "@vercel/functions";
 import { and, eq } from "drizzle-orm";
 
 export const load: LayoutServerLoad = async ({ params }) => {
+  await addCacheTag(`materia-${params.codigo_materia}`);
+
   const materiasVigentes = await db
     .select({
       codigo: schema.materia.codigo,

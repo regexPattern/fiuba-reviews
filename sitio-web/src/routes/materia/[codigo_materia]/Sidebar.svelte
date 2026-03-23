@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from "$app/state";
-
   import { ListFilter, Star } from "@lucide/svelte";
   import { ScrollArea } from "bits-ui";
   import Fuse from "fuse.js";
@@ -56,7 +55,7 @@
 </script>
 
 <aside
-  class="flex h-full min-h-0 flex-col divide-y divide-layout-border border-r border-layout-border md:pt-[56px]"
+  class="flex h-full min-h-0 flex-col divide-y divide-layout-border border-r border-layout-border md:pt-14"
 >
   <div class="shrink-0 space-y-2 border-b p-3 font-serif text-lg font-medium">
     {materia.nombre}
@@ -91,7 +90,7 @@
                 {calificacion === "0.0" ? "–" : calificacion}
               </span>
               <Star
-                class="size-[12px] shrink-0 fill-yellow-500 stroke-yellow-700 dark:stroke-yellow-400"
+                class="size-3 shrink-0 fill-yellow-500 stroke-yellow-700 dark:stroke-yellow-400"
               />
               <span class={page.params.codigo_catedra === catedra.codigo ? "text-fiuba" : ""}
                 >{catedra.nombre}</span
@@ -113,9 +112,9 @@
       class="w-full py-3 pr-12 pl-3 outline-none placeholder:text-sm"
     />
     <span
-      class="border-border pointer-events-none absolute top-1/2 right-3 flex size-[26px] -translate-y-1/2 items-center justify-center rounded-full border text-foreground/50"
+      class="border-border pointer-events-none absolute top-1/2 right-3 flex size-6.5 -translate-y-1/2 items-center justify-center rounded-full border text-foreground/50"
     >
-      <ListFilter class="size-[12px]" aria-hidden="true" />
+      <ListFilter class="size-3" aria-hidden="true" />
     </span>
   </div>
 </aside>

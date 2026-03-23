@@ -1,9 +1,7 @@
 <script lang="ts">
   import { afterNavigate } from "$app/navigation";
-
   import { ChevronDown, ChevronUp } from "@lucide/svelte";
   import { Dialog, ScrollArea } from "bits-ui";
-
   import Sidebar from "./Sidebar.svelte";
 
   let { children, data } = $props();
@@ -28,7 +26,7 @@
 >
   {#if data.catedras.length > 0}
     <!-- Desktop sidebar -->
-    <div class="hidden w-[280px] shrink-0 md:flex">
+    <div class="hidden w-70 shrink-0 md:flex">
       <Sidebar materia={data.materia} catedras={data.catedras} />
     </div>
 
@@ -60,9 +58,9 @@
         >
           {data.materia.nombre}
           {#if mobileDrawerOpen}
-            <ChevronUp class="size-[18px] shrink-0" />
+            <ChevronUp class="size-4.5 shrink-0" />
           {:else}
-            <ChevronDown class="size-[18px] shrink-0" />
+            <ChevronDown class="size-4.5 shrink-0" />
           {/if}
         </button>
 

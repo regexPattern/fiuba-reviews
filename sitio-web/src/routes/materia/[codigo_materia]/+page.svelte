@@ -1,7 +1,7 @@
 <script lang="ts">
+  import { PUBLIC_BASE_URL } from "$env/static/public";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
-  import { PUBLIC_BASE_URL } from "$env/static/public";
 
   let { data } = $props();
 

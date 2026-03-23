@@ -1,12 +1,9 @@
 import { ISR_BYPASS_TOKEN } from "$env/static/private";
-
 import type { RequestHandler } from "./$types";
-
 import { read } from "$app/server";
 import DynOGImgCatedra from "$lib/assets/open-graph/DynOGImgCatedra.svelte";
 import { db, schema } from "$lib/server/db";
 import { calcularNombreCatedra } from "$lib/server/db/utils";
-
 import { ImageResponse } from "@ethercorps/sveltekit-og";
 import { CustomFont, resolveFonts } from "@ethercorps/sveltekit-og/fonts";
 import { addCacheTag } from "@vercel/functions";

@@ -1,7 +1,5 @@
 import type { PageServerLoad } from "./$types";
-
 import { db, schema } from "$lib/server/db";
-
 import { and, count, desc, eq, exists, gt, lt, sql } from "drizzle-orm";
 
 const N_COMENTARIOS = 12;

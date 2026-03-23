@@ -1,5 +1,4 @@
 import type { LayoutLoad } from "./$types";
-
 import { browser } from "$app/environment";
 import { posthogInit } from "$lib/posthog";
 
