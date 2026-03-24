@@ -6,31 +6,30 @@ import * as v from "valibot";
 
 v.setGlobalConfig({ lang: "es" });
 
-export const load: LayoutServerLoad = async ({ url }) => {
-  const cantidadPlanesExpr = sql<number>`count(distinct ${schema.plan.codigo})::int`;
-
-  const cantidadCatedrasExpr = sql<number>`(
-    CASE 
-      WHEN ${schema.materia.cuatrimestreUltimaActualizacion} IS NOT NULL 
-        THEN (
-          SELECT COUNT(*) 
-          FROM ${schema.catedra} 
-          WHERE ${schema.catedra.codigoMateria} = ${schema.materia.codigo} 
-            AND ${schema.catedra.activa} = true
-        )
-      ELSE (
-        SELECT COUNT(*) 
-        FROM ${schema.catedra} 
-        WHERE ${schema.catedra.codigoMateria} IN (
-          SELECT ${schema.equivalencia.codigoMateriaPlanAnterior} 
-          FROM ${schema.equivalencia} 
-          WHERE ${schema.equivalencia.codigoMateriaPlanVigente} = ${schema.materia.codigo}
-        )
+const cantidadPlanesExpr = sql<number>`count(distinct ${schema.plan.codigo})::int`;
+const cantidadCatedrasExpr = sql<number>`(
+  CASE
+    WHEN ${schema.materia.cuatrimestreUltimaActualizacion} IS NOT NULL
+      THEN (
+        SELECT COUNT(*)
+        FROM ${schema.catedra}
+        WHERE ${schema.catedra.codigoMateria} = ${schema.materia.codigo}
+          AND ${schema.catedra.activa} = true
       )
-    END
-  )::int`;
+    ELSE (
+      SELECT COUNT(*)
+      FROM ${schema.catedra}
+      WHERE ${schema.catedra.codigoMateria} IN (
+        SELECT ${schema.equivalencia.codigoMateriaPlanAnterior}
+        FROM ${schema.equivalencia}
+        WHERE ${schema.equivalencia.codigoMateriaPlanVigente} = ${schema.materia.codigo}
+      )
+    )
+  END
+)::int`;
 
-  const materias = await db
+export const load: LayoutServerLoad = async ({ url }) => {
+  const materiaRows = await db
     .select({ codigo: schema.materia.codigo, nombre: schema.materia.nombre })
     .from(schema.materia)
     .innerJoin(schema.planMateria, eq(schema.planMateria.codigoMateria, schema.materia.codigo))
@@ -40,7 +39,7 @@ export const load: LayoutServerLoad = async ({ url }) => {
     .orderBy(desc(cantidadPlanesExpr), desc(cantidadCatedrasExpr), schema.materia.nombre);
 
   return {
-    materias,
-    mostrarTriggerBuscadorMaterias: url.pathname !== "/"
+    materias: materiaRows,
+    showBuscador: url.pathname !== "/"
   };
 };

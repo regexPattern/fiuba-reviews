@@ -5,6 +5,8 @@ import { obtenerCatedrasMaterias } from "$lib/server/db/utils";
 import { addCacheTag } from "@vercel/functions";
 import { and, eq } from "drizzle-orm";
 
+export const prerender = true;
+
 export const load: LayoutServerLoad = async ({ params }) => {
   await addCacheTag(`materia-${params.codigo_materia}`);
 

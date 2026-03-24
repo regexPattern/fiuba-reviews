@@ -41,7 +41,7 @@
       <span class="text-fiuba">FIUBA</span> Reviews
     </a>
 
-    {#if data.mostrarTriggerBuscadorMaterias}
+    {#if data.showBuscador}
       <BuscadorMaterias.Trigger variante="navbar" />
     {/if}
 
@@ -61,9 +61,9 @@
         class="hidden size-9 items-center justify-center text-sm font-medium md:inline-flex"
       >
         {#if mode.current === "light"}
-          <SunMedium class="size-[22px]" />
+          <SunMedium class="size-5.5" />
         {:else}
-          <Moon class="size-[20px]" />
+          <Moon class="size-5" />
         {/if}
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>

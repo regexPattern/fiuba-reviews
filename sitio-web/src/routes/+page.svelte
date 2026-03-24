@@ -41,12 +41,12 @@
     class="relative z-10 container mx-auto mb-4 grid gap-10 p-6 lg:grid-cols-2 lg:flex-row lg:gap-12"
   >
     <section id="hero" class="space-y-8 self-center">
-      <div class="mx-auto space-y-4 text-center lg:max-w-[512px]">
+      <div class="mx-auto space-y-4 text-center lg:max-w-lg">
         <h1 class="text-5xl font-semibold tracking-tighter sm:text-6xl">
           <span class="text-fiuba">FIUBA</span>
           <span>Reviews</span>
         </h1>
-        <p class="mx-auto max-w-[468px] font-medium">
+        <p class="mx-auto max-w-117 font-medium">
           Encontrá calificaciones y comentarios de los docentes de la facultad, subidos por otros
           estudiantes. Basado en el legendario Dolly FIUBA.
         </p>
@@ -56,11 +56,11 @@
         <BuscadorMaterias.Trigger variante="hero" />
       </div>
 
-      <div class="mx-auto grid max-w-[620px] gap-6 sm:grid-cols-2">
+      <div class="mx-auto grid max-w-155 gap-6 sm:grid-cols-2">
         {#snippet feature(Icono: Component, titulo: string, descripcion: string)}
           <article class="flex flex-1 items-start gap-3">
             <div class="p-2 select-none">
-              <Icono class="size-[22px] stroke-fiuba" />
+              <Icono class="size-5.5 stroke-fiuba" />
             </div>
             <div class="space-y-2">
               <p class="font-medium">{titulo}</p>
@@ -92,7 +92,7 @@
       </div>
     </section>
 
-    <section id="ultimos-comentarios" class="space-y-4 md:h-[630px]">
+    <section id="ultimos-comentarios" class="space-y-4 md:h-157.5">
       {#snippet filaComentarios(comentarios: typeof data.comentarios, reverse: boolean = false)}
         {@const animacion = reverse
           ? "animate-scroll-horizontal sm:animate-scroll-horizontal-sm"
@@ -102,7 +102,7 @@
           <div class={`flex w-max gap-4 ${animacion}`}>
             {#each [...comentarios, ...comentarios] as com, i (`fila-${com.codigo}-${i}`)}
               <article
-                class="max-w-[260px] min-w-[260px] shrink-0 border border-button-border bg-button-background/50 p-4"
+                class="max-w-65 min-w-65 shrink-0 border border-button-border bg-button-background/50 p-4"
               >
                 <p
                   class={`comentario-contenido line-clamp-4 before:content-['"'] after:content-['"'] md:line-clamp-none`}
@@ -119,7 +119,7 @@
       {/snippet}
 
       {#snippet columnaComentarios(comentarios: typeof data.comentarios)}
-        <div class="h-[630px] overflow-hidden">
+        <div class="h-157.5 overflow-hidden">
           <div class="flex animate-scroll-vertical flex-col gap-4 md:animate-scroll-vertical-md">
             {#each [...comentarios, ...comentarios] as com, i (`${com.codigo}-${i}`)}
               <article class="border border-button-border bg-button-background/50 p-4">
@@ -145,7 +145,7 @@
         )}
       </div>
 
-      <div class="hidden grid-cols-2 gap-4 md:grid md:h-[630px]">
+      <div class="hidden grid-cols-2 gap-4 md:grid md:h-157.5">
         {@render columnaComentarios(data.comentarios.slice(0, data.comentarios.length / 2))}
         {@render columnaComentarios(data.comentarios.slice(data.comentarios.length / 2))}
       </div>

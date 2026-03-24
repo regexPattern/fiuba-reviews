@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from "$app/state";
+  import { resolve } from "$app/paths";
   import { ListFilter, Star } from "@lucide/svelte";
   import { ScrollArea } from "bits-ui";
   import Fuse from "fuse.js";
@@ -85,7 +86,10 @@
           {@const calificacion = catedra.calificacion.toFixed(1)}
 
           <li class="p-3">
-            <a href={`${catedra.codigo}`} class="flex items-center gap-1.5 tabular-nums">
+            <a
+              href={resolve(`/materia/${materia.codigo}/${catedra.codigo}`)}
+              class="flex items-center gap-1.5 tabular-nums"
+            >
               <span class="inline-block w-[3ch] shrink-0 text-center">
                 {calificacion === "0.0" ? "–" : calificacion}
               </span>
