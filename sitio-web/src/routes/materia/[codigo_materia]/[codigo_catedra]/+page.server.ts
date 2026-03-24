@@ -6,8 +6,6 @@ import { UUID_V4_RE } from "$lib/utils";
 import { addCacheTag } from "@vercel/functions";
 import { desc, eq, inArray, sql } from "drizzle-orm";
 
-export const config = { isr: { expiration: false, bypassToken: ISR_BYPASS_TOKEN } };
-
 export const load: PageServerLoad = async ({ params, parent, setHeaders }) => {
   setHeaders({
     "x-robots-tag": "noindex, nofollow"
