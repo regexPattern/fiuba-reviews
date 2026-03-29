@@ -13,6 +13,11 @@
 
   let idxCatedra = $state(0);
   let tieneCatedras = $derived(data.catedras.length > 0);
+  let viewportRef: HTMLDivElement | null = $state(null);
+
+  const resetCatedraView = () => {
+    viewportRef?.scrollTo({ top: 0 });
+  };
 </script>
 
 <svelte:head>
@@ -34,13 +39,19 @@
 >
   {#if tieneCatedras}
     <div class="hidden w-90 shrink-0 md:flex">
-      <Sidebar materia={data.materia} catedras={data.catedras} bind:idxCatedra />
+      <Sidebar
+        materia={data.materia}
+        catedras={data.catedras}
+        bind:idxCatedra
+        callback={resetCatedraView}
+      />
     </div>
   {/if}
 
   <main class="min-h-0 w-full min-w-0">
     <ScrollArea.Root class="h-full min-h-0 overflow-hidden">
       <ScrollArea.Viewport
+        bind:ref={viewportRef}
         class="h-full w-full pt-[calc(56px+env(safe-area-inset-top))]"
         data-scroll-container="main"
       >

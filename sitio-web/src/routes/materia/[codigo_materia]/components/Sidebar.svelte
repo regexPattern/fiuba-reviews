@@ -26,9 +26,10 @@
       calificacion: number;
     }[];
     idxCatedra: number;
+    callback: () => void;
   }
 
-  let { materia, catedras, idxCatedra = $bindable() }: Props = $props();
+  let { materia, catedras, idxCatedra = $bindable(), callback }: Props = $props();
 
   const fuzzySearchThreshold = 0.15;
   const fuzzySearchDebounceTimeoutMs = 300;
@@ -102,8 +103,8 @@
             <button
               class="flex items-center gap-1.5 text-left tabular-nums"
               onclick={() => {
-                window.scrollTo(0, 0);
                 idxCatedra = i;
+                callback();
               }}
             >
               <span class="inline-block w-[2.5ch] shrink-0 text-center">
