@@ -49,7 +49,7 @@
       {promedio ? 'hover:bg-button-hover' : 'pointer-events-none'}"
   >
     <Star class="size-[16px] fill-yellow-500 stroke-yellow-700 dark:stroke-yellow-400" />
-    <span>Promedio: {promedio?.general.toFixed(1) || "–"}</span>
+    <span>Promedio: {promedio?.general.toFixed(1) || "-"}</span>
     {#if promedio}
       <ChevronDown class="size-[16px]" />
     {/if}
@@ -63,13 +63,13 @@
         sideOffset={6}
       >
         <div class="divide-y-2 divide-background">
-          {@render Criterio("Acepta Crítica", promedio.aceptaCritica)}
+          {@render Criterio("Acepta Critica", promedio.aceptaCritica)}
           {@render Criterio("Asistencia", promedio.asistencia)}
           {@render Criterio("Buen Trato", promedio.buenTrato)}
           {@render Criterio("Claridad", promedio.claridad)}
           {@render Criterio("Clase Organizada", promedio.claseOrganizada)}
           {@render Criterio("Cumple Horario", promedio.cumpleHorarios)}
-          {@render Criterio("Fomenta Participación", promedio.fomentaParticipacion)}
+          {@render Criterio("Fomenta Participacion", promedio.fomentaParticipacion)}
           {@render Criterio("Panorama Amplio", promedio.panoramaAmplio)}
           {@render Criterio("Responde Mails", promedio.respondeMails)}
         </div>

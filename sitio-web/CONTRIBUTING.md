@@ -63,3 +63,24 @@ and not exists (
 order by m.codigo, c.codigo
 limit 1;
 ```
+
+## Materia en plan vigente sin cátedras, o con cátedras sin docentes asignados
+
+```sql
+select
+  m.codigo as codigo_materia,
+  m.nombre as materia,
+  count(distinct c.codigo) as cantidad_catedras,
+  count(distinct cd.codigo_docente) as cantidad_docentes
+from plan p
+join plan_materia pm on pm.codigo_plan = p.codigo
+join materia m on m.codigo = pm.codigo_materia
+left join catedra c on c.codigo_materia = m.codigo
+left join catedra_docente cd on cd.codigo_catedra = c.codigo
+where p.esta_vigente = true
+group by m.codigo, m.nombre
+having count(distinct c.codigo) = 0
+   or count(distinct cd.codigo_docente) = 0
+order by m.codigo
+limit 1;
+```

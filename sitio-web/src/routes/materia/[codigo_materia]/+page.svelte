@@ -12,6 +12,7 @@
   );
 
   let idxCatedra = $state(0);
+  let tieneCatedras = $derived(data.catedras.length > 0);
 </script>
 
 <svelte:head>
@@ -31,9 +32,11 @@
   class="container mx-auto mt-[calc(-56px-env(safe-area-inset-top))] flex overflow-hidden"
   style="height: -webkit-fill-available; height: 100dvh"
 >
-  <div class="hidden w-90 shrink-0 md:flex">
-    <Sidebar materia={data.materia} catedras={data.catedras} bind:idxCatedra />
-  </div>
+  {#if tieneCatedras}
+    <div class="hidden w-90 shrink-0 md:flex">
+      <Sidebar materia={data.materia} catedras={data.catedras} bind:idxCatedra />
+    </div>
+  {/if}
 
   <main class="min-h-0 w-full min-w-0">
     <ScrollArea.Root class="h-full min-h-0 overflow-hidden">
@@ -47,7 +50,15 @@
           {data.materia.nombre}
         </button>
 
-        <Catedra catedra={data.catedras[idxCatedra]} />
+        {#if tieneCatedras}
+          <Catedra catedra={data.catedras[idxCatedra]} />
+        {:else}
+          <div class="m-4 md:m-6">
+            <p class="text-foreground-muted py-2 text-sm">
+              Esta materia todavía no tiene cátedras cargadas.
+            </p>
+          </div>
+        {/if}
       </ScrollArea.Viewport>
 
       <ScrollArea.Scrollbar orientation="vertical">

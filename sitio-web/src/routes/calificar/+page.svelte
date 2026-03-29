@@ -45,22 +45,12 @@
         {/if}
       </div>
 
-      <!-- TODO: hacer que funcione el scroll del docente y poner el codigo de la catedra -->
       <a
-        href={resolve(
-          data.codigoCatedra
-            ? `/materia/${data.docente.codigoMateria}/${data.codigoCatedra}`
-            : `/materia/${data.docente.codigoMateria}`
-        )}
+        href={resolve(`/materia/${data.docente.codigoMateria}`)}
         class="flex items-center text-sm underline"
       >
         <ChevronLeft class="size-[18px]" />
-
-        {#if data.codigoCatedra}
-          Ir a cátedra del docente
-        {:else}
-          Ir a materia del docente
-        {/if}
+        Ir a materia del docente
       </a>
     </div>
 

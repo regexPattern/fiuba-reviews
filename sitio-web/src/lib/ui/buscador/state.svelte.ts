@@ -13,8 +13,8 @@
 //
 import Fuse from "fuse.js";
 
-const FUZZY_SEARCH_THRESHOLD = 0.25;
-const FUZZY_SEARCH_DEBOUNCE_TIMEOUT_MS = 300;
+const fuzzySearchThreshold = 0.25;
+const fuzzySearchDebounceTimeoutMs = 300;
 
 export type MateriaBuscador = { codigo: string; nombre: string };
 
@@ -30,7 +30,7 @@ let fuse = $derived(
     ignoreFieldNorm: true,
     includeScore: true,
     shouldSort: true,
-    threshold: FUZZY_SEARCH_THRESHOLD,
+    threshold: fuzzySearchThreshold,
     keys: ["codigo", "nombre"]
   })
 );
@@ -75,7 +75,7 @@ function setQuery(query: string) {
 
   debounceTimeoutHandler = setTimeout(() => {
     queryDebounced = query;
-  }, FUZZY_SEARCH_DEBOUNCE_TIMEOUT_MS);
+  }, fuzzySearchDebounceTimeoutMs);
 }
 
 function abrir() {

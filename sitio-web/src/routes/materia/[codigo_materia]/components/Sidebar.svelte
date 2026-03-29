@@ -1,6 +1,7 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
+  import { cn } from "$lib/utils";
   import { ListFilter, Star } from "@lucide/svelte";
   import { ScrollArea } from "bits-ui";
   import Fuse from "fuse.js";
@@ -98,14 +99,20 @@
           {@const calificacion = catedra.calificacion.toFixed(1)}
 
           <li class="p-3">
-            <button class="flex items-center gap-1.5 tabular-nums" onclick={() => (idxCatedra = i)}>
-              <span class="inline-block w-[3ch] shrink-0 text-center">
+            <button
+              class="flex items-center gap-1.5 text-left tabular-nums"
+              onclick={() => {
+                window.scrollTo(0, 0);
+                idxCatedra = i;
+              }}
+            >
+              <span class="inline-block w-[2.5ch] shrink-0 text-center">
                 {calificacion === "0.0" ? "–" : calificacion}
               </span>
               <Star
                 class="size-3 shrink-0 fill-yellow-500 stroke-yellow-700 dark:stroke-yellow-400"
               />
-              <span class="text-left">
+              <span class={cn(idxCatedra === i && "text-fiuba")}>
                 {catedra.nombre}
               </span>
             </button>

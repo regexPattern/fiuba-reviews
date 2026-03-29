@@ -59,7 +59,7 @@
         >
           {estaExpandido
             ? "Mostrar menos"
-            : `Mostrar ${cantidadOcultos} comentario${cantidadOcultos === 1 ? "" : "s"} más`}
+            : `Mostrar ${cantidadOcultos} comentario${cantidadOcultos === 1 ? "" : "s"} mas`}
         </Collapsible.Trigger>
       </div>
     {/if}

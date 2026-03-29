@@ -1,11 +1,21 @@
-import { error } from "console";
-import type { PageServerLoad } from "./$types";
+import type { EntryGenerator, PageServerLoad } from "./$types";
+import { error } from "@sveltejs/kit";
 import { db, schema } from "$lib/server/db";
-import { obtenerCatedrasMaterias } from "$lib/server/db/utils";
+import {
+  getMateriasDisponibles,
+  obtenerCatedrasMaterias,
+  obtenerDetallesCatedras
+} from "$lib/server/db/utils";
 import { and, eq } from "drizzle-orm";
 
+export const prerender = true;
+
+export const entries: EntryGenerator = async () => {
+  return (await getMateriasDisponibles()).map((m) => ({ codigo_materia: m.codigo }));
+};
+
 export const load: PageServerLoad = async ({ params }) => {
-  const materiasVigentesRows = await db
+  const materiasRows = await db
     .select({
       codigo: schema.materia.codigo,
       nombre: schema.materia.nombre,
@@ -23,11 +33,11 @@ export const load: PageServerLoad = async ({ params }) => {
       and(eq(schema.plan.estaVigente, true), eq(schema.materia.codigo, params.codigo_materia))
     );
 
-  if (materiasVigentesRows.length === 0) {
+  if (materiasRows.length === 0) {
     error(404, "Materia no encontrada en los planes vigentes.");
   }
 
-  const materia = materiasVigentesRows[0];
+  const materia = materiasRows[0];
 
   const equivalenciasRows = await db
     .select({ codigo: schema.materia.codigo, nombre: schema.materia.nombre })
@@ -50,6 +60,13 @@ export const load: PageServerLoad = async ({ params }) => {
   }
 
   const catedras = await obtenerCatedrasMaterias(codigosMateria, soloActivas);
+  const docentesPorCatedra =
+    catedras.length > 0 ? await obtenerDetallesCatedras(catedras.map((c) => c.codigo)) : {};
+
+  const catedrasConDocentes = catedras.map((catedra) => ({
+    ...catedra,
+    docentes: docentesPorCatedra[catedra.codigo] ?? []
+  }));
 
   return {
     materia: {
@@ -61,6 +78,6 @@ export const load: PageServerLoad = async ({ params }) => {
           : null,
       equivalencias: equivalenciasRows
     },
-    catedras
+    catedras: catedrasConDocentes
   };
 };

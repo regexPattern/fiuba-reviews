@@ -1,5 +1,6 @@
 <script lang="ts">
   import { beforeNavigate } from "$app/navigation";
+  import { resolve } from "$app/paths";
   import { Search } from "@lucide/svelte";
   import { Command, Dialog } from "bits-ui";
   import buscadorState from "./state.svelte";
@@ -74,16 +75,16 @@
           </kbd>
         </div>
 
-        <Command.List class="max-h-[280px] overflow-x-hidden overflow-y-auto pb-2">
+        <Command.List class="max-h-70 overflow-x-hidden overflow-y-auto pb-2">
           <Command.Viewport>
             {#each buscadorState.materiasFiltradas as materia (materia.codigo)}
               <Command.LinkItem
-                href="/materia/{materia.codigo}"
+                href={resolve(`/materia/${materia.codigo}`)}
                 value={materia.codigo}
                 class="flex h-10 cursor-pointer items-center gap-3 p-3 text-sm outline-hidden select-none data-selected:text-fiuba"
               >
-                <span class="text-xs text-foreground tabular-nums">
-                  {materia.codigo}
+                <span class="text-xs text-foreground tabular-nums w-[5ch]">
+                  {materia.codigo.replace("COD", "CD")}
                 </span>
                 <span>{materia.nombre}</span>
               </Command.LinkItem>
