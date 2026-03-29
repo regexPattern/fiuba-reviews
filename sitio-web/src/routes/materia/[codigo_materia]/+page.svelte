@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { PUBLIC_BASE_URL } from "$env/static/public";
-  import { onMount } from "svelte";
-  import { goto } from "$app/navigation";
+  import { resolve } from "$app/paths";
+  import { ScrollArea } from "bits-ui";
+  import Catedra from "./components/Catedra.svelte";
+  import Sidebar from "./components/Sidebar.svelte";
 
   let { data } = $props();
 
@@ -9,30 +10,50 @@
   let metaDescription = $derived(
     `Visitá la página de ${data.materia.nombre} para ver calificaciones y comentarios de las cátedras.`
   );
-  let ogImageUrl = $derived(`${PUBLIC_BASE_URL}/materia/${data.materia.codigo}/og.png`);
-  let ogImageAlt = $derived(`FIUBA Reviews Materia ${data.materia.codigo}`);
 
-  onMount(() => {
-    if (data.catedras.length > 0) {
-      goto(`/materia/${data.materia.codigo}/${data.catedras[0].codigo}`, { replaceState: true });
-    }
-  });
+  let idxCatedra = $state(0);
 </script>
 
 <svelte:head>
   <title>{metaTitle}</title>
   <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large" />
   <meta name="description" content={metaDescription} />
-  <link rel="canonical" href={`${PUBLIC_BASE_URL}/materia/${data.materia.codigo}`} />
+  <link rel="canonical" href={resolve(`/materia/${data.materia.codigo}`)} />
 
   <meta property="og:title" content={metaTitle} />
   <meta property="og:description" content={metaDescription} />
-  <meta property="og:image" content={ogImageUrl} />
-  <meta property="og:image:alt" content={ogImageAlt} />
-
+  <meta property="og:image" content={resolve(`/materia/${data.materia.codigo}/og.png`)} />
+  <meta property="og:image:alt" content={`FIUBA Reviews Materia ${data.materia.codigo}`} />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content={metaTitle} />
-  <meta name="twitter:description" content={metaDescription} />
-  <meta name="twitter:image" content={ogImageUrl} />
-  <meta name="twitter:image:alt" content={ogImageAlt} />
 </svelte:head>
+
+<div
+  class="container mx-auto mt-[calc(-56px-env(safe-area-inset-top))] flex overflow-hidden"
+  style="height: -webkit-fill-available; height: 100dvh"
+>
+  <div class="hidden w-90 shrink-0 md:flex">
+    <Sidebar materia={data.materia} catedras={data.catedras} bind:idxCatedra />
+  </div>
+
+  <main class="min-h-0 w-full min-w-0">
+    <ScrollArea.Root class="h-full min-h-0 overflow-hidden">
+      <ScrollArea.Viewport
+        class="h-full w-full pt-[calc(56px+env(safe-area-inset-top))]"
+        data-scroll-container="main"
+      >
+        <button
+          class="sticky top-0 z-200 flex w-full items-center justify-between border-b border-layout-border bg-background p-3 text-left font-serif text-lg font-medium md:hidden"
+        >
+          {data.materia.nombre}
+        </button>
+
+        <Catedra catedra={data.catedras[idxCatedra]} />
+      </ScrollArea.Viewport>
+
+      <ScrollArea.Scrollbar orientation="vertical">
+        <ScrollArea.Thumb />
+      </ScrollArea.Scrollbar>
+      <ScrollArea.Corner />
+    </ScrollArea.Root>
+  </main>
+</div>

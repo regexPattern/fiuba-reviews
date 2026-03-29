@@ -12,8 +12,6 @@
   const metaTitle = "FIUBA Reviews";
   const metaDescription =
     "Encontrá calificaciones y comentarios de los docentes de la facultad, subidos por otros estudiantes. Basado en el legendario Dolly FIUBA.";
-  const ogImageUrl = resolve("/og.png");
-  const ogImageAlt = "FIUBA Reviews";
 </script>
 
 <svelte:head>
@@ -24,14 +22,9 @@
 
   <meta property="og:title" content={metaTitle} />
   <meta property="og:description" content={metaDescription} />
-  <meta property="og:image" content={ogImageUrl} />
-  <meta property="og:image:alt" content={ogImageAlt} />
-
+  <meta property="og:image" content={resolve("/og.png")} />
+  <meta property="og:image:alt" content="FIUBA Reviews" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content={metaTitle} />
-  <meta name="twitter:description" content={metaDescription} />
-  <meta name="twitter:image" content={ogImageUrl} />
-  <meta name="twitter:image:alt" content={ogImageAlt} />
 </svelte:head>
 
 <div class="relative isolate">

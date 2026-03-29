@@ -5,20 +5,32 @@
   import { ScrollArea } from "bits-ui";
   import Fuse from "fuse.js";
 
-  const FUZZY_SEARCH_THRESHOLD = 0.15;
-  const FUZZY_SEARCH_DEBOUNCE_TIMEOUT_MS = 300;
-
   interface Props {
     materia: {
       codigo: string;
       nombre: string;
-      cuatrimestre: { numero: number; anio: number } | null;
-      equivalencias: { codigo: string; nombre: string }[];
+      cuatrimestre: {
+        numero: number;
+        anio: number;
+      } | null;
+      equivalencias: {
+        codigo: string;
+        nombre: string;
+      }[];
     };
-    catedras: { codigo: string; codigoMateria: string; nombre: string; calificacion: number }[];
+    catedras: {
+      codigo: string;
+      codigoMateria: string;
+      nombre: string;
+      calificacion: number;
+    }[];
+    idxCatedra: number;
   }
 
-  let { materia, catedras }: Props = $props();
+  let { materia, catedras, idxCatedra = $bindable() }: Props = $props();
+
+  const fuzzySearchThreshold = 0.15;
+  const fuzzySearchDebounceTimeoutMs = 300;
 
   let queryValue = $state("");
   let queryDebounced = $state("");
@@ -28,7 +40,7 @@
       ignoreDiacritics: true,
       shouldSort: false,
       includeScore: false,
-      threshold: FUZZY_SEARCH_THRESHOLD,
+      threshold: fuzzySearchThreshold,
       ignoreLocation: true,
       keys: ["nombre"]
     })
@@ -49,7 +61,7 @@
 
     const handler = setTimeout(() => {
       queryDebounced = queryValue;
-    }, FUZZY_SEARCH_DEBOUNCE_TIMEOUT_MS);
+    }, fuzzySearchDebounceTimeoutMs);
 
     return () => clearTimeout(handler);
   });
@@ -68,38 +80,35 @@
         Última actualización de cátedras en <span class="tracking-tight">
           {materia.cuatrimestre.numero}C{materia.cuatrimestre.anio}
         </span>. Si ves que la oferta está desactualizada, podés colaborar
-        <a href="/colaborar" class="text-fiuba underline">enviándola acá</a>.
+        <a href={resolve("/colaborar")} class="text-fiuba underline">enviándola acá</a>.
       </p>
     {:else}
       La oferta de esta materia no está actualizada todavía. Se muestran las ofertas de sus
       equivalencias en los planes anteriores: <span class="tracking-tight">
         {materia.equivalencias.map((e) => e.codigo).join(", ")}
       </span>. Si tenés la oferta actualizada, podés colaborar
-      <a href="/colaborar" class="text-fiuba underline">enviándola acá</a>.
+      <a href={resolve("/colaborar")} class="text-fiuba underline">enviándola acá</a>.
     {/if}
   </div>
 
   <ScrollArea.Root class="min-h-0 flex-1 overflow-hidden">
     <ScrollArea.Viewport class="h-full">
       <ul class="my-2">
-        {#each catedrasFiltradas as catedra (catedra.codigo)}
+        {#each catedrasFiltradas as catedra, i (catedra.codigo)}
           {@const calificacion = catedra.calificacion.toFixed(1)}
 
           <li class="p-3">
-            <a
-              href={resolve(`/materia/${materia.codigo}/${catedra.codigo}`)}
-              class="flex items-center gap-1.5 tabular-nums"
-            >
+            <button class="flex items-center gap-1.5 tabular-nums" onclick={() => (idxCatedra = i)}>
               <span class="inline-block w-[3ch] shrink-0 text-center">
                 {calificacion === "0.0" ? "–" : calificacion}
               </span>
               <Star
                 class="size-3 shrink-0 fill-yellow-500 stroke-yellow-700 dark:stroke-yellow-400"
               />
-              <span class={page.params.codigo_catedra === catedra.codigo ? "text-fiuba" : ""}
-                >{catedra.nombre}</span
-              >
-            </a>
+              <span class="text-left">
+                {catedra.nombre}
+              </span>
+            </button>
           </li>
         {/each}
       </ul>

@@ -7,6 +7,7 @@
   import { mode, ModeWatcher, resetMode, setMode } from "mode-watcher";
   import "./layout.css";
   import ExternalLink from "$ui/ExternalLink.svelte";
+  import { PUBLIC_POSTHOG_STATS_URL } from "$env/static/public";
 
   let { children, data } = $props();
 
@@ -47,10 +48,7 @@
 
     <nav class="hidden items-center gap-5 md:mx-3 md:flex" aria-label="Navegación">
       <a href={resolve("/")} class="text-sm hover:text-fiuba">Inicio</a>
-      <ExternalLink
-        href="https://us.posthog.com/shared/c8cbP4SoFDIll_Niw7z2MaUbMRqEyA"
-        class="text-sm hover:text-fiuba"
-      >
+      <ExternalLink href={PUBLIC_POSTHOG_STATS_URL} class="text-sm hover:text-fiuba">
         Estadísticas
       </ExternalLink>
       <a href={resolve("/colaborar")} class="text-sm hover:text-fiuba">Colaborar</a>

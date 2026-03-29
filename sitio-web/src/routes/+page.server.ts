@@ -2,12 +2,22 @@ import type { PageServerLoad } from "./$types";
 import { db, schema } from "$lib/server/db";
 import { and, count, desc, eq, exists, gt, lt, sql } from "drizzle-orm";
 
-const N_COMENTARIOS = 12;
-const MIN_CHARS_COMENTARIO = 100; // inclusivo
-const MAX_CHARS_COMENTARIO = 200; // inclusivo
-const N_MATERIAS_POPULARES = 10;
-
 export const prerender = true;
+
+// Parámetros para elegir comentarios suficientemente relevantes para mostrar en la landing page.
+const nComentarios = 12;
+const minCharsComentario = 100; // inclusivo
+const maxCharsComentario = 200; // inclusivo
+
+// Idem pero para el listado de materias (se toman las materias de planes vigentes con la mayor cantidad de comentarios).
+const nMateriasPopulares = 10;
+
+const cantidadPlanesVigentesExpr = count(sql`DISTINCT ${schema.plan.codigo}`).as(
+  "cantidad_planes_vigentes"
+);
+const cantidadComentariosExpr = count(sql`DISTINCT ${schema.comentario.codigo}`).as(
+  "cantidad_comentarios"
+);
 
 export const load: PageServerLoad = async () => {
   const comentariosUnificados = db
@@ -30,8 +40,8 @@ export const load: PageServerLoad = async () => {
     .innerJoin(schema.materia, eq(schema.materia.codigo, schema.docente.codigoMateria))
     .where(
       and(
-        gt(sql`char_length(${schema.comentario.contenido})`, MIN_CHARS_COMENTARIO - 1),
-        lt(sql`char_length(${schema.comentario.contenido})`, MAX_CHARS_COMENTARIO + 1),
+        gt(sql`char_length(${schema.comentario.contenido})`, minCharsComentario - 1),
+        lt(sql`char_length(${schema.comentario.contenido})`, maxCharsComentario + 1),
         exists(
           db
             .select({ uno: sql`1` })
@@ -48,7 +58,7 @@ export const load: PageServerLoad = async () => {
     )
     .as("comentarios_con_rank");
 
-  const comentarios = await db
+  const comentariosRows = await db
     .select({
       codigo: comentariosUnificados.codigo,
       contenido: comentariosUnificados.contenido,
@@ -59,23 +69,16 @@ export const load: PageServerLoad = async () => {
     .from(comentariosUnificados)
     .where(eq(comentariosUnificados.ordenPorContenido, 1))
     .orderBy(desc(comentariosUnificados.fechaCreacion), desc(comentariosUnificados.codigo))
-    .limit(N_COMENTARIOS);
+    .limit(nComentarios);
 
-  const cantidadPlanesVigentes = count(sql`DISTINCT ${schema.plan.codigo}`).as(
-    "cantidad_planes_vigentes"
-  );
-  const cantidadComentarios = count(sql`DISTINCT ${schema.comentario.codigo}`).as(
-    "cantidad_comentarios"
-  );
-
-  const materiasPopulares = await db
+  const materiasPopularesRows = await db
     .select({
       codigo: schema.materia.codigo,
       nombre: schema.materia.nombre,
       cantidadCatedras: count(sql`DISTINCT ${schema.catedra.codigo}`).as("cantidad_catedras"),
       cantidadDocentes: count(sql`DISTINCT ${schema.docente.codigo}`).as("cantidad_docentes"),
-      cantidadPlanesVigentes,
-      cantidadComentarios
+      cantidadPlanesVigentes: cantidadPlanesVigentesExpr,
+      cantidadComentarios: cantidadComentariosExpr
     })
     .from(schema.materia)
     .innerJoin(schema.planMateria, eq(schema.planMateria.codigoMateria, schema.materia.codigo))
@@ -87,8 +90,11 @@ export const load: PageServerLoad = async () => {
     .leftJoin(schema.docente, eq(schema.docente.codigoMateria, schema.materia.codigo))
     .leftJoin(schema.comentario, eq(schema.comentario.codigoDocente, schema.docente.codigo))
     .groupBy(schema.materia.codigo, schema.materia.nombre)
-    .orderBy(desc(cantidadPlanesVigentes), desc(cantidadComentarios), schema.materia.nombre)
-    .limit(N_MATERIAS_POPULARES);
+    .orderBy(desc(cantidadPlanesVigentesExpr), desc(cantidadComentariosExpr), schema.materia.nombre)
+    .limit(nMateriasPopulares);
 
-  return { comentarios, materiasPopulares };
+  return {
+    comentarios: comentariosRows,
+    materiasPopulares: materiasPopularesRows
+  };
 };

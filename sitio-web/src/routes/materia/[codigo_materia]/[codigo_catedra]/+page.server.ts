@@ -36,7 +36,7 @@ export const load: PageServerLoad = async ({ params, parent, setHeaders }) => {
     ${schema.calificacionDolly.respondeMails}
   ) / 9.0`;
 
-  const calificacionesPorDocente = db
+  const calificacionesDocentesRows = db
     .select({
       codigoDocente: schema.calificacionDolly.codigoDocente,
       cantidad: sql<number>`count(*)::int`.as("cantidad"),
@@ -79,24 +79,24 @@ export const load: PageServerLoad = async ({ params, parent, setHeaders }) => {
     .groupBy(schema.calificacionDolly.codigoDocente)
     .as("calificaciones_por_docente");
 
-  const rowsDocentes = await db
+  const docentesRows = await db
     .select({
       codigo: schema.docente.codigo,
       nombre: schema.docente.nombre,
       rol: schema.docente.rol,
       resumenComentario: schema.docente.resumenComentarios,
       prioridadRol: schema.prioridadRol.prioridad,
-      cantidadCalificaciones: calificacionesPorDocente.cantidad,
-      promedio: calificacionesPorDocente.promedio,
-      aceptaCritica: calificacionesPorDocente.aceptaCritica,
-      asistencia: calificacionesPorDocente.asistencia,
-      buenTrato: calificacionesPorDocente.buenTrato,
-      claridad: calificacionesPorDocente.claridad,
-      claseOrganizada: calificacionesPorDocente.claseOrganizada,
-      cumpleHorarios: calificacionesPorDocente.cumpleHorarios,
-      fomentaParticipacion: calificacionesPorDocente.fomentaParticipacion,
-      panoramaAmplio: calificacionesPorDocente.panoramaAmplio,
-      respondeMails: calificacionesPorDocente.respondeMails
+      cantidadCalificaciones: calificacionesDocentesRows.cantidad,
+      promedio: calificacionesDocentesRows.promedio,
+      aceptaCritica: calificacionesDocentesRows.aceptaCritica,
+      asistencia: calificacionesDocentesRows.asistencia,
+      buenTrato: calificacionesDocentesRows.buenTrato,
+      claridad: calificacionesDocentesRows.claridad,
+      claseOrganizada: calificacionesDocentesRows.claseOrganizada,
+      cumpleHorarios: calificacionesDocentesRows.cumpleHorarios,
+      fomentaParticipacion: calificacionesDocentesRows.fomentaParticipacion,
+      panoramaAmplio: calificacionesDocentesRows.panoramaAmplio,
+      respondeMails: calificacionesDocentesRows.respondeMails
     })
     .from(schema.catedra)
     .innerJoin(
@@ -106,12 +106,12 @@ export const load: PageServerLoad = async ({ params, parent, setHeaders }) => {
     .innerJoin(schema.docente, eq(schema.docente.codigo, schema.catedraDocente.codigoDocente))
     .leftJoin(schema.prioridadRol, eq(schema.prioridadRol.rol, schema.docente.rol))
     .leftJoin(
-      calificacionesPorDocente,
-      eq(calificacionesPorDocente.codigoDocente, schema.docente.codigo)
+      calificacionesDocentesRows,
+      eq(calificacionesDocentesRows.codigoDocente, schema.docente.codigo)
     )
     .where(eq(schema.catedra.codigo, params.codigo_catedra));
 
-  const codigosDocente = rowsDocentes.map((d) => d.codigo);
+  const codigosDocente = docentesRows.map((d) => d.codigo);
 
   const comentariosDocentes = new Map<
     string,
@@ -124,7 +124,7 @@ export const load: PageServerLoad = async ({ params, parent, setHeaders }) => {
   >();
 
   if (codigosDocente.length > 0) {
-    const rowsComentarios = await db
+    const comentariosRows = await db
       .select({
         codigoDocente: schema.comentario.codigoDocente,
         codigoComentario: schema.comentario.codigo,
@@ -142,7 +142,7 @@ export const load: PageServerLoad = async ({ params, parent, setHeaders }) => {
       .where(inArray(schema.comentario.codigoDocente, codigosDocente))
       .orderBy(desc(schema.comentario.codigoCuatrimestre));
 
-    for (const row of rowsComentarios) {
+    for (const row of comentariosRows) {
       const comentarios = comentariosDocentes.get(row.codigoDocente) ?? [];
       comentarios.push({
         codigo: row.codigoComentario,
@@ -154,7 +154,7 @@ export const load: PageServerLoad = async ({ params, parent, setHeaders }) => {
     }
   }
 
-  const docentes = rowsDocentes
+  const docentes = docentesRows
     .map((row) => {
       const prioridad = row.prioridadRol ?? Number.MAX_SAFE_INTEGER;
 

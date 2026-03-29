@@ -1,10 +1,12 @@
 <script lang="ts">
+  import { PUBLIC_REPO_URL } from "$env/static/public";
   import { page } from "$app/state";
-  import BackgroundBlob from "$ui/BackgroundBlob.svelte";
   import colectivo99 from "$lib/assets/colectivo-99.webp";
   import colectivo400 from "$lib/assets/colectivo-400.webp";
   import colectivo404 from "$lib/assets/colectivo-404.webp";
   import colectivo500 from "$lib/assets/colectivo-500.webp";
+  import BackgroundBlob from "$ui/BackgroundBlob.svelte";
+  import ExternalLink from "$ui/ExternalLink.svelte";
 
   function imagenColectivo(codigo: number) {
     if (codigo === 400) {
@@ -33,26 +35,21 @@
       <img
         src={imagenColectivo(codigoError)}
         alt={`Error ${codigoError}`}
-        class="mx-auto max-h-[468px]"
+        class="mx-auto max-h-117"
       />
-      <div class="mx-auto max-w-[512px] space-y-4 text-center">
+      <div class="mx-auto max-w-lg space-y-4 text-center">
         <div class="space-y-2">
           <h1 class="text-4xl font-semibold sm:text-6xl">Error {codigoError}</h1>
           <p>
             {page.error.message}
           </p>
         </div>
-        <div class="mx-auto h-px w-[72px] bg-foreground/30" aria-hidden="true"></div>
+        <div class="mx-auto h-px w-18 bg-foreground/30" aria-hidden="true"></div>
         <div class="text-sm text-foreground/75">
           Si considerás que este error no debería haber ocurrido podes reportarlo en el
-          <a
-            href="https://github.com/regexPattern/fiuba-reviews"
-            target="_blank"
-            rel="noreferrer"
-            class="underline underline-offset-2"
-          >
+          <ExternalLink href={PUBLIC_REPO_URL} class="underline underline-offset-2">
             repositorio
-          </a>
+          </ExternalLink>
           o escribirme un mail
           <a href="mailto:ccastillo@fi.uba.ar" class="underline underline-offset-2">acá</a>
           .

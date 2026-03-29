@@ -1,14 +1,66 @@
-import type { EntryGenerator, PageServerLoad } from "./$types";
-import { obtenerMateriasBuscador } from "$lib/server/db/materias";
+import { error } from "console";
+import type { PageServerLoad } from "./$types";
+import { db, schema } from "$lib/server/db";
+import { obtenerCatedrasMaterias } from "$lib/server/db/utils";
+import { and, eq } from "drizzle-orm";
 
-export const prerender = true;
+export const load: PageServerLoad = async ({ params }) => {
+  const materiasVigentesRows = await db
+    .select({
+      codigo: schema.materia.codigo,
+      nombre: schema.materia.nombre,
+      cuatrimestreAnio: schema.cuatrimestre.anio,
+      cuatrimestreNumero: schema.cuatrimestre.numero
+    })
+    .from(schema.materia)
+    .innerJoin(schema.planMateria, eq(schema.planMateria.codigoMateria, schema.materia.codigo))
+    .innerJoin(schema.plan, eq(schema.plan.codigo, schema.planMateria.codigoPlan))
+    .leftJoin(
+      schema.cuatrimestre,
+      eq(schema.cuatrimestre.codigo, schema.materia.cuatrimestreUltimaActualizacion)
+    )
+    .where(
+      and(eq(schema.plan.estaVigente, true), eq(schema.materia.codigo, params.codigo_materia))
+    );
 
-export const entries: EntryGenerator = async () => {
-  const materias = await obtenerMateriasBuscador();
+  if (materiasVigentesRows.length === 0) {
+    error(404, "Materia no encontrada en los planes vigentes.");
+  }
 
-  return materias.map(({ codigo }) => ({ codigo_materia: codigo }));
-};
+  const materia = materiasVigentesRows[0];
 
-export const load: PageServerLoad = async ({ parent }) => {
-  await parent();
+  const equivalenciasRows = await db
+    .select({ codigo: schema.materia.codigo, nombre: schema.materia.nombre })
+    .from(schema.equivalencia)
+    .innerJoin(
+      schema.materia,
+      eq(schema.materia.codigo, schema.equivalencia.codigoMateriaPlanAnterior)
+    )
+    .where(eq(schema.equivalencia.codigoMateriaPlanVigente, materia.codigo));
+
+  let codigosMateria: string[];
+  let soloActivas: boolean;
+
+  if (materia.cuatrimestreAnio !== null) {
+    codigosMateria = [materia.codigo];
+    soloActivas = true;
+  } else {
+    codigosMateria = equivalenciasRows.map((e) => e.codigo);
+    soloActivas = false;
+  }
+
+  const catedras = await obtenerCatedrasMaterias(codigosMateria, soloActivas);
+
+  return {
+    materia: {
+      codigo: materia.codigo,
+      nombre: materia.nombre,
+      cuatrimestre:
+        materia.cuatrimestreAnio !== null
+          ? { numero: materia.cuatrimestreNumero!, anio: materia.cuatrimestreAnio }
+          : null,
+      equivalencias: equivalenciasRows
+    },
+    catedras
+  };
 };

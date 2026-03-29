@@ -29,7 +29,7 @@ const cantidadCatedrasExpr = sql<number>`(
 )::int`;
 
 export const load: LayoutServerLoad = async ({ url }) => {
-  const materiaRows = db
+  const materiaRows = await db
     .select({ codigo: schema.materia.codigo, nombre: schema.materia.nombre })
     .from(schema.materia)
     .innerJoin(schema.planMateria, eq(schema.planMateria.codigoMateria, schema.materia.codigo))
