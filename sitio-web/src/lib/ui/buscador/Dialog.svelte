@@ -60,12 +60,12 @@
             class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-foreground/60"
           />
 
-            <Command.Input
-              value={buscadorState.query}
-              oninput={(evento) => buscadorState.setQuery(evento.currentTarget.value)}
-              placeholder="Codigo o nombre de materia"
-              class="w-full truncate p-3 pr-3 pl-10 text-base focus:ring-0 focus:outline-hidden md:pr-14"
-            />
+          <Command.Input
+            value={buscadorState.query}
+            oninput={(evento) => buscadorState.setQuery(evento.currentTarget.value)}
+            placeholder="Codigo o nombre de materia"
+            class="w-full truncate p-3 pr-3 pl-10 text-base focus:ring-0 focus:outline-hidden md:pr-14"
+          />
 
           <kbd
             class="pointer-events-none absolute top-1/2 right-3 hidden -translate-y-1/2 rounded-none border border-secondary-border px-1.5 py-0.5 font-mono text-[10px] leading-none text-foreground/60 md:inline-flex"

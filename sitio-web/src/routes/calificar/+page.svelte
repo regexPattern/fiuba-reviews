@@ -1,6 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
-  import BackgroundBlob from "$comps/BackgroundBlob.svelte";
+  import BackgroundBlob from "$ui/BackgroundBlob.svelte";
   import { ChevronLeft } from "@lucide/svelte";
   import Form from "./Form.svelte";
 

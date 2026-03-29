@@ -2,9 +2,9 @@
   import { PUBLIC_BASE_URL } from "$env/static/public";
   import type { Component } from "svelte";
   import { resolve } from "$app/paths";
-  import BackgroundBlob from "$comps/BackgroundBlob.svelte";
-  import BuscadorMaterias from "$comps/buscador-materias";
-  import ExternalLink from "$comps/ExternalLink.svelte";
+  import BackgroundBlob from "$ui/BackgroundBlob.svelte";
+  import BuscadorMaterias from "$ui/buscador";
+  import ExternalLink from "$ui/ExternalLink.svelte";
   import { Database, GraduationCap, HatGlasses, LayersPlus } from "@lucide/svelte";
 
   let { data } = $props();

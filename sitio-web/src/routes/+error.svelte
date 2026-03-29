@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import BackgroundBlob from "$comps/BackgroundBlob.svelte";
+  import BackgroundBlob from "$ui/BackgroundBlob.svelte";
   import colectivo99 from "$lib/assets/colectivo-99.webp";
   import colectivo400 from "$lib/assets/colectivo-400.webp";
   import colectivo404 from "$lib/assets/colectivo-404.webp";

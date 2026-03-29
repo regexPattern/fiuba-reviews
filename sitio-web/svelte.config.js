@@ -5,7 +5,7 @@ import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 const config = {
   preprocess: vitePreprocess(),
   kit: {
-    alias: { ["$comps"]: "src/lib/ui/components" },
+    alias: { ["$ui"]: "src/lib/ui" },
     adapter: adapter({ runtime: "nodejs24.x" }),
     experimental: { remoteFunctions: true }
   },

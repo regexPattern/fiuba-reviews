@@ -1,11 +1,13 @@
 <script lang="ts">
-  let { upperLeft = true, lowerRight = true } = $props<{
+  interface Props {
     upperLeft?: boolean;
     lowerRight?: boolean;
-  }>();
+  }
+
+  let { upperLeft = true, lowerRight = true }: Props = $props();
 </script>
 
-<div class="pointer-events-none fixed inset-0 z-0 overflow-clip [contain:paint]" aria-hidden="true">
+<div class="pointer-events-none fixed inset-0 z-0 overflow-clip contain-[paint]" aria-hidden="true">
   {#if upperLeft}
     <div
       class="absolute -top-64 -left-64 h-[min(52rem,68vh)] w-[min(76rem,100vw)] bg-no-repeat max-sm:-top-48 max-sm:-left-52 max-sm:h-[48vh] max-sm:w-[125vw]"

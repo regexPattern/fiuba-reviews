@@ -1,12 +1,12 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
-  import BuscadorMaterias from "$comps/buscador-materias";
+  import BuscadorMaterias from "$ui/buscador";
   import { Github, Menu, Monitor, Moon, SunMedium } from "@lucide/svelte";
   import { DropdownMenu } from "bits-ui";
   import { mode, ModeWatcher, resetMode, setMode } from "mode-watcher";
   import "./layout.css";
-  import ExternalLink from "$comps/ExternalLink.svelte";
+  import ExternalLink from "$ui/ExternalLink.svelte";
 
   let { children, data } = $props();
 
