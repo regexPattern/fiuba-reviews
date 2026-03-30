@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { browser } from "$app/environment";
   import { resolve } from "$app/paths";
+  import { page } from "$app/state";
   import { ScrollArea } from "bits-ui";
   import Catedra from "./components/Catedra.svelte";
   import Sidebar from "./components/Sidebar.svelte";
@@ -13,11 +15,31 @@
 
   let idxCatedra = $state(0);
   let tieneCatedras = $derived(data.catedras.length > 0);
+  let codigoCatedraSeleccionada = $derived(data.catedras[idxCatedra]?.codigo ?? null);
   let viewportRef: HTMLDivElement | null = $state(null);
 
-  const resetCatedraView = () => {
-    viewportRef?.scrollTo({ top: 0 });
-  };
+  const resetCatedraView = () => viewportRef?.scrollTo({ top: 0 });
+
+  $effect(() => {
+    const codigoQuery = page.url.searchParams.get("catedra");
+    const idxQuery = data.catedras.findIndex((catedra) => catedra.codigo === codigoQuery);
+    idxCatedra = idxQuery >= 0 ? idxQuery : 0;
+  });
+
+  $effect(() => {
+    if (!browser || !tieneCatedras || !codigoCatedraSeleccionada) {
+      return;
+    }
+
+    const url = new URL(window.location.href);
+
+    if (url.searchParams.get("catedra") === codigoCatedraSeleccionada) {
+      return;
+    }
+
+    url.searchParams.set("catedra", codigoCatedraSeleccionada);
+    window.history.replaceState(window.history.state, "", url);
+  });
 </script>
 
 <svelte:head>
@@ -38,7 +60,7 @@
   style="height: -webkit-fill-available; height: 100dvh"
 >
   {#if tieneCatedras}
-    <div class="hidden w-90 shrink-0 md:flex">
+    <div class="hidden w-70 shrink-0 md:flex lg:w-90">
       <Sidebar
         materia={data.materia}
         catedras={data.catedras}
