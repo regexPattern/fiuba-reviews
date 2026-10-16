@@ -7,6 +7,7 @@
 
 # Misc
 .direnv/
+.devenv/
 .DS_Store
 .envrc
 
