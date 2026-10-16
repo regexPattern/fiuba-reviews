@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { MateriaBuscador } from "@/server/queries/materias-vigentes";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 type BuscadorContext = {
   materias: MateriaBuscador[];

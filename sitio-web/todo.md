@@ -47,7 +47,6 @@ Partial Prerender) y el servidor de producción fue probado a mano.
 - [ ] **404 en materias inexistentes**: la primera visita a un código que no existe devuelve 200
       (con `noindex` y la página de 404); las siguientes devuelven 404. Evaluar `dynamicParams`.
 - [ ] Revisar el warning de `next/font` por falta de métricas de `Google Sans Code`.
-- [ ] Warnings de ESLint por `table` sin usar en `src/server/db/schema.ts`.
 
 ## Referencias
 

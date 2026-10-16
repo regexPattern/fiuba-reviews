@@ -1,5 +1,5 @@
-import { Google_Sans_Code, Inter, Source_Serif_4 } from "next/font/google";
 import type { Metadata, Viewport } from "next";
+import { Google_Sans_Code, Inter, Source_Serif_4 } from "next/font/google";
 import { BuscadorDialog } from "@/components/buscador/buscador-dialog";
 import { BuscadorProvider } from "@/components/buscador/buscador-provider";
 import { Header } from "@/components/layout/header";

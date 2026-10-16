@@ -1,6 +1,6 @@
 import "server-only";
-import { cacheLife, cacheTag } from "next/cache";
 import { desc, eq, sql } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import { db, schema } from "@/server/db";
 
 const cantidadPlanesExpr = sql<number>`count(distinct ${schema.plan.codigo})::int`;

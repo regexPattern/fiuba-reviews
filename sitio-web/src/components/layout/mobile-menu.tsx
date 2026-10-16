@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { Menu, Monitor, Moon, SunMedium } from "lucide-react";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 import { GithubIcon } from "@/components/icons/github";
 import {
   DropdownMenu,

@@ -1,6 +1,6 @@
 import "server-only";
-import { cacheLife, cacheTag } from "next/cache";
 import { and, count, desc, eq, exists, gt, lt, sql } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import { db, schema } from "@/server/db";
 
 const N_COMENTARIOS = 12;

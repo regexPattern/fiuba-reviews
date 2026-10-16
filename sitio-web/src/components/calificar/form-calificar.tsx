@@ -1,13 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useRef, useTransition } from "react";
 import type { CalificarInput } from "@/lib/calificar-schema";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
+import { useRef, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { calificarDocente } from "@/app/calificar/actions";
@@ -79,8 +79,8 @@ export function FormCalificar({
 
   return (
     <form
-      // react-hook-form: falso positivo de react-hooks/refs
-      // eslint-disable-next-line react-hooks/refs
+      // react-hook-form: handleSubmit creates an event handler; it does not read refs during render.
+      // oxlint-disable-next-line react/refs
       onSubmit={form.handleSubmit(onSubmit)}
       className="mx-auto flex w-full flex-col gap-12 md:w-fit lg:mx-0 lg:flex-row"
     >

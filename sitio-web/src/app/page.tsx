@@ -1,7 +1,7 @@
-import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { Database, GraduationCap, HatGlasses, LayersPlus } from "lucide-react";
+import Link from "next/link";
 import { BackgroundBlob } from "@/components/background-blob";
 import { BuscadorTrigger } from "@/components/buscador/buscador-trigger";
 import { ExternalLink } from "@/components/external-link";

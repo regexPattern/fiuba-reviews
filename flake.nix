@@ -56,8 +56,8 @@
       in {
         devShells.web = mkShells {
           devPackages = with pkgs; [
-            prettierd
-            svelte-language-server
+            oxfmt
+            oxlint
             tailwindcss-language-server
             typescript-language-server
             vscode-langservers-extracted

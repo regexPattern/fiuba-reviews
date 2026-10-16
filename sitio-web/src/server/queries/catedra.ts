@@ -1,7 +1,7 @@
 import "server-only";
-import { cacheLife, cacheTag } from "next/cache";
 import type { SQLWrapper } from "drizzle-orm";
 import { desc, eq, inArray, sql } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import { db, schema } from "@/server/db";
 import { promedioDollyExpr } from "@/server/db/sql";
 import { calcularNombreCatedra, PRIORIDAD_SIN_ROL } from "./nombre-catedra";

@@ -1,7 +1,7 @@
+import { Info, MessageSquarePlus } from "lucide-react";
 import { cacheLife, cacheTag } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Info, MessageSquarePlus } from "lucide-react";
 import { getCatedra } from "@/server/queries/catedra";
 import { Comentarios } from "./comentarios";
 import { Promedios } from "./promedios";

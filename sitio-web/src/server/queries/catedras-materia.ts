@@ -1,6 +1,6 @@
 import "server-only";
-import { cacheLife, cacheTag } from "next/cache";
 import { and, eq, inArray, sql } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import { db, schema } from "@/server/db";
 import { promedioDollyExpr } from "@/server/db/sql";
 import { getMateria } from "./materia";

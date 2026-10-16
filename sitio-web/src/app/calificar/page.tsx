@@ -1,8 +1,8 @@
+import type { Metadata } from "next";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import type { Metadata } from "next";
-import { ChevronLeft } from "lucide-react";
 import { BackgroundBlob } from "@/components/background-blob";
 import { FormCalificar } from "@/components/calificar/form-calificar";
 import { Skeleton } from "@/components/ui/skeleton";

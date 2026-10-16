@@ -1,10 +1,10 @@
 "use client";
 
+import type { CatedraListada } from "@/server/queries/catedras-materia";
+import { ListFilter, Loader2, Star } from "lucide-react";
 import Link, { useLinkStatus } from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useDeferredValue, useMemo, useState } from "react";
-import type { CatedraListada } from "@/server/queries/catedras-materia";
-import { ListFilter, Loader2, Star } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useMateriaShell } from "./materia-shell";

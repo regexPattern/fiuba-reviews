@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import type { ComentarioDocente } from "@/server/queries/catedra";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 

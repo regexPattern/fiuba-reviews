@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
+import { useMemo } from "react";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -82,6 +82,8 @@ function Field({
 }: React.ComponentProps<"div"> & VariantProps<typeof fieldVariants>) {
   return (
     <div
+      // shadcn Field is a layout group, not a fieldset (FieldSet handles that case).
+      // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
       role="group"
       data-slot="field"
       data-orientation={orientation}
