@@ -24,6 +24,8 @@
 }
 
 @theme inline {
+  --font-sans: var(--font-mozilla-text), ui-sans-serif, system-ui, sans-serif;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

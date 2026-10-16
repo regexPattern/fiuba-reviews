@@ -1,6 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
+import { mozillaHeadline } from "@/lib/fonts";
 import { getCatedra } from "@/server/db/queries/catedra";
 import { Comentarios } from "./comentarios";
 import { Promedios } from "./promedios";
@@ -18,7 +19,9 @@ export async function DetalleCatedra({ uuid }: { uuid: string }) {
       {catedra.docentes.map((docente) => (
         <section key={docente.codigo} id={docente.codigo} className="space-y-4">
           <div>
-            <h2 className="text-xl font-semibold">{docente.nombre}</h2>
+            <h2 className={`${mozillaHeadline.className} text-xl font-semibold`}>
+              {docente.nombre}
+            </h2>
             {docente.rol && <p className="text-sm text-muted-foreground">{docente.rol}</p>}
           </div>
           {docente.resumenComentario && (

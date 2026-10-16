@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { mozillaHeadline } from "@/lib/fonts";
 import { useMateriaShell } from "./materia-shell";
 
 const normalizar = (texto: string) =>
@@ -64,7 +65,7 @@ function Items({
                 <span className="inline-block w-[3ch] shrink-0 text-center">
                   {calificacion === "0.0" ? "–" : calificacion}
                 </span>
-                <span>{catedra.nombre}</span>
+                <span className={mozillaHeadline.className}>{catedra.nombre}</span>
               </Link>
             </Button>
           </li>
