@@ -22,6 +22,9 @@ export async function DetalleCatedra({ uuid }: { uuid: string }) {
             <h2 className={`${mozillaHeadline.className} text-xl font-semibold`}>
               {docente.nombre}
             </h2>
+            {docente.nombreSiu && (
+              <p className="text-sm text-muted-foreground">{docente.nombreSiu}</p>
+            )}
             {docente.rol && <p className="text-sm text-muted-foreground">{docente.rol}</p>}
           </div>
           {docente.resumenComentario && (

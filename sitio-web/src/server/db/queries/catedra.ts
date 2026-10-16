@@ -23,6 +23,7 @@ export async function getCatedra(codigo: string) {
       .select({
         codigo: schema.docente.codigo,
         nombre: schema.docente.nombre,
+        nombreSiu: schema.docente.nombreSiu,
         rol: schema.docente.rol,
         resumenComentario: schema.docente.resumenComentarios,
         prioridadRol: schema.prioridadRol.prioridad,
@@ -91,6 +92,7 @@ export async function getCatedra(codigo: string) {
     .map((row) => ({
       codigo: row.codigo,
       nombre: row.nombre,
+      nombreSiu: row.nombreSiu,
       rol: row.rol,
       prioridad: row.prioridadRol ?? PRIORIDAD_SIN_ROL,
       resumenComentario: row.resumenComentario,
