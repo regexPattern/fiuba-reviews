@@ -31,7 +31,10 @@
 
       perSystem = {pkgs, ...}: {
         devenv.shells.default = {
-          packages = [];
+          packages = with pkgs; [
+            tailwindcss-language-server
+            vscode-langservers-extracted
+          ];
           languages.javascript = {
             enable = true;
             lsp.package = pkgs.vtsls;
