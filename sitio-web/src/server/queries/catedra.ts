@@ -1,5 +1,5 @@
 import "server-only";
-import { desc, eq, inArray } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { db, schema } from "@/server/db";
 import { calcularNombreCatedra, PRIORIDAD_SIN_ROL } from "./nombre-catedra";
@@ -15,34 +15,52 @@ export async function getCatedra(codigo: string) {
 
   const cal = schema.resumenCalificacionesDocente;
 
-  const rowsDocentes = await db
-    .select({
-      codigo: schema.docente.codigo,
-      nombre: schema.docente.nombre,
-      rol: schema.docente.rol,
-      resumenComentario: schema.docente.resumenComentarios,
-      prioridadRol: schema.prioridadRol.prioridad,
-      cantidadCalificaciones: cal.cantidad,
-      promedio: cal.promedio,
-      aceptaCritica: cal.aceptaCritica,
-      asistencia: cal.asistencia,
-      buenTrato: cal.buenTrato,
-      claridad: cal.claridad,
-      claseOrganizada: cal.claseOrganizada,
-      cumpleHorarios: cal.cumpleHorarios,
-      fomentaParticipacion: cal.fomentaParticipacion,
-      panoramaAmplio: cal.panoramaAmplio,
-      respondeMails: cal.respondeMails
-    })
-    .from(schema.catedra)
-    .innerJoin(
-      schema.catedraDocente,
-      eq(schema.catedraDocente.codigoCatedra, schema.catedra.codigo)
-    )
-    .innerJoin(schema.docente, eq(schema.docente.codigo, schema.catedraDocente.codigoDocente))
-    .leftJoin(schema.prioridadRol, eq(schema.prioridadRol.rol, schema.docente.rol))
-    .leftJoin(cal, eq(cal.codigoDocente, schema.docente.codigo))
-    .where(eq(schema.catedra.codigo, codigo));
+  const cd = schema.catedraDocente;
+
+  // Ambas queries parten de `catedra_docente`, así que no dependen una de otra y van en paralelo.
+  const [rowsDocentes, rowsComentarios] = await Promise.all([
+    db
+      .select({
+        codigo: schema.docente.codigo,
+        nombre: schema.docente.nombre,
+        rol: schema.docente.rol,
+        resumenComentario: schema.docente.resumenComentarios,
+        prioridadRol: schema.prioridadRol.prioridad,
+        cantidadCalificaciones: cal.cantidad,
+        promedio: cal.promedio,
+        aceptaCritica: cal.aceptaCritica,
+        asistencia: cal.asistencia,
+        buenTrato: cal.buenTrato,
+        claridad: cal.claridad,
+        claseOrganizada: cal.claseOrganizada,
+        cumpleHorarios: cal.cumpleHorarios,
+        fomentaParticipacion: cal.fomentaParticipacion,
+        panoramaAmplio: cal.panoramaAmplio,
+        respondeMails: cal.respondeMails
+      })
+      .from(cd)
+      .innerJoin(schema.docente, eq(schema.docente.codigo, cd.codigoDocente))
+      .leftJoin(schema.prioridadRol, eq(schema.prioridadRol.rol, schema.docente.rol))
+      .leftJoin(cal, eq(cal.codigoDocente, schema.docente.codigo))
+      .where(eq(cd.codigoCatedra, codigo)),
+    db
+      .select({
+        codigoDocente: schema.comentario.codigoDocente,
+        codigo: schema.comentario.codigo,
+        contenido: schema.comentario.contenido,
+        deDolly: schema.comentario.deDolly,
+        cuatrimestreNumero: schema.cuatrimestre.numero,
+        cuatrimestreAnio: schema.cuatrimestre.anio
+      })
+      .from(cd)
+      .innerJoin(schema.comentario, eq(schema.comentario.codigoDocente, cd.codigoDocente))
+      .innerJoin(
+        schema.cuatrimestre,
+        eq(schema.cuatrimestre.codigo, schema.comentario.codigoCuatrimestre)
+      )
+      .where(eq(cd.codigoCatedra, codigo))
+      .orderBy(desc(schema.comentario.codigoCuatrimestre), desc(schema.comentario.codigo))
+  ]);
 
   if (rowsDocentes.length === 0) {
     return null;
@@ -57,28 +75,6 @@ export async function getCatedra(codigo: string) {
       deDolly: boolean;
     }[]
   >();
-
-  const rowsComentarios = await db
-    .select({
-      codigoDocente: schema.comentario.codigoDocente,
-      codigo: schema.comentario.codigo,
-      contenido: schema.comentario.contenido,
-      deDolly: schema.comentario.deDolly,
-      cuatrimestreNumero: schema.cuatrimestre.numero,
-      cuatrimestreAnio: schema.cuatrimestre.anio
-    })
-    .from(schema.comentario)
-    .innerJoin(
-      schema.cuatrimestre,
-      eq(schema.cuatrimestre.codigo, schema.comentario.codigoCuatrimestre)
-    )
-    .where(
-      inArray(
-        schema.comentario.codigoDocente,
-        rowsDocentes.map((d) => d.codigo)
-      )
-    )
-    .orderBy(desc(schema.comentario.codigoCuatrimestre), desc(schema.comentario.codigo));
 
   for (const row of rowsComentarios) {
     const lista = comentariosPorDocente.get(row.codigoDocente) ?? [];
