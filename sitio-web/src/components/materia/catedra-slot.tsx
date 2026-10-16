@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { UUID_RE } from "@/lib/utils";
 import { getCatedrasMateria } from "@/server/db/queries/catedras-materia";
 import { DetalleCatedra } from "./detalle-catedra";
 import { ScrollTop } from "./scroll-top";
@@ -29,12 +28,7 @@ export async function CatedraSlot({
     );
   }
 
-  const uuid =
-    typeof catedra === "string" &&
-    UUID_RE.test(catedra) &&
-    catedras.some((c) => c.codigo === catedra)
-      ? catedra
-      : catedras[0].codigo;
+  const uuid = catedras.find((c) => c.codigo === catedra)?.codigo ?? catedras[0].codigo;
 
   return (
     <>

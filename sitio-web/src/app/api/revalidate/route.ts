@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { env } from "@/env";
-import { UUID_RE } from "@/lib/utils";
 
 const bodySchema = z.object({
   /** Lista de materias vigentes o nuevas: cambió el listado general. */
@@ -11,7 +10,7 @@ const bodySchema = z.object({
   /** Códigos de materia que cambiaron (info de materia y/o cátedras). */
   materias: z.array(z.string().min(1)).default([]),
   /** UUIDs de cátedras cuyo detalle cambió. */
-  catedras: z.array(z.string().regex(UUID_RE)).default([]),
+  catedras: z.array(z.uuid()).default([]),
   /** Tags arbitrarios, por si hace falta algo puntual. */
   tags: z.array(z.string().min(1)).default([]),
   inicio: z.boolean().optional()
