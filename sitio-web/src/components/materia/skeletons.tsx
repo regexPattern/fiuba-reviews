@@ -2,39 +2,35 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function SidebarSkeleton() {
   return (
-    <div className="flex min-h-0 flex-1 flex-col divide-y divide-layout-border">
-      <ul className="my-2 min-h-0 flex-1 overflow-hidden">
-        {Array.from({ length: 10 }, (_, i) => (
-          <li key={i} className="flex h-[50px] items-center gap-2 p-3">
-            <Skeleton className="h-4 w-[3ch]" />
-            <Skeleton className="h-4 flex-1" />
-          </li>
+    <div className="min-h-0 flex-1 overflow-hidden p-3">
+      <output className="sr-only">Cargando cátedras…</output>
+      <div aria-hidden="true" className="space-y-3">
+        {Array.from({ length: 8 }, (_, index) => (
+          <Skeleton key={index} className="h-9 w-full" />
         ))}
-      </ul>
-      <div className="h-[50px] shrink-0" />
+      </div>
     </div>
   );
 }
 
 export function CatedraSkeleton() {
   return (
-    <div className="m-4 space-y-8 md:m-6" aria-hidden="true">
-      <section className="space-y-3">
-        <div>
-          <Skeleton className="h-10 w-3/4 max-w-md" />
-        </div>
-        <div className="flex gap-2">
-          <Skeleton className="h-[38px] w-40" />
-          <Skeleton className="h-[38px] w-28" />
-        </div>
-        <div className="divide-y divide-layout-border">
-          {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className="py-3">
-              <Skeleton className="h-[48px] w-full" />
+    <div className="p-4 md:p-6">
+      <output className="sr-only">Cargando docentes…</output>
+      <div aria-hidden="true" className="space-y-4">
+        <Skeleton className="h-7 w-2/3 max-w-sm" />
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-9 w-36" />
+        <div className="divide-y">
+          {Array.from({ length: 4 }, (_, index) => (
+            <div key={index} className="space-y-2 py-3">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-5 w-20" />
             </div>
           ))}
         </div>
-      </section>
+      </div>
     </div>
   );
 }

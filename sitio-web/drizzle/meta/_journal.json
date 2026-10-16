@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792114829642,
+      "tag": "0000_mighty_vision",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792114877933,
+      "tag": "0001_swift_thor",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792114944728,
+      "tag": "0002_silent_hulk",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792114956739,
+      "tag": "0003_mighty_thor",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792114969583,
+      "tag": "0004_crimson_thor",
+      "breakpoints": true
+    }
+  ]
+}

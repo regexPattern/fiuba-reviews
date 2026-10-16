@@ -58,7 +58,7 @@ export default async function Page({ params, searchParams }: Props) {
   if (!materia) notFound();
 
   const sidebar = (
-    <aside className="flex h-full min-h-0 w-full flex-col border-r border-layout-border md:pt-14">
+    <aside className="flex h-full min-h-0 w-full flex-col">
       <MateriaHeader codigo={codigo} />
       <Suspense fallback={<SidebarSkeleton />}>
         <SidebarCatedras codigo={codigo} />
@@ -67,7 +67,7 @@ export default async function Page({ params, searchParams }: Props) {
   );
 
   return (
-    <MateriaShell nombreMateria={materia.nombre} sidebar={sidebar}>
+    <MateriaShell key={codigo} nombreMateria={materia.nombre} sidebar={sidebar}>
       <Suspense fallback={<CatedraSkeleton />}>
         <CatedraSlot codigo={codigo} searchParams={searchParams} />
       </Suspense>

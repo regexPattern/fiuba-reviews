@@ -12,7 +12,9 @@ export async function MateriaHeader({ codigo }: { codigo: string }) {
 
   return (
     <>
-      <div className="shrink-0 border-b p-3 font-serif text-lg font-medium">{materia.nombre}</div>
+      <h1 className="shrink-0 border-b p-4 text-lg font-semibold">
+        {materia.codigo} · {materia.nombre}
+      </h1>
 
       <div className="shrink-0 border-b p-3 text-sm tabular-nums">
         {materia.cuatrimestre ? (

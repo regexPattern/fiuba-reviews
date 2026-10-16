@@ -1,19 +1,28 @@
 "use client";
 
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { createContext, useContext, useState } from "react";
-import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { createContext, useContext, useOptimistic, useState, useTransition } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
+} from "@/components/ui/sheet";
+import { CatedraSkeleton } from "./skeletons";
 
-const ShellContext = createContext<{ cerrarDrawer: () => void }>({ cerrarDrawer: () => {} });
-
+const ShellContext = createContext<{
+  cerrarDrawer: () => void;
+  navegarCatedra: (codigoMateria: string, uuid: string) => void;
+  catedraPendiente: string | null;
+}>({ cerrarDrawer: () => {}, navegarCatedra: () => {}, catedraPendiente: null });
 export const useMateriaShell = () => useContext(ShellContext);
-
 export const SCROLL_CONTAINER_ID = "materia-scroll";
 
-/**
- * Layout de dos columnas: sidebar fijo en desktop y drawer (Sheet) en mobile. El sidebar llega
- * como prop, así que sus Server Components siguen siendo parte de la shell estática.
- */
+/** El sidebar se recibe del servidor para conservar la shell estática. */
 export function MateriaShell({
   nombreMateria,
   sidebar,
@@ -24,41 +33,48 @@ export function MateriaShell({
   children: React.ReactNode;
 }) {
   const [abierto, setAbierto] = useState(false);
+  const router = useRouter();
+  const [navegando, startTransition] = useTransition();
+  const [catedraPendiente, setCatedraPendiente] = useOptimistic<string | null>(null);
+
+  function navegarCatedra(codigoMateria: string, uuid: string) {
+    setAbierto(false);
+    document.getElementById(SCROLL_CONTAINER_ID)?.scrollTo({ top: 0 });
+    // El panel responde al clic sin esperar el payload RSC. La transición termina
+    // cuando Next confirma la navegación; no dependemos de timers ni de efectos sobre la URL.
+    startTransition(() => {
+      setCatedraPendiente(uuid);
+      router.push(`/materia/${codigoMateria}?catedra=${uuid}`, { scroll: false });
+    });
+  }
 
   return (
-    <ShellContext.Provider value={{ cerrarDrawer: () => setAbierto(false) }}>
-      <div className="container mx-auto mt-[calc(-56px-env(safe-area-inset-top))] flex h-dvh overflow-hidden">
-        <div className="hidden w-70 shrink-0 md:flex">{sidebar}</div>
-
-        <Sheet open={abierto} onOpenChange={setAbierto}>
-          <SheetContent side="left" showCloseButton={false} className="w-4/5 gap-0 md:hidden">
-            <SheetTitle className="sr-only">{nombreMateria}</SheetTitle>
-            <SheetDescription className="sr-only">Cátedras de la materia</SheetDescription>
-            {sidebar}
-          </SheetContent>
-        </Sheet>
-
-        <main className="min-h-0 w-full min-w-0">
-          <div
-            id={SCROLL_CONTAINER_ID}
-            className="h-full overflow-y-auto overscroll-contain pt-[calc(56px+env(safe-area-inset-top))]"
-          >
-            <button
-              type="button"
-              onClick={() => setAbierto(true)}
-              className="sticky top-0 z-20 flex w-full items-center justify-between border-b border-layout-border bg-background p-3 text-left font-serif text-lg font-medium md:hidden"
-            >
-              {nombreMateria}
-              {abierto ? (
-                <ChevronUp className="size-4.5 shrink-0" />
-              ) : (
-                <ChevronDown className="size-4.5 shrink-0" />
-              )}
-            </button>
-
-            {children}
+    <ShellContext.Provider
+      value={{ cerrarDrawer: () => setAbierto(false), navegarCatedra, catedraPendiente }}
+    >
+      <div className="mx-auto flex h-full max-w-7xl">
+        <div className="hidden w-80 shrink-0 border-r md:flex">{sidebar}</div>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="border-b p-3 md:hidden">
+            <Sheet open={abierto} onOpenChange={setAbierto}>
+              <SheetTrigger asChild>
+                <Button variant="outline">
+                  <Menu /> Ver cátedras
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="gap-0">
+                <SheetHeader>
+                  <SheetTitle>Cátedras</SheetTitle>
+                  <SheetDescription>{nombreMateria}</SheetDescription>
+                </SheetHeader>
+                <div className="min-h-0 flex-1">{sidebar}</div>
+              </SheetContent>
+            </Sheet>
           </div>
-        </main>
+          <main id={SCROLL_CONTAINER_ID} className="min-h-0 flex-1 overflow-y-auto">
+            {navegando ? <CatedraSkeleton /> : children}
+          </main>
+        </div>
       </div>
     </ShellContext.Provider>
   );

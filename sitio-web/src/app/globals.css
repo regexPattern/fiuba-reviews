@@ -1,68 +1,29 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 :root {
-  --radius: 0rem;
-
-  --fiuba: #4facd4;
-  --background: #fbfef9;
-  --foreground: #173341;
-  --card: #fbfef9;
-  --card-foreground: #173341;
-  --popover: #fbfef9;
-  --popover-foreground: #173341;
-  --primary: #b2ebf2;
-  --primary-foreground: #495883;
-  --secondary: #ecf4ea;
-  --secondary-foreground: #ab9e9c;
-  --muted: #eef6ec;
-  --muted-foreground: #5d7480;
-  --accent: #8ee2ec;
-  --accent-foreground: #173341;
-  --destructive: #dc2626;
-  --border: #c2e1c2;
-  --input: #4facd4;
-  --ring: #4facd4;
-
-  --button-hover: #8ee2ec;
-  --secondary-border: #ab9e9c;
-  --overlay: rgb(251 254 249 / 0.75);
-}
-
-.dark {
-  --fiuba: #4facd4;
-  --background: #0d0106;
-  --foreground: #ececec;
-  --card: #0d0106;
-  --card-foreground: #ececec;
-  --popover: #0d0106;
-  --popover-foreground: #ececec;
-  --primary: #342f37;
-  --primary-foreground: #f4dbd8;
-  --secondary: #1b1419;
-  --secondary-foreground: #998291;
-  --muted: #1b1419;
-  --muted-foreground: #a8a0a5;
-  --accent: #433c46;
-  --accent-foreground: #ececec;
-  --destructive: #f87171;
-  --border: #512d38;
-  --input: #875e6b;
-  --ring: #875e6b;
-
-  --button-hover: #433c46;
-  --secondary-border: #875e6b;
-  --overlay: rgb(13 1 6 / 0.75);
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
 }
 
 @theme inline {
-  --font-sans: var(--font-inter), sans-serif;
-  --font-serif: var(--font-source-serif), serif;
-  --font-mono: var(--font-google-sans-code), monospace;
-
-  --color-fiuba: var(--fiuba);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -82,84 +43,17 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* Alias de la paleta original */
-  --color-layout-border: var(--border);
-  --color-button-background: var(--primary);
-  --color-button-foreground: var(--primary-foreground);
-  --color-button-border: var(--input);
-  --color-button-hover: var(--button-hover);
-  --color-secondary-border: var(--secondary-border);
-  --color-overlay-background: var(--overlay);
-
-  --radius-sm: calc(var(--radius) - 2px);
-  --radius-md: var(--radius);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: var(--radius);
-
-  --animate-scroll-horizontal: scroll-horizontal 68s linear infinite;
-  --animate-scroll-horizontal-sm: scroll-horizontal 56s linear infinite;
-  --animate-scroll-horizontal-reverse: scroll-horizontal-reverse 64s linear infinite;
-  --animate-scroll-horizontal-reverse-sm: scroll-horizontal-reverse 52s linear infinite;
-  --animate-scroll-vertical: scroll-vertical 50s linear infinite;
-  --animate-scroll-vertical-md: scroll-vertical 30s linear infinite;
-}
-
-@keyframes scroll-horizontal {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes scroll-horizontal-reverse {
-  0% {
-    transform: translateX(-50%);
-  }
-  100% {
-    transform: translateX(0);
-  }
-}
-
-@keyframes scroll-vertical {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(-50%);
-  }
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-
-  /* iOS 26 rompió el cálculo clásico del viewport; estas propiedades evitan fallas de cálculo
-   * y de overscroll.
-   * https://stripearmy.medium.com/ios-26-0-be-prepared-for-viewport-changes-in-safari-e867d7eace43 */
-  html {
-    height: 100vh;
-    height: -webkit-fill-available;
-    height: 100dvh;
-  }
-
   body {
     @apply bg-background text-foreground;
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    min-height: 100dvh;
-    overflow-x: hidden;
-    position: relative;
-  }
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-serif;
   }
 }

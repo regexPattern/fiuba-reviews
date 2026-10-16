@@ -3,26 +3,21 @@
 import type { ComentarioDocente } from "@/server/queries/catedra";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const MAX_VISIBLES = 10;
 
 function ComentarioItem({ comentario }: { comentario: ComentarioDocente }) {
   return (
-    <div className="space-x-0.5 py-3">
-      <p className="inline w-fit before:content-['&quot;'] after:content-['&quot;']">
-        {comentario.contenido.trim()}
-      </p>
+    <div className="space-y-2 py-3">
+      <p className="break-words whitespace-pre-wrap">{comentario.contenido.trim()}</p>
 
-      <div className="inline-flex items-center gap-2 text-xs text-button-foreground select-none">
-        <Badge variant="outline" className="border-fiuba/30 bg-fiuba/10">
+      <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+        <Badge variant="outline">
           {comentario.cuatrimestre.numero}C{comentario.cuatrimestre.anio}
         </Badge>
-        {comentario.esDeDolly && (
-          <Badge variant="outline" className="border-fiuba/30 bg-fiuba/10">
-            Dolly FIUBA
-          </Badge>
-        )}
+        {comentario.deDolly && <Badge variant="outline">Dolly FIUBA</Badge>}
       </div>
     </div>
   );
@@ -36,24 +31,26 @@ export function Comentarios({ comentarios }: { comentarios: ComentarioDocente[] 
 
   return (
     <Collapsible open={expandido} onOpenChange={setExpandido}>
-      <div className="divide-y divide-layout-border">
+      <div className="divide-y">
         {visibles.map((comentario) => (
           <ComentarioItem key={comentario.codigo} comentario={comentario} />
         ))}
 
         {ocultos.length > 0 && (
           <>
-            <CollapsibleContent className="divide-y divide-layout-border">
+            <CollapsibleContent className="divide-y">
               {ocultos.map((comentario) => (
                 <ComentarioItem key={comentario.codigo} comentario={comentario} />
               ))}
             </CollapsibleContent>
 
             <div className="w-full text-center">
-              <CollapsibleTrigger className="mt-2 w-full cursor-pointer p-2 text-sm text-secondary-foreground hover:underline md:w-fit">
-                {expandido
-                  ? "Mostrar menos"
-                  : `Mostrar ${ocultos.length} comentario${ocultos.length === 1 ? "" : "s"} más`}
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" className="mt-2">
+                  {expandido
+                    ? "Mostrar menos"
+                    : `Mostrar ${ocultos.length} comentario${ocultos.length === 1 ? "" : "s"} más`}
+                </Button>
               </CollapsibleTrigger>
             </div>
           </>

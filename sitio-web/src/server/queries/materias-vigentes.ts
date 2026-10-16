@@ -1,44 +1,15 @@
 import "server-only";
-import { desc, eq, sql } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { db, schema } from "@/server/db";
 
-const cantidadPlanesExpr = sql<number>`count(distinct ${schema.plan.codigo})::int`;
-const cantidadCatedrasExpr = sql<number>`(
-  CASE
-    WHEN ${schema.materia.cuatrimestreUltimaActualizacion} IS NOT NULL
-      THEN (
-        SELECT COUNT(*)
-        FROM ${schema.catedra}
-        WHERE ${schema.catedra.codigoMateria} = ${schema.materia.codigo}
-          AND ${schema.catedra.activa} = true
-      )
-    ELSE (
-      SELECT COUNT(*)
-      FROM ${schema.catedra}
-      WHERE ${schema.catedra.codigoMateria} IN (
-        SELECT ${schema.equivalencia.codigoMateriaPlanAnterior}
-        FROM ${schema.equivalencia}
-        WHERE ${schema.equivalencia.codigoMateriaPlanVigente} = ${schema.materia.codigo}
-      )
-    )
-  END
-)::int`;
-
-/** Materias de planes vigentes, ordenadas por relevancia. Para buscador, sitemap y static params. */
+/** Materias de planes vigentes, ordenadas por relevancia. Para el inicio, sitemap y static params. */
 export async function getMateriasVigentes() {
   "use cache";
   cacheLife("max");
   cacheTag("materias");
 
   return db
-    .select({ codigo: schema.materia.codigo, nombre: schema.materia.nombre })
-    .from(schema.materia)
-    .innerJoin(schema.planMateria, eq(schema.planMateria.codigoMateria, schema.materia.codigo))
-    .innerJoin(schema.plan, eq(schema.plan.codigo, schema.planMateria.codigoPlan))
-    .where(eq(schema.plan.estaVigente, true))
-    .groupBy(schema.materia.codigo, schema.materia.nombre)
-    .orderBy(desc(cantidadPlanesExpr), desc(cantidadCatedrasExpr), schema.materia.nombre);
+    .select({ codigo: schema.materiaVigente.codigo, nombre: schema.materiaVigente.nombre })
+    .from(schema.materiaVigente)
+    .orderBy(schema.materiaVigente.orden);
 }
-
-export type MateriaBuscador = Awaited<ReturnType<typeof getMateriasVigentes>>[number];

@@ -1,12 +1,8 @@
 import "server-only";
-import type { SQLWrapper } from "drizzle-orm";
-import { desc, eq, inArray, sql } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { db, schema } from "@/server/db";
-import { promedioDollyExpr } from "@/server/db/sql";
 import { calcularNombreCatedra, PRIORIDAD_SIN_ROL } from "./nombre-catedra";
-
-const avg = (col: SQLWrapper) => sql<number>`avg(${col})::double precision`;
 
 /**
  * Detalle de una cátedra: docentes ordenados, promedios por criterio y comentarios.
@@ -17,28 +13,7 @@ export async function getCatedra(codigo: string) {
   cacheLife("max");
   cacheTag(`catedra:${codigo}`);
 
-  const c = schema.calificacionDolly;
-
-  const calificacionesPorDocente = db
-    .select({
-      codigoDocente: c.codigoDocente,
-      cantidad: sql<number>`count(*)::int`.as("cantidad"),
-      promedio: avg(promedioDollyExpr).as("promedio"),
-      aceptaCritica: avg(c.aceptaCritica).as("acepta_critica"),
-      asistencia: avg(c.asistencia).as("asistencia"),
-      buenTrato: avg(c.buenTrato).as("buen_trato"),
-      claridad: avg(c.claridad).as("claridad"),
-      claseOrganizada: avg(c.claseOrganizada).as("clase_organizada"),
-      cumpleHorarios: avg(c.cumpleHorarios).as("cumple_horarios"),
-      fomentaParticipacion: avg(c.fomentaParticipacion).as("fomenta_participacion"),
-      panoramaAmplio: avg(c.panoramaAmplio).as("panorama_amplio"),
-      respondeMails: avg(c.respondeMails).as("responde_mails")
-    })
-    .from(c)
-    .groupBy(c.codigoDocente)
-    .as("calificaciones_por_docente");
-
-  const cal = calificacionesPorDocente;
+  const cal = schema.resumenCalificacionesDocente;
 
   const rowsDocentes = await db
     .select({
@@ -79,7 +54,7 @@ export async function getCatedra(codigo: string) {
       codigo: number;
       contenido: string;
       cuatrimestre: { numero: number; anio: number };
-      esDeDolly: boolean;
+      deDolly: boolean;
     }[]
   >();
 
@@ -88,7 +63,7 @@ export async function getCatedra(codigo: string) {
       codigoDocente: schema.comentario.codigoDocente,
       codigo: schema.comentario.codigo,
       contenido: schema.comentario.contenido,
-      esDeDolly: schema.comentario.esDeDolly,
+      deDolly: schema.comentario.deDolly,
       cuatrimestreNumero: schema.cuatrimestre.numero,
       cuatrimestreAnio: schema.cuatrimestre.anio
     })
@@ -111,7 +86,7 @@ export async function getCatedra(codigo: string) {
       codigo: row.codigo,
       contenido: row.contenido,
       cuatrimestre: { numero: row.cuatrimestreNumero, anio: row.cuatrimestreAnio },
-      esDeDolly: row.esDeDolly
+      deDolly: row.deDolly
     });
     comentariosPorDocente.set(row.codigoDocente, lista);
   }

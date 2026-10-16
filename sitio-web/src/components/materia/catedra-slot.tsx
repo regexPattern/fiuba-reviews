@@ -38,9 +38,9 @@ export async function CatedraSlot({
 
   return (
     <>
-      <ScrollTop key={uuid} />
+      <ScrollTop key={`scroll-${uuid}`} />
       <Suspense key={uuid} fallback={<CatedraSkeleton />}>
-        <DetalleCatedra uuid={uuid} codigoMateria={codigo} />
+        <DetalleCatedra uuid={uuid} />
       </Suspense>
     </>
   );

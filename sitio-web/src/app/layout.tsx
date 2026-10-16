@@ -1,21 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Google_Sans_Code, Inter, Source_Serif_4 } from "next/font/google";
-import { BuscadorDialog } from "@/components/buscador/buscador-dialog";
-import { BuscadorProvider } from "@/components/buscador/buscador-provider";
 import { Header } from "@/components/layout/header";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { env } from "@/env";
-import { getMateriasVigentes } from "@/server/queries/materias-vigentes";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const sourceSerif = Source_Serif_4({ subsets: ["latin"], variable: "--font-source-serif" });
-const googleSansCode = Google_Sans_Code({
-  subsets: ["latin"],
-  variable: "--font-google-sans-code"
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_BASE_URL),
@@ -27,26 +13,12 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { viewportFit: "cover" };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const materias = await getMateriasVigentes();
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="es"
-      suppressHydrationWarning
-      className={`${inter.variable} ${sourceSerif.variable} ${googleSansCode.variable}`}
-    >
-      <body className="font-sans antialiased">
-        <ThemeProvider>
-          <TooltipProvider>
-            <BuscadorProvider materias={materias}>
-              <Header />
-              <BuscadorDialog />
-              <div className="pt-[calc(56px+env(safe-area-inset-top))]">{children}</div>
-            </BuscadorProvider>
-          </TooltipProvider>
-          <Toaster />
-        </ThemeProvider>
+    <html lang="es">
+      <body className="flex h-dvh flex-col font-sans antialiased">
+        <Header />
+        <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
       </body>
     </html>
   );

@@ -37,9 +37,7 @@ Partial Prerender) y el servidor de producción fue probado a mano.
 
 ## Extras (al final de todo)
 
-- [ ] **Dump local desactualizado**: `fiuba-reviews.sql` usa `catedra.esta_activa` pero el schema
-      (y producción) usa `activa`. Regenerar el dump o aplicar el rename. Mientras tanto
-      `.env.development` apunta a `fiuba-reviews` y falla; se probó contra una copia `fiuba_next`.
+- [x] **Dump local desactualizado**: resuelto con las migraciones de `drizzle/` (`pnpm drizzle-kit migrate`).
 - [ ] **Región de Vercel**: configurar las funciones en la misma región que la DB y revisar el
       límite de conexiones del proveedor.
 - [ ] **`actualizador-siu`**: que llame a `/api/revalidate` al terminar una corrida, con los

@@ -2,12 +2,15 @@ import { sql } from "drizzle-orm";
 import {
   boolean,
   check,
+  doublePrecision,
   foreignKey,
   index,
   integer,
   jsonb,
   numeric,
+  pgMaterializedView,
   pgTable,
+  pgView,
   primaryKey,
   serial,
   smallint,
@@ -32,7 +35,9 @@ export const docente = pgTable(
       columns: [table.codigoMateria],
       foreignColumns: [materia.codigo],
       name: "docente_codigo_materia_fkey"
-    })
+    }),
+    // El actualizador del SIU resuelve docentes por (materia, nombre_siu).
+    index("docente_codigo_materia_nombre_siu_idx").on(table.codigoMateria, table.nombreSiu)
   ]
 );
 
@@ -51,13 +56,13 @@ export const materia = pgTable(
   {
     codigo: text().primaryKey().notNull(),
     nombre: text().notNull(),
-    cuatrimestreUltimaActualizacion: integer("cuatrimestre_ultima_actualizacion")
+    codigoCuatrimestreUltimaActualizacion: integer("codigo_cuatrimestre_ultima_actualizacion")
   },
   (table) => [
     foreignKey({
-      columns: [table.cuatrimestreUltimaActualizacion],
+      columns: [table.codigoCuatrimestreUltimaActualizacion],
       foreignColumns: [cuatrimestre.codigo],
-      name: "materia_cuatrimestre_ultima_actualizacion_fkey"
+      name: "materia_codigo_cuatrimestre_ultima_actualizacion_fkey"
     })
   ]
 );
@@ -73,7 +78,7 @@ export const plan = pgTable(
     codigo: serial().primaryKey().notNull(),
     codigoCarrera: integer("codigo_carrera").notNull(),
     anio: smallint().notNull(),
-    estaVigente: boolean("esta_vigente").notNull()
+    vigente: boolean().notNull()
   },
   (table) => [
     foreignKey({
@@ -96,7 +101,8 @@ export const catedra = pgTable(
       columns: [table.codigoMateria],
       foreignColumns: [materia.codigo],
       name: "catedra_codigo_materia_fkey"
-    }).onUpdate("cascade")
+    }).onUpdate("cascade"),
+    index("catedra_codigo_materia_activa_idx").on(table.codigoMateria, table.activa)
   ]
 );
 
@@ -107,16 +113,18 @@ export const comentario = pgTable(
     codigoDocente: uuid("codigo_docente").notNull(),
     codigoCuatrimestre: integer("codigo_cuatrimestre").notNull(),
     contenido: text().notNull(),
-    esDeDolly: boolean("es_de_dolly").default(false).notNull(),
+    deDolly: boolean("de_dolly").default(false).notNull(),
     fechaCreacion: timestamp("fecha_creacion", { withTimezone: true, mode: "string" }).default(
       sql`(now() AT TIME ZONE 'America/Argentina/Buenos_Aires'::text)`
     ),
     codigoCalificacionDolly: integer("codigo_calificacion_dolly")
   },
   (table) => [
-    index("comentario_codigo_docente_idx").using(
-      "btree",
-      table.codigoDocente.asc().nullsLast().op("uuid_ops")
+    // Sirve `WHERE codigo_docente IN (...) ORDER BY codigo_cuatrimestre DESC, codigo DESC`.
+    index("comentario_docente_cuatrimestre_idx").on(
+      table.codigoDocente,
+      table.codigoCuatrimestre.desc(),
+      table.codigo.desc()
     ),
     foreignKey({
       columns: [table.codigoDocente],
@@ -166,40 +174,72 @@ export const calificacionDolly = pgTable(
     }),
     check(
       "calificacion_dolly_acepta_critica_check",
-      sql`(acepta_critica >= (0)::numeric) AND (acepta_critica <= (5)::numeric)`
+      sql`(acepta_critica >= (1)::numeric) AND (acepta_critica <= (5)::numeric)`
     ),
     check(
       "calificacion_dolly_asistencia_check",
-      sql`(asistencia >= (0)::numeric) AND (asistencia <= (5)::numeric)`
+      sql`(asistencia >= (1)::numeric) AND (asistencia <= (5)::numeric)`
     ),
     check(
       "calificacion_dolly_buen_trato_check",
-      sql`(buen_trato >= (0)::numeric) AND (buen_trato <= (5)::numeric)`
+      sql`(buen_trato >= (1)::numeric) AND (buen_trato <= (5)::numeric)`
     ),
     check(
       "calificacion_dolly_claridad_check",
-      sql`(claridad >= (0)::numeric) AND (claridad <= (5)::numeric)`
+      sql`(claridad >= (1)::numeric) AND (claridad <= (5)::numeric)`
     ),
     check(
       "calificacion_dolly_clase_organizada_check",
-      sql`(clase_organizada >= (0)::numeric) AND (clase_organizada <= (5)::numeric)`
+      sql`(clase_organizada >= (1)::numeric) AND (clase_organizada <= (5)::numeric)`
     ),
     check(
       "calificacion_dolly_cumple_horarios_check",
-      sql`(cumple_horarios >= (0)::numeric) AND (cumple_horarios <= (5)::numeric)`
+      sql`(cumple_horarios >= (1)::numeric) AND (cumple_horarios <= (5)::numeric)`
     ),
     check(
       "calificacion_dolly_fomenta_participacion_check",
-      sql`(fomenta_participacion >= (0)::numeric) AND (fomenta_participacion <= (5)::numeric)`
+      sql`(fomenta_participacion >= (1)::numeric) AND (fomenta_participacion <= (5)::numeric)`
     ),
     check(
       "calificacion_dolly_panorama_amplio_check",
-      sql`(panorama_amplio >= (0)::numeric) AND (panorama_amplio <= (5)::numeric)`
+      sql`(panorama_amplio >= (1)::numeric) AND (panorama_amplio <= (5)::numeric)`
     ),
     check(
       "calificacion_dolly_responde_mails_check",
-      sql`(responde_mails >= (0)::numeric) AND (responde_mails <= (5)::numeric)`
+      sql`(responde_mails >= (1)::numeric) AND (responde_mails <= (5)::numeric)`
     )
+  ]
+);
+
+/**
+ * Resumen de las calificaciones de cada docente (cantidad y promedios por criterio).
+ *
+ * No se escribe a mano: lo mantienen los triggers de `calificacion_dolly`, así que siempre está
+ * al día y evita agrupar las ~30k calificaciones en cada lectura. `promedio` es el promedio de
+ * los 9 criterios.
+ */
+export const resumenCalificacionesDocente = pgTable(
+  "resumen_calificaciones_docente",
+  {
+    codigoDocente: uuid("codigo_docente").primaryKey().notNull(),
+    cantidad: integer().notNull(),
+    promedio: doublePrecision().notNull(),
+    aceptaCritica: doublePrecision("acepta_critica").notNull(),
+    asistencia: doublePrecision().notNull(),
+    buenTrato: doublePrecision("buen_trato").notNull(),
+    claridad: doublePrecision().notNull(),
+    claseOrganizada: doublePrecision("clase_organizada").notNull(),
+    cumpleHorarios: doublePrecision("cumple_horarios").notNull(),
+    fomentaParticipacion: doublePrecision("fomenta_participacion").notNull(),
+    panoramaAmplio: doublePrecision("panorama_amplio").notNull(),
+    respondeMails: doublePrecision("responde_mails").notNull()
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.codigoDocente],
+      foreignColumns: [docente.codigo],
+      name: "resumen_calificaciones_docente_codigo_docente_fkey"
+    }).onDelete("cascade")
   ]
 );
 
@@ -230,6 +270,7 @@ export const equivalencia = pgTable(
       columns: [table.codigoMateriaPlanVigente, table.codigoMateriaPlanAnterior],
       name: "equivalencia_pkey"
     }),
+    index("equivalencia_codigo_materia_plan_anterior_idx").on(table.codigoMateriaPlanAnterior),
     check("equivalencia_check", sql`codigo_materia_plan_vigente <> codigo_materia_plan_anterior`)
   ]
 );
@@ -252,9 +293,10 @@ export const catedraDocente = pgTable(
       name: "catedra_docente_codigo_docente_fkey"
     }),
     primaryKey({
-      columns: [table.codigoDocente, table.codigoCatedra],
+      columns: [table.codigoCatedra, table.codigoDocente],
       name: "catedra_docente_pkey"
-    })
+    }),
+    index("catedra_docente_codigo_docente_idx").on(table.codigoDocente)
   ]
 );
 
@@ -263,7 +305,7 @@ export const planMateria = pgTable(
   {
     codigoPlan: integer("codigo_plan").notNull(),
     codigoMateria: text("codigo_materia").notNull(),
-    esElectiva: boolean("es_electiva").notNull()
+    electiva: boolean().notNull()
   },
   (table) => [
     foreignKey({
@@ -276,7 +318,8 @@ export const planMateria = pgTable(
       foreignColumns: [materia.codigo],
       name: "plan_materia_codigo_materia_fkey"
     }).onUpdate("cascade"),
-    primaryKey({ columns: [table.codigoPlan, table.codigoMateria], name: "plan_materia_pkey" })
+    primaryKey({ columns: [table.codigoPlan, table.codigoMateria], name: "plan_materia_pkey" }),
+    index("plan_materia_codigo_materia_idx").on(table.codigoMateria)
   ]
 );
 
@@ -299,7 +342,7 @@ export const ofertaComisiones = pgTable(
       name: "oferta_comisiones_codigo_cuatrimestre_fkey"
     }),
     primaryKey({
-      columns: [table.codigoCuatrimestre, table.codigoCarrera],
+      columns: [table.codigoCarrera, table.codigoCuatrimestre],
       name: "oferta_comisiones_pkey"
     })
   ]
@@ -324,8 +367,46 @@ export const ofertaComisionesRaw = pgTable(
       name: "oferta_comisiones_raw_codigo_cuatrimestre_fkey"
     }),
     primaryKey({
-      columns: [table.codigoCuatrimestre, table.codigoCarrera],
+      columns: [table.codigoCarrera, table.codigoCuatrimestre],
       name: "oferta_comisiones_raw_pkey"
     })
   ]
 );
+
+// ---------------------------------------------------------------------------------------------
+// Vistas. Se crean con SQL a mano en la última migración de `drizzle/`; acá solo se declaran (`existing`)
+// para poder consultarlas con tipos. Drizzle Kit no las genera ni las toca.
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * Materias de planes vigentes (cambia solo al correr el actualizador del SIU).
+ * `orden` es la posición de relevancia: planes desc, cátedras desc, nombre asc.
+ */
+export const materiaVigente = pgMaterializedView("materia_vigente", {
+  codigo: text().notNull(),
+  nombre: text().notNull(),
+  cantidadPlanes: integer("cantidad_planes").notNull(),
+  cantidadCatedras: integer("cantidad_catedras").notNull(),
+  cuatrimestreNumero: smallint("cuatrimestre_numero"),
+  cuatrimestreAnio: smallint("cuatrimestre_anio"),
+  /** `true` si no tiene cátedras propias y muestra las de sus equivalencias. */
+  usaEquivalencias: boolean("usa_equivalencias").notNull(),
+  /** Materias de las que se leen las cátedras (ella misma, o sus equivalencias). */
+  codigosMateriasFuente: text("codigos_materias_fuente").array().notNull(),
+  equivalencias: jsonb().$type<{ codigo: string; nombre: string }[]>().notNull(),
+  orden: integer().notNull()
+}).existing();
+
+/** Cátedras que se muestran en cada materia vigente, con su nombre ya armado. */
+export const catedraMostrada = pgMaterializedView("catedra_mostrada", {
+  codigoMateria: text("codigo_materia").notNull(),
+  codigoCatedra: uuid("codigo_catedra").notNull(),
+  codigoMateriaCatedra: text("codigo_materia_catedra").notNull(),
+  nombre: text().notNull()
+}).existing();
+
+/** Calificación de cada cátedra: promedio de los promedios de sus docentes calificados. */
+export const calificacionCatedra = pgView("calificacion_catedra", {
+  codigoCatedra: uuid("codigo_catedra").notNull(),
+  calificacion: doublePrecision().notNull()
+}).existing();
