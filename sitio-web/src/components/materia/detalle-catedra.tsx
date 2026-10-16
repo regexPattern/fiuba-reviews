@@ -1,7 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
-import { getCatedra } from "@/server/queries/catedra";
+import { getCatedra } from "@/server/db/queries/catedra";
 import { Comentarios } from "./comentarios";
 import { Promedios } from "./promedios";
 

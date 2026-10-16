@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { OG_SIZE, ogMateria } from "@/lib/og";
-import { getMateria } from "@/server/queries/materia";
-import { getMateriasVigentes } from "@/server/queries/materias-vigentes";
+import { getMateria } from "@/server/db/queries/materia";
+import { getMateriasVigentes } from "@/server/db/queries/materias-vigentes";
 
 export const size = OG_SIZE;
 export const contentType = "image/png";

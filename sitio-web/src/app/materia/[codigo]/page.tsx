@@ -6,8 +6,8 @@ import { MateriaHeader } from "@/components/materia/materia-header";
 import { MateriaShell } from "@/components/materia/materia-shell";
 import { SidebarCatedras } from "@/components/materia/sidebar-catedras";
 import { CatedraSkeleton, SidebarSkeleton } from "@/components/materia/skeletons";
-import { getMateria } from "@/server/queries/materia";
-import { getMateriasVigentes } from "@/server/queries/materias-vigentes";
+import { getMateria } from "@/server/db/queries/materia";
+import { getMateriasVigentes } from "@/server/db/queries/materias-vigentes";
 
 type Props = {
   params: Promise<{ codigo: string }>;

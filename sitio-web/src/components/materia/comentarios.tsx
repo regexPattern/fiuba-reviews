@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComentarioDocente } from "@/server/queries/catedra";
+import type { ComentarioDocente } from "@/server/db/queries/catedra";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

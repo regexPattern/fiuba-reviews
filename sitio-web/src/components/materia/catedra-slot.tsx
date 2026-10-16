@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { UUID_RE } from "@/lib/utils";
-import { getCatedrasMateria } from "@/server/queries/catedras-materia";
+import { getCatedrasMateria } from "@/server/db/queries/catedras-materia";
 import { DetalleCatedra } from "./detalle-catedra";
 import { ScrollTop } from "./scroll-top";
 import { CatedraSkeleton } from "./skeletons";

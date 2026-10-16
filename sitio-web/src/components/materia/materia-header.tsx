@@ -1,5 +1,5 @@
 import { cacheLife, cacheTag } from "next/cache";
-import { getMateria } from "@/server/queries/materia";
+import { getMateria } from "@/server/db/queries/materia";
 
 export async function MateriaHeader({ codigo }: { codigo: string }) {
   "use cache";

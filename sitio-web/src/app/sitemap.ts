@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { env } from "@/env";
-import { getMateriasVigentes } from "@/server/queries/materias-vigentes";
+import { getMateriasVigentes } from "@/server/db/queries/materias-vigentes";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const materias = await getMateriasVigentes();

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getMateriasVigentes } from "@/server/queries/materias-vigentes";
+import { getMateriasVigentes } from "@/server/db/queries/materias-vigentes";
 
 export const metadata: Metadata = {
   title: "FIUBA Reviews",

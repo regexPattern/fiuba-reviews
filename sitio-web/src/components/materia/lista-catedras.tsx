@@ -1,6 +1,6 @@
 "use client";
 
-import type { CatedraListada } from "@/server/queries/catedras-materia";
+import type { CatedraListada } from "@/server/db/queries/catedras-materia";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
