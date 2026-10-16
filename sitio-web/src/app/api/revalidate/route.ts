@@ -5,8 +5,8 @@ import { z } from "zod";
 import { env } from "@/env";
 
 const bodySchema = z.object({
-  /** Lista de materias vigentes o nuevas: cambió el listado general. */
-  materiasCambiaron: z.boolean().optional(),
+  /** Se actualizaron los planes: cambió el listado de materias vigentes. */
+  planesActualizados: z.boolean().optional(),
   /** Códigos de materia que cambiaron (info de materia y/o cátedras). */
   materias: z.array(z.string().min(1)).default([]),
   /** UUIDs de cátedras cuyo detalle cambió. */
@@ -35,11 +35,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: z.prettifyError(parsed.error) }, { status: 400 });
   }
 
-  const { materiasCambiaron, materias, catedras, tags, inicio } = parsed.data;
+  const { planesActualizados, materias, catedras, tags, inicio } = parsed.data;
 
   const aInvalidar = new Set<string>(tags);
 
-  if (materiasCambiaron) aInvalidar.add("materias");
+  if (planesActualizados) aInvalidar.add("materias");
   if (inicio) aInvalidar.add("inicio");
 
   for (const codigo of materias) {
