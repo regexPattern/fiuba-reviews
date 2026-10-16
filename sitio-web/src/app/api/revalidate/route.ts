@@ -57,6 +57,11 @@ export async function POST(request: Request) {
   if (planesActualizados) aInvalidar.add("materias");
   if (inicio) aInvalidar.add("inicio");
 
+  // El ranking depende de las cátedras resueltas y los comentarios de sus docentes.
+  if (materias.length > 0 || catedras.length > 0) {
+    aInvalidar.add("buscador-materias");
+  }
+
   for (const codigo of materias) {
     aInvalidar.add(`materia:${codigo}`);
     aInvalidar.add(`catedras:${codigo}`);
