@@ -4,14 +4,29 @@ import { timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { env } from "@/env";
 
+/**
+ * Hay varios motivos por los que se puede invalidar el caché:
+ *
+ *  - `planesActualizados`: Si una actualización de los planes cambia las materias vigentes
+ *    o sus equivalencias. No hace falta enviarlo en cada ejecución del actualizador del SIU
+ *    si solo cambió la oferta de cátedras o docentes.
+ *  - `materias`: Después de sincronizar la oferta del SIU, para las materias cuya información,
+ *    cuatrimestre de actualización o listado de cátedras cambió. También si una calificación
+ *    cambia el promedio o el orden de sus cátedras.
+ *  - `catedras`: Si el actualizador del SIU cambia sus docentes, o se agregan, modifican o
+ *    eliminan calificaciones o comentarios de esos docentes. Se envían los UUIDs de todas
+ *    las cátedras afectadas, ya que un docente puede pertenecer a más de una.
+ *  - `tags`: Para invalidaciones manuales o puntuales que no cubran los casos anteriores.
+ *  - `inicio`: Contenido propio de la página de inicio.
+ *
+ * Una misma actualización puede requerir varios campos. Por ejemplo, una calificación
+ * puede afectar tanto el detalle de una cátedra como el listado de cátedras de su materia.
+ */
+
 const bodySchema = z.object({
-  /** Se actualizaron los planes: cambió el listado de materias vigentes. */
   planesActualizados: z.boolean().optional(),
-  /** Códigos de materia que cambiaron (info de materia y/o cátedras). */
   materias: z.array(z.string().min(1)).default([]),
-  /** UUIDs de cátedras cuyo detalle cambió. */
   catedras: z.array(z.uuid()).default([]),
-  /** Tags arbitrarios, por si hace falta algo puntual. */
   tags: z.array(z.string().min(1)).default([]),
   inicio: z.boolean().optional()
 });
@@ -51,7 +66,6 @@ export async function POST(request: Request) {
     aInvalidar.add(`catedra:${uuid}`);
   }
 
-  // Sirve la versión vieja y regenera en segundo plano.
   for (const tag of aInvalidar) {
     revalidateTag(tag, "max");
   }
