@@ -1,6 +1,8 @@
 node_modules/
-
-# Build artifacts
-.svelte-kit/
+.next/
 .vercel/
-build/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.env*.local
+.env

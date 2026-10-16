@@ -1,5 +1,2 @@
-static/
+.next
 pnpm-lock.yaml
-
-.agents/
-.vscode/
