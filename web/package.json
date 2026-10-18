@@ -1,0 +1,46 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "oxlint .",
+    "typecheck": "tsc --noEmit",
+    "format": "oxfmt --write .",
+    "lint:fix": "oxlint --fix .",
+    "format:check": "oxfmt --check ."
+  },
+  "dependencies": {
+    "@t3-oss/env-nextjs": "^0.13.11",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
+    "drizzle-orm": "^0.45.4",
+    "fuse.js": "^7.5.0",
+    "lucide-react": "^1.57.0",
+    "next": "^16.4.2",
+    "parser-siu": "workspace:*",
+    "postgres": "^3.4.9",
+    "radix-ui": "^1.8.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "server-only": "^0.0.1",
+    "tailwind-merge": "^3.7.0",
+    "tw-animate-css": "^1.4.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@shadcn/lint": "^0.2.1",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "drizzle-kit": "^0.31.11",
+    "oxfmt": "^0.73.0",
+    "oxlint": "^1.88.0",
+    "postcss": "^8.5.30",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3"
+  }
+}
