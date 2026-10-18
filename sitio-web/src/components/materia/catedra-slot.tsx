@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { getCatedrasMateria } from "@/server/db/queries/catedras-materia";
 import { DetalleCatedra } from "./detalle-catedra";
@@ -28,7 +29,12 @@ export async function CatedraSlot({
     );
   }
 
-  const uuid = catedras.find((c) => c.codigo === catedra)?.codigo ?? catedras[0].codigo;
+  const seleccionada = catedras.find((c) => c.codigo === catedra);
+  if (catedra !== undefined && !seleccionada) {
+    redirect(`/materia/${codigo}?catedra=${catedras[0].codigo}`);
+  }
+
+  const uuid = seleccionada?.codigo ?? catedras[0].codigo;
 
   return (
     <>

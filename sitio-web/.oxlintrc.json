@@ -1,12 +1,15 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["typescript", "oxc", "unicorn", "react", "nextjs", "jsx-a11y"],
+  "jsPlugins": ["@shadcn/lint"],
   "categories": {
     "correctness": "error"
   },
   "rules": {
     "react/rules-of-hooks": "error",
-    "react/exhaustive-deps": "warn"
+    "react/exhaustive-deps": "warn",
+    "shadcn/no-unknown-classes": "error",
+    "shadcn/no-arbitrary-values": "error"
   },
   "ignorePatterns": [".next/**", "out/**", "build/**", "next-env.d.ts"]
 }

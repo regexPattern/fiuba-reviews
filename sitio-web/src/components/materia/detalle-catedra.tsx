@@ -19,7 +19,7 @@ export async function DetalleCatedra({ uuid }: { uuid: string }) {
       {catedra.docentes.map((docente) => (
         <section key={docente.codigo} id={docente.codigo} className="space-y-4">
           <div>
-            <h2 className={`${mozillaHeadline.className} text-xl font-semibold`}>
+            <h2 className={`${mozillaHeadline.className} text-3xl font-semibold`}>
               {docente.nombre}
             </h2>
             {docente.nombreSiu && (

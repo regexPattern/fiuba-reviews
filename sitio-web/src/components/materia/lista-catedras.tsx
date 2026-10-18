@@ -1,30 +1,14 @@
 "use client";
 
 import type { CatedraListada } from "@/server/db/queries/catedras-materia";
+import Fuse from "fuse.js";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { mozillaHeadline } from "@/lib/fonts";
 import { useMateriaShell } from "./materia-shell";
-
-const normalizar = (texto: string) =>
-  texto
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
-
-function filtrarCatedras(catedras: CatedraListada[], query: string) {
-  const palabras = normalizar(query).split(/\s+/).filter(Boolean);
-
-  if (palabras.length === 0) return catedras;
-
-  return catedras.filter((catedra) => {
-    const nombre = normalizar(catedra.nombre);
-    return palabras.every((palabra) => nombre.includes(palabra));
-  });
-}
 
 function Items({
   codigoMateria,
@@ -97,7 +81,27 @@ export function ListaCatedras({
   catedras: CatedraListada[];
 }) {
   const [query, setQuery] = useState("");
-  const filtradas = filtrarCatedras(catedras, query);
+  const indice = useMemo(
+    () =>
+      new Fuse(catedras, {
+        keys: ["nombre"],
+        ignoreDiacritics: true,
+        ignoreLocation: true,
+        threshold: 0.35,
+        shouldSort: false
+      }),
+    [catedras]
+  );
+  const filtradas = useMemo(() => {
+    const palabras = query.trim().split(/\s+/).filter(Boolean);
+    if (palabras.length === 0) return catedras;
+
+    // Todas las palabras deben coincidir, sin exigir orden ni perder el ranking por calificación.
+    const coincidencias = palabras.map(
+      (palabra) => new Set(indice.search(palabra).map(({ item }) => item.codigo))
+    );
+    return catedras.filter((catedra) => coincidencias.every((set) => set.has(catedra.codigo)));
+  }, [catedras, indice, query]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col divide-y">

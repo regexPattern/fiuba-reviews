@@ -2,7 +2,6 @@ import { MateriaShell } from "@/components/materia/materia-shell";
 import { CatedraSkeleton, SidebarSkeleton } from "@/components/materia/skeletons";
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** Shell sin consultas: puede mostrarse aunque la materia todavía no esté en caché. */
 export default function Loading() {
   return (
     <MateriaShell

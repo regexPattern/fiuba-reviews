@@ -8,5 +8,7 @@ export const mozillaText = Mozilla_Text({
 
 export const mozillaHeadline = Mozilla_Headline({
   subsets: ["latin"],
-  display: "swap"
+  display: "swap",
+  adjustFontFallback: false,
+  fallback: ["Arial", "sans-serif"]
 });
