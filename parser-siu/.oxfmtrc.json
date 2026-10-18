@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "trailingComma": "none",
+  "sortPackageJson": false,
+  "ignorePatterns": ["dist/**"],
+  "sortImports": {
+    "newlinesBetween": false,
+    "groups": [
+      "type",
+      ["builtin", "external"],
+      "internal",
+      ["parent", "sibling", "index"],
+      "unknown"
+    ]
+  }
+}
