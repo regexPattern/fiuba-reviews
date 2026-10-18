@@ -1,10 +1,6 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
-  "useTabs": false,
-  "tabWidth": 2,
-  "singleQuote": false,
   "trailingComma": "none",
-  "printWidth": 100,
   "sortPackageJson": false,
   "sortTailwindcss": {
     "stylesheet": "./src/app/globals.css",
