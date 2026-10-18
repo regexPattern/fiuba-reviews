@@ -1,4 +1,6 @@
 [tools]
 node = "lts"
-pnpm = "12"
 rust = { version = "stable", components = ["rust-analyzer"] }
+
+[settings]
+idiomatic_version_file_enable_tools = ["pnpm"]
