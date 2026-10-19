@@ -1,8 +1,18 @@
 # Actualizador de ofertas
 
-Estado y próximos pasos de la reescritura del actualizador de FIUBA Reviews. La sanitización y la consolidación básica ya están implementadas; el resto del flujo sigue en desarrollo.
+Estado y próximos pasos de la reescritura del actualizador de FIUBA Reviews. Ya están conectadas la sanitización, la reconciliación automática de códigos provisionales con recuperación de historial y la consolidación por materia y período. **El próximo bloque de desarrollo es el paso 5: resolver identidades docentes**, con algunos pendientes de las etapas anteriores detallados abajo.
 
-La aplicación recibe ofertas académicas parseadas, las compara con la base de datos y genera una **migración SQL revisable**. Generar la migración no debe modificar la base: su aplicación es un paso separado.
+El objetivo final es recibir ofertas académicas parseadas, compararlas con la base de datos y generar una **migración SQL revisable**, cuya aplicación sea un paso separado. **Todavía no se genera esa migración:** la reconciliación actual ejecuta SQL sobre la conexión recibida y el ejecutable de desarrollo descarta los cambios mediante `rollback`.
+
+## Estado actual de la implementación
+
+- `src/main.rs` carga cuatro fixtures (Civil, Industrial e Informática de 1C 2026 e Informática de 2C 2026), conecta a PostgreSQL local, abre una transacción, llama a `armar_patches` y hace `rollback`.
+- `src/lib.rs`: `armar_patches` sanitiza, extrae el catálogo completo, reconcilia materias en la DB y consolida las ofertas, en ese orden. Por ahora devuelve un vector vacío; `Patch` sigue siendo un tipo sin contenido.
+- `src/siu.rs`: contrato de entrada, sanitización y consolidación, con 16 tests unitarios que pasan con `cargo test`.
+- `src/catalogo.rs` y `src/catalogo/reconciliar_materias.sql`: extracción de pares únicos `(codigo, nombre)`, reemplazo de códigos provisionales y copia de docentes, calificaciones Dolly y comentarios desde equivalencias.
+- Pendiente inmediato: leer los docentes históricos de cada materia para iniciar su resolución incremental. La comparación con el período de última actualización de la DB tampoco está implementada.
+
+**Límite del ensayo actual:** `reconciliar_materias` no administra transacciones; si se la llama sin una transacción externa, sus escrituras pueden persistir. Además, el `rollback` no revierte los avances de secuencias PostgreSQL usados al copiar calificaciones/comentarios. No equivale a una planificación de solo lectura.
 
 ## Conceptos y reglas del dominio
 
@@ -12,7 +22,7 @@ La aplicación recibe ofertas académicas parseadas, las compara con la base de 
 - **Docente:** hoy la DB registra docentes **por materia**, con un UUID, un nombre de presentación y, cuando se conoce, `nombre_siu`. Sus comentarios y calificaciones deben conservarse al reconocer su identidad.
 - **Cátedra/comisión:** para este actualizador, una comisión distinguible y su grupo de docentes. Dos comisiones A/B o 1/2 son diferentes aunque tengan exactamente los mismos docentes. Agregar o quitar un docente también da lugar a una cátedra diferente para fines prácticos.
 - Las comisiones de **condicionales no participan** de la actualización de cátedras.
-- Para una materia se utiliza el cuatrimestre más reciente disponible. Las ofertas de ese mismo cuatrimestre se unen entre carreras; las de cuatrimestres anteriores no se mezclan con ellas.
+- Para una materia se utiliza el cuatrimestre más reciente disponible con comisiones después de sanitizar. Las ofertas de ese mismo cuatrimestre se unen entre carreras; las de cuatrimestres anteriores no se mezclan con ellas.
 - Desactivar no significa borrar: las materias históricas, docentes, reseñas y cátedras anteriores deben seguir existiendo.
 
 ## Flujo general
@@ -24,7 +34,7 @@ La aplicación recibe ofertas académicas parseadas, las compara con la base de 
                          ↓
 3. Resolución de materias y códigos pendientes
                          ↓
-4. Consolidación de la oferta más reciente y posterior filtrado de materias sin comisiones
+4. Consolidación de la oferta más reciente con comisiones (se ignoran las vacías)
                          ↓
 5. Resolución incremental de identidades docentes, con intervención humana
                          ↓
@@ -35,7 +45,9 @@ La aplicación recibe ofertas académicas parseadas, las compara con la base de 
             Aplicación separada y posterior relectura de la DB
 ```
 
-### 1. Ingress
+### 1. Ingress — carga de fixtures implementada; snapshot pendiente
+
+El ejecutable ya deserializa ofertas desde archivos JSON, pero las rutas y la conexión están fijas en `src/main.rs`; todavía no hay una interfaz para seleccionar entradas ni una lectura completa del estado de la DB. Tampoco se conserva el archivo de procedencia en el modelo.
 
 Recibir las ofertas producidas por `../parser-siu`. Su contrato actual es:
 
@@ -43,15 +55,15 @@ Recibir las ofertas producidas por `../parser-siu`. Su contrato actual es:
 - Materia: `codigo`, `nombre`, `comisiones`.
 - Comisión: `nombre`, `docentes`, `clases`.
 - Docente: `nombre`, `rol` (puede ser `null`).
-- Clase: `tipo`, `dia`, `inicio`, `fin`, `aula`.
+- Clase: `tipo`, `dia`, `inicio`, `fin`, `aula`. El modelo actual del actualizador no conserva `aula`.
 
 Conservar el contenido original y su procedencia: archivo, carrera y período. El parser sigue siendo genérico; las reglas particulares de FIUBA Reviews pertenecen al actualizador.
 
-Leer también un snapshot lógico de la DB: materias, planes vigentes, equivalencias, docentes, reseñas relacionadas, cátedras, prioridades de roles y períodos de última actualización. Los cambios posteriores se calculan sobre un estado proyectado en memoria, no escribiendo durante la resolución.
+Leer también un snapshot lógico de la DB: materias, planes vigentes, equivalencias, docentes, reseñas relacionadas, cátedras, prioridades de roles y períodos de última actualización. El diseño objetivo es calcular los cambios posteriores sobre un estado proyectado, sin escrituras persistentes durante la resolución; hoy la reconciliación del catálogo usa la transacción de desarrollo descrita arriba.
 
 La DB ya contiene `oferta_comisiones_raw` y `oferta_comisiones`, pero el JSON histórico de esta última usa `catedras` y códigos numéricos internos: **no tiene el mismo contrato ni toda la información del parser nuevo**.
 
-TODO: Realmente las ofertas de comisiones ya guardadas en la base de datos no importan, solo son registro historico. Realmente lo importante para comparar si tengo que actualizar o no es el cuatrimestre de ultima actualizacion de la materia.
+Las ofertas de comisiones guardadas en la DB son un registro histórico, no la entrada del flujo nuevo. Para contrastar la vigencia de una oferta importa el cuatrimestre de última actualización de cada materia; el reprocesamiento de correcciones del mismo período requiere además definir la cobertura de las entradas (ver paso 4).
 
 ### 2. Sanitización — implementada
 
@@ -59,9 +71,21 @@ TODO: Realmente las ofertas de comisiones ya guardadas en la base de datos no im
 
 La deserialización con `serde` comprueba la estructura y los tipos de la entrada.
 
-### 3. Resolver materias y códigos
+### 3. Resolver materias y códigos — reconciliación automática implementada
 
-La reconciliación del catálogo debe usar **todas las materias sanitizadas**, incluidas las que no tienen comisiones y las de períodos anteriores: pueden aportar códigos o historial por equivalencias aunque no sirvan para actualizar cátedras. `sync.rs` ya extrae los pares únicos `(codigo, nombre)`; su reconciliación con la DB y la planificación de migraciones siguen pendientes. Esta etapa no construye `OfertaMateria`: la consolidación permanece en `oferta`.
+`catalogo::extraer_materias` usa **todas las materias sanitizadas**, incluidas las que no tienen comisiones y las de períodos anteriores, y extrae los pares únicos `(codigo, nombre)`. Esta etapa no construye `OfertaMateria`: la consolidación permanece en `siu`.
+
+`catalogo::reconciliar_materias` ejecuta el SQL de `src/catalogo/reconciliar_materias.sql`:
+
+- Busca en `materia_vigente` códigos `COD%` con `usa_equivalencias`, por igualdad de nombre ignorando mayúsculas y acentos. Asume que esa vista materializada está al día.
+- Reemplaza el código provisional por el del SIU y se apoya en las FKs con `ON UPDATE CASCADE` para propagarlo.
+- Copia docentes desde `codigos_materias_fuente`, con UUID nuevos, junto con sus resúmenes, calificaciones Dolly y comentarios; remapea el vínculo entre comentario y calificación y conserva los registros de origen.
+- Si varias equivalencias tienen docentes de igual nombre, elige una sola fuente: más calificaciones Dolly, luego más comentarios y finalmente menor código de docente. No une el historial de las fuentes descartadas ni copia `nombre_siu`.
+- Devuelve códigos anterior/nuevo, equivalencias y cantidades copiadas por materia, emite diagnósticos y refresca las vistas materializadas cuando hubo reemplazos.
+
+La condición `COD%` evita volver a copiar el historial de una materia cuyo código ya fue reemplazado por uno oficial. No recupera por sí sola historial de materias que ya tenían código oficial antes de ejecutar esta etapa.
+
+**Todavía pendiente:** detectar y presentar matches ambiguos, códigos destino ocupados, materias desconocidas y altas; registrar decisiones y fuentes; probar la reconciliación contra PostgreSQL. La selección por nombre del SQL actual no equivale a una resolución humana de identidad docente. Las reglas siguientes describen el alcance objetivo, no funcionalidades ya completas.
 
 Al introducir los planes nuevos se crearon materias con códigos provisionales `COD###`. La resolución debe seguir siendo incremental mientras queden pendientes.
 
@@ -77,17 +101,19 @@ La copia debe ser trazable y ejecutarse una sola vez. Cuando varias equivalencia
 
 El SQL de `main` actualizaba códigos por igualdad de nombre sin acentos/mayúsculas; **las equivalencias se usaban después para copiar historial**, no como condición del match inicial. Además, elegía por nombre el docente con más calificaciones Dolly entre las equivalencias: es un comportamiento anterior a revisar, no una regla obligatoria para la reescritura.
 
-### 4. Consolidar por materia y período
+### 4. Consolidar por materia y período — implementado
 
-Implementado: `consolidar_ofertas_materias` agrupa por código, selecciona el período más reciente comparando `(año, cuatrimestre)` y une carreras y comisiones de ese período, deduplicando comisiones exactamente iguales.
+Implementado: `consolidar_ofertas_materias` agrupa por código, selecciona el período más reciente con comisiones comparando `(año, cuatrimestre)` y une carreras y comisiones de ese período, deduplicando comisiones exactamente iguales.
 
-**Decisión acordada, pendiente de implementación:** filtrar las materias sin comisiones **después de consolidar**, nunca antes. Si una materia tiene comisiones en 2025 pero su oferta de 2026 queda vacía tras sanitizar, se selecciona 2026 y luego se excluye de la actualización de cátedras; no se recuperan las comisiones de 2025. Sus metadatos ya habrán participado de la reconciliación del catálogo. Este filtrado no implica por sí solo desactivar cátedras existentes.
+**Implementado:** dentro de la consolidación se ignoran las materias sin comisiones **antes de comparar períodos**. Si una materia tiene comisiones en 2025 pero su oferta de 2026 queda vacía tras sanitizar, se conserva la oferta de 2025 con su período original. Esto funciona independientemente del orden de entrada. Las carreras que no aportan comisiones no se incluyen en la oferta consolidada. Los metadatos de todas las materias, incluidas las vacías, ya habrán participado de la reconciliación del catálogo. Ignorar una oferta vacía no implica desactivar cátedras existentes.
 
 También queda pendiente conservar la procedencia de cada comisión y mostrar conflictos entre fuentes, sin concatenar docentes a ciegas. Al contrastar con la DB, una oferta vieja no debe hacer retroceder una materia ya actualizada a un período posterior.
 
 Una segunda ejecución puede traer otra carrera o una corrección **del mismo cuatrimestre**. Para recalcular la unión hacen falta las ofertas ya conocidas de ese período, no solamente el archivo nuevo. El período de última actualización por sí solo no basta para decidir que no hay trabajo pendiente: también importan las fuentes y su contenido.
 
-### 5. Resolver docentes de forma incremental
+### 5. Resolver docentes de forma incremental — próximo paso
+
+Todavía no está conectado a `armar_patches`. El punto de partida ya es una oferta consolidada por materia y un catálogo reconciliado dentro de la misma transacción, donde pueden leerse también los docentes recién copiados por equivalencias. La consolidación ya excluye del trabajo de cátedras las materias sin comisiones.
 
 La resolución se hace antes de comparar definitivamente los grupos docentes:
 
@@ -209,15 +235,18 @@ Referencia: `actualizador-siu/servidor/` en la rama `main`.
 
 - `ofertas.go` conserva la primera oferta por código al recorrer períodos descendentes: **no hace la unión entre carreras del mismo período** descrita como requisito de esta reescritura.
 - Deduplica cátedras exclusivamente por nombres docentes, fusionando turnos que ahora deben distinguirse.
-- `sincronizacion.go` y su SQL cambian códigos y copian historial en la DB durante el flujo. La nueva aplicación debe producir esos cambios como parte de una migración, no aplicarlos al planificar.
+- `sincronizacion.go` y su SQL cambian códigos y copian historial en la DB durante el flujo. La reescritura ya implementa una reconciliación SQL con escrituras, ensayada dentro de una transacción que se revierte. Sigue pendiente convertir esos cambios en una migración revisable, separada de su aplicación.
 - `patches.go` detecta principalmente docentes/comisiones nuevas: no basta como modelo para bajas puras o para volver a procesar correcciones del mismo período.
 
 ## Casos pendientes para validar el flujo
 
-La sanitización y la consolidación básica tienen tests en `src/oferta.rs`; quedan por cubrir la integración y las etapas pendientes:
+La sanitización y la consolidación básica tienen 16 tests unitarios en `src/siu.rs`. Pasan con `cargo test`, pero no validan el SQL ni la integración con PostgreSQL. Quedan por cubrir la integración y las etapas pendientes:
+
+- Reconciliación de códigos con copia de historial, conservación de origen y remapeo de comentarios/calificaciones.
+- Reejecución tras confirmar una reconciliación, matches ambiguos, código destino ocupado y restricciones de claves foráneas.
 
 - Materia sin comisiones que aporta un código oficial o historial por equivalencias, pero no una actualización de cátedras.
-- Oferta reciente vacía y oferta antigua con comisiones: el filtrado posterior a consolidar no recupera las comisiones antiguas.
+- Cubierto por tests unitarios: una oferta reciente vacía conserva la anterior con comisiones y su período original (en ambos órdenes de entrada); una carrera vacía no excluye las comisiones de otra del mismo período.
 - Nueva fuente del mismo período en otra ejecución: recalcular sin perder comisiones ya conocidas.
 - Vinculación de un docente histórico que conserva UUID y reseñas, y reutilización del vínculo en otra ejecución.
 - A/B con idénticos docentes siguen siendo dos cátedras; cambio de integrantes crea otra.

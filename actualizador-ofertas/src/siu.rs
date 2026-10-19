@@ -52,34 +52,31 @@ pub fn sanitizar_ofertas_carreras(ofertas_carreras: &mut [OfertaCarrera]) {
     for oferta in ofertas_carreras {
         for materia in &mut oferta.materias {
             sanitizar_comisiones_materia(materia);
-            if materia.comisiones.is_empty() {
-                warn!(
-                    materia = %materia.codigo,
-                    nombre = %materia.nombre,
-                    "materia sin comisiones"
-                );
-            }
         }
     }
 }
 
 fn sanitizar_comisiones_materia(materia: &mut Materia) {
     let codigo = &materia.codigo;
-    materia.comisiones.retain(|comision| {
-        if comision
-            .nombre
-            .trim()
-            .to_uppercase()
-            .contains("CONDICIONAL")
-        {
+    materia.comisiones.retain(|c| {
+        if c.nombre.trim().to_uppercase().contains("CONDICIONAL") {
+            debug!(materia = %codigo, comision = %c.nombre, "comisión condicional excluida");
             return false;
         }
-        if comision.docentes.is_empty() {
-            debug!(materia = %codigo, comision = %comision.nombre, "comisión sin docentes excluida");
+        if c.docentes.is_empty() {
+            debug!(materia = %codigo, comision = %c.nombre, "comisión sin docentes excluida");
             return false;
         }
         true
     });
+
+    if materia.comisiones.is_empty() {
+        warn!(
+            materia = %materia.codigo,
+            nombre = %materia.nombre,
+            "materia sin comisiones"
+        );
+    }
 
     for comision in &mut materia.comisiones {
         if comision.docentes.iter().any(|d| d.nombre.trim().is_empty()) {
@@ -117,15 +114,20 @@ fn normalizar_rol(rol: &str) -> String {
 
 /// Consolida las ofertas de varias carreras en una oferta por materia.
 ///
-/// Para cada código de materia se conserva solo el período más reciente.
-/// Si varias carreras ofrecen la misma materia en ese período, se devuelve una
-/// sola oferta que lista todas esas carreras y reúne las comisiones de cada una.
+/// Para cada código de materia se conserva el período más reciente con comisiones.
+/// Las materias sin comisiones se ignoran antes de comparar períodos.
+/// Si varias carreras ofrecen la misma materia en ese período con comisiones, se devuelve
+/// una sola oferta que lista esas carreras y reúne las comisiones de cada una.
 pub fn consolidar_ofertas_materias(ofertas_carreras: Vec<OfertaCarrera>) -> Vec<OfertaMateria> {
     let mut por_codigo: HashMap<String, OfertaMateria> = HashMap::new();
 
     for oferta in ofertas_carreras {
         let periodo = (oferta.anio, oferta.cuatrimestre);
         for materia in oferta.materias {
+            if materia.comisiones.is_empty() {
+                continue;
+            }
+
             match por_codigo.entry(materia.codigo.clone()) {
                 Entry::Vacant(e) => {
                     e.insert(OfertaMateria {
@@ -193,13 +195,37 @@ pub fn consolidar_ofertas_materias(ofertas_carreras: Vec<OfertaCarrera>) -> Vec<
 #[cfg(test)]
 mod tests {
     mod sanitizar {
+        #[test]
+        fn se_conservan_las_materias_que_quedan_sin_comisiones() {
+            let mut ofertas: Vec<super::super::OfertaCarrera> =
+                serde_json::from_value(serde_json::json!([{
+                    "carrera": "Ingeniería Civil",
+                    "anio": 2026,
+                    "cuatrimestre": 1,
+                    "materias": [
+                        {"codigo": "CB002", "nombre": "Álgebra Lineal", "comisiones": []},
+                        {"codigo": "CB003", "nombre": "Análisis Matemático", "comisiones": [
+                            {"nombre": "A", "docentes": [], "clases": []}
+                        ]}
+                    ]
+                }]))
+                .unwrap();
+
+            super::super::sanitizar_ofertas_carreras(&mut ofertas);
+
+            assert_eq!(ofertas[0].materias.len(), 2);
+            assert_eq!(ofertas[0].materias[0].codigo, "CB002");
+            assert_eq!(ofertas[0].materias[1].codigo, "CB003");
+            assert!(ofertas[0].materias.iter().all(|m| m.comisiones.is_empty()));
+        }
+
         mod sanitizar_comisiones_materia {
             use super::super::super::*;
             use tracing_test::traced_test;
 
             #[test]
             #[traced_test]
-            fn se_filtran_las_materias_sin_comisiones() {
+            fn se_advierten_las_materias_sin_comisiones() {
                 let mut materia: Materia = serde_json::from_value(serde_json::json!({
                     "codigo": "CB002",
                     "nombre": "Álgebra Lineal",
@@ -209,7 +235,6 @@ mod tests {
 
                 sanitizar_comisiones_materia(&mut materia);
 
-                assert!(materia.comisiones.is_empty());
                 assert!(logs_contain("materia sin comisiones"));
                 assert!(logs_contain("materia=CB002"));
                 assert!(logs_contain("nombre=Álgebra Lineal"));
@@ -404,7 +429,7 @@ mod tests {
         }
 
         #[test]
-        fn las_ofertas_con_materias_distintas_conservan_todas_las_materias() {
+        fn las_ofertas_con_materias_distintas_conservan_las_materias_con_comisiones() {
             let ofertas_carreras = serde_json::from_value(serde_json::json!([
                 {
                     "carrera": "Ingeniería Civil",
@@ -413,7 +438,7 @@ mod tests {
                     "materias": [{
                         "codigo": "TA073",
                         "nombre": "AEROPUERTOS I",
-                        "comisiones": []
+                        "comisiones": [{"nombre": "A", "docentes": [], "clases": []}]
                     }]
                 },
                 {
@@ -437,17 +462,7 @@ mod tests {
                     "materia": {
                         "codigo": "TA073",
                         "nombre": "AEROPUERTOS I",
-                        "comisiones": []
-                    }
-                },
-                {
-                    "carreras": ["Ingeniería Industrial"],
-                    "anio": 2026,
-                    "cuatrimestre": 1,
-                    "materia": {
-                        "codigo": "TA030",
-                        "nombre": "AGROINDUSTRIA Y BIOECONOMÍA",
-                        "comisiones": []
+                        "comisiones": [{"nombre": "A", "docentes": [], "clases": []}]
                     }
                 }
             ]))
@@ -457,6 +472,64 @@ mod tests {
 
             ofertas_materias.sort_by(|a, b| b.materia.codigo.cmp(&a.materia.codigo));
             assert_eq!(ofertas_materias, esperadas);
+        }
+
+        #[test]
+        fn una_oferta_reciente_vacia_conserva_la_anterior_con_comisiones() {
+            for periodos in [[2025, 2026], [2026, 2025]] {
+                let ofertas: Vec<OfertaCarrera> = periodos
+                    .into_iter()
+                    .map(|anio| {
+                        serde_json::from_value(serde_json::json!({
+                            "carrera": "Ingeniería Civil",
+                            "anio": anio,
+                            "cuatrimestre": 1,
+                            "materias": [{
+                                "codigo": "CB002",
+                                "nombre": "Álgebra Lineal",
+                                "comisiones": if anio == 2025 {
+                                    serde_json::json!([{"nombre": "A", "docentes": [], "clases": []}])
+                                } else {
+                                    serde_json::json!([])
+                                }
+                            }]
+                        }))
+                        .unwrap()
+                    })
+                    .collect();
+
+                let consolidadas = consolidar_ofertas_materias(ofertas);
+
+                assert_eq!(consolidadas.len(), 1);
+                assert_eq!(consolidadas[0].anio, 2025);
+                assert_eq!(consolidadas[0].cuatrimestre, 1);
+                assert_eq!(consolidadas[0].materia.comisiones.len(), 1);
+                assert_eq!(consolidadas[0].materia.comisiones[0].nombre, "A");
+            }
+        }
+
+        #[test]
+        fn una_carrera_sin_comisiones_no_excluye_las_de_otra_del_mismo_periodo() {
+            let ofertas = serde_json::from_value(serde_json::json!([
+                {
+                    "carrera": "Ingeniería Civil", "anio": 2026, "cuatrimestre": 1,
+                    "materias": [{"codigo": "CB002", "nombre": "Álgebra Lineal", "comisiones": []}]
+                },
+                {
+                    "carrera": "Ingeniería Industrial", "anio": 2026, "cuatrimestre": 1,
+                    "materias": [{"codigo": "CB002", "nombre": "Álgebra Lineal", "comisiones": [
+                        {"nombre": "A", "docentes": [], "clases": []}
+                    ]}]
+                }
+            ]))
+            .unwrap();
+
+            let consolidadas = consolidar_ofertas_materias(ofertas);
+
+            assert_eq!(consolidadas.len(), 1);
+            assert_eq!(consolidadas[0].carreras, ["Ingeniería Industrial"]);
+            assert_eq!(consolidadas[0].materia.comisiones.len(), 1);
+            assert_eq!(consolidadas[0].materia.comisiones[0].nombre, "A");
         }
 
         #[test]

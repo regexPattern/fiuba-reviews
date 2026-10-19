@@ -8,17 +8,12 @@ async fn main() {
         .with_timer(ChronoLocal::new("%H:%M:%S".to_string()))
         .init();
 
-    let archivos_planes = vec![
+    let archivos_planes = [
         "./tests/fixtures/ofertas/civil-1C-2026.json",
         "./tests/fixtures/ofertas/industrial-1C-2026.json",
         "./tests/fixtures/ofertas/informatica-1C-2026.json",
         "./tests/fixtures/ofertas/informatica-2C-2026.json",
     ];
-
-    let mut db = PgPoolOptions::new()
-        .connect("postgres://postgres:postgres@localhost:5432/fiuba-reviews")
-        .await
-        .unwrap();
 
     let ofertas_carreras = archivos_planes
         .iter()
@@ -28,5 +23,14 @@ async fn main() {
         })
         .collect();
 
-    actualizador_ofertas::armar_patches(ofertas_carreras, &mut db).await;
+    let db = PgPoolOptions::new()
+        .connect("postgres://postgres:postgres@localhost:5432/fiuba-reviews")
+        .await
+        .unwrap();
+
+    let mut tx = db.begin().await.unwrap();
+
+    actualizador_ofertas::armar_patches(ofertas_carreras, &mut tx).await;
+
+    tx.rollback().await.unwrap();
 }
