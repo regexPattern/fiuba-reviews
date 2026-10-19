@@ -1,6 +1,12 @@
 [package]
 name = "actualizador-ofertas"
-version = "0.1.0"
+version = "2.0.0"
 edition = "2024"
 
 [dependencies]
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+sqlx = { version = "0.9.0", features = ["derive", "runtime-tokio"] }
+tokio = { version = "1.53.3", features = ["full"] }
+tracing = "0.1.44"
+tracing-subscriber = "0.3.23"
