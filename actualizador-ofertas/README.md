@@ -1,6 +1,6 @@
 # Actualizador de ofertas
 
-Planificación de la reescritura del actualizador de FIUBA Reviews. Este documento describe el problema y el flujo previsto; **no es una implementación**.
+Estado y próximos pasos de la reescritura del actualizador de FIUBA Reviews. La sanitización y la consolidación básica ya están implementadas; el resto del flujo sigue en desarrollo.
 
 La aplicación recibe ofertas académicas parseadas, las compara con la base de datos y genera una **migración SQL revisable**. Generar la migración no debe modificar la base: su aplicación es un paso separado.
 
@@ -24,7 +24,7 @@ La aplicación recibe ofertas académicas parseadas, las compara con la base de 
                          ↓
 3. Resolución de materias y códigos pendientes
                          ↓
-4. Consolidación de la oferta más reciente de cada materia
+4. Consolidación de la oferta más reciente y posterior filtrado de materias sin comisiones
                          ↓
 5. Resolución incremental de identidades docentes, con intervención humana
                          ↓
@@ -53,25 +53,15 @@ La DB ya contiene `oferta_comisiones_raw` y `oferta_comisiones`, pero el JSON hi
 
 TODO: Realmente las ofertas de comisiones ya guardadas en la base de datos no importan, solo son registro historico. Realmente lo importante para comparar si tengo que actualizar o no es el cuatrimestre de ultima actualizacion de la materia.
 
-### 2. Sanitización
+### 2. Sanitización — implementada
 
-Estado actual: `sanitizar_ofertas_carreras` aplica `sanitizar_comisiones_materia` a cada materia y devuelve **todas** las materias, incluso las que queden sin comisiones. No se separa un catálogo observado de una oferta utilizable por ahora. Toda la información de exclusión se emite solo con logs (`tracing`), sin estructuras de motivos.
+`sanitizar_ofertas_carreras` modifica las ofertas en el lugar: excluye comisiones condicionales o sin docentes, normaliza variantes de roles y conserva los turnos distintos. Mantiene docentes con nombre vacío con una advertencia y **todas las materias**, incluso las que quedan sin comisiones. Los diagnósticos se emiten mediante `tracing`.
 
-La validación de estructura, período y campos necesarios la hace `serde` al deserializar, por lo que no hay una fase aparte.
-
-Implementado:
-
-- Materia sin comisiones: log `warn!` («materia sin comisiones»).
-- Exclusión de comisiones condicionales, clasificadas por su denominación (el nombre empieza con `CONDICIONAL`), sin eliminar las regulares. No se usa una búsqueda ingenua de `COND`: los fixtures contienen `Curso Conde Comisión 1`, que no significa condicionales.
-- Exclusión de comisiones sin docentes.
-
-Pendiente (hay tests declarados sin cuerpo en `src/oferta.rs`):
-
-- Si hay docentes con nombre vacío, la comisión se conserva tal cual pero se emite un `warn!` indicando que está incompleta; no se la convierte silenciosamente en un equipo reducido.
-- Normalizar variantes de roles (`JTP`, `Jefe/a Trabajos Practicos`, etc.). Mantener roles desconocidos para revisión; docentes sin rol van al final al ordenar.
-- Una misma comisión en múltiples turnos se considera como comisiones diferentes: no se fusionan ni se pierde información de turnos. No se espera que haya otras comisiones repetidas, por lo que no hay deduplicación.
+La deserialización con `serde` comprueba la estructura y los tipos de la entrada.
 
 ### 3. Resolver materias y códigos
+
+La reconciliación del catálogo debe usar **todas las materias sanitizadas**, incluidas las que no tienen comisiones y las de períodos anteriores: pueden aportar códigos o historial por equivalencias aunque no sirvan para actualizar cátedras. `sync.rs` ya extrae los pares únicos `(codigo, nombre)`; su reconciliación con la DB y la planificación de migraciones siguen pendientes. Esta etapa no construye `OfertaMateria`: la consolidación permanece en `oferta`.
 
 Al introducir los planes nuevos se crearon materias con códigos provisionales `COD###`. La resolución debe seguir siendo incremental mientras queden pendientes.
 
@@ -89,15 +79,11 @@ El SQL de `main` actualizaba códigos por igualdad de nombre sin acentos/mayúsc
 
 ### 4. Consolidar por materia y período
 
-Para cada materia ya identificada:
+Implementado: `consolidar_ofertas_materias` agrupa por código, selecciona el período más reciente comparando `(año, cuatrimestre)` y une carreras y comisiones de ese período, deduplicando comisiones exactamente iguales.
 
-1. Comparar períodos por `(año, cuatrimestre)`, no por el ID autoincremental de la tabla.
-2. Seleccionar su período más reciente entre las ofertas ingresadas.
-3. Unir las comisiones de todas las carreras que ofrecen esa materia **en ese período**.
-4. Deduplicar la misma comisión repetida entre carreras conservando las fuentes.
-5. Si dos fuentes discrepan sobre la misma comisión, mostrar el conflicto: no concatenar docentes a ciegas ni elegir arbitrariamente el último archivo.
+**Decisión acordada, pendiente de implementación:** filtrar las materias sin comisiones **después de consolidar**, nunca antes. Si una materia tiene comisiones en 2025 pero su oferta de 2026 queda vacía tras sanitizar, se selecciona 2026 y luego se excluye de la actualización de cátedras; no se recuperan las comisiones de 2025. Sus metadatos ya habrán participado de la reconciliación del catálogo. Este filtrado no implica por sí solo desactivar cátedras existentes.
 
-Las ofertas viejas pueden servir como evidencia para códigos o alias, pero no deben hacer retroceder el estado activo de una materia ya actualizada a un período posterior. Si la oferta más reciente es incompleta, no sustituirla silenciosamente por una vieja como si fuera vigente.
+También queda pendiente conservar la procedencia de cada comisión y mostrar conflictos entre fuentes, sin concatenar docentes a ciegas. Al contrastar con la DB, una oferta vieja no debe hacer retroceder una materia ya actualizada a un período posterior.
 
 Una segunda ejecución puede traer otra carrera o una corrección **del mismo cuatrimestre**. Para recalcular la unión hacen falta las ofertas ya conocidas de ese período, no solamente el archivo nuevo. El período de última actualización por sí solo no basta para decidir que no hay trabajo pendiente: también importan las fuentes y su contenido.
 
@@ -226,11 +212,12 @@ Referencia: `actualizador-siu/servidor/` en la rama `main`.
 - `sincronizacion.go` y su SQL cambian códigos y copian historial en la DB durante el flujo. La nueva aplicación debe producir esos cambios como parte de una migración, no aplicarlos al planificar.
 - `patches.go` detecta principalmente docentes/comisiones nuevas: no basta como modelo para bajas puras o para volver a procesar correcciones del mismo período.
 
-## Casos mínimos para validar el flujo cuando se implemente
+## Casos pendientes para validar el flujo
 
-- Materia sin docentes que aporta un código oficial, pero no una actualización de cátedras.
-- Comisión condicional excluida sin excluir las regulares; «Curso Conde» conservado.
-- Mismo código y período en dos carreras: unión; períodos distintos: solo el más reciente.
+La sanitización y la consolidación básica tienen tests en `src/oferta.rs`; quedan por cubrir la integración y las etapas pendientes:
+
+- Materia sin comisiones que aporta un código oficial o historial por equivalencias, pero no una actualización de cátedras.
+- Oferta reciente vacía y oferta antigua con comisiones: el filtrado posterior a consolidar no recupera las comisiones antiguas.
 - Nueva fuente del mismo período en otra ejecución: recalcular sin perder comisiones ya conocidas.
 - Vinculación de un docente histórico que conserva UUID y reseñas, y reutilización del vínculo en otra ejecución.
 - A/B con idénticos docentes siguen siendo dos cátedras; cambio de integrantes crea otra.
