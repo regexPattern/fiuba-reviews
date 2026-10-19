@@ -56,6 +56,9 @@ pub fn sanitizar_ofertas_carreras(mut ofertas_carreras: Vec<OfertaCarrera>) -> V
 }
 
 fn sanitizar_comisiones_materia(materia: &mut Materia) {
+    // TODO: Realmente luego, ya despues de haber hecho la sincronizacion de codigo y eso, voy a
+    // ignorar las materias que no tiene comisiones, por ahora las dejo. Supongo que va a ser mejor
+    // idea mandar este log hasta donde finalmente se quitan.
     if materia.comisiones.is_empty() {
         warn!(
             materia = %materia.codigo,
@@ -84,6 +87,13 @@ fn sanitizar_comisiones_materia(materia: &mut Materia) {
     });
 
     for comision in &mut materia.comisiones {
+        if comision.docentes.iter().any(|d| d.nombre.trim().is_empty()) {
+            warn!(
+                materia = %materia.codigo,
+                comision = %comision.nombre,
+                "comisión con docente con nombre vacío"
+            );
+        }
         for docente in &mut comision.docentes {
             if let Some(rol) = &docente.rol {
                 docente.rol = Some(normalizar_rol(rol));
@@ -259,7 +269,6 @@ mod tests {
 
             #[test]
             #[traced_test]
-            #[ignore = "pendiente: warn de comisión incompleta"]
             fn se_conservan_las_comisiones_con_docentes_de_nombre_vacio() {
                 let mut materia: Materia = serde_json::from_value(serde_json::json!({
                     "codigo": "CB002",
@@ -280,7 +289,7 @@ mod tests {
                 assert_eq!(materia.comisiones.len(), 1);
                 assert_eq!(materia.comisiones[0].nombre, "A");
                 assert_eq!(materia.comisiones[0].docentes.len(), 2);
-                assert!(logs_contain("comisión incompleta"));
+                assert!(logs_contain("comisión con docente con nombre vacío"));
                 assert!(logs_contain("CB002"));
             }
 
