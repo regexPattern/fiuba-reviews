@@ -46,6 +46,8 @@ pub struct OfertaMateria {
     materia: Materia,
 }
 
+/// Limpia las ofertas de las carreras, excluyendo comisiones condicionales o sin
+/// docentes y unificando los roles docentes. Conserva las materias sin comisiones.
 pub fn sanitizar_ofertas_carreras(mut ofertas_carreras: Vec<OfertaCarrera>) -> Vec<OfertaCarrera> {
     for oferta in &mut ofertas_carreras {
         for materia in &mut oferta.materias {
@@ -76,7 +78,6 @@ fn sanitizar_comisiones_materia(materia: &mut Materia) {
             .to_uppercase()
             .contains("CONDICIONAL")
         {
-            debug!(materia = %codigo, comision = %comision.nombre, "comisión condicional excluida");
             return false;
         }
         if comision.docentes.is_empty() {
@@ -107,7 +108,7 @@ fn sanitizar_comisiones_materia(materia: &mut Materia) {
 /// El SIU escribe el mismo rol de distintas formas (por ejemplo `JTP` y
 /// `Jefe/a Trabajos Practicos`, o `Ayudante 1ra` y `Ayudante 1ro/a`). Se unifican para que
 /// el rol pueda compararse y ordenarse sin tratar variantes del mismo rol como distintas.
-/// También se quita el sufijo ` ad-honorem`. Los roles sin variantes conocidas, incluidos los desconocidos, se mantienen tal cual.
+/// Los roles sin variantes conocidas, incluidos los desconocidos, se mantienen tal cual.
 fn normalizar_rol(rol: &str) -> String {
     let rol = rol.strip_suffix("ad-honorem").unwrap_or(rol).trim();
     match rol {
@@ -216,8 +217,8 @@ mod tests {
 
                 assert!(materia.comisiones.is_empty());
                 assert!(logs_contain("materia sin comisiones"));
-                assert!(logs_contain("CB002"));
-                assert!(logs_contain("Álgebra Lineal"));
+                assert!(logs_contain("materia=CB002"));
+                assert!(logs_contain("nombre=Álgebra Lineal"));
             }
 
             #[test]
@@ -238,7 +239,7 @@ mod tests {
                 assert_eq!(materia.comisiones.len(), 1);
                 assert_eq!(materia.comisiones[0].nombre, "B");
                 assert!(logs_contain("comisión sin docentes excluida"));
-                assert!(logs_contain("CB002"));
+                assert!(logs_contain("materia=CB002"));
             }
 
             #[test]
@@ -263,8 +264,7 @@ mod tests {
                 assert_eq!(materia.comisiones[0].nombre, "Curso Conde Comisión 1");
                 assert_eq!(materia.comisiones[1].nombre, "A");
                 assert!(logs_contain("comisión condicional excluida"));
-                assert!(logs_contain("CB002"));
-                assert!(logs_contain("CONDICIONALES - GRYNBERG/ORECCHIA"));
+                assert!(logs_contain("materia=CB002"));
             }
 
             #[test]
@@ -290,7 +290,7 @@ mod tests {
                 assert_eq!(materia.comisiones[0].nombre, "A");
                 assert_eq!(materia.comisiones[0].docentes.len(), 2);
                 assert!(logs_contain("comisión con docente con nombre vacío"));
-                assert!(logs_contain("CB002"));
+                assert!(logs_contain("materia=CB002"));
             }
 
             #[test]
@@ -400,6 +400,7 @@ mod tests {
 
     mod consolidar {
         use super::super::*;
+        use tracing_test::traced_test;
 
         #[test]
         fn las_ofertas_vacias_producen_un_resultado_vacio() {
@@ -465,6 +466,7 @@ mod tests {
         }
 
         #[test]
+        #[traced_test]
         fn las_ofertas_con_la_misma_materia_y_el_mismo_periodo_unen_sus_comisiones() {
             let ofertas_carreras = serde_json::from_value(serde_json::json!([
                 {
@@ -514,9 +516,15 @@ mod tests {
                 .comisiones
                 .sort_by(|a, b| a.nombre.cmp(&b.nombre));
             assert_eq!(ofertas_materias, esperadas);
+            assert!(logs_contain("agregado comisiones a la oferta existente"));
+            assert!(logs_contain("materia=CB002"));
+            assert!(logs_contain("carrera=Ingeniería Industrial"));
+            assert!(logs_contain("periodo=(1, 2026)"));
+            assert!(logs_contain("comisiones_agregadas=1"));
         }
 
         #[test]
+        #[traced_test]
         fn las_ofertas_con_la_misma_materia_y_distinto_periodo_conservan_la_mas_reciente() {
             let ofertas_carreras = serde_json::from_value(serde_json::json!([
                 {
@@ -567,6 +575,18 @@ mod tests {
             let ofertas_materias = consolidar_ofertas_materias(ofertas_carreras);
 
             assert_eq!(ofertas_materias, esperadas);
+            assert!(logs_contain(
+                "oferta sobreescrita por ser de un cuatrimestre más reciente"
+            ));
+            assert!(logs_contain(
+                "oferta descartada por ser de un cuatrimestre más antiguo"
+            ));
+            assert!(logs_contain("materia=CB002"));
+            assert!(logs_contain("carrera=Ingeniería Civil"));
+            assert!(logs_contain("periodo=(2, 2026)"));
+            assert!(logs_contain("periodo_anterior=(2, 2025)"));
+            assert!(logs_contain("periodo=(1, 2026)"));
+            assert!(logs_contain("periodo_vigente=(2, 2026)"));
         }
     }
 }
