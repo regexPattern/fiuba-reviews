@@ -7,13 +7,13 @@ pub struct OfertaCarrera {
     carrera: String,
     anio: u16,
     cuatrimestre: u8,
-    materias: Vec<Materia>,
+    pub materias: Vec<Materia>,
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
-struct Materia {
-    codigo: String,
-    nombre: String,
+pub struct Materia {
+    pub codigo: String,
+    pub nombre: String,
     comisiones: Vec<Comision>,
 }
 
@@ -46,30 +46,24 @@ pub struct OfertaMateria {
     materia: Materia,
 }
 
-/// Limpia las ofertas de las carreras, excluyendo comisiones condicionales o sin
-/// docentes y unificando los roles docentes. Conserva las materias sin comisiones.
-pub fn sanitizar_ofertas_carreras(mut ofertas_carreras: Vec<OfertaCarrera>) -> Vec<OfertaCarrera> {
-    for oferta in &mut ofertas_carreras {
+/// Limpia en el lugar las ofertas de las carreras, excluyendo comisiones condicionales
+/// o sin docentes y unificando los roles docentes. Conserva las materias sin comisiones.
+pub fn sanitizar_ofertas_carreras(ofertas_carreras: &mut [OfertaCarrera]) {
+    for oferta in ofertas_carreras {
         for materia in &mut oferta.materias {
             sanitizar_comisiones_materia(materia);
+            if materia.comisiones.is_empty() {
+                warn!(
+                    materia = %materia.codigo,
+                    nombre = %materia.nombre,
+                    "materia sin comisiones"
+                );
+            }
         }
     }
-    ofertas_carreras
 }
 
 fn sanitizar_comisiones_materia(materia: &mut Materia) {
-    // TODO: Realmente luego, ya despues de haber hecho la sincronizacion de codigo y eso, voy a
-    // ignorar las materias que no tiene comisiones, por ahora las dejo. Supongo que va a ser mejor
-    // idea mandar este log hasta donde finalmente se quitan.
-    if materia.comisiones.is_empty() {
-        warn!(
-            materia = %materia.codigo,
-            nombre = %materia.nombre,
-            "materia sin comisiones"
-        );
-        return;
-    }
-
     let codigo = &materia.codigo;
     materia.comisiones.retain(|comision| {
         if comision

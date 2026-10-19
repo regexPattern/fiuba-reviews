@@ -1,23 +1,26 @@
 #![allow(dead_code)]
 
-pub use crate::oferta::OfertaCarrera;
-use crate::{oferta::OfertaMateria, patch::Patch};
+pub use crate::siu::OfertaCarrera;
+use crate::patch::Patch;
 
 use sqlx::{Pool, Postgres};
 use tracing::info;
 
-mod oferta;
+mod catalogo;
 mod patch;
+mod siu;
 
 pub async fn armar_patches(
-    ofertas_carreras: Vec<OfertaCarrera>,
+    mut ofertas_carreras: Vec<OfertaCarrera>,
     db: &mut Pool<Postgres>,
 ) -> Vec<Patch> {
-    let ofertas_carreras = oferta::sanitizar_ofertas_carreras(ofertas_carreras);
+    siu::sanitizar_ofertas_carreras(&mut ofertas_carreras);
+
+    let catalogo_materias = catalogo::extraer_materias(&ofertas_carreras);
+    catalogo::reconciliar_materias(&catalogo_materias, db).await;
 
     let total_carreras = ofertas_carreras.len();
-    let ofertas_materias: Vec<OfertaMateria> =
-        oferta::consolidar_ofertas_materias(ofertas_carreras);
+    let ofertas_materias = siu::consolidar_ofertas_materias(ofertas_carreras);
 
     // Bueno, entonces ahora tenemos que hacer el siguiente paso, que es actualizar los codigos de
     // las materias que se han encontrado que no tenian codigo (prefijo 'COD'), y para estas
