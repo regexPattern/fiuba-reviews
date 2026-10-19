@@ -194,7 +194,7 @@ mod tests {
 
             #[test]
             #[traced_test]
-            fn se_filtran_materias_sin_comisiones() {
+            fn se_filtran_las_materias_sin_comisiones() {
                 let mut materia: Materia = serde_json::from_value(serde_json::json!({
                     "codigo": "CB002",
                     "nombre": "Álgebra Lineal",
@@ -212,7 +212,7 @@ mod tests {
 
             #[test]
             #[traced_test]
-            fn se_filtran_comisiones_sin_docentes() {
+            fn se_filtran_las_comisiones_sin_docentes() {
                 let mut materia: Materia = serde_json::from_value(serde_json::json!({
                     "codigo": "CB002",
                     "nombre": "Álgebra Lineal",
@@ -233,7 +233,7 @@ mod tests {
 
             #[test]
             #[traced_test]
-            fn se_filtran_comisiones_condicionales() {
+            fn se_filtran_las_comisiones_condicionales() {
                 let docente = serde_json::json!([{"nombre": "VARGAS GABRIELA", "rol": "Profesor/a Adjunto/a"}]);
                 let mut materia: Materia = serde_json::from_value(serde_json::json!({
                     "codigo": "CB002",
@@ -260,7 +260,7 @@ mod tests {
             #[test]
             #[traced_test]
             #[ignore = "pendiente: warn de comisión incompleta"]
-            fn se_conservan_comisiones_con_docentes_de_nombre_vacio() {
+            fn se_conservan_las_comisiones_con_docentes_de_nombre_vacio() {
                 let mut materia: Materia = serde_json::from_value(serde_json::json!({
                     "codigo": "CB002",
                     "nombre": "Álgebra Lineal",
@@ -285,7 +285,7 @@ mod tests {
             }
 
             #[test]
-            fn normalizacion_de_roles_de_docentes() {
+            fn se_normalizan_los_roles_de_los_docentes() {
                 let mut materia: Materia = serde_json::from_value(serde_json::json!({
                     "codigo": "CB002",
                     "nombre": "Álgebra Lineal",
@@ -306,14 +306,12 @@ mod tests {
                 sanitizar_comisiones_materia(&mut materia);
 
                 let docentes = &materia.comisiones[0].docentes;
+
                 assert_eq!(docentes.len(), 5);
-                assert_eq!(docentes[0].rol.as_deref(), Some("Profesor/a Titular/a"));
-                assert_eq!(
-                    docentes[1].rol.as_deref(),
-                    Some("Jefe/a Trabajos Practicos")
-                );
-                assert_eq!(docentes[2].rol.as_deref(), Some("Ayudante 1ro/a"));
-                assert_eq!(docentes[3].rol.as_deref(), Some("Ayudante 2do/a"));
+                assert_eq!(docentes[0].rol, Some(normalizar_rol("Titular")));
+                assert_eq!(docentes[1].rol, Some(normalizar_rol("JTP")));
+                assert_eq!(docentes[2].rol, Some(normalizar_rol("Ayudante de 1ra")));
+                assert_eq!(docentes[3].rol, Some(normalizar_rol("Ayudante 2da")));
                 assert_eq!(docentes[4].rol, None);
             }
 
@@ -369,7 +367,7 @@ mod tests {
             }
 
             #[test]
-            fn roles_ya_normalizados_no_cambian() {
+            fn los_roles_ya_normalizados_no_cambian() {
                 for rol in [
                     "Profesor/a Titular/a",
                     "Profesor/a Asociado/a",
@@ -385,7 +383,7 @@ mod tests {
             }
 
             #[test]
-            fn roles_desconocidos_se_mantienen() {
+            fn los_roles_desconocidos_se_mantienen() {
                 assert_eq!(normalizar_rol("Rol Inventado"), "Rol Inventado");
             }
         }
@@ -395,14 +393,14 @@ mod tests {
         use super::super::*;
 
         #[test]
-        fn ofertas_vacias_producen_resultado_vacio() {
+        fn las_ofertas_vacias_producen_un_resultado_vacio() {
             let ofertas_carreras = vec![];
             let ofertas_materias = consolidar_ofertas_materias(ofertas_carreras);
             assert_eq!(ofertas_materias.len(), 0);
         }
 
         #[test]
-        fn ofertas_con_materias_distintas_conservan_todas_las_materias() {
+        fn las_ofertas_con_materias_distintas_conservan_todas_las_materias() {
             let ofertas_carreras = serde_json::from_value(serde_json::json!([
                 {
                     "carrera": "Ingeniería Civil",
@@ -458,7 +456,7 @@ mod tests {
         }
 
         #[test]
-        fn ofertas_con_la_misma_materia_y_periodo_unen_sus_comisiones() {
+        fn las_ofertas_con_la_misma_materia_y_el_mismo_periodo_unen_sus_comisiones() {
             let ofertas_carreras = serde_json::from_value(serde_json::json!([
                 {
                     "carrera": "Ingeniería Civil",
@@ -510,7 +508,7 @@ mod tests {
         }
 
         #[test]
-        fn ofertas_con_la_misma_materia_y_distinto_periodo_conservan_la_mas_reciente() {
+        fn las_ofertas_con_la_misma_materia_y_distinto_periodo_conservan_la_mas_reciente() {
             let ofertas_carreras = serde_json::from_value(serde_json::json!([
                 {
                     "carrera": "Ingeniería Civil",
