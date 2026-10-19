@@ -20,7 +20,7 @@ La aplicación recibe ofertas académicas parseadas, las compara con la base de 
 ```text
 1. Ingress de ofertas parseadas + lectura del estado de la DB
                          ↓
-2. Validación, normalización y clasificación (sin perder el original)
+2. Sanitización (filtrado y normalización de comisiones y docentes)
                          ↓
 3. Resolución de materias y códigos pendientes
                          ↓
@@ -53,24 +53,23 @@ La DB ya contiene `oferta_comisiones_raw` y `oferta_comisiones`, pero el JSON hi
 
 TODO: Realmente las ofertas de comisiones ya guardadas en la base de datos no importan, solo son registro historico. Realmente lo importante para comparar si tengo que actualizar o no es el cuatrimestre de ultima actualizacion de la materia.
 
-### 2. Sanitización: separar catálogo de oferta utilizable
+### 2. Sanitización
 
-No descartar materias completas antes de aprovechar su código y nombre. Producir dos vistas del ingreso:
+Estado actual: `sanitizar_ofertas_carreras` aplica `sanitizar_comisiones_materia` a cada materia y devuelve **todas** las materias, incluso las que queden sin comisiones. No se separa un catálogo observado de una oferta utilizable por ahora. Toda la información de exclusión se emite solo con logs (`tracing`), sin estructuras de motivos.
 
-| Vista | Qué conserva | Para qué sirve |
-| --- | --- | --- |
-| Catálogo observado | Código y nombre de las materias, incluso sin docentes o con solo condicionales | Resolver códigos pendientes y detectar materias desconocidas |
-| Oferta utilizable | Comisiones regulares con docentes identificables | Resolver docentes y actualizar cátedras |
+La validación de estructura, período y campos necesarios la hace `serde` al deserializar, por lo que no hay una fase aparte.
 
-Reglas de preparación:
+Implementado:
 
-- Validar estructura, período y campos necesarios; registrar errores con su procedencia.
-- Normalizar espacios, mayúsculas y variantes para comparar, sin sobrescribir el texto original. Una coincidencia normalizada no prueba por sí sola identidad.
-- Clasificar condicionales por su denominación, sin eliminar las comisiones regulares de esa materia. No usar una búsqueda ingenua de `COND`: los fixtures contienen `Curso Conde Comisión 1`, que no significa condicionales.
-- Excluir de la oferta utilizable las comisiones sin docentes. Si hay docentes con nombre vacío, señalar la comisión como incompleta; no convertirla silenciosamente en un equipo reducido.
-- Deduplicar repeticiones reales, pero no fusionar A/B ni eliminar información de turnos.
+- Materia sin comisiones: log `warn!` («materia sin comisiones»).
+- Exclusión de comisiones condicionales, clasificadas por su denominación (el nombre empieza con `CONDICIONAL`), sin eliminar las regulares. No se usa una búsqueda ingenua de `COND`: los fixtures contienen `Curso Conde Comisión 1`, que no significa condicionales.
+- Exclusión de comisiones sin docentes.
+
+Pendiente (hay tests declarados sin cuerpo en `src/oferta.rs`):
+
+- Si hay docentes con nombre vacío, la comisión se conserva tal cual pero se emite un `warn!` indicando que está incompleta; no se la convierte silenciosamente en un equipo reducido.
 - Normalizar variantes de roles (`JTP`, `Jefe/a Trabajos Practicos`, etc.). Mantener roles desconocidos para revisión; docentes sin rol van al final al ordenar.
-- Emitir motivos de exclusión. Una materia cuyo contenido quedó inutilizable **no equivale a una materia confirmada sin oferta**.
+- Una misma comisión en múltiples turnos se considera como comisiones diferentes: no se fusionan ni se pierde información de turnos. No se espera que haya otras comisiones repetidas, por lo que no hay deduplicación.
 
 ### 3. Resolver materias y códigos
 

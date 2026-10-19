@@ -1,3 +1,4 @@
+use sqlx::postgres::PgPoolOptions;
 use tracing_subscriber::{EnvFilter, fmt::time::ChronoLocal};
 
 #[tokio::main]
@@ -14,6 +15,11 @@ async fn main() {
         "./tests/fixtures/ofertas/informatica-2C-2026.json",
     ];
 
+    let mut db = PgPoolOptions::new()
+        .connect("postgres://postgres:postgres@localhost:5432/fiuba-reviews")
+        .await
+        .unwrap();
+
     let ofertas_carreras = archivos_planes
         .iter()
         .map(|&archivo| {
@@ -22,5 +28,5 @@ async fn main() {
         })
         .collect();
 
-    actualizador_ofertas::armar_patches(ofertas_carreras).await;
+    actualizador_ofertas::armar_patches(ofertas_carreras, &mut db).await;
 }
