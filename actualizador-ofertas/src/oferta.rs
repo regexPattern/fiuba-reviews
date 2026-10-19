@@ -1,5 +1,6 @@
 use serde::Deserialize;
 use std::collections::{HashMap, hash_map::Entry};
+use tracing::debug;
 
 #[derive(Deserialize, PartialEq, Debug)]
 pub struct OfertaCarrera {
@@ -69,13 +70,29 @@ pub fn consolidar_ofertas_materias(ofertas_carreras: Vec<OfertaCarrera>) -> Vec<
                     let actual = e.get_mut();
                     let periodo_actual = (actual.anio, actual.cuatrimestre);
                     if periodo > periodo_actual {
+                        debug!(
+                            materia = %actual.materia.codigo,
+                            carrera = %oferta.carrera,
+                            periodo = ?(oferta.cuatrimestre, oferta.anio),
+                            periodo_anterior = ?(periodo_actual.1, periodo_actual.0),
+                            "oferta sobreescrita por ser de un cuatrimestre más reciente"
+                        );
                         *actual = OfertaMateria {
                             carreras: vec![oferta.carrera.clone()],
                             anio: oferta.anio,
                             cuatrimestre: oferta.cuatrimestre,
                             materia,
                         };
-                    } else if periodo == periodo_actual {
+                    } else if periodo < periodo_actual {
+                        debug!(
+                            materia = %actual.materia.codigo,
+                            carrera = %oferta.carrera,
+                            periodo = ?(oferta.cuatrimestre, oferta.anio),
+                            periodo_vigente = ?(periodo_actual.1, periodo_actual.0),
+                            "oferta descartada por ser de un cuatrimestre más antiguo"
+                        );
+                    } else {
+                        let cantidad_anterior = actual.materia.comisiones.len();
                         if !actual.carreras.contains(&oferta.carrera) {
                             actual.carreras.push(oferta.carrera.clone());
                         }
@@ -83,6 +100,17 @@ pub fn consolidar_ofertas_materias(ofertas_carreras: Vec<OfertaCarrera>) -> Vec<
                             if !actual.materia.comisiones.contains(&comision) {
                                 actual.materia.comisiones.push(comision);
                             }
+                        }
+                        let comisiones_agregadas =
+                            actual.materia.comisiones.len() - cantidad_anterior;
+                        if comisiones_agregadas > 0 {
+                            debug!(
+                                materia = %actual.materia.codigo,
+                                carrera = %oferta.carrera,
+                                periodo = ?(oferta.cuatrimestre, oferta.anio),
+                                comisiones_agregadas,
+                                "agregado comisiones a la oferta existente"
+                            );
                         }
                     }
                 }
