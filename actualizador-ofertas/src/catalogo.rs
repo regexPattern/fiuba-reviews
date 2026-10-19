@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use sqlx::PgConnection;
-use tracing::{debug, info};
+use tracing::debug;
 
 use crate::OfertaCarrera;
 

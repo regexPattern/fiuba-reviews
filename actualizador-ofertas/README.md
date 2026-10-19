@@ -8,7 +8,7 @@ El objetivo final es recibir ofertas académicas parseadas, compararlas con la b
 
 - `src/main.rs` carga cuatro fixtures (Civil, Industrial e Informática de 1C 2026 e Informática de 2C 2026), conecta a PostgreSQL local, abre una transacción, llama a `armar_patches` y hace `rollback`.
 - `src/lib.rs`: `armar_patches` sanitiza, extrae el catálogo completo, reconcilia materias en la DB y consolida las ofertas, en ese orden. Por ahora devuelve un vector vacío; `Patch` sigue siendo un tipo sin contenido.
-- `src/siu.rs`: contrato de entrada, sanitización y consolidación, con 16 tests unitarios que pasan con `cargo test`.
+- `src/siu.rs`: tipos compartidos del SIU y reexportaciones. `src/siu/sanitizar.rs`, `src/siu/normalizar.rs` y `src/siu/consolidar.rs` contienen cada implementación con sus tests unitarios que pasan con `cargo test`.
 - `src/catalogo.rs` y `src/catalogo/reconciliar_materias.sql`: extracción de pares únicos `(codigo, nombre)`, reemplazo de códigos provisionales y copia de docentes, calificaciones Dolly y comentarios desde equivalencias.
 - Pendiente inmediato: leer los docentes históricos de cada materia para iniciar su resolución incremental. La comparación con el período de última actualización de la DB tampoco está implementada.
 
@@ -240,13 +240,13 @@ Referencia: `actualizador-siu/servidor/` en la rama `main`.
 
 ## Casos pendientes para validar el flujo
 
-La sanitización y la consolidación básica tienen 16 tests unitarios en `src/siu.rs`. Pasan con `cargo test`, pero no validan el SQL ni la integración con PostgreSQL. Quedan por cubrir la integración y las etapas pendientes:
+La sanitización y la consolidación básica tienen, junto con la normalización de roles, tests unitarios en `src/siu/sanitizar.rs`, `src/siu/normalizar.rs` y `src/siu/consolidar.rs`. Pasan con `cargo test`, pero no validan el SQL ni la integración con PostgreSQL. Quedan por cubrir la integración y las etapas pendientes:
 
 - Reconciliación de códigos con copia de historial, conservación de origen y remapeo de comentarios/calificaciones.
 - Reejecución tras confirmar una reconciliación, matches ambiguos, código destino ocupado y restricciones de claves foráneas.
 
 - Materia sin comisiones que aporta un código oficial o historial por equivalencias, pero no una actualización de cátedras.
-- Cubierto por tests unitarios: una oferta reciente vacía conserva la anterior con comisiones y su período original (en ambos órdenes de entrada); una carrera vacía no excluye las comisiones de otra del mismo período.
+- Cubierto por tests unitarios: una oferta reciente vacía conserva la anterior con comisiones y su período original (en ambos órdenes de entrada).
 - Nueva fuente del mismo período en otra ejecución: recalcular sin perder comisiones ya conocidas.
 - Vinculación de un docente histórico que conserva UUID y reseñas, y reutilización del vínculo en otra ejecución.
 - A/B con idénticos docentes siguen siendo dos cátedras; cambio de integrantes crea otra.
