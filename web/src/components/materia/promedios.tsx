@@ -24,20 +24,23 @@ export function Promedios({
         </Button>
       </PopoverTrigger>
       {promedios && (
-        <PopoverContent align="start" className="w-60 space-y-3 text-xs select-none">
+        <PopoverContent
+          align="start"
+          className="w-60 space-y-3 bg-popover/75 text-xs shadow-glass backdrop-blur-surface select-none"
+        >
           <dl className="space-y-1">
             {CRITERIOS.map(({ name, label }) => (
               <div
                 key={name}
-                className="relative isolate flex justify-between gap-3 overflow-hidden rounded-sm bg-muted/50 px-2 py-1.5"
+                className="relative isolate flex justify-between gap-3 overflow-hidden rounded-sm border border-border bg-muted/50 px-2 py-1.5"
               >
                 <span
                   aria-hidden="true"
                   className="absolute inset-y-0 left-0 -z-10 bg-fiuba/25"
                   style={{ width: `${Math.min(100, Math.max(0, (promedios[name] / 5) * 100))}%` }}
                 />
-                <dt>{label}</dt>
-                <dd className="flex shrink-0 items-center gap-1 font-medium tabular-nums">
+                <dt className="font-medium">{label}</dt>
+                <dd className="flex shrink-0 items-center gap-1 font-semibold tabular-nums">
                   {promedios[name].toFixed(1)}
                   <Star size={12} className="gold-star shrink-0" aria-hidden="true" />
                 </dd>

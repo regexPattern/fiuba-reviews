@@ -52,10 +52,10 @@ export function MateriaShell({
     <ShellContext.Provider
       value={{ cerrarDrawer: () => setAbierto(false), navegarCatedra, catedraPendiente }}
     >
-      <div className="mx-auto flex h-full max-w-7xl">
-        <div className="hidden w-80 shrink-0 border-r md:flex">{sidebar}</div>
+      <div className="mx-auto -mt-(--header-height) flex h-[calc(100%+var(--header-height))] max-w-7xl">
+        <div className="hidden w-80 shrink-0 border-r pt-(--header-height) md:flex">{sidebar}</div>
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="border-b p-3 md:hidden">
+          <div className="border-b p-3 pt-[calc(var(--header-height)+0.75rem)] md:hidden">
             <Sheet open={abierto} onOpenChange={setAbierto}>
               <SheetTrigger asChild>
                 <Button variant="outline">
@@ -71,7 +71,10 @@ export function MateriaShell({
               </SheetContent>
             </Sheet>
           </div>
-          <main id={SCROLL_CONTAINER_ID} className="min-h-0 flex-1 overflow-y-auto">
+          <main
+            id={SCROLL_CONTAINER_ID}
+            className="min-h-0 flex-1 overflow-y-auto md:pt-(--header-height)"
+          >
             {navegando ? <CatedraSkeleton /> : children}
           </main>
         </div>

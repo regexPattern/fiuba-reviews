@@ -15,7 +15,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { mozillaHeadline } from "@/lib/fonts";
 import styles from "./lista-catedras.module.css";
 import { useMateriaShell } from "./materia-shell";
 
@@ -64,7 +63,6 @@ function Items({
                   <Star size={16} className="gold-star" aria-hidden="true" />
                 </span>
                 <TextoConCoincidencias
-                  className={mozillaHeadline.className}
                   texto={catedra.nombre}
                   rangos={coincidencias.get(catedra.codigo)}
                 />
