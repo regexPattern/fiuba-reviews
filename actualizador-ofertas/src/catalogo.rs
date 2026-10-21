@@ -1,12 +1,12 @@
 use std::collections::HashSet;
 
 use sqlx::PgConnection;
-use tracing::debug;
+use tracing::{debug, info};
 
 use crate::OfertaCarrera;
 
 #[derive(Eq, PartialEq, Hash, Debug)]
-pub struct MetadatosMateria {
+struct MetadatosMateria {
     codigo: String,
     nombre: String,
 }
@@ -23,7 +23,7 @@ pub struct MateriaReconciliada {
     comentarios_migrados: i32,
 }
 
-pub fn extraer_materias(ofertas_carreras: &[OfertaCarrera]) -> Vec<MetadatosMateria> {
+fn extraer_materias(ofertas_carreras: &[OfertaCarrera]) -> Vec<MetadatosMateria> {
     let metadatos: HashSet<_> = ofertas_carreras
         .iter()
         .flat_map(|o| &o.materias)
@@ -36,12 +36,22 @@ pub fn extraer_materias(ofertas_carreras: &[OfertaCarrera]) -> Vec<MetadatosMate
     metadatos.into_iter().collect()
 }
 
+/// Extrae el catálogo de todas las ofertas sanitizadas y reconcilia sus materias en la DB.
+///
 /// No abre ni cierra transacciones: quien llama decide si confirmar o descartar los cambios.
 /// Incluye el refresco de las materialized views.
 pub async fn reconciliar_materias(
-    catalogo: &[MetadatosMateria],
+    ofertas_carreras: &[OfertaCarrera],
     conn: &mut PgConnection,
 ) -> Result<Vec<MateriaReconciliada>, sqlx::Error> {
+    let catalogo = extraer_materias(ofertas_carreras);
+
+    debug!(
+        carreras = ofertas_carreras.len(),
+        materias = catalogo.len(),
+        "catalogo de materias generado"
+    );
+
     let nombres: Vec<&str> = catalogo.iter().map(|m| m.nombre.as_str()).collect();
     let codigos: Vec<&str> = catalogo.iter().map(|m| m.codigo.as_str()).collect();
 
@@ -68,6 +78,8 @@ pub async fn reconciliar_materias(
             "materia reconciliada"
         );
     }
+
+    info!(materias = reconciliadas.len(), "materias reconciliadas");
 
     Ok(reconciliadas)
 }
