@@ -1,0 +1,50 @@
+.canvas {
+  position: relative;
+  min-height: 24rem;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.stars {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  grid-auto-rows: 48px;
+  padding: 12px;
+  overflow: hidden;
+  /* A subtle diagonal wave reveals the chrome finish without overpowering
+     the loading canvas. */
+  mask-image: linear-gradient(
+    110deg,
+    rgb(0 0 0 / 14%) 40%,
+    rgb(0 0 0 / 55%) 50%,
+    rgb(0 0 0 / 14%) 60%
+  );
+  mask-size: 300% 100%;
+  mask-repeat: no-repeat;
+  animation: shimmer 3.2s ease-in-out infinite;
+}
+
+.star {
+  display: grid;
+  place-items: center;
+}
+
+@keyframes shimmer {
+  from {
+    mask-position: 100% 0;
+  }
+  to {
+    mask-position: 0% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stars {
+    animation: none;
+    mask-image: none;
+    opacity: 0.2;
+  }
+}

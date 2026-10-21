@@ -1,3 +1,5 @@
 packages:
   - web
   - parser-siu
+allowBuilds:
+  esbuild: true

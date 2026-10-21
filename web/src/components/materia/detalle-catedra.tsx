@@ -1,6 +1,7 @@
+import { Bot } from "@withicons/react/chrome";
 import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { mozillaHeadline } from "@/lib/fonts";
 import { getCatedra } from "@/server/db/queries/catedra";
 import { Comentarios } from "./comentarios";
@@ -28,13 +29,16 @@ export async function DetalleCatedra({ uuid }: { uuid: string }) {
             {docente.rol && <p className="text-sm text-muted-foreground">{docente.rol}</p>}
           </div>
           {docente.resumenComentario && (
-            <Card>
-              <CardHeader>
-                <CardDescription>Resumen generado con IA</CardDescription>
-              </CardHeader>
+            <Card className="shadow-none">
               <CardContent>
                 <p>{docente.resumenComentario}</p>
               </CardContent>
+              <CardFooter>
+                <CardDescription className="flex items-center gap-2 select-none">
+                  Resumen generado con IA
+                  <Bot size={18} className="shrink-0" aria-hidden="true" />
+                </CardDescription>
+              </CardFooter>
             </Card>
           )}
           <Promedios

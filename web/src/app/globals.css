@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 
 :root {
+  --fiuba: #50acd4;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -26,6 +27,7 @@
 @theme inline {
   --font-sans: var(--font-mozilla-text), ui-sans-serif, system-ui, sans-serif;
 
+  --color-fiuba: var(--fiuba);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -49,6 +51,15 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+}
+
+.gold-star {
+  --with-chrome-edge: #fff3c4;
+  --with-chrome-tint: #ffe59a;
+  --with-chrome-c1: #d4a017;
+  --with-chrome-c4: #b77916;
+  --with-chrome-shadow: #6b420e;
+  --with-chrome-ink: #6b420e;
 }
 
 @layer base {

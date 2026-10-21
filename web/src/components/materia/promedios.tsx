@@ -1,6 +1,7 @@
 "use client";
 
 import type { PromediosDocente } from "@/server/db/queries/catedra";
+import { Star } from "@withicons/react/chrome";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -16,22 +17,34 @@ export function Promedios({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" disabled={!promedios}>
+        <Button variant="outline" className="shadow-none select-none" disabled={!promedios}>
           Promedio: {promedios ? promedios.general.toFixed(1) : "–"}
+          <Star size={16} className="gold-star" aria-hidden="true" />
           {promedios && <ChevronDown />}
         </Button>
       </PopoverTrigger>
       {promedios && (
-        <PopoverContent align="start" className="space-y-4 text-sm">
-          <dl className="space-y-2">
+        <PopoverContent align="start" className="w-60 space-y-3 text-xs select-none">
+          <dl className="space-y-1">
             {CRITERIOS.map(({ name, label }) => (
-              <div key={name} className="flex justify-between gap-4">
+              <div
+                key={name}
+                className="relative isolate flex justify-between gap-3 overflow-hidden rounded-sm bg-muted/50 px-2 py-1.5"
+              >
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-y-0 left-0 -z-10 bg-fiuba/25"
+                  style={{ width: `${Math.min(100, Math.max(0, (promedios[name] / 5) * 100))}%` }}
+                />
                 <dt>{label}</dt>
-                <dd className="tabular-nums">{promedios[name].toFixed(1)}</dd>
+                <dd className="flex shrink-0 items-center gap-1 font-medium tabular-nums">
+                  {promedios[name].toFixed(1)}
+                  <Star size={12} className="gold-star shrink-0" aria-hidden="true" />
+                </dd>
               </div>
             ))}
           </dl>
-          <p className="text-muted-foreground">
+          <p className="text-center text-muted-foreground">
             {cantidadCalificaciones} calificacion{cantidadCalificaciones === 1 ? "" : "es"}
           </p>
         </PopoverContent>

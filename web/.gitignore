@@ -3,5 +3,10 @@
 /out/
 /next-env.d.ts
 
+# Variables de entorno (pueden contener secretos)
+.env
+.env.*
+!.env.example
+
 # TypeScript
 /*.tsbuildinfo

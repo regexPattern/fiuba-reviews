@@ -1,4 +1,6 @@
+import { Star } from "@withicons/react/chrome";
 import { Skeleton } from "@/components/ui/skeleton";
+import styles from "./skeletons.module.css";
 
 export function SidebarSkeleton() {
   return (
@@ -6,7 +8,13 @@ export function SidebarSkeleton() {
       <output className="sr-only">Cargando cátedras…</output>
       <div aria-hidden="true" className="space-y-3">
         {Array.from({ length: 8 }, (_, index) => (
-          <Skeleton key={index} className="h-9 w-full" />
+          <div key={index} className="flex h-9 items-center gap-2 px-3">
+            <span className="inline-flex w-12 shrink-0 items-center justify-end gap-1">
+              <Skeleton className="h-4 w-6" />
+              <Star size={16} className="gold-star shrink-0" />
+            </span>
+            <Skeleton className="h-4 flex-1" />
+          </div>
         ))}
       </div>
     </div>
@@ -15,21 +23,14 @@ export function SidebarSkeleton() {
 
 export function CatedraSkeleton() {
   return (
-    <div className="p-4 md:p-6">
-      <output className="sr-only">Cargando docentes…</output>
-      <div aria-hidden="true" className="space-y-4">
-        <Skeleton className="h-7 w-2/3 max-w-sm" />
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-9 w-36" />
-        <div className="divide-y">
-          {Array.from({ length: 4 }, (_, index) => (
-            <div key={index} className="space-y-2 py-3">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-5 w-20" />
-            </div>
-          ))}
-        </div>
+    <div className={styles.canvas}>
+      <output className="sr-only">Cargando información de la cátedra…</output>
+      <div aria-hidden="true" className={styles.stars}>
+        {Array.from({ length: 480 }, (_, index) => (
+          <span key={index} className={styles.star}>
+            <Star size={18} className="gold-star" />
+          </span>
+        ))}
       </div>
     </div>
   );

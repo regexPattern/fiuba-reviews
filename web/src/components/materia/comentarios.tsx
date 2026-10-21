@@ -1,7 +1,9 @@
 "use client";
 
 import type { ComentarioDocente } from "@/server/db/queries/catedra";
+import Image from "next/image";
 import { useState } from "react";
+import dollyLogo from "@/assets/dolly-logo.png";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -14,10 +16,17 @@ function ComentarioItem({ comentario }: { comentario: ComentarioDocente }) {
       <p className="break-words whitespace-pre-wrap">{comentario.contenido.trim()}</p>
 
       <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-        <Badge variant="outline">
+        <Badge variant="outline" className="select-none">
           {comentario.cuatrimestre.numero}C{comentario.cuatrimestre.anio}
         </Badge>
-        {comentario.deDolly && <Badge variant="outline">Dolly FIUBA</Badge>}
+        {comentario.deDolly && (
+          <Image
+            src={dollyLogo}
+            alt="Dolly FIUBA"
+            className="h-4 w-auto select-none"
+            draggable={false}
+          />
+        )}
       </div>
     </div>
   );

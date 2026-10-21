@@ -1,6 +1,7 @@
 "use client";
 
 import type { CatedraListada } from "@/server/db/queries/catedras-materia";
+import { Star } from "@withicons/react/chrome";
 import Fuse from "fuse.js";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -46,8 +47,9 @@ function Items({
                   }
                 }}
               >
-                <span className="inline-block w-[3ch] shrink-0 text-center">
+                <span className="inline-flex w-12 shrink-0 items-center justify-end gap-1 tabular-nums">
                   {calificacion === "0.0" ? "–" : calificacion}
+                  <Star size={16} className="gold-star" aria-hidden="true" />
                 </span>
                 <span className={mozillaHeadline.className}>{catedra.nombre}</span>
               </Link>
