@@ -1,9 +1,13 @@
-import Fuse from "fuse.js";
+import Fuse, { type FuseResultMatch } from "fuse.js";
 
 export type MateriaBuscador = {
   codigo: string;
   nombre: string;
   cantidadComentarios: number;
+};
+
+export type ResultadoMateria = MateriaBuscador & {
+  coincidencias?: readonly FuseResultMatch[];
 };
 
 export function crearBuscadorMaterias(materias: MateriaBuscador[]) {
@@ -18,12 +22,15 @@ export function crearBuscadorMaterias(materias: MateriaBuscador[]) {
     ignoreDiacritics: true,
     ignoreLocation: true,
     threshold: 0.35,
-    shouldSort: false
+    shouldSort: false,
+    includeMatches: true
   });
 
   // El fuzzy matching decide qué coincide; la cantidad de comentarios decide el orden.
-  return (query: string): MateriaBuscador[] => {
+  return (query: string): ResultadoMateria[] => {
     const texto = query.trim();
-    return texto ? indice.search(texto).map(({ item }) => item) : ordenadas;
+    return texto
+      ? indice.search(texto).map(({ item, matches }) => ({ ...item, coincidencias: matches }))
+      : ordenadas;
   };
 }

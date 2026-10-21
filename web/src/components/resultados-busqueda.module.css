@@ -1,0 +1,18 @@
+.entrada {
+  animation: entrada 150ms ease-out;
+}
+
+@keyframes entrada {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entrada {
+    animation: none;
+  }
+}

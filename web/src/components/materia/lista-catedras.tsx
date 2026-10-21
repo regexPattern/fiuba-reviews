@@ -6,18 +6,30 @@ import Fuse from "fuse.js";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
+import resultadosStyles from "@/components/resultados-busqueda.module.css";
+import {
+  TextoConCoincidencias,
+  rangosExactos,
+  type Rangos
+} from "@/components/texto-con-coincidencias";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { mozillaHeadline } from "@/lib/fonts";
+import styles from "./lista-catedras.module.css";
 import { useMateriaShell } from "./materia-shell";
+
+type Coincidencias = Map<string, Rangos>;
 
 function Items({
   codigoMateria,
   catedras,
+  coincidencias,
   activo
 }: {
   codigoMateria: string;
   catedras: CatedraListada[];
+  coincidencias: Coincidencias;
   activo: string | null;
 }) {
   const { cerrarDrawer, navegarCatedra, catedraPendiente } = useMateriaShell();
@@ -29,7 +41,7 @@ function Items({
         const calificacion = catedra.calificacion.toFixed(1);
 
         return (
-          <li key={catedra.codigo}>
+          <li key={catedra.codigo} className={resultadosStyles.entrada}>
             <Button
               asChild
               variant={seleccionado === catedra.codigo ? "secondary" : "ghost"}
@@ -51,7 +63,11 @@ function Items({
                   {calificacion === "0.0" ? "–" : calificacion}
                   <Star size={16} className="gold-star" aria-hidden="true" />
                 </span>
-                <span className={mozillaHeadline.className}>{catedra.nombre}</span>
+                <TextoConCoincidencias
+                  className={mozillaHeadline.className}
+                  texto={catedra.nombre}
+                  rangos={coincidencias.get(catedra.codigo)}
+                />
               </Link>
             </Button>
           </li>
@@ -66,6 +82,7 @@ function ItemsConActiva(props: {
   codigoMateria: string;
   catedras: CatedraListada[];
   todas: CatedraListada[];
+  coincidencias: Coincidencias;
 }) {
   const param = useSearchParams().get("catedra");
   const activo = props.todas.some((c) => c.codigo === param)
@@ -83,6 +100,7 @@ export function ListaCatedras({
   catedras: CatedraListada[];
 }) {
   const [query, setQuery] = useState("");
+  const debouncedQuery = useDebouncedValue(query);
   const indice = useMemo(
     () =>
       new Fuse(catedras, {
@@ -90,33 +108,63 @@ export function ListaCatedras({
         ignoreDiacritics: true,
         ignoreLocation: true,
         threshold: 0.35,
-        shouldSort: false
+        shouldSort: false,
+        includeMatches: true
       }),
     [catedras]
   );
-  const filtradas = useMemo(() => {
-    const palabras = query.trim().split(/\s+/).filter(Boolean);
-    if (palabras.length === 0) return catedras;
+  const { filtradas, coincidencias } = useMemo(() => {
+    const palabras = debouncedQuery.trim().split(/\s+/).filter(Boolean);
+    const coincidencias: Coincidencias = new Map();
+    if (palabras.length === 0) return { filtradas: catedras, coincidencias };
 
     // Todas las palabras deben coincidir, sin exigir orden ni perder el ranking por calificación.
-    const coincidencias = palabras.map(
-      (palabra) => new Set(indice.search(palabra).map(({ item }) => item.codigo))
+    const resultados = palabras.map(
+      (palabra) =>
+        new Map(indice.search(palabra).map((resultado) => [resultado.item.codigo, resultado]))
     );
-    return catedras.filter((catedra) => coincidencias.every((set) => set.has(catedra.codigo)));
-  }, [catedras, indice, query]);
+    const filtradas = catedras.filter((catedra) =>
+      resultados.every((resultado) => resultado.has(catedra.codigo))
+    );
+    for (const catedra of filtradas) {
+      coincidencias.set(
+        catedra.codigo,
+        resultados.flatMap((resultado, i) =>
+          rangosExactos(
+            catedra.nombre,
+            palabras[i]!,
+            (resultado.get(catedra.codigo)?.matches ?? []).flatMap((match) => match.indices)
+          )
+        )
+      );
+    }
+    return { filtradas, coincidencias };
+  }, [catedras, indice, debouncedQuery]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col divide-y">
-      <nav aria-label="Cátedras" className="min-h-0 flex-1 overflow-y-auto">
+      <nav aria-label="Cátedras" className={`min-h-0 flex-1 overflow-y-scroll ${styles.lista}`}>
         {catedras.length === 0 ? (
           <p className="p-3 text-sm text-muted-foreground">
             Esta materia no tiene cátedras todavía.
           </p>
         ) : (
           <Suspense
-            fallback={<Items codigoMateria={codigoMateria} catedras={filtradas} activo={null} />}
+            fallback={
+              <Items
+                codigoMateria={codigoMateria}
+                catedras={filtradas}
+                coincidencias={coincidencias}
+                activo={null}
+              />
+            }
           >
-            <ItemsConActiva codigoMateria={codigoMateria} catedras={filtradas} todas={catedras} />
+            <ItemsConActiva
+              codigoMateria={codigoMateria}
+              catedras={filtradas}
+              todas={catedras}
+              coincidencias={coincidencias}
+            />
           </Suspense>
         )}
         {catedras.length > 0 && filtradas.length === 0 && (
