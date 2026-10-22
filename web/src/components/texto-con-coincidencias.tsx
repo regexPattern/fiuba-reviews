@@ -27,7 +27,7 @@ export function TextoConCoincidencias({
         return (
           <span key={inicio}>
             {anterior}
-            <span className="font-semibold underline decoration-2 underline-offset-2">
+            <span className="font-medium underline decoration-2 underline-offset-2">
               {texto.slice(inicio, fin + 1)}
             </span>
           </span>

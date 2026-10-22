@@ -3,6 +3,7 @@
 import type { CatedraListada } from "@/server/db/queries/catedras-materia";
 import { Star } from "@withicons/react/chrome";
 import Fuse from "fuse.js";
+import { ListFilterIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
@@ -171,12 +172,19 @@ export function ListaCatedras({
       </nav>
 
       <div className="shrink-0 p-3">
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Filtrar por nombre de docente"
-          aria-label="Filtrar cátedras por nombre de docente"
-        />
+        <div className="relative">
+          <ListFilterIcon
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
+          />
+          <Input
+            className="pr-9"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Filtrar por nombre de docente"
+            aria-label="Filtrar cátedras por nombre de docente"
+          />
+        </div>
       </div>
     </div>
   );

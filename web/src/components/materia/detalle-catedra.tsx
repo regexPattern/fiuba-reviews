@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Card, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { getCatedra } from "@/server/db/queries/catedra";
 import { Comentarios } from "./comentarios";
+import { NombreDocente } from "./nombre-docente";
 import { Promedios } from "./promedios";
 
 export async function DetalleCatedra({ uuid }: { uuid: string }) {
@@ -17,9 +18,14 @@ export async function DetalleCatedra({ uuid }: { uuid: string }) {
   return (
     <div className="space-y-8 p-4 md:p-6">
       {catedra.docentes.map((docente) => (
-        <section key={docente.codigo} id={docente.codigo} className="space-y-4">
+        <section
+          key={docente.codigo}
+          id={docente.codigo}
+          className="space-y-4"
+          style={{ scrollMarginTop: "calc(var(--header-height) + 1rem)" }}
+        >
           <div>
-            <h2 className="mb-2 text-3xl font-semibold tracking-tight">{docente.nombre}</h2>
+            <NombreDocente codigo={docente.codigo} nombre={docente.nombre} catedra={uuid} />
             {docente.nombreSiu && (
               <p className="text-sm text-muted-foreground">{docente.nombreSiu}</p>
             )}
