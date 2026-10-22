@@ -4,7 +4,7 @@
 :root {
   --fiuba: #50acd4;
   --header-height: calc(3.5rem + env(safe-area-inset-top));
-  --radius: 0;
+  --radius: 0.25rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -27,9 +27,12 @@
 
 @theme inline {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
   --shadow-glass: 0 0 24px rgb(0 0 0 / 0.12);
   --blur-surface: 24px;
 
+  --color-github: #181717;
+  --color-linkedin: #0a66c2;
   --color-fiuba: var(--fiuba);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -58,6 +61,12 @@
   --radius-2xl: var(--radius);
   --radius-3xl: var(--radius);
   --radius-4xl: var(--radius);
+}
+
+.command-palette {
+  top: max(calc(var(--header-height) + 1rem), 15dvh);
+  max-height: 75dvh;
+  width: calc(100% - 2rem);
 }
 
 .gold-star {

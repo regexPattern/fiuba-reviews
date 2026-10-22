@@ -19,7 +19,7 @@ export async function DetalleCatedra({ uuid }: { uuid: string }) {
       {catedra.docentes.map((docente) => (
         <section key={docente.codigo} id={docente.codigo} className="space-y-4">
           <div>
-            <h2 className="text-3xl font-semibold tracking-tight">{docente.nombre}</h2>
+            <h2 className="mb-2 text-3xl font-semibold tracking-tight">{docente.nombre}</h2>
             {docente.nombreSiu && (
               <p className="text-sm text-muted-foreground">{docente.nombreSiu}</p>
             )}

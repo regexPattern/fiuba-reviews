@@ -77,17 +77,17 @@ La deserialización con `serde` comprueba la estructura y los tipos de la entrad
 
 `catalogo::reconciliar_materias` ejecuta el SQL de `src/catalogo/reconciliar_materias.sql`:
 
-- Busca en `materia_vigente` códigos `COD%` con `usa_equivalencias`, por igualdad de nombre ignorando mayúsculas y acentos. Asume que esa vista materializada está al día.
+- Busca en `materia_vigente` códigos provisionales `XX###` (regex `^XX[0-9]{3}$`) con `usa_equivalencias`, por igualdad de nombre ignorando mayúsculas y acentos. Asume que esa vista materializada está al día.
 - Reemplaza el código provisional por el del SIU y se apoya en las FKs con `ON UPDATE CASCADE` para propagarlo.
 - Copia docentes desde `codigos_materias_fuente`, con UUID nuevos, junto con sus resúmenes, calificaciones Dolly y comentarios; remapea el vínculo entre comentario y calificación y conserva los registros de origen.
 - Si varias equivalencias tienen docentes de igual nombre, elige una sola fuente: más calificaciones Dolly, luego más comentarios y finalmente menor código de docente. No une el historial de las fuentes descartadas ni copia `nombre_siu`.
 - Devuelve códigos anterior/nuevo, equivalencias y cantidades copiadas por materia, emite diagnósticos y refresca las vistas materializadas cuando hubo reemplazos.
 
-La condición `COD%` evita volver a copiar el historial de una materia cuyo código ya fue reemplazado por uno oficial. No recupera por sí sola historial de materias que ya tenían código oficial antes de ejecutar esta etapa.
+La condición `^XX[0-9]{3}$` evita volver a copiar el historial de una materia cuyo código ya fue reemplazado por uno oficial. No recupera por sí sola historial de materias que ya tenían código oficial antes de ejecutar esta etapa.
 
 **Todavía pendiente:** detectar y presentar matches ambiguos, códigos destino ocupados, materias desconocidas y altas; registrar decisiones y fuentes; probar la reconciliación contra PostgreSQL. La selección por nombre del SQL actual no equivale a una resolución humana de identidad docente. Las reglas siguientes describen el alcance objetivo, no funcionalidades ya completas.
 
-Al introducir los planes nuevos se crearon materias con códigos provisionales `COD###`. La resolución debe seguir siendo incremental mientras queden pendientes.
+Al introducir los planes nuevos se crearon materias con códigos provisionales `COD###`, renombrados a `XX###` por la migración `web/drizzle/0005_rename_placeholder_codes.sql` conservando los tres dígitos. La resolución debe seguir siendo incremental mientras queden pendientes. Las referencias `COD###` del diagnóstico histórico de abajo corresponden al snapshot anterior a esa migración.
 
 1. Buscar primero por código oficial.
 2. Si no existe, buscar candidatos provisionales por nombre normalizado y contexto del plan/carrera; consultar sus equivalencias con planes anteriores.

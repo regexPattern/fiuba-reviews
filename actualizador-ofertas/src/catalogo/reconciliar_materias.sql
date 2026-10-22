@@ -2,12 +2,12 @@
 --
 -- Imposible hacer esto a mano, asi que gracias Claude Sonnet 5.5 (high).
 --
--- Sincroniza los códigos provisionales ('COD...') de las materias vigentes con los códigos
+-- Sincroniza los códigos provisionales ('XX###') de las materias vigentes con los códigos
 -- oficiales del SIU y migra los datos base (docentes, calificaciones y comentarios) desde sus
 -- equivalencias de planes anteriores.
 --
 -- Se apoya en `materia_vigente`, que se asume al día al momento de ejecutarse. Una materia solo se
--- procesa una vez: al cambiar su código deja de cumplir la condición `COD%`.
+-- procesa una vez: al cambiar su código deja de cumplir la condición `^XX[0-9]{3}$`.
 --
 -- Parámetros:
 --   $1: text[] con los nombres de las materias del SIU.
@@ -25,7 +25,7 @@ reemplazos AS (
 		mv.codigos_materias_fuente AS codigos_equivalencias
 	FROM catalogo c
 	JOIN materia_vigente mv ON lower(unaccent(mv.nombre)) = lower(unaccent(c.nombre))
-	WHERE mv.codigo LIKE 'COD%'
+	WHERE mv.codigo ~ '^XX[0-9]{3}$'
 		AND mv.usa_equivalencias
 		AND mv.codigo <> c.codigo
 ),

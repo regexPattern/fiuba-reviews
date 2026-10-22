@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Header } from "@/components/layout/header";
 import { env } from "@/env";
-import { inter } from "@/lib/fonts";
+import { ibmPlexMono, inter } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,10 +16,10 @@ export const viewport: Viewport = { viewportFit: "cover" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={inter.variable}>
-      <body className="flex h-dvh flex-col font-sans antialiased">
+    <html lang="es" className={`${inter.variable} ${ibmPlexMono.variable}`}>
+      <body className="flex min-h-dvh flex-col font-sans md:h-dvh antialiased">
         <Header />
-        <div className="min-h-0 flex-1 overflow-y-auto pt-(--header-height)">{children}</div>
+        <div className="flex-1 pt-(--header-height) pb-[env(safe-area-inset-bottom)] md:min-h-0 md:overflow-y-auto md:pb-0">{children}</div>
       </body>
     </html>
   );

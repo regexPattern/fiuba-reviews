@@ -58,7 +58,7 @@ function Items({
                   }
                 }}
               >
-                <span className="inline-flex w-12 shrink-0 items-center justify-end gap-1 tabular-nums">
+                <span className="inline-flex w-12 shrink-0 items-center justify-end gap-1 font-mono tracking-tighter tabular-nums">
                   {calificacion === "0.0" ? "–" : calificacion}
                   <Star size={16} className="gold-star" aria-hidden="true" />
                 </span>

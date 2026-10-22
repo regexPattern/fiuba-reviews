@@ -18,7 +18,10 @@ export function Promedios({
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" className="shadow-none select-none" disabled={!promedios}>
-          Promedio: {promedios ? promedios.general.toFixed(1) : "–"}
+          Promedio:{" "}
+          <span className="font-mono tracking-tighter tabular-nums">
+            {promedios ? promedios.general.toFixed(1) : "–"}
+          </span>
           <Star size={16} className="gold-star" aria-hidden="true" />
           {promedios && <ChevronDown />}
         </Button>
@@ -26,13 +29,13 @@ export function Promedios({
       {promedios && (
         <PopoverContent
           align="start"
-          className="w-60 space-y-3 bg-popover/75 text-xs shadow-glass backdrop-blur-surface select-none"
+          className="flex w-60 flex-col gap-2 bg-popover/75 p-2 text-xs shadow-glass backdrop-blur-surface select-none"
         >
-          <dl className="space-y-1">
+          <dl className="overflow-hidden rounded-sm border border-border">
             {CRITERIOS.map(({ name, label }) => (
               <div
                 key={name}
-                className="relative isolate flex justify-between gap-3 overflow-hidden rounded-sm border border-border bg-muted/50 px-2 py-1.5"
+                className="relative isolate flex justify-between gap-3 overflow-hidden bg-muted/50 px-2 py-1.5"
               >
                 <span
                   aria-hidden="true"
@@ -40,7 +43,7 @@ export function Promedios({
                   style={{ width: `${Math.min(100, Math.max(0, (promedios[name] / 5) * 100))}%` }}
                 />
                 <dt className="font-medium">{label}</dt>
-                <dd className="flex shrink-0 items-center gap-1 font-semibold tabular-nums">
+                <dd className="flex shrink-0 items-center gap-1 font-mono font-semibold tracking-tighter tabular-nums">
                   {promedios[name].toFixed(1)}
                   <Star size={12} className="gold-star shrink-0" aria-hidden="true" />
                 </dd>
@@ -48,7 +51,8 @@ export function Promedios({
             ))}
           </dl>
           <p className="text-center text-muted-foreground">
-            {cantidadCalificaciones} calificacion{cantidadCalificaciones === 1 ? "" : "es"}
+            <span className="font-mono tabular-nums">{cantidadCalificaciones}</span> calificacion
+            {cantidadCalificaciones === 1 ? "" : "es"}
           </p>
         </PopoverContent>
       )}

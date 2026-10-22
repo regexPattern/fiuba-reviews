@@ -8,12 +8,11 @@
 
 .stars {
   position: absolute;
-  inset: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
-  grid-auto-rows: 48px;
-  padding: 12px;
-  overflow: hidden;
+  inset: 0 -32px;
+  /* Repeat a static tile instead of rendering hundreds of SVG components
+     per Suspense fallback (including their RSC debug metadata in development). */
+  background: url("/skeleton-stars.svg") repeat;
+  background-size: 64px 64px;
   /* A subtle diagonal wave reveals the chrome finish without overpowering
      the loading canvas. */
   mask-image: linear-gradient(
@@ -25,11 +24,6 @@
   mask-size: 300% 100%;
   mask-repeat: no-repeat;
   animation: shimmer 3.2s ease-in-out infinite;
-}
-
-.star {
-  display: grid;
-  place-items: center;
 }
 
 @keyframes shimmer {

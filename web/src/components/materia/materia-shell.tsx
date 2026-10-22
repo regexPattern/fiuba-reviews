@@ -40,6 +40,7 @@ export function MateriaShell({
   function navegarCatedra(codigoMateria: string, uuid: string) {
     setAbierto(false);
     document.getElementById(SCROLL_CONTAINER_ID)?.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0 });
     // El panel responde al clic sin esperar el payload RSC. La transición termina
     // cuando Next confirma la navegación; no dependemos de timers ni de efectos sobre la URL.
     startTransition(() => {
@@ -52,7 +53,7 @@ export function MateriaShell({
     <ShellContext.Provider
       value={{ cerrarDrawer: () => setAbierto(false), navegarCatedra, catedraPendiente }}
     >
-      <div className="mx-auto -mt-(--header-height) flex h-[calc(100%+var(--header-height))] max-w-7xl">
+      <div className="mx-auto -mt-(--header-height) flex max-w-7xl md:h-[calc(100%+var(--header-height))]">
         <div className="hidden w-80 shrink-0 border-r pt-(--header-height) md:flex">{sidebar}</div>
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="border-b p-3 pt-[calc(var(--header-height)+0.75rem)] md:hidden">
@@ -62,7 +63,11 @@ export function MateriaShell({
                   <Menu /> Ver cátedras
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="gap-0">
+              <SheetContent
+                side="left"
+                className="gap-0"
+                onOpenAutoFocus={(event) => event.preventDefault()}
+              >
                 <SheetHeader>
                   <SheetTitle>Cátedras</SheetTitle>
                   <SheetDescription>{nombreMateria}</SheetDescription>
@@ -73,7 +78,7 @@ export function MateriaShell({
           </div>
           <main
             id={SCROLL_CONTAINER_ID}
-            className="min-h-0 flex-1 overflow-y-auto md:pt-(--header-height)"
+            className="flex-1 md:min-h-0 md:overflow-y-auto md:pt-(--header-height)"
           >
             {navegando ? <CatedraSkeleton /> : children}
           </main>

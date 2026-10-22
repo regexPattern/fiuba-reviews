@@ -5,7 +5,11 @@ import { CatedraSlot } from "@/components/materia/catedra-slot";
 import { MateriaHeader } from "@/components/materia/materia-header";
 import { MateriaShell } from "@/components/materia/materia-shell";
 import { SidebarCatedras } from "@/components/materia/sidebar-catedras";
-import { CatedraSkeleton, SidebarSkeleton } from "@/components/materia/skeletons";
+import {
+  CatedraSkeleton,
+  MateriaHeaderSkeleton,
+  SidebarSkeleton
+} from "@/components/materia/skeletons";
 import { getMateria } from "@/server/db/queries/materia";
 import { getMateriasVigentes } from "@/server/db/queries/materias-vigentes";
 
@@ -59,7 +63,9 @@ export default async function Page({ params, searchParams }: Props) {
 
   const sidebar = (
     <aside className="flex h-full min-h-0 w-full flex-col">
-      <MateriaHeader codigo={codigo} />
+      <Suspense fallback={<MateriaHeaderSkeleton />}>
+        <MateriaHeader codigo={codigo} />
+      </Suspense>
       <Suspense fallback={<SidebarSkeleton />}>
         <SidebarCatedras codigo={codigo} />
       </Suspense>

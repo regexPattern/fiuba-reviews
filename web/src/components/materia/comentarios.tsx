@@ -16,7 +16,7 @@ function ComentarioItem({ comentario }: { comentario: ComentarioDocente }) {
       <p className="break-words whitespace-pre-wrap">{comentario.contenido.trim()}</p>
 
       <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-        <Badge variant="outline" className="select-none">
+        <Badge variant="outline" className="font-mono tabular-nums select-none">
           {comentario.cuatrimestre.numero}C{comentario.cuatrimestre.anio}
         </Badge>
         {comentario.deDolly && (

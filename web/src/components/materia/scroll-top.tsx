@@ -7,6 +7,7 @@ import { SCROLL_CONTAINER_ID } from "./materia-shell";
 export function ScrollTop() {
   useEffect(() => {
     document.getElementById(SCROLL_CONTAINER_ID)?.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0 });
   }, []);
 
   return null;
