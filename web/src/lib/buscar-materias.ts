@@ -4,7 +4,6 @@ export type MateriaBuscador = {
   codigo: string;
   nombre: string;
   cantidadCatedras: number;
-  usaEquivalencias: boolean;
 };
 
 export type ResultadoMateria = MateriaBuscador & {
@@ -14,8 +13,6 @@ export type ResultadoMateria = MateriaBuscador & {
 export function crearBuscadorMaterias(materias: MateriaBuscador[]) {
   const ordenadas = [...materias].sort(
     (a, b) =>
-      Number(!b.usaEquivalencias && b.cantidadCatedras > 0) -
-        Number(!a.usaEquivalencias && a.cantidadCatedras > 0) ||
       b.cantidadCatedras - a.cantidadCatedras ||
       a.nombre.localeCompare(b.nombre, "es") ||
       a.codigo.localeCompare(b.codigo)
@@ -25,12 +22,12 @@ export function crearBuscadorMaterias(materias: MateriaBuscador[]) {
     ignoreDiacritics: true,
     ignoreLocation: true,
     threshold: 0.35,
-    shouldSort: false,
+    shouldSort: true,
     includeMatches: true
   });
 
-  // El fuzzy matching decide qué coincide; las cátedras propias tienen prioridad,
-  // luego ordenamos por cantidad de cátedras y nombre.
+  // Sin búsqueda: cantidad de cátedras y nombre. Con búsqueda: relevancia del
+  // fuzzy matching; Fuse desempata por la posición en el listado ordenado.
   return (query: string): ResultadoMateria[] => {
     const texto = query.trim();
     return texto

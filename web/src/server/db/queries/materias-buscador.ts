@@ -2,7 +2,7 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { db, schema } from "@/server/db";
 
-/** El buscador ordena por cátedras, priorizando materias con cátedras propias. */
+/** El buscador ordena por cantidad de cátedras o relevancia según la búsqueda. */
 export async function getMateriasBuscador() {
   "use cache";
   cacheLife("max");
@@ -14,8 +14,7 @@ export async function getMateriasBuscador() {
     .select({
       codigo: m.codigo,
       nombre: m.nombre,
-      cantidadCatedras: m.cantidadCatedras,
-      usaEquivalencias: m.usaEquivalencias
+      cantidadCatedras: m.cantidadCatedras
     })
     .from(m);
 }

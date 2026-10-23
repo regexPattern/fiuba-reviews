@@ -107,7 +107,8 @@ export function ListaCatedras({
         ignoreDiacritics: true,
         ignoreLocation: true,
         threshold: 0.35,
-        shouldSort: false,
+        shouldSort: true,
+        includeScore: true,
         includeMatches: true
       }),
     [catedras]
@@ -117,14 +118,17 @@ export function ListaCatedras({
     const coincidencias: Coincidencias = new Map();
     if (palabras.length === 0) return { filtradas: catedras, coincidencias };
 
-    // Todas las palabras deben coincidir, sin exigir orden ni perder el ranking por calificación.
+    // Todas las palabras deben coincidir, sin exigir orden. La relevancia combina
+    // los scores de cada palabra; los empates conservan el ranking por calificación.
     const resultados = palabras.map(
       (palabra) =>
         new Map(indice.search(palabra).map((resultado) => [resultado.item.codigo, resultado]))
     );
-    const filtradas = catedras.filter((catedra) =>
-      resultados.every((resultado) => resultado.has(catedra.codigo))
-    );
+    const score = (codigo: string) =>
+      resultados.reduce((total, resultado) => total + (resultado.get(codigo)?.score ?? 1), 0);
+    const filtradas = catedras
+      .filter((catedra) => resultados.every((resultado) => resultado.has(catedra.codigo)))
+      .sort((a, b) => score(a.codigo) - score(b.codigo));
     for (const catedra of filtradas) {
       coincidencias.set(
         catedra.codigo,

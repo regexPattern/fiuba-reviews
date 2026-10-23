@@ -8,6 +8,8 @@ import { Command, CommandInput, CommandItem, CommandList } from "@/components/ui
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { crearBuscadorMaterias, type MateriaBuscador } from "@/lib/buscar-materias";
 
+const MAX_RESULTADOS = 30;
+
 export function BuscadorMaterias({
   materias,
   onSelect,
@@ -23,7 +25,9 @@ export function BuscadorMaterias({
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebouncedValue(query);
   const buscar = useMemo(() => crearBuscadorMaterias(materias), [materias]);
-  const resultados = useMemo(() => buscar(debouncedQuery), [buscar, debouncedQuery]);
+  const todos = useMemo(() => buscar(debouncedQuery), [buscar, debouncedQuery]);
+  const resultados = todos.slice(0, MAX_RESULTADOS);
+  const restantes = todos.length - resultados.length;
 
   return (
     <Command className={className} label="Buscador de materias" shouldFilter={false} loop>
@@ -34,7 +38,13 @@ export function BuscadorMaterias({
         onValueChange={setQuery}
         trailingAction={inputAction}
       />
-      <CommandList aria-label="Materias ordenadas por cantidad de cátedras, priorizando cátedras propias">
+      <CommandList
+        aria-label={
+          debouncedQuery.trim()
+            ? "Materias ordenadas por relevancia"
+            : "Materias ordenadas por cantidad de cátedras"
+        }
+      >
         {resultados.length === 0 && (
           <p className="py-6 text-center text-sm">No se encontraron materias.</p>
         )}
@@ -74,6 +84,12 @@ export function BuscadorMaterias({
             </span>
           </CommandItem>
         ))}
+        {restantes > 0 && (
+          <p className="px-2 py-3 text-center text-xs text-muted-foreground">
+            {restantes === 1 ? "1 materia más" : `${restantes} materias más`} · seguí escribiendo
+            para filtrar
+          </p>
+        )}
       </CommandList>
     </Command>
   );

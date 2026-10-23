@@ -3,6 +3,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { getCatedra } from "@/server/db/queries/catedra";
+import { AgregarCalificacion } from "./agregar-calificacion";
 import { Comentarios } from "./comentarios";
 import { NombreDocente } from "./nombre-docente";
 import { Promedios } from "./promedios";
@@ -44,10 +45,13 @@ export async function DetalleCatedra({ uuid }: { uuid: string }) {
               </CardFooter>
             </Card>
           )}
-          <Promedios
-            promedios={docente.promedios}
-            cantidadCalificaciones={docente.cantidadCalificaciones}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <Promedios
+              promedios={docente.promedios}
+              cantidadCalificaciones={docente.cantidadCalificaciones}
+            />
+            <AgregarCalificacion nombreDocente={docente.nombre} />
+          </div>
           {docente.comentarios.length > 0 ? (
             <Comentarios comentarios={docente.comentarios} />
           ) : (
