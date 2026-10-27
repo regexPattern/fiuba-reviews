@@ -1,18 +1,23 @@
 # Actualizador de ofertas
 
-Estado y próximos pasos de la reescritura del actualizador de FIUBA Reviews. Ya están conectadas la sanitización, la reconciliación automática de códigos provisionales con recuperación de historial y la consolidación por materia y período. **El próximo bloque de desarrollo es el paso 5: resolver identidades docentes**, con algunos pendientes de las etapas anteriores detallados abajo.
+Estado y próximos pasos de la reescritura del actualizador de FIUBA Reviews. Ya están conectadas la sanitización, la reconciliación automática de códigos provisionales con recuperación de historial y la consolidación por materia y período. **El próximo bloque de desarrollo es completar el paso 5: confirmar y persistir la resolución de identidades docentes**, con algunos pendientes de las etapas anteriores detallados abajo.
 
-El objetivo final es recibir ofertas académicas parseadas, compararlas con la base de datos y generar una **migración SQL revisable**, cuya aplicación sea un paso separado. **Todavía no se genera esa migración:** la reconciliación actual ejecuta SQL sobre la conexión recibida y el ejecutable de desarrollo descarta los cambios mediante `rollback`.
+El objetivo final es recibir ofertas académicas parseadas, compararlas con la base de datos y generar una **migración SQL revisable**, cuya aplicación sea un paso separado. **Todavía no se genera esa migración:** la reconciliación actual ejecuta SQL sobre la conexión recibida y el llamador debe administrar la transacción. El ejecutable actual es un prototipo gráfico y todavía no ejecuta este flujo.
+
+## Migraciones
+
+Este proyecto administra exclusivamente el esquema compartido mediante **SQLx CLI** y los SQL de `migrations/`. Ver [instalación, comandos y transición desde Drizzle](../README.md#migraciones-de-la-base-de-datos). Ejecutar `sqlx migrate add`, `sqlx migrate info` y `sqlx migrate run` desde este directorio. Los tests `#[sqlx::test]` aplican automáticamente ese mismo historial a bases aisladas; la interfaz gráfica no aplica migraciones al iniciarse.
 
 ## Estado actual de la implementación
 
-- `src/main.rs` carga cuatro fixtures (Civil, Industrial e Informática de 1C 2026 e Informática de 2C 2026), conecta a PostgreSQL local, abre una transacción, llama a `armar_patches` y hace `rollback`.
-- `src/lib.rs`: `armar_patches` sanitiza, extrae el catálogo completo, reconcilia materias en la DB y consolida las ofertas, en ese orden. Por ahora devuelve un vector vacío; `Patch` sigue siendo un tipo sin contenido.
+- `src/main.rs` abre el prototipo gráfico de `src/gui.rs` con GPUI Kit; todavía muestra una pantalla de prueba sin conexión a la DB ni carga de ofertas.
+- `src/lib.rs`: `proponer_actualizaciones` sanitiza, reconcilia materias en la DB, consolida las ofertas y devuelve propuestas de docentes resueltos y pendientes, con sus candidatos. El llamador debe administrar la conexión y la transacción.
+- `src/propuesta.rs` y `src/propuesta/docente.rs`: búsqueda de vínculos SIU existentes y candidatos por similitud dentro de cada materia. Las propuestas se ordenan por cantidad de pendientes y código de materia.
 - `src/siu.rs`: tipos compartidos del SIU y reexportaciones. `src/siu/sanitizar.rs`, `src/siu/normalizar.rs` y `src/siu/consolidar.rs` contienen cada implementación con sus tests unitarios que pasan con `cargo test`.
 - `src/catalogo.rs` y `src/catalogo/reconciliar_materias.sql`: extracción de pares únicos `(codigo, nombre)`, reemplazo de códigos provisionales y copia de docentes, calificaciones Dolly y comentarios desde equivalencias.
-- Pendiente inmediato: leer los docentes históricos de cada materia para iniciar su resolución incremental. La comparación con el período de última actualización de la DB tampoco está implementada.
+- Pendiente inmediato: conectar las propuestas a la interfaz y confirmar/persistir las decisiones de identidad docente. La comparación con el período de última actualización de la DB tampoco está implementada.
 
-**Límite del ensayo actual:** `reconciliar_materias` no administra transacciones; si se la llama sin una transacción externa, sus escrituras pueden persistir. Además, el `rollback` no revierte los avances de secuencias PostgreSQL usados al copiar calificaciones/comentarios. No equivale a una planificación de solo lectura.
+**Límite del ensayo actual:** `reconciliar_materias` no administra transacciones; si se la llama sin una transacción externa, sus escrituras pueden persistir. Incluso con una transacción externa, el `rollback` no revierte los avances de secuencias PostgreSQL usados al copiar calificaciones/comentarios. No equivale a una planificación de solo lectura.
 
 ## Conceptos y reglas del dominio
 
@@ -47,7 +52,7 @@ El objetivo final es recibir ofertas académicas parseadas, compararlas con la b
 
 ### 1. Ingress — carga de fixtures implementada; snapshot pendiente
 
-El ejecutable ya deserializa ofertas desde archivos JSON, pero las rutas y la conexión están fijas en `src/main.rs`; todavía no hay una interfaz para seleccionar entradas ni una lectura completa del estado de la DB. Tampoco se conserva el archivo de procedencia en el modelo.
+La biblioteca deserializa ofertas desde JSON, pero el prototipo gráfico todavía no permite seleccionar entradas ni conectar a la DB. Tampoco hay una lectura completa del estado de la DB ni se conserva el archivo de procedencia en el modelo.
 
 Recibir las ofertas producidas por `../parser-siu`. Su contrato actual es:
 
@@ -59,7 +64,7 @@ Recibir las ofertas producidas por `../parser-siu`. Su contrato actual es:
 
 Conservar el contenido original y su procedencia: archivo, carrera y período. El parser sigue siendo genérico; las reglas particulares de FIUBA Reviews pertenecen al actualizador.
 
-Leer también un snapshot lógico de la DB: materias, planes vigentes, equivalencias, docentes, reseñas relacionadas, cátedras, prioridades de roles y períodos de última actualización. El diseño objetivo es calcular los cambios posteriores sobre un estado proyectado, sin escrituras persistentes durante la resolución; hoy la reconciliación del catálogo usa la transacción de desarrollo descrita arriba.
+Leer también un snapshot lógico de la DB: materias, planes vigentes, equivalencias, docentes, reseñas relacionadas, cátedras, prioridades de roles y períodos de última actualización. El diseño objetivo es calcular los cambios posteriores sobre un estado proyectado, sin escrituras persistentes durante la resolución; hoy la reconciliación del catálogo escribe sobre la conexión recibida y requiere una transacción externa.
 
 La DB ya contiene `oferta_comisiones_raw` y `oferta_comisiones`, pero el JSON histórico de esta última usa `catedras` y códigos numéricos internos: **no tiene el mismo contrato ni toda la información del parser nuevo**.
 
@@ -87,7 +92,7 @@ La condición `^XX[0-9]{3}$` evita volver a copiar el historial de una materia c
 
 **Todavía pendiente:** detectar y presentar matches ambiguos, códigos destino ocupados, materias desconocidas y altas; registrar decisiones y fuentes; probar la reconciliación contra PostgreSQL. La selección por nombre del SQL actual no equivale a una resolución humana de identidad docente. Las reglas siguientes describen el alcance objetivo, no funcionalidades ya completas.
 
-Al introducir los planes nuevos se crearon materias con códigos provisionales `COD###`, renombrados a `XX###` por la migración `web/drizzle/0005_rename_placeholder_codes.sql` conservando los tres dígitos. La resolución debe seguir siendo incremental mientras queden pendientes. Las referencias `COD###` del diagnóstico histórico de abajo corresponden al snapshot anterior a esa migración.
+Al introducir los planes nuevos se crearon materias con códigos provisionales `COD###`, renombrados a `XX###` por la migración `migrations/0005_rename_placeholder_codes.sql` (desde este proyecto) conservando los tres dígitos. La resolución debe seguir siendo incremental mientras queden pendientes. Las referencias `COD###` del diagnóstico histórico de abajo corresponden al snapshot anterior a esa migración.
 
 1. Buscar primero por código oficial.
 2. Si no existe, buscar candidatos provisionales por nombre normalizado y contexto del plan/carrera; consultar sus equivalencias con planes anteriores.
@@ -113,7 +118,9 @@ Una segunda ejecución puede traer otra carrera o una corrección **del mismo cu
 
 ### 5. Resolver docentes de forma incremental — próximo paso
 
-Todavía no está conectado a `armar_patches`. El punto de partida ya es una oferta consolidada por materia y un catálogo reconciliado dentro de la misma transacción, donde pueden leerse también los docentes recién copiados por equivalencias. La consolidación ya excluye del trabajo de cátedras las materias sin comisiones.
+La búsqueda de propuestas ya está conectada a `proponer_actualizaciones`: reconoce vínculos por `nombre_siu` normalizado y busca hasta cinco candidatos por similitud dentro de cada materia. Separa los docentes resueltos de los pendientes, sin confirmar ni escribir nuevos vínculos. Hay tests unitarios de agrupación y tests de integración con PostgreSQL que usan las migraciones de este proyecto.
+
+El punto de partida es una oferta consolidada por materia y un catálogo reconciliado sobre la misma conexión, donde pueden leerse también los docentes recién copiados por equivalencias. La consolidación ya excluye del trabajo de cátedras las materias sin comisiones.
 
 La resolución se hace antes de comparar definitivamente los grupos docentes:
 

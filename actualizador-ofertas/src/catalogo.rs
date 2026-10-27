@@ -5,7 +5,7 @@ use tracing::{debug, info};
 
 use crate::OfertaCarrera;
 
-#[derive(Eq, PartialEq, Hash, Debug)]
+#[derive(Debug, Eq, Hash, PartialEq)]
 struct MetadatosMateria {
     codigo: String,
     nombre: String,

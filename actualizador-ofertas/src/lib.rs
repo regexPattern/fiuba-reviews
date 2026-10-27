@@ -1,17 +1,19 @@
-use crate::patch::Patch;
+pub use crate::propuesta::{CandidatoDocente, DocentePendiente, DocenteResuelto, PropuestaMateria};
 pub use crate::siu::OfertaCarrera;
 
 use sqlx::PgConnection;
 use tracing::info;
 
 mod catalogo;
-mod patch;
+mod propuesta;
 mod siu;
 
-pub async fn armar_patches(
+pub mod gui;
+
+pub async fn proponer_actualizaciones(
     mut ofertas_carreras: Vec<OfertaCarrera>,
     db: &mut PgConnection,
-) -> Vec<Patch> {
+) -> Vec<PropuestaMateria> {
     siu::sanitizar_ofertas_carreras(&mut ofertas_carreras);
     catalogo::reconciliar_materias(&ofertas_carreras, db)
         .await
@@ -26,7 +28,5 @@ pub async fn armar_patches(
         "ofertas consolidadas"
     );
 
-    vec![]
+    propuesta::proponer(&ofertas_materias, db).await.unwrap()
 }
-
-pub mod gui;
