@@ -374,8 +374,8 @@ export const ofertaComisionesRaw = pgTable(
 );
 
 // ---------------------------------------------------------------------------------------------
-// Vistas. Se crean con SQL a mano en la última migración de `drizzle/`; acá solo se declaran (`existing`)
-// para poder consultarlas con tipos. Drizzle Kit no las genera ni las toca.
+// Vistas. Se crean con SQL en `actualizador-ofertas/migrations/`; acá solo se declaran
+// (`existing`) para consultarlas con tipos. SQLx administra las migraciones; Drizzle solo es el ORM.
 // ---------------------------------------------------------------------------------------------
 
 /**
