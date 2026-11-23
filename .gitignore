@@ -1,9 +1,23 @@
-# Nix / devenv
+/node_modules
+.pnpm-debug.log*
+
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+/coverage
+
+.env*
+*.pem
+
+.vercel
+
 .devenv/
 .direnv/
 .pre-commit-config.yaml
 result
 result-*
 
-# Misc
 .DS_Store
