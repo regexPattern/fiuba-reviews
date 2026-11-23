@@ -178,6 +178,9 @@ importers:
       '@t3-oss/env-nextjs':
         specifier: ^0.13.11
         version: 0.13.11(typescript@5.9.3)(zod@4.6.7)
+      '@withicons/react':
+        specifier: ^0.6.0
+        version: 0.6.0(react@19.3.0)
       drizzle-orm:
         specifier: ^0.45.4
         version: 0.45.4(postgres@4.1.1)
@@ -861,6 +864,11 @@ packages:
 
   '@types/react@19.3.0':
     resolution: {integrity: sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg==}
+
+  '@withicons/react@0.6.0':
+    resolution: {integrity: sha512-cwlnaEM9P5qUccOi12XORvm2rXHsrDNYUVpaX7TxD8oITCv7qdvvd6zSIAw8/IYCa8D8AoEd8mcmc02+l3rOcw==}
+    peerDependencies:
+      react: '>=16.8.0'
 
   baseline-browser-mapping@2.11.39:
     resolution: {integrity: sha512-Q9buOYhr2ggrEZpImICecZTJHCCd8yXkRUokFlUEQ8uiD6oP82F4W4jWnhOHZYV+wlvrC51V7Wy0ULyWjil5Wg==}
@@ -1581,6 +1589,10 @@ snapshots:
   '@types/react@19.3.0':
     dependencies:
       csstype: 3.2.4
+
+  '@withicons/react@0.6.0(react@19.3.0)':
+    dependencies:
+      react: 19.3.0
 
   baseline-browser-mapping@2.11.39: {}
 

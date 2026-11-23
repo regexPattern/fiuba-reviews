@@ -1,4 +1,5 @@
 import type { ComentarioDocente, DocenteCatedra } from "@/server/db/queries/catedras";
+import { Star } from "@withicons/react/pixel";
 import { notFound } from "next/navigation";
 import { CRITERIOS } from "@/lib/criterios";
 import { getCatedra } from "@/server/db/queries/catedras";
@@ -41,7 +42,8 @@ function Docente({ docente }: { docente: DocenteCatedra }) {
       {docente.promedios ? (
         <details>
           <summary className="cursor-pointer">
-            Promedio: <span className="font-mono">{docente.promedios.general.toFixed(1)}</span> (
+            Promedio: <Star size={16} className="inline-block align-[-2px] text-fiuba" />{" "}
+            <span className="font-mono">{docente.promedios.general.toFixed(1)}</span> (
             <span className="font-mono">{docente.cantidadCalificaciones}</span> calificaciones)
           </summary>
           <dl className="mt-2 grid max-w-xs grid-cols-[1fr_auto] gap-x-4 text-sm">

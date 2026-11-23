@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 @theme {
+  /* Celeste FIUBA: rgb(0, 136, 204). */
+  --color-fiuba: oklch(60% 0.141 241.55);
+
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, monospace;
   /* Geist Pixel solo existe en peso 400: no usar `font-medium`/`font-bold` con esta fuente. */

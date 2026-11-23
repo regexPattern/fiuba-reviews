@@ -1,6 +1,7 @@
 "use client";
 
 import type { CatedraListada } from "@/server/db/queries/catedras";
+import { Star } from "@withicons/react/pixel";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
@@ -30,8 +31,9 @@ export function ListaCatedras({
               aria-current={catedra.codigo === activa ? "page" : undefined}
               className="flex gap-3 rounded p-2 hover:bg-neutral-100 aria-[current=page]:bg-neutral-200"
             >
-              <span className="w-8 shrink-0 text-right font-mono">
+              <span className="flex w-12 shrink-0 items-center justify-end gap-1 font-mono">
                 {catedra.calificacion > 0 ? catedra.calificacion.toFixed(1) : "–"}
+                <Star size={16} className="shrink-0 text-fiuba" />
               </span>
               <span className="font-pixel">{catedra.nombre}</span>
             </Link>
