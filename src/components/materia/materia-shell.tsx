@@ -88,7 +88,7 @@ export function MateriaShell({
           ref={drawerRef}
           aria-label="Cátedras"
           onClick={(event) => event.target === event.currentTarget && cerrarDrawer()}
-          className="modal-drawer h-dvh max-h-none w-[85vw] max-w-sm flex-col border-r bg-white pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] open:flex md:hidden"
+          className="inset-y-0 right-auto left-0 m-0 h-dvh max-h-none w-[85vw] max-w-sm [translate:-100%] flex-col border-r bg-white pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] transition-all transition-discrete duration-300 ease-out backdrop:bg-black/0 backdrop:transition-all backdrop:transition-discrete backdrop:duration-200 open:flex open:[translate:0] open:backdrop:bg-black/20 motion-reduce:transition-none md:hidden starting:open:[translate:-100%] starting:open:backdrop:bg-black/0"
         >
           <div className="flex shrink-0 items-center justify-between border-b px-4 py-3">
             <h2 className="font-pixel text-lg">Cátedras</h2>

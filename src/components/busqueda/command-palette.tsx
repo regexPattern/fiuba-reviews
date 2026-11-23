@@ -59,7 +59,7 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
         // Click en el backdrop: el contenido ocupa todo el diálogo, así que el target solo es
         // el propio diálogo cuando se clickea afuera.
         onClick={(event) => event.target === event.currentTarget && cerrar()}
-        className="modal command-palette flex-col overflow-hidden rounded-md border bg-white shadow-xl open:flex"
+        className="inset-x-0 top-[max(calc(var(--header-height)+1rem),15dvh)] bottom-auto mx-auto max-h-[75dvh] w-[calc(100%-2rem)] max-w-xl scale-97 flex-col overflow-hidden rounded-md border bg-white opacity-0 shadow-xl transition-all transition-discrete duration-200 ease-out backdrop:bg-black/0 backdrop:transition-all backdrop:transition-discrete backdrop:duration-200 open:flex open:scale-100 open:opacity-100 open:backdrop:bg-black/20 motion-reduce:transition-none starting:open:scale-97 starting:open:opacity-0 starting:open:backdrop:bg-black/0"
       >
         <BuscadorMaterias
           materias={materias}
