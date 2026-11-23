@@ -1,0 +1,9 @@
+# Nix / devenv
+.devenv/
+.direnv/
+.pre-commit-config.yaml
+result
+result-*
+
+# Misc
+.DS_Store
