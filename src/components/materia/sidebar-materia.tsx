@@ -14,8 +14,8 @@ export async function SidebarMateria({
   return (
     <>
       <header className="space-y-2 border-b p-4">
-        <h1 className="text-lg font-semibold">
-          <span className="font-mono">{materia.codigo}</span> · {materia.nombre}
+        <h1 className="font-pixel text-lg">
+          {materia.codigo} · {materia.nombre}
         </h1>
         <p className="text-sm">
           {materia.cuatrimestre ? (

@@ -33,7 +33,7 @@ export function ListaCatedras({
               <span className="w-8 shrink-0 text-right font-mono">
                 {catedra.calificacion > 0 ? catedra.calificacion.toFixed(1) : "–"}
               </span>
-              <span>{catedra.nombre}</span>
+              <span className="font-pixel">{catedra.nombre}</span>
             </Link>
           </li>
         ))}

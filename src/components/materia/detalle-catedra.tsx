@@ -26,7 +26,7 @@ function Docente({ docente }: { docente: DocenteCatedra }) {
   return (
     <section id={docente.codigo} className="space-y-4">
       <div>
-        <h2 className="text-2xl font-semibold">{docente.nombre}</h2>
+        <h2 className="font-pixel text-2xl">{docente.nombre}</h2>
         {docente.nombreSiu && <p className="text-sm text-neutral-500">{docente.nombreSiu}</p>}
         {docente.rol && <p className="text-sm text-neutral-500">{docente.rol}</p>}
       </div>
@@ -42,7 +42,7 @@ function Docente({ docente }: { docente: DocenteCatedra }) {
         <details>
           <summary className="cursor-pointer">
             Promedio: <span className="font-mono">{docente.promedios.general.toFixed(1)}</span> (
-            {docente.cantidadCalificaciones} calificaciones)
+            <span className="font-mono">{docente.cantidadCalificaciones}</span> calificaciones)
           </summary>
           <dl className="mt-2 grid max-w-xs grid-cols-[1fr_auto] gap-x-4 text-sm">
             {CRITERIOS.map(({ nombre, etiqueta }) => (

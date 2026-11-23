@@ -1,6 +1,17 @@
 @import "tailwindcss";
 
-@theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@theme {
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+  /* Geist Pixel solo existe en peso 400: no usar `font-medium`/`font-bold` con esta fuente. */
+  --font-pixel: "Geist Pixel Variable", var(--font-mono);
+}
+
+@utility font-pixel {
+  font-family: var(--font-pixel);
+  font-weight: 400;
+  /* Eje ELSH (forma del píxel): 1 = Square, 20 = Circle, 40 = Grid, 60 = Triangle, 80 = Line. */
+  font-variation-settings: "ELSH" 1;
+  /* Evita que el navegador sintetice negrita, que deforma los píxeles. */
+  font-synthesis: none;
 }
