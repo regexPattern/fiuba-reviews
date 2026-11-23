@@ -4,7 +4,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "next": "16.4.6",
@@ -15,6 +20,8 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "oxfmt": "^0.79.0",
+    "oxlint": "^1.94.0",
     "typescript": "^5"
   },
   "packageManager": "pnpm@12.9.0"

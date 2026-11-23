@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "trailingComma": "none",
+  "sortPackageJson": false,
+  "ignorePatterns": [".next/**", "out/**", "build/**", "next-env.d.ts", "pnpm-lock.yaml"],
+  "sortImports": {
+    "internalPattern": ["@/"],
+    "newlinesBetween": false,
+    "customGroups": [
+      {
+        "groupName": "react-next",
+        "elementNamePattern": ["^(react|next)(/.*)?$"]
+      }
+    ],
+    "groups": [
+      "react-next",
+      "type",
+      ["builtin", "external"],
+      "internal",
+      ["parent", "sibling", "index"],
+      "unknown"
+    ]
+  }
+}
