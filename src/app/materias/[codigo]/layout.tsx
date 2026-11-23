@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { SidebarMateria } from "@/components/materia/sidebar-materia";
+import { MateriaShell } from "@/components/materia/materia-shell";
+import { SidebarMateria, TituloMateria } from "@/components/materia/sidebar-materia";
 import { getMateria } from "@/server/db/queries/materias";
 
 export async function generateMetadata({
@@ -16,13 +17,19 @@ export async function generateMetadata({
 
 export default function Layout({ params, children }: LayoutProps<"/materias/[codigo]">) {
   return (
-    <div className="mx-auto flex max-w-6xl flex-col md:h-[calc(100dvh-var(--header-height))] md:flex-row">
-      <aside className="flex shrink-0 flex-col border-b md:w-80 md:border-r md:border-b-0">
+    <MateriaShell
+      titulo={
+        <Suspense fallback="Cargando materia…">
+          <TituloMateria params={params} />
+        </Suspense>
+      }
+      sidebar={
         <Suspense fallback={<p className="p-4">Cargando materia…</p>}>
           <SidebarMateria params={params} />
         </Suspense>
-      </aside>
-      <main className="min-w-0 flex-1 md:overflow-y-auto">{children}</main>
-    </div>
+      }
+    >
+      {children}
+    </MateriaShell>
   );
 }

@@ -20,41 +20,24 @@
 }
 
 :root {
-  --header-height: 3.5rem;
+  /* Alto del header fijo, incluido el safe area superior (`viewport-fit=cover`). */
+  --header-height: calc(3.5rem + env(safe-area-inset-top));
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-/* Con un diálogo modal abierto, la página no scrollea por detrás. */
+/* Con un diálogo modal abierto el documento no scrollea por detrás (en móvil scrollea la ventana). */
 html:has(dialog:modal) {
   overflow: hidden;
 }
 
-/* Las animaciones de entrada usan `@starting-style` y las de salida mantienen el diálogo en el top layer. */
+/* Diálogos nativos. Entran con `@starting-style` y al cerrar siguen visibles hasta terminar la animación. */
 @layer components {
-  .command-palette {
-    inset: max(calc(var(--header-height) + 1rem), 15dvh) 0 auto;
-    margin: 0 auto;
-    width: calc(100% - 2rem);
-    max-width: 36rem;
-    max-height: 75dvh;
-    opacity: 0;
-    scale: 0.97;
-    transition-property: opacity, scale, overlay, display;
+  .command-palette,
+  .modal-drawer {
+    transition-property: opacity, translate, scale, overlay, display;
     transition-duration: 200ms;
     transition-timing-function: var(--ease-out);
     transition-behavior: allow-discrete;
-
-    &[open] {
-      opacity: 1;
-      scale: 1;
-    }
-
-    @starting-style {
-      &[open] {
-        opacity: 0;
-        scale: 0.97;
-      }
-    }
 
     &::backdrop {
       background-color: rgb(0 0 0 / 0);
@@ -74,8 +57,49 @@ html:has(dialog:modal) {
     }
   }
 
+  .command-palette {
+    inset: max(calc(var(--header-height) + 1rem), 15dvh) 0 auto;
+    margin: 0 auto;
+    width: calc(100% - 2rem);
+    max-width: 36rem;
+    max-height: 75dvh;
+    opacity: 0;
+    scale: 0.97;
+
+    &[open] {
+      opacity: 1;
+      scale: 1;
+    }
+
+    @starting-style {
+      &[open] {
+        opacity: 0;
+        scale: 0.97;
+      }
+    }
+  }
+
+  .modal-drawer {
+    inset: 0 auto 0 0;
+    margin: 0;
+    translate: -100% 0;
+    transition-duration: 300ms;
+
+    &[open] {
+      translate: 0 0;
+    }
+
+    @starting-style {
+      &[open] {
+        translate: -100% 0;
+      }
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .command-palette {
+    .command-palette,
+    .modal-drawer {
+      translate: none;
       scale: none;
       transition-duration: 0ms;
     }

@@ -25,7 +25,11 @@ function Docente({ docente }: { docente: DocenteCatedra }) {
   const ocultos = docente.comentarios.slice(COMENTARIOS_VISIBLES);
 
   return (
-    <section id={docente.codigo} className="space-y-4">
+    <section
+      id={docente.codigo}
+      // Que los anchors a un docente no queden debajo del header (y de la barra sticky en móvil).
+      className="scroll-mt-[calc(var(--header-height)+var(--materia-sticky-height,0px)+1rem)] space-y-4 md:scroll-mt-[calc(var(--header-height)+1.5rem)]"
+    >
       <div>
         <h2 className="font-pixel text-2xl">{docente.nombre}</h2>
         {docente.nombreSiu && <p className="text-sm text-neutral-500">{docente.nombreSiu}</p>}

@@ -8,12 +8,13 @@ async function BusquedaGlobal() {
   return <CommandPalette materias={materias} />;
 }
 
+/** Fijo y translúcido, el contenido scrollea por debajo. Suma el safe area superior por `viewport-fit=cover`. */
 export function Header() {
   return (
-    <header className="h-(--header-height) border-b">
+    <header className="fixed inset-x-0 top-0 z-40 border-b bg-white/75 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
       <nav
         aria-label="Navegación principal"
-        className="mx-auto flex h-full max-w-6xl items-center justify-between gap-2 px-4 md:px-6"
+        className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4 md:px-6"
       >
         <Link href="/" className="flex min-h-11 items-center font-pixel text-lg">
           FIUBA Reviews

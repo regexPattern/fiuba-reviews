@@ -8,6 +8,7 @@ import { useMemo, useState } from "react";
 import { TextoConMatches } from "@/components/busqueda/texto-con-matches";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { crearBusqueda } from "@/lib/busqueda";
+import { useMateriaShell } from "./materia-shell";
 
 export function ListaCatedras({
   codigoMateria,
@@ -16,6 +17,7 @@ export function ListaCatedras({
   codigoMateria: string;
   catedras: CatedraListada[];
 }) {
+  const { alNavegar } = useMateriaShell();
   // Sin cátedra en la URL, la página muestra la primera.
   const activa = useParams<{ catedra?: string }>().catedra ?? catedras[0]?.codigo;
   const [query, setQuery] = useState("");
@@ -40,6 +42,9 @@ export function ListaCatedras({
                 href={`/materias/${codigoMateria}/catedras/${catedra.codigo}`}
                 // Prefetch completo, no solo hasta el Suspense: el click es instantáneo.
                 prefetch={true}
+                // Scrollea la shell, así no queda debajo del header.
+                scroll={false}
+                onNavigate={alNavegar}
                 aria-current={catedra.codigo === activa ? "page" : undefined}
                 className="flex gap-3 rounded p-2 hover:bg-neutral-100 aria-[current=page]:bg-neutral-200"
               >
