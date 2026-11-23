@@ -18,3 +18,66 @@
   /* Evita que el navegador sintetice negrita, que deforma los píxeles. */
   font-synthesis: none;
 }
+
+:root {
+  --header-height: 3.5rem;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Con un diálogo modal abierto, la página no scrollea por detrás. */
+html:has(dialog:modal) {
+  overflow: hidden;
+}
+
+/* Las animaciones de entrada usan `@starting-style` y las de salida mantienen el diálogo en el top layer. */
+@layer components {
+  .command-palette {
+    inset: max(calc(var(--header-height) + 1rem), 15dvh) 0 auto;
+    margin: 0 auto;
+    width: calc(100% - 2rem);
+    max-width: 36rem;
+    max-height: 75dvh;
+    opacity: 0;
+    scale: 0.97;
+    transition-property: opacity, scale, overlay, display;
+    transition-duration: 200ms;
+    transition-timing-function: var(--ease-out);
+    transition-behavior: allow-discrete;
+
+    &[open] {
+      opacity: 1;
+      scale: 1;
+    }
+
+    @starting-style {
+      &[open] {
+        opacity: 0;
+        scale: 0.97;
+      }
+    }
+
+    &::backdrop {
+      background-color: rgb(0 0 0 / 0);
+      transition-property: background-color, overlay, display;
+      transition-duration: 200ms;
+      transition-behavior: allow-discrete;
+    }
+
+    &[open]::backdrop {
+      background-color: rgb(0 0 0 / 0.2);
+    }
+
+    @starting-style {
+      &[open]::backdrop {
+        background-color: rgb(0 0 0 / 0);
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .command-palette {
+      scale: none;
+      transition-duration: 0ms;
+    }
+  }
+}

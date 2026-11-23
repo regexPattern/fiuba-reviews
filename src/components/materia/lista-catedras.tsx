@@ -1,9 +1,13 @@
 "use client";
 
 import type { CatedraListada } from "@/server/db/queries/catedras";
-import { Star } from "@withicons/react/pixel";
+import { ListFilter, Star } from "@withicons/react/pixel";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useMemo, useState } from "react";
+import { TextoConMatches } from "@/components/busqueda/texto-con-matches";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { crearBusqueda } from "@/lib/busqueda";
 
 export function ListaCatedras({
   codigoMateria,
@@ -12,34 +16,67 @@ export function ListaCatedras({
   codigoMateria: string;
   catedras: CatedraListada[];
 }) {
-  // En `/materias/[codigo]` no hay cátedra en la URL y se muestra la primera.
+  // Sin cátedra en la URL, la página muestra la primera.
   const activa = useParams<{ catedra?: string }>().catedra ?? catedras[0]?.codigo;
+  const [query, setQuery] = useState("");
+  const debouncedQuery = useDebouncedValue(query);
+  const buscar = useMemo(() => crearBusqueda(catedras, ["nombre"]), [catedras]);
+  const resultados = useMemo(() => buscar(debouncedQuery), [buscar, debouncedQuery]);
 
   if (catedras.length === 0) {
     return <p className="p-4 text-sm">Esta materia no tiene cátedras todavía.</p>;
   }
 
   return (
-    <nav aria-label="Cátedras" className="min-h-0 flex-1 overflow-y-auto">
-      <ul className="p-2">
-        {catedras.map((catedra) => (
-          <li key={catedra.codigo}>
-            <Link
-              href={`/materias/${codigoMateria}/catedras/${catedra.codigo}`}
-              // Trae la página prerenderizada de la cátedra antes del click.
-              prefetch={true}
-              aria-current={catedra.codigo === activa ? "page" : undefined}
-              className="flex gap-3 rounded p-2 hover:bg-neutral-100 aria-[current=page]:bg-neutral-200"
-            >
-              <span className="flex w-12 shrink-0 items-center justify-end gap-1 font-mono">
-                {catedra.calificacion > 0 ? catedra.calificacion.toFixed(1) : "–"}
-                <Star size={16} className="shrink-0 text-fiuba" />
-              </span>
-              <span className="font-pixel">{catedra.nombre}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <nav
+        aria-label="Cátedras"
+        className="min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto overscroll-contain"
+      >
+        <ul className="p-2">
+          {resultados.map(({ item: catedra, matches }) => (
+            <li key={catedra.codigo}>
+              <Link
+                href={`/materias/${codigoMateria}/catedras/${catedra.codigo}`}
+                // Prefetch completo, no solo hasta el Suspense: el click es instantáneo.
+                prefetch={true}
+                aria-current={catedra.codigo === activa ? "page" : undefined}
+                className="flex gap-3 rounded p-2 hover:bg-neutral-100 aria-[current=page]:bg-neutral-200"
+              >
+                <span className="flex w-12 shrink-0 items-center justify-end gap-1 font-mono">
+                  {catedra.calificacion > 0 ? catedra.calificacion.toFixed(1) : "–"}
+                  <Star size={16} className="shrink-0 text-fiuba" />
+                </span>
+                <TextoConMatches
+                  className="font-pixel"
+                  texto={catedra.nombre}
+                  indices={matches?.[0]?.indices}
+                />
+              </Link>
+            </li>
+          ))}
+        </ul>
+        {resultados.length === 0 && <p className="p-4 text-sm text-neutral-500">Sin resultados.</p>}
+      </nav>
+
+      <div className="shrink-0 border-t p-3">
+        <label className="relative block">
+          <span className="sr-only">Filtrar cátedras por nombre de docente</span>
+          {/* 16px en móvil: con menos, iOS hace zoom al enfocar. */}
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Filtrar por nombre de docente"
+            className="h-9 w-full rounded border px-3 pr-9 text-base outline-none placeholder:text-neutral-500 focus-visible:ring-2 focus-visible:ring-fiuba/50 md:text-sm"
+          />
+          <ListFilter
+            size={16}
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-neutral-500"
+          />
+        </label>
+      </div>
+    </div>
   );
 }

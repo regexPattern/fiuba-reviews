@@ -16,7 +16,7 @@ export async function generateMetadata({
 
 export default function Layout({ params, children }: LayoutProps<"/materias/[codigo]">) {
   return (
-    <div className="mx-auto flex max-w-6xl flex-col md:h-dvh md:flex-row">
+    <div className="mx-auto flex max-w-6xl flex-col md:h-[calc(100dvh-var(--header-height))] md:flex-row">
       <aside className="flex shrink-0 flex-col border-b md:w-80 md:border-r md:border-b-0">
         <Suspense fallback={<p className="p-4">Cargando materia…</p>}>
           <SidebarMateria params={params} />
