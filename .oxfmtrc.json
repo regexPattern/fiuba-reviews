@@ -2,6 +2,10 @@
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "trailingComma": "none",
   "sortPackageJson": false,
+  "sortTailwindcss": {
+    "stylesheet": "./src/app/globals.css",
+    "functions": ["cn", "clsx", "cva"]
+  },
   "ignorePatterns": [".next/**", "out/**", "build/**", "next-env.d.ts", "pnpm-lock.yaml"],
   "sortImports": {
     "internalPattern": ["@/"],
