@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCatedrasMateria } from "@/server/db/queries/catedras";
@@ -5,7 +6,9 @@ import { getMateria } from "@/server/db/queries/materias";
 import { ListaCatedras } from "./lista-catedras";
 
 /** Título corto para la barra sticky móvil que abre el drawer de cátedras. */
-export async function TituloMateria({ params }: Pick<LayoutProps<"/materias/[codigo]">, "params">) {
+export async function TituloMateria({
+  params,
+}: Pick<LayoutProps<"/materias/[codigo]">, "params">) {
   const { codigo } = await params;
   const materia = await getMateria(codigo);
 
@@ -23,10 +26,13 @@ export async function TituloMateria({ params }: Pick<LayoutProps<"/materias/[cod
 }
 
 export async function SidebarMateria({
-  params
+  params,
 }: Pick<LayoutProps<"/materias/[codigo]">, "params">) {
   const { codigo } = await params;
-  const [materia, catedras] = await Promise.all([getMateria(codigo), getCatedrasMateria(codigo)]);
+  const [materia, catedras] = await Promise.all([
+    getMateria(codigo),
+    getCatedrasMateria(codigo),
+  ]);
 
   if (!materia) notFound();
 
@@ -39,7 +45,9 @@ export async function SidebarMateria({
           <span className="min-w-0 flex-1 font-acento text-base/5 font-medium">
             {materia.nombre}
           </span>
-          <span className="shrink-0 font-numeros text-sm/5">{materia.codigo}</span>
+          <span className="shrink-0 font-numeros text-sm/5">
+            {materia.codigo}
+          </span>
         </h1>
         <p className="px-4 py-3 text-sm text-stone-500">
           {materia.cuatrimestre ? (
@@ -61,7 +69,8 @@ export async function SidebarMateria({
           )}{" "}
           Si ves que la oferta está desactualizada, podés colaborar{" "}
           <Link
-            href="/planes"
+            // TODO: sacar el cast cuando exista la página `/planes`.
+            href={"/planes" as Route}
             className="text-fiuba underline decoration-fiuba/40 underline-offset-2 hover:decoration-fiuba"
           >
             enviándola acá
