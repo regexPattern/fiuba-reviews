@@ -1,7 +1,7 @@
 import type { ComentarioDocente, DocenteCatedra } from "@/server/db/queries/catedras";
 import type { Route } from "next";
 import { PenLine } from "@withicons/react/line";
-import { Quote, Sparkles } from "@withicons/react/plush";
+import { MessageCircleQuestion, Quote, Sparkles } from "@withicons/react/plush";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -80,7 +80,7 @@ function Docente({ docente, codigoCatedra }: { docente: DocenteCatedra; codigoCa
       {docente.comentarios.length > 0 ? (
         <Comentarios id={`${docente.codigo}-comentarios`} comentarios={docente.comentarios} />
       ) : (
-        <p className="rotulo text-stone-500">Docente sin comentarios</p>
+        <SinComentarios />
       )}
     </section>
   );
@@ -123,6 +123,20 @@ function ResumenIA({ resumen }: { resumen: string }) {
         Resumen generado con IA
       </footer>
     </div>
+  );
+}
+
+/**
+ * Hueco punteado donde irían los comentarios: mismo borde y radio que las cajas en `relieve` pero
+ * sin canto, así se lee como un lugar vacío y no como contenido. Texto en caja normal y no en
+ * `rotulo`, para que no se confunda con el nombre del SIU y el rol de arriba.
+ */
+function SinComentarios() {
+  return (
+    <p className="flex items-center gap-2 rounded-md border-[1.5px] border-dashed border-stone-300 px-3 py-3 text-sm text-stone-500">
+      <MessageCircleQuestion size={18} aria-hidden="true" className="shrink-0 text-stone-400" />
+      Todavía nadie comentó sobre este docente.
+    </p>
   );
 }
 
