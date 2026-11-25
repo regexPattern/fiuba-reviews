@@ -1,7 +1,14 @@
 "use client";
 
-import { Close, Search } from "@withicons/react/pixel";
-import { type ComponentProps, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { Close, Search } from "@withicons/react/plush";
+import {
+  type ComponentProps,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore
+} from "react";
 import { BuscadorMaterias, type MateriaBuscador } from "./buscador-materias";
 
 const subscribePlatform = () => () => {};
@@ -59,7 +66,7 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
         // Click en el backdrop: el contenido ocupa todo el diálogo, así que el target solo es
         // el propio diálogo cuando se clickea afuera.
         onClick={(event) => event.target === event.currentTarget && cerrar()}
-        className="inset-x-0 top-[max(calc(var(--header-height)+1rem),15dvh)] bottom-auto mx-auto max-h-[75dvh] w-[calc(100%-2rem)] max-w-xl scale-97 flex-col overflow-hidden border bg-white opacity-0 shadow-xl transition-all transition-discrete duration-200 ease-out backdrop:bg-black/0 backdrop:transition-all backdrop:transition-discrete backdrop:duration-200 open:flex open:scale-100 open:opacity-100 open:backdrop:bg-black/20 motion-reduce:transition-none starting:open:scale-97 starting:open:opacity-0 starting:open:backdrop:bg-black/0"
+        className="inset-x-0 top-[max(calc(var(--header-height)+1rem),15dvh)] bottom-auto mx-auto max-h-[75dvh] w-[calc(100%-2rem)] max-w-xl scale-97 flex-col overflow-hidden relieve bg-white text-tinta opacity-0 transition-all transition-discrete duration-200 ease-out backdrop:bg-black/0 backdrop:transition-all backdrop:transition-discrete backdrop:duration-200 open:flex open:scale-100 open:opacity-100 open:backdrop:bg-black/20 motion-reduce:transition-none starting:open:scale-97 starting:open:opacity-0 starting:open:backdrop:bg-black/0"
       >
         <BuscadorMaterias
           materias={materias}
@@ -71,20 +78,32 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
               type="button"
               onClick={cerrar}
               aria-label="Cerrar buscador"
-              className="flex h-6 shrink-0 items-center border px-1.5 text-xs text-neutral-500 hover:bg-neutral-100"
+              // Tecla chica en relieve, como los atajos del pie.
+              className="flex h-6 shrink-0 relieve-boton cursor-pointer items-center bg-white px-1.5 font-numeros text-xs text-stone-500 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fiuba"
             >
-              <Close size={12} className="sm:hidden" aria-hidden="true" />
+              <Close size={14} className="sm:hidden" aria-hidden="true" />
               <span className="hidden sm:inline">Esc</span>
             </button>
           }
         />
+        {/* Pie apagado, como el del resumen con IA. */}
         <div
           aria-hidden="true"
-          className="hidden shrink-0 gap-4 border-t px-3 py-2 text-xs text-neutral-500 sm:flex"
+          className="hidden shrink-0 items-center gap-4 border-t border-stone-200 bg-stone-50 px-3 py-2 rotulo text-stone-500 sm:flex"
         >
-          <span>↑ ↓ navegar</span>
-          <span>↵ abrir</span>
-          <span className="ml-auto">Esc cerrar</span>
+          <span className="flex items-center gap-1.5">
+            <Tecla>↑</Tecla>
+            <Tecla>↓</Tecla>
+            navegar
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Tecla>↵</Tecla>
+            abrir
+          </span>
+          <span className="ml-auto flex items-center gap-1.5">
+            <Tecla>Esc</Tecla>
+            cerrar
+          </span>
         </div>
       </dialog>
     </>
@@ -97,18 +116,28 @@ export function BotonBuscar({ atajo, ...props }: ComponentProps<"button"> & { at
       type="button"
       aria-label="Buscar materias"
       aria-haspopup="dialog"
-      className="flex h-11 items-center gap-2 px-3 text-sm hover:bg-neutral-100 disabled:opacity-50 sm:h-9"
+      // Terciario, sin borde ni relieve: el atajo ya va en una tecla en relieve y dos cajas competirían.
+      className="boton-terciario h-9 disabled:pointer-events-none disabled:opacity-50"
       {...props}
     >
-      <Search size={16} aria-hidden="true" />
+      <Search size={18} aria-hidden="true" className="text-stone-500" />
       <span>
         Buscar<span className="hidden sm:inline"> materias</span>
       </span>
       {atajo && (
-        <kbd className="hidden border px-1.5 py-0.5 font-mono text-xs text-neutral-500 sm:inline">
-          {atajo}
-        </kbd>
+        <span className="ml-1 hidden sm:flex">
+          <Tecla>{atajo}</Tecla>
+        </span>
       )}
     </button>
+  );
+}
+
+/** Tecla chica en relieve bajo, para atajos de teclado. */
+function Tecla({ children }: { children: ReactNode }) {
+  return (
+    <kbd className="inline-flex h-5 min-w-5 items-center justify-center relieve bg-white px-1 font-numeros text-xs font-normal tracking-normal text-stone-500 normal-case [--relieve-alto:2px]">
+      {children}
+    </kbd>
   );
 }

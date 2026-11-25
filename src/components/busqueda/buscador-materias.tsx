@@ -1,6 +1,6 @@
 "use client";
 
-import { Search } from "@withicons/react/pixel";
+import { Search } from "@withicons/react/plush";
 import { Command } from "cmdk";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useMemo, useState } from "react";
@@ -47,8 +47,8 @@ export function BuscadorMaterias({
       onValueChange={(codigo) => setSeleccion({ query: debouncedQuery, codigo })}
       className="flex min-h-0 flex-1 flex-col"
     >
-      <div className="flex shrink-0 items-center gap-2 border-b px-3">
-        <Search size={16} aria-hidden="true" className="shrink-0 text-neutral-500" />
+      <div className="flex shrink-0 items-center gap-2 border-b border-stone-300 px-3">
+        <Search size={18} aria-hidden="true" className="shrink-0 text-stone-500" />
         {/* 16px en móvil evita el zoom de iOS al enfocar. */}
         <Command.Input
           autoCapitalize="off"
@@ -56,7 +56,7 @@ export function BuscadorMaterias({
           placeholder="Buscar materia o código…"
           value={query}
           onValueChange={onQueryChange}
-          className="h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-neutral-500 md:text-sm"
+          className="h-12 min-w-0 flex-1 bg-transparent text-base text-tinta outline-none placeholder:text-stone-400 md:text-sm"
         />
         {inputAction}
       </div>
@@ -66,10 +66,11 @@ export function BuscadorMaterias({
             ? "Materias ordenadas por relevancia"
             : "Materias ordenadas por relevancia general"
         }
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-1"
+        // cmdk envuelve los ítems en `[cmdk-list-sizer]`: el espaciado va ahí.
+        className="min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto overscroll-contain p-2 [&_[cmdk-list-sizer]]:space-y-1.5"
       >
         {resultados.length === 0 && (
-          <p className="py-6 text-center text-sm">No se encontraron materias.</p>
+          <p className="py-6 text-center text-sm text-stone-400">No se encontraron materias.</p>
         )}
         {resultados.map(({ item: materia, matches }) => (
           <Command.Item
@@ -79,25 +80,26 @@ export function BuscadorMaterias({
               onSelect?.();
               router.push(`/materias/${materia.codigo}`);
             }}
-            className="flex cursor-pointer items-center gap-3 px-2 py-3 text-sm select-none data-[selected=true]:bg-neutral-100"
+            // Mismo estilo que la lista de cátedras: la seleccionada queda en relieve celeste.
+            // `scroll-m*`: al navegar con flechas cmdk hace `scrollIntoView` y sin esto el ítem queda
+            // pegado al borde, sin el `p-2` de la lista. Abajo suma los 3px del canto del relieve.
+            className="flex cursor-pointer scroll-mt-2 scroll-mb-[calc(--spacing(2)+3px)] items-start gap-2 rounded-md border-[1.5px] border-transparent px-2.5 py-2 text-sm text-stone-600 select-none data-[selected=true]:relieve data-[selected=true]:bg-sky-50 data-[selected=true]:text-tinta data-[selected=true]:[--relieve:var(--color-fiuba-oscuro)]"
           >
-            <span className="min-w-0 flex-1 wrap-break-word">
-              <TextoConMatches
-                className="font-numeros text-neutral-600"
-                texto={materia.codigo}
-                indices={matches?.find((match) => match.key === "codigo")?.indices}
-              />
-              {" · "}
-              <TextoConMatches
-                className="font-acento text-base font-medium"
-                texto={materia.nombre}
-                indices={matches?.find((match) => match.key === "nombre")?.indices}
-              />
-            </span>
+            {/* Nombre primero y código apagado a la derecha, como en el encabezado de la materia. */}
+            <TextoConMatches
+              className="min-w-0 flex-1 font-acento text-base/6 wrap-break-word"
+              texto={materia.nombre}
+              indices={matches?.find((match) => match.key === "nombre")?.indices}
+            />
+            <TextoConMatches
+              className="shrink-0 font-numeros text-sm/6 text-stone-400"
+              texto={materia.codigo}
+              indices={matches?.find((match) => match.key === "codigo")?.indices}
+            />
           </Command.Item>
         ))}
         {restantes > 0 && (
-          <p className="px-2 py-3 text-center text-xs text-neutral-500">
+          <p className="px-2 py-3 text-center text-xs text-stone-500">
             <span className="font-numeros tabular-nums">{restantes}</span>{" "}
             {restantes === 1 ? "materia más" : "materias más"} · seguí escribiendo para filtrar
           </p>
