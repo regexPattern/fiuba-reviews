@@ -19,7 +19,7 @@ export function PromedioDocente({
     <Popover.Root>
       <Popover.Trigger
         aria-label={`Promedio ${promedios.general.toFixed(1)}. Ver desglose por criterio`}
-        className="group flex shrink-0 relieve-boton cursor-pointer items-center gap-1.5 bg-white py-1 pr-1.5 pl-2 text-sm font-medium text-tinta outline-none focus-visible:ring-2 focus-visible:ring-fiuba"
+        className="group boton-secundario"
       >
         <Numero>{promedios.general.toFixed(1)}</Numero>
         <Star size={18} aria-hidden="true" className="text-fiuba" />

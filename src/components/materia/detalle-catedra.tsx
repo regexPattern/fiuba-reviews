@@ -1,13 +1,13 @@
 import type { ComentarioDocente, DocenteCatedra } from "@/server/db/queries/catedras";
 import type { Route } from "next";
 import { PenLine } from "@withicons/react/line";
-import { ChevronDown, Quote, Sparkles } from "@withicons/react/plush";
+import { Quote, Sparkles } from "@withicons/react/plush";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import dollyLogo from "@/assets/dolly-logo.png";
+import { ComentariosOcultos } from "@/components/materia/comentarios-ocultos";
 import { PromedioDocente } from "@/components/materia/promedio-docente";
-import { Etiqueta } from "@/components/ui/etiqueta";
 import { Numero } from "@/components/ui/numero";
 import { getCatedra } from "@/server/db/queries/catedras";
 
@@ -39,12 +39,21 @@ function Docente({ docente, codigoCatedra }: { docente: DocenteCatedra; codigoCa
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-2">
         <div className="min-w-0 flex-1 space-y-1">
           <h2 className="font-acento text-[1.375rem]/7 font-medium text-tinta">{docente.nombre}</h2>
-          {docente.nombreSiu && (
-            <p className="truncate rotulo text-stone-500">{docente.nombreSiu}</p>
-          )}
-          {docente.rol && (
-            <div className="flex">
-              <Etiqueta>{docente.rol}</Etiqueta>
+          {/* Nombre del SIU y rol separados por un punto. Si no entran en un renglón, el rol baja
+              entero. El punto va al principio de cada parte y el `overflow-hidden` junto con el
+              `-ml-4` recorta el de la que arranca un renglón, así nunca queda un punto colgando. */}
+          {(docente.nombreSiu || docente.rol) && (
+            <div className="overflow-hidden">
+              <p className="-ml-4 flex flex-wrap rotulo text-stone-500">
+                {[docente.nombreSiu, docente.rol].filter(Boolean).map((parte) => (
+                  <span
+                    key={parte}
+                    className="relative pl-4 before:absolute before:left-1.5 before:content-['·'_/_'']"
+                  >
+                    {parte}
+                  </span>
+                ))}
+              </p>
             </div>
           )}
         </div>
@@ -81,7 +90,7 @@ function Docente({ docente, codigoCatedra }: { docente: DocenteCatedra; codigoCa
   );
 }
 
-/** Botón principal (celeste) que lleva al formulario para calificar al docente. */
+/** Botón primario (celeste) que lleva al formulario para calificar al docente. */
 function BotonCalificar({
   codigoDocente,
   codigoCatedra,
@@ -98,7 +107,7 @@ function BotonCalificar({
       // TODO: la página `/calificar` todavía no existe en este sitio (misma URL que el anterior).
       // El cast es por `typedRoutes`: sacarlo cuando exista la ruta.
       href={`/calificar?${params}` as Route}
-      className={`flex shrink-0 relieve-boton items-center gap-1.5 bg-fiuba px-2.5 py-1 text-sm font-medium text-white outline-none [--relieve:var(--color-fiuba-oscuro)] focus-visible:ring-2 focus-visible:ring-fiuba focus-visible:ring-offset-2 ${className ?? ""}`}
+      className={`boton-primario ${className ?? ""}`}
     >
       <PenLine size={16} aria-hidden="true" className="shrink-0" />
       Calificar
@@ -110,11 +119,11 @@ function BotonCalificar({
 function ResumenIA({ resumen }: { resumen: string }) {
   // Los textos arrancan a 26px del borde, igual que el de los comentarios (ícono de 18px +
   // `gap-2`): 1.5px de borde + 24.5px de padding. El pie usa menos porque arranca con el ícono.
-  // Vertical: 19px, que con los ~5px de interlineado de `text-sm/6` arriba y abajo se ve como los
-  // 24.5px de los costados.
+  // Vertical: 19px, que con los 5px de interlineado de `text-base/relaxed` (16px en renglones de
+  // 26px) arriba y abajo se ve como los 24.5px de los costados.
   return (
     <div className="overflow-hidden relieve bg-white">
-      <p className="px-[24.5px] py-[19px] text-sm/6 text-stone-700">{resumen}</p>
+      <p className="px-[24.5px] py-[19px] text-base/relaxed text-stone-700">{resumen}</p>
       <footer className="flex items-center gap-2 border-t border-stone-200 bg-stone-50 px-3 py-2 rotulo text-stone-500">
         <Sparkles size={18} aria-hidden="true" className="shrink-0" />
         Resumen generado con IA
@@ -136,15 +145,11 @@ function Comentarios({ id, comentarios }: { id: string; comentarios: ComentarioD
         <Comentario key={comentario.codigo} comentario={comentario} />
       ))}
       {ocultos.length > 0 && (
-        <details className="group">
-          <summary className="mx-2 mt-2 flex w-fit relieve-boton cursor-pointer list-none items-center gap-2 bg-white px-3 py-1.5 text-sm text-stone-700 group-open:hidden [&::-webkit-details-marker]:hidden">
-            <ChevronDown size={18} aria-hidden="true" />
-            Mostrar <Numero>{ocultos.length}</Numero> comentarios más
-          </summary>
+        <ComentariosOcultos cantidad={ocultos.length}>
           {ocultos.map((comentario) => (
             <Comentario key={comentario.codigo} comentario={comentario} />
           ))}
-        </details>
+        </ComentariosOcultos>
       )}
     </div>
   );
@@ -153,8 +158,8 @@ function Comentarios({ id, comentarios }: { id: string; comentarios: ComentarioD
 function Comentario({ comentario }: { comentario: ComentarioDocente }) {
   return (
     <article className="flex gap-2 px-2 py-2">
-      <Quote size={18} aria-hidden="true" className="mt-0.5 shrink-0 text-stone-400" />
-      <p className="min-w-0 flex-1 text-sm/6 text-stone-700">
+      <Quote size={18} aria-hidden="true" className="mt-1 shrink-0 text-stone-400" />
+      <p className="min-w-0 flex-1 text-base/relaxed text-stone-700">
         <span className="whitespace-pre-wrap">{comentario.contenido.trim()}</span>
         {/* Metadata al final del texto, en la misma línea. Fuera del `pre-wrap` para que el espacio
             no quede al principio del renglón si la metadata baja. Doble espacio: el `nbsp` queda

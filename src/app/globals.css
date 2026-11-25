@@ -72,6 +72,33 @@
   }
 }
 
+/*
+ * Niveles de botón, como en PostHog:
+ * - `boton-primario`: lleno y en relieve, para la acción principal (calificar).
+ * - `boton-secundario`: blanco y en relieve, para acciones de apoyo (abrir el desglose).
+ * - `boton-terciario`: sin borde ni relieve, solo fondo al pasar el mouse, para lo que no tiene
+ *   que competir con el contenido (mostrar más/menos comentarios).
+ * Todos comparten `boton`: tamaño de texto, alineación del ícono y el foco.
+ */
+@utility boton {
+  /* Foco con `outline` y no con `ring`: el `ring` es un `box-shadow` y pisaría el canto del relieve. */
+  @apply flex shrink-0 cursor-pointer items-center gap-1.5 text-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fiuba;
+}
+
+@utility boton-primario {
+  --relieve: var(--color-fiuba-oscuro);
+  @apply boton relieve-boton bg-fiuba px-2.5 py-1 font-medium text-white;
+}
+
+@utility boton-secundario {
+  @apply boton relieve-boton bg-white px-2 py-1 font-medium text-tinta;
+}
+
+/* Al pasar el mouse cambia solo el fondo: ni el peso ni el color del texto. */
+@utility boton-terciario {
+  @apply boton rounded-md px-3 py-1.5 text-stone-600 hover:bg-stone-100;
+}
+
 /* Rótulo chico en versalitas espaciadas (roles, aclaraciones). */
 @utility rotulo {
   font-size: 0.6875rem;
