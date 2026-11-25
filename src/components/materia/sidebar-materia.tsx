@@ -11,9 +11,12 @@ export async function TituloMateria({ params }: Pick<LayoutProps<"/materias/[cod
   if (!materia) notFound();
 
   return (
-    <span className="flex items-center gap-2">
-      <span className="shrink-0 font-numeros">{materia.codigo}</span>
-      <span className="min-w-0 truncate font-acento">{materia.nombre}</span>
+    // Misma tipografía que el título del sidebar: nombre a la izquierda y código a la derecha.
+    <span className="flex items-baseline gap-2">
+      <span className="min-w-0 flex-1 truncate font-acento text-base/5 font-medium">
+        {materia.nombre}
+      </span>
+      <span className="shrink-0 font-numeros text-sm/5">{materia.codigo}</span>
     </span>
   );
 }
@@ -29,13 +32,13 @@ export async function SidebarMateria({
   return (
     <>
       <header className="shrink-0 space-y-3 px-4 pt-4 pb-2">
-        {/* Código a la izquierda y del mismo color que el nombre, como parte del título. Si el nombre
-            baja, sigue alineado consigo mismo y el código queda en la línea base del primer renglón. */}
+        {/* Nombre a la izquierda y código a la derecha, del mismo color, como parte del título. Si
+            el nombre baja, el código queda en la línea base del primer renglón. */}
         <h1 className="flex items-baseline gap-2 text-tinta">
-          <span className="shrink-0 font-numeros text-sm/5">{materia.codigo}</span>
           <span className="min-w-0 flex-1 font-acento text-base/5 font-medium">
             {materia.nombre}
           </span>
+          <span className="shrink-0 font-numeros text-sm/5">{materia.codigo}</span>
         </h1>
         <p className="text-sm text-stone-500">
           {materia.cuatrimestre ? (
