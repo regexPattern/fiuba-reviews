@@ -70,8 +70,13 @@ function Docente({ docente, codigoCatedra }: { docente: DocenteCatedra; codigoCa
               Sin calificaciones
             </span>
           )}
-          {/* A la derecha de la nota, en móvil y en desktop. */}
-          <BotonCalificar codigoDocente={docente.codigo} codigoCatedra={codigoCatedra} />
+          {/* En móvil, primero: la nota cambia de ancho entre docentes y así "Calificar" queda siempre
+              alineado a la izquierda. Desde `sm`, a la derecha de la nota (contra el borde). */}
+          <BotonCalificar
+            codigoDocente={docente.codigo}
+            codigoCatedra={codigoCatedra}
+            className="-order-1 sm:order-none"
+          />
         </div>
       </header>
 
@@ -89,10 +94,12 @@ function Docente({ docente, codigoCatedra }: { docente: DocenteCatedra; codigoCa
 /** Botón primario (celeste) que lleva al formulario para calificar al docente. */
 function BotonCalificar({
   codigoDocente,
-  codigoCatedra
+  codigoCatedra,
+  className
 }: {
   codigoDocente: string;
   codigoCatedra: string;
+  className?: string;
 }) {
   const params = new URLSearchParams({ docente: codigoDocente, catedra: codigoCatedra });
 
@@ -101,7 +108,7 @@ function BotonCalificar({
       // TODO: la página `/calificar` todavía no existe en este sitio (misma URL que el anterior).
       // El cast es por `typedRoutes`: sacarlo cuando exista la ruta.
       href={`/calificar?${params}` as Route}
-      className="boton-primario"
+      className={`boton-primario ${className ?? ""}`}
     >
       <PenLine size={16} aria-hidden="true" className="shrink-0" />
       Calificar
