@@ -19,6 +19,32 @@ export const cuatrimestre = pgTable("cuatrimestre", {
   anio: smallint().notNull()
 });
 
+export const carrera = pgTable("carrera", {
+  codigo: serial().primaryKey(),
+  nombre: text().notNull()
+});
+
+export const plan = pgTable("plan", {
+  codigo: serial().primaryKey(),
+  codigoCarrera: integer().notNull(),
+  anio: smallint().notNull(),
+  vigente: boolean().notNull()
+});
+
+/** Oferta de comisiones de una carrera en un cuatrimestre, ya procesada. */
+export const ofertaComisiones = pgTable("oferta_comisiones", {
+  codigoCarrera: integer().notNull(),
+  codigoCuatrimestre: integer().notNull(),
+  contenido: jsonb().notNull()
+});
+
+/** Oferta tal cual la pegaron desde el SIU, pendiente de procesar. */
+export const ofertaComisionesRaw = pgTable("oferta_comisiones_raw", {
+  codigoCarrera: integer().notNull(),
+  codigoCuatrimestre: integer().notNull(),
+  contenido: text().notNull()
+});
+
 export const materia = pgTable("materia", {
   codigo: text().primaryKey(),
   nombre: text().notNull(),

@@ -13,10 +13,12 @@ import { tags } from "@/server/cache";
  *  - `materias`: cambió la info o el listado de cátedras (incluidas sus calificaciones) de estas
  *    materias.
  *  - `catedras`: cambiaron los docentes, calificaciones o comentarios de estas cátedras.
+ *  - `ofertas`: se procesaron ofertas de comisiones (estado por carrera en `/planes`).
  *  - `tags`: tags arbitrarios, para invalidaciones manuales.
  */
 const Body = z.object({
   planes: z.boolean().default(false),
+  ofertas: z.boolean().default(false),
   materias: z.array(z.string().min(1)).default([]),
   catedras: z.array(z.uuid()).default([]),
   tags: z.array(z.string().min(1)).default([])
@@ -41,11 +43,12 @@ export async function POST(req: Request) {
     return Response.json({ error: z.prettifyError(body.error) }, { status: 400 });
   }
 
-  const { planes, materias, catedras } = body.data;
+  const { planes, ofertas, materias, catedras } = body.data;
 
   const invalidados = new Set([
     ...body.data.tags,
     ...(planes ? [tags.materias] : []),
+    ...(ofertas ? [tags.ofertas] : []),
     ...materias.flatMap((codigo) => [tags.materia(codigo), tags.catedras(codigo)]),
     ...catedras.map(tags.catedra)
   ]);

@@ -7,10 +7,12 @@
  *  - `catedras:<codigo>`: cátedras propias de una materia y sus calificaciones. Una materia
  *    vigente que usa equivalencias depende de los `catedras:` de cada equivalencia.
  *  - `catedra:<uuid>`: detalle de una cátedra (docentes, promedios y comentarios).
+ *  - `ofertas`: estado de las ofertas de comisiones de cada carrera (procesadas y recibidas).
  */
 export const tags = {
   materias: "materias",
   materia: (codigo: string) => `materia:${codigo}`,
   catedras: (codigoMateria: string) => `catedras:${codigoMateria}`,
-  catedra: (codigo: string) => `catedra:${codigo}`
+  catedra: (codigo: string) => `catedra:${codigo}`,
+  ofertas: "ofertas"
 } as const;
