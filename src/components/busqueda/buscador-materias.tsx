@@ -1,6 +1,6 @@
 "use client";
 
-import { Search } from "@withicons/react/plush";
+import { Search } from "@withicons/react/line";
 import { Command } from "cmdk";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useMemo, useState } from "react";

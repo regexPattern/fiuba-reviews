@@ -1,7 +1,8 @@
 "use client";
 
 import type { CatedraListada } from "@/server/db/queries/catedras";
-import { ListFilter, Star } from "@withicons/react/plush";
+import { ListFilter } from "@withicons/react/line";
+import { Star } from "@withicons/react/plush";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";

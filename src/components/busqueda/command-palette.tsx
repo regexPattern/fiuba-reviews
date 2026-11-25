@@ -1,6 +1,6 @@
 "use client";
 
-import { Close, Search } from "@withicons/react/plush";
+import { Close, Search } from "@withicons/react/line";
 import {
   type ComponentProps,
   type ReactNode,

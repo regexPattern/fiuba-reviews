@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronsUpDown, Close } from "@withicons/react/plush";
+import { ChevronsUpDown, Close } from "@withicons/react/line";
 import { type ReactNode, createContext, useContext, useLayoutEffect, useRef } from "react";
 
 const ShellContext = createContext<{ alNavegar: () => void }>({ alNavegar: () => {} });
