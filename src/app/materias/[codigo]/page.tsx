@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { DetalleCatedra } from "@/components/materia/detalle-catedra";
 import { getCatedrasMateria } from "@/server/db/queries/catedras";
 import { getMateriasVigentes } from "@/server/db/queries/materias";
@@ -11,11 +10,7 @@ export async function generateStaticParams() {
 
 /** Sin cátedra elegida se muestra la primera del listado (la mejor calificada). */
 export default function Page({ params }: PageProps<"/materias/[codigo]">) {
-  return (
-    <Suspense fallback={<p className="p-4">Cargando cátedra…</p>}>
-      <PrimeraCatedra params={params} />
-    </Suspense>
-  );
+  return <PrimeraCatedra params={params} />;
 }
 
 async function PrimeraCatedra({ params }: Pick<PageProps<"/materias/[codigo]">, "params">) {

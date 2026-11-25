@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCatedrasMateria } from "@/server/db/queries/catedras";
 import { getMateria } from "@/server/db/queries/materias";
@@ -31,16 +32,16 @@ export async function SidebarMateria({
 
   return (
     <>
-      <header className="shrink-0 space-y-3 px-4 pt-4 pb-2">
+      <header className="shrink-0 divide-y divide-stone-200 border-b border-stone-200">
         {/* Nombre a la izquierda y código a la derecha, del mismo color, como parte del título. Si
             el nombre baja, el código queda en la línea base del primer renglón. */}
-        <h1 className="flex items-baseline gap-2 text-tinta">
+        <h1 className="flex items-baseline gap-2 p-4 text-tinta">
           <span className="min-w-0 flex-1 font-acento text-base/5 font-medium">
             {materia.nombre}
           </span>
           <span className="shrink-0 font-numeros text-sm/5">{materia.codigo}</span>
         </h1>
-        <p className="text-sm text-stone-500">
+        <p className="px-4 py-3 text-sm text-stone-500">
           {materia.cuatrimestre ? (
             <>
               Última actualización de cátedras en{" "}
@@ -57,7 +58,15 @@ export async function SidebarMateria({
               </span>
               .
             </>
-          )}
+          )}{" "}
+          Si ves que la oferta está desactualizada, podés colaborar{" "}
+          <Link
+            href="/planes"
+            className="text-fiuba underline decoration-fiuba/40 underline-offset-2 hover:decoration-fiuba"
+          >
+            enviándola acá
+          </Link>
+          .
         </p>
       </header>
       <ListaCatedras codigoMateria={codigo} catedras={catedras} />
