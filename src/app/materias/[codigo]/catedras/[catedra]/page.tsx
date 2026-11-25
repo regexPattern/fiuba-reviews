@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { DetalleCatedra } from "@/components/materia/detalle-catedra";
@@ -12,6 +13,14 @@ export async function generateStaticParams() {
     catedras[i].map((catedra) => ({ codigo, catedra: catedra.codigo }))
   );
 }
+
+/**
+ * Solo se indexan las materias: su página ya muestra la mejor cátedra. Las cátedras no se indexan,
+ * pero se siguen sus links (al resto de las cátedras y materias).
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: true }
+};
 
 export default function Page({ params }: PageProps<"/materias/[codigo]/catedras/[catedra]">) {
   return (

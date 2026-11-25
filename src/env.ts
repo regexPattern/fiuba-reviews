@@ -6,9 +6,14 @@ export const env = createEnv({
     DATABASE_URL: z.url(),
     REVALIDATE_SECRET: z.string().min(32)
   },
+  client: {
+    /** URL pública del sitio, para las URLs absolutas del sitemap, `robots.txt` y metadatos. */
+    NEXT_PUBLIC_BASE_URL: z.url()
+  },
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
-    REVALIDATE_SECRET: process.env.REVALIDATE_SECRET
+    REVALIDATE_SECRET: process.env.REVALIDATE_SECRET,
+    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL
   },
   emptyStringAsUndefined: true,
   skipValidation: process.env.SKIP_ENV_VALIDATION === "1"
