@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { DetalleCatedra } from "@/components/materia/detalle-catedra";
 import { getCatedrasMateria } from "@/server/db/queries/catedras";
 import { getMateriasVigentes } from "@/server/db/queries/materias";
@@ -22,7 +23,11 @@ export const metadata: Metadata = {
 };
 
 export default function Page({ params }: PageProps<"/materias/[codigo]/catedras/[catedra]">) {
-  return <Catedra params={params} />;
+  return (
+    <Suspense fallback={<p className="p-4">Cargando cátedra…</p>}>
+      <Catedra params={params} />
+    </Suspense>
+  );
 }
 
 async function Catedra({
