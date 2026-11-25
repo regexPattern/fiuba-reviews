@@ -2,6 +2,12 @@ import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
 import "@fontsource-variable/geist-pixel";
+// Fuentes en prueba (ver `--font-acento` y `--font-numeros` en globals.css).
+import "@fontsource/instrument-serif";
+import "@fontsource-variable/newsreader/opsz.css";
+import "@fontsource-variable/fraunces/full.css";
+import "@fontsource-variable/source-serif-4/opsz.css";
+import "@fontsource-variable/jetbrains-mono";
 import { Header } from "@/components/layout/header";
 import "./globals.css";
 

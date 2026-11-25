@@ -4,19 +4,93 @@
   /* Celeste FIUBA: rgb(0, 136, 204). */
   --color-fiuba: oklch(60% 0.141 241.55);
 
+  /* Celeste FIUBA oscuro: borde y canto de lo que está en relieve sobre celeste. */
+  --color-fiuba-oscuro: oklch(48% 0.12 241.55);
+  /* Texto principal, casi negro y cálido. */
+  --color-tinta: oklch(21.6% 0.006 56.04);
+
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, monospace;
-  /* Geist Pixel solo existe en peso 400: no usar `font-medium`/`font-bold` con esta fuente. */
   --font-pixel: "Geist Pixel Variable", var(--font-mono);
+
+  /* Serifs en prueba para la fuente de acento (nombres de materias, cátedras y docentes). */
+  --font-instrument: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-newsreader: "Newsreader Variable", ui-serif, Georgia, serif;
+  --font-fraunces: "Fraunces Variable", ui-serif, Georgia, serif;
+  --font-source-serif: "Source Serif 4 Variable", ui-serif, Georgia, serif;
+
+  /* Fuente de acento: cambiar acá para probar otra. */
+  --font-acento: var(--font-sans);
+
+  /* Monospace en prueba para los números (calificaciones, cuatrimestres, cantidades). */
+  --font-jetbrains: "JetBrains Mono Variable", ui-monospace, monospace;
+  --font-geist-mono: var(--font-mono);
+
+  /* Fuente de los números: cambiar acá para probar otra. */
+  --font-numeros: var(--font-mono);
 }
 
-@utility font-pixel {
-  font-family: var(--font-pixel);
-  font-weight: 400;
-  /* Eje ELSH (forma del píxel): 1 = Square, 20 = Circle, 40 = Grid, 60 = Triangle, 80 = Line. */
-  font-variation-settings: "ELSH" 1;
-  /* Evita que el navegador sintetice negrita, que deforma los píxeles. */
-  font-synthesis: none;
+/*
+ * Relieve tipo PostHog: borde de 1.5px y un canto sólido del mismo color abajo, como si la caja
+ * fuera una tecla. Se colorea con `--relieve` (borde y canto) y `--relieve-alto` (alto del canto,
+ * 3px por defecto).
+ */
+@utility relieve {
+  border: 1.5px solid var(--relieve, var(--color-stone-300));
+  border-radius: var(--radius-md);
+  box-shadow: 0 var(--relieve-alto, 3px) 0 var(--relieve, var(--color-stone-300));
+}
+
+/*
+ * `relieve` para cosas clickeables: al pasar el mouse sube un poco y al apretar se hunde. El
+ * `translate` compensa el canto, así lo que está alrededor no se mueve.
+ */
+@utility relieve-boton {
+  --relieve-alto: 3px;
+  border: 1.5px solid var(--relieve, var(--color-stone-300));
+  border-radius: var(--radius-md);
+  box-shadow: 0 var(--relieve-alto) 0 var(--relieve, var(--color-stone-300));
+  transition-property: translate, box-shadow, background-color;
+  transition-duration: 100ms;
+  transition-timing-function: ease-out;
+
+  @media (hover: hover) {
+    &:hover {
+      --relieve-alto: 4px;
+      translate: 0 -1px;
+    }
+  }
+
+  &:active,
+  &[data-popup-open] {
+    --relieve-alto: 1px;
+    translate: 0 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+/* Rótulo chico en versalitas espaciadas (roles, aclaraciones). */
+@utility rotulo {
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@layer utilities {
+  .font-pixel {
+    /* Geist Pixel tiene un solo peso (400). Usamos la variante Square sin negrita sintética. */
+    font-variation-settings: "ELSH" 1;
+    font-synthesis: none;
+  }
+
+  .font-acento {
+    /* Por si la fuente de acento tiene un solo peso (Instrument Serif): sin negrita sintética. */
+    font-synthesis: none;
+  }
 }
 
 :root {

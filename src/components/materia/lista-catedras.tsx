@@ -1,7 +1,7 @@
 "use client";
 
 import type { CatedraListada } from "@/server/db/queries/catedras";
-import { ListFilter, Star } from "@withicons/react/pixel";
+import { ListFilter, Star } from "@withicons/react/plush";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -31,11 +31,34 @@ export function ListaCatedras({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
+      {/* `px-2`, igual que la lista: el input queda alineado con el borde de la cátedra seleccionada. */}
+      <div className="shrink-0 px-2 pt-3 pb-1">
+        <label className="relative block">
+          <span className="sr-only">Filtrar cátedras por docente</span>
+          {/* 16px en móvil: con menos, iOS hace zoom al enfocar. */}
+          <input
+            type="search"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Filtrar por docente"
+            className="h-9 w-full rounded-md border-[1.5px] border-stone-300 bg-white px-2.5 pr-9 text-base outline-none placeholder:text-stone-400 focus-visible:border-fiuba focus-visible:ring-3 focus-visible:ring-fiuba/20 md:text-sm"
+          />
+          <ListFilter
+            size={18}
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-stone-600"
+          />
+        </label>
+      </div>
       <nav
         aria-label="Cátedras"
         className="min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto overscroll-contain"
       >
-        <ul className="p-2">
+        <ul className="space-y-1.5 p-2">
           {resultados.map(({ item: catedra, matches }) => (
             <li key={catedra.codigo}>
               <Link
@@ -46,14 +69,16 @@ export function ListaCatedras({
                 scroll={false}
                 onNavigate={alNavegar}
                 aria-current={catedra.codigo === activa ? "page" : undefined}
-                className="flex gap-3 rounded p-2 hover:bg-neutral-100 aria-[current=page]:bg-neutral-200"
+                className="flex items-start gap-2 rounded-md border-[1.5px] border-transparent px-2.5 py-2 text-sm text-stone-600 hover:bg-stone-100 hover:text-tinta aria-[current=page]:relieve aria-[current=page]:bg-sky-50 aria-[current=page]:text-tinta aria-[current=page]:[--relieve:var(--color-fiuba-oscuro)]"
               >
-                <span className="flex w-12 shrink-0 items-center justify-end gap-1 font-mono">
+                {/* Calificación a la izquierda con ancho fijo, así los nombres quedan alineados.
+                    `h-5` es el alto de un renglón: queda a la altura del primero si el nombre baja. */}
+                <span className="flex h-5 w-12 shrink-0 items-center gap-1 font-numeros text-stone-600 tabular-nums">
+                  <Star size={16} aria-hidden="true" className="shrink-0 text-fiuba" />
                   {catedra.calificacion > 0 ? catedra.calificacion.toFixed(1) : "–"}
-                  <Star size={16} className="shrink-0 text-fiuba" />
                 </span>
                 <TextoConMatches
-                  className="font-pixel"
+                  className="min-w-0 flex-1 font-acento"
                   texto={catedra.nombre}
                   indices={matches?.[0]?.indices}
                 />
@@ -61,27 +86,8 @@ export function ListaCatedras({
             </li>
           ))}
         </ul>
-        {resultados.length === 0 && <p className="p-4 text-sm text-neutral-500">Sin resultados.</p>}
+        {resultados.length === 0 && <p className="p-4 text-sm text-stone-400">Sin resultados.</p>}
       </nav>
-
-      <div className="shrink-0 border-t p-3">
-        <label className="relative block">
-          <span className="sr-only">Filtrar cátedras por nombre de docente</span>
-          {/* 16px en móvil: con menos, iOS hace zoom al enfocar. */}
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Filtrar por nombre de docente"
-            className="h-9 w-full rounded border px-3 pr-9 text-base outline-none placeholder:text-neutral-500 focus-visible:ring-2 focus-visible:ring-fiuba/50 md:text-sm"
-          />
-          <ListFilter
-            size={16}
-            aria-hidden="true"
-            className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-neutral-500"
-          />
-        </label>
-      </div>
     </div>
   );
 }

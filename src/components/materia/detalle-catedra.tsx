@@ -1,7 +1,14 @@
 import type { ComentarioDocente, DocenteCatedra } from "@/server/db/queries/catedras";
-import { Star } from "@withicons/react/pixel";
+import type { Route } from "next";
+import { PenLine } from "@withicons/react/line";
+import { ChevronDown, Quote, Sparkles } from "@withicons/react/plush";
+import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CRITERIOS } from "@/lib/criterios";
+import dollyLogo from "@/assets/dolly-logo.png";
+import { PromedioDocente } from "@/components/materia/promedio-docente";
+import { Etiqueta } from "@/components/ui/etiqueta";
+import { Numero } from "@/components/ui/numero";
 import { getCatedra } from "@/server/db/queries/catedras";
 
 const COMENTARIOS_VISIBLES = 10;
@@ -12,87 +19,167 @@ export async function DetalleCatedra({ codigo }: { codigo: string }) {
   if (!catedra) notFound();
 
   return (
-    <div className="space-y-10 p-4 md:p-6">
+    <div className="space-y-12 p-4 md:p-6">
       {catedra.docentes.map((docente) => (
-        <Docente key={docente.codigo} docente={docente} />
+        <Docente key={docente.codigo} docente={docente} codigoCatedra={catedra.codigo} />
       ))}
     </div>
   );
 }
 
-function Docente({ docente }: { docente: DocenteCatedra }) {
-  const visibles = docente.comentarios.slice(0, COMENTARIOS_VISIBLES);
-  const ocultos = docente.comentarios.slice(COMENTARIOS_VISIBLES);
-
+function Docente({ docente, codigoCatedra }: { docente: DocenteCatedra; codigoCatedra: string }) {
   return (
     <section
       id={docente.codigo}
       // Que los anchors a un docente no queden debajo del header (y de la barra sticky en móvil).
       className="scroll-mt-[calc(var(--header-height)+var(--materia-sticky-height,0px)+1rem)] space-y-4 md:scroll-mt-[calc(var(--header-height)+1.5rem)]"
     >
-      <div>
-        <h2 className="font-pixel text-2xl">{docente.nombre}</h2>
-        {docente.nombreSiu && <p className="text-sm text-neutral-500">{docente.nombreSiu}</p>}
-        {docente.rol && <p className="text-sm text-neutral-500">{docente.rol}</p>}
-      </div>
-
-      {docente.resumenComentarios && (
-        <div className="rounded border p-4">
-          <p>{docente.resumenComentarios}</p>
-          <p className="mt-2 text-sm text-neutral-500">Resumen generado con IA</p>
-        </div>
-      )}
-
-      {docente.promedios ? (
-        <details>
-          <summary className="cursor-pointer">
-            Promedio: <Star size={16} className="inline-block align-[-2px] text-fiuba" />{" "}
-            <span className="font-mono">{docente.promedios.general.toFixed(1)}</span> (
-            <span className="font-mono">{docente.cantidadCalificaciones}</span> calificaciones)
-          </summary>
-          <dl className="mt-2 grid max-w-xs grid-cols-[1fr_auto] gap-x-4 text-sm">
-            {CRITERIOS.map(({ nombre, etiqueta }) => (
-              <div key={nombre} className="contents">
-                <dt>{etiqueta}</dt>
-                <dd className="font-mono">{docente.promedios![nombre].toFixed(1)}</dd>
-              </div>
-            ))}
-          </dl>
-        </details>
-      ) : (
-        <p>Sin calificaciones</p>
-      )}
-
-      {docente.comentarios.length > 0 ? (
-        <div className="divide-y">
-          {visibles.map((comentario) => (
-            <Comentario key={comentario.codigo} comentario={comentario} />
-          ))}
-          {ocultos.length > 0 && (
-            <details className="divide-y">
-              <summary className="cursor-pointer py-3">
-                Mostrar {ocultos.length} comentarios más
-              </summary>
-              {ocultos.map((comentario) => (
-                <Comentario key={comentario.codigo} comentario={comentario} />
-              ))}
-            </details>
+      {/* En pantallas chicas las acciones van en una fila debajo del nombre, así el nombre del SIU
+          no se corta. Desde `sm`, a la derecha y a la altura del nombre (`items-start`). */}
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-2">
+        <div className="min-w-0 flex-1 space-y-1">
+          <h2 className="font-acento text-[1.375rem]/7 font-medium text-tinta">{docente.nombre}</h2>
+          {docente.nombreSiu && (
+            <p className="truncate rotulo text-stone-500">{docente.nombreSiu}</p>
+          )}
+          {docente.rol && (
+            <div className="flex">
+              <Etiqueta>{docente.rol}</Etiqueta>
+            </div>
           )}
         </div>
+        <div className="flex shrink-0 items-start gap-2">
+          {docente.promedios ? (
+            <PromedioDocente
+              promedios={docente.promedios}
+              cantidadCalificaciones={docente.cantidadCalificaciones}
+            />
+          ) : (
+            // Misma forma que el botón del promedio pero apagado, tipo deshabilitado: no hay
+            // desglose para mostrar. Es un `span` y no un `button disabled`: no hay nada que hacer.
+            <span className="shrink-0 relieve bg-stone-50 px-2.5 py-1 text-sm text-stone-400 select-none [--relieve:var(--color-stone-200)]">
+              Sin calificaciones
+            </span>
+          )}
+          {/* En móvil, a la derecha de la nota; desde `sm`, a la izquierda (lejos del borde). */}
+          <BotonCalificar
+            codigoDocente={docente.codigo}
+            codigoCatedra={codigoCatedra}
+            className="sm:-order-1"
+          />
+        </div>
+      </header>
+
+      {docente.resumenComentarios && <ResumenIA resumen={docente.resumenComentarios} />}
+
+      {docente.comentarios.length > 0 ? (
+        <Comentarios id={`${docente.codigo}-comentarios`} comentarios={docente.comentarios} />
       ) : (
-        <p className="text-sm text-neutral-500">Docente sin comentarios</p>
+        <p className="rotulo text-stone-500">Docente sin comentarios</p>
       )}
     </section>
   );
 }
 
+/** Botón principal (celeste) que lleva al formulario para calificar al docente. */
+function BotonCalificar({
+  codigoDocente,
+  codigoCatedra,
+  className
+}: {
+  codigoDocente: string;
+  codigoCatedra: string;
+  className?: string;
+}) {
+  const params = new URLSearchParams({ docente: codigoDocente, catedra: codigoCatedra });
+
+  return (
+    <Link
+      // TODO: la página `/calificar` todavía no existe en este sitio (misma URL que el anterior).
+      // El cast es por `typedRoutes`: sacarlo cuando exista la ruta.
+      href={`/calificar?${params}` as Route}
+      className={`flex shrink-0 relieve-boton items-center gap-1.5 bg-fiuba px-2.5 py-1 text-sm font-medium text-white outline-none [--relieve:var(--color-fiuba-oscuro)] focus-visible:ring-2 focus-visible:ring-fiuba focus-visible:ring-offset-2 ${className ?? ""}`}
+    >
+      <PenLine size={16} aria-hidden="true" className="shrink-0" />
+      Calificar
+    </Link>
+  );
+}
+
+/** Tarjeta en relieve con el resumen y un pie con la aclaración de que es generado con IA. */
+function ResumenIA({ resumen }: { resumen: string }) {
+  // Los textos arrancan a 26px del borde, igual que el de los comentarios (ícono de 18px +
+  // `gap-2`): 1.5px de borde + 24.5px de padding. El pie usa menos porque arranca con el ícono.
+  // Vertical: 19px, que con los ~5px de interlineado de `text-sm/6` arriba y abajo se ve como los
+  // 24.5px de los costados.
+  return (
+    <div className="overflow-hidden relieve bg-white">
+      <p className="px-[24.5px] py-[19px] text-sm/6 text-stone-700">{resumen}</p>
+      <footer className="flex items-center gap-2 border-t border-stone-200 bg-stone-50 px-3 py-2 rotulo text-stone-500">
+        <Sparkles size={18} aria-hidden="true" className="shrink-0" />
+        Resumen generado con IA
+      </footer>
+    </div>
+  );
+}
+
+function Comentarios({ id, comentarios }: { id: string; comentarios: ComentarioDocente[] }) {
+  const visibles = comentarios.slice(0, COMENTARIOS_VISIBLES);
+  const ocultos = comentarios.slice(COMENTARIOS_VISIBLES);
+
+  return (
+    <div
+      id={id}
+      className="-mx-2 scroll-mt-[calc(var(--header-height)+var(--materia-sticky-height,0px)+1rem)] md:scroll-mt-[calc(var(--header-height)+1.5rem)]"
+    >
+      {visibles.map((comentario) => (
+        <Comentario key={comentario.codigo} comentario={comentario} />
+      ))}
+      {ocultos.length > 0 && (
+        <details className="group">
+          <summary className="mx-2 mt-2 flex w-fit relieve-boton cursor-pointer list-none items-center gap-2 bg-white px-3 py-1.5 text-sm text-stone-700 group-open:hidden [&::-webkit-details-marker]:hidden">
+            <ChevronDown size={18} aria-hidden="true" />
+            Mostrar <Numero>{ocultos.length}</Numero> comentarios más
+          </summary>
+          {ocultos.map((comentario) => (
+            <Comentario key={comentario.codigo} comentario={comentario} />
+          ))}
+        </details>
+      )}
+    </div>
+  );
+}
+
 function Comentario({ comentario }: { comentario: ComentarioDocente }) {
   return (
-    <article className="space-y-1 py-3">
-      <p className="whitespace-pre-wrap">{comentario.contenido.trim()}</p>
-      <p className="font-mono text-xs text-neutral-500">
-        {comentario.cuatrimestre.numero}C{comentario.cuatrimestre.anio}
-        {comentario.deDolly && " · Dolly"}
+    <article className="flex gap-2 px-2 py-2">
+      <Quote size={18} aria-hidden="true" className="mt-0.5 shrink-0 text-stone-400" />
+      <p className="min-w-0 flex-1 text-sm/6 text-stone-700">
+        <span className="whitespace-pre-wrap">{comentario.contenido.trim()}</span>
+        {/* Metadata al final del texto, en la misma línea. Fuera del `pre-wrap` para que el espacio
+            no quede al principio del renglón si la metadata baja. Doble espacio: el `nbsp` queda
+            pegado al texto y el normal es el punto de corte (un `margin` dejaría sangría al bajar). */}
+        {"\u00A0 "}
+        <span className="whitespace-nowrap text-stone-400 select-none">
+          <span className="text-xs">
+            <Numero>
+              {comentario.cuatrimestre.numero}C{comentario.cuatrimestre.anio}
+            </Numero>
+          </span>
+          {comentario.deDolly && (
+            <>
+              {/* Mismo espacio que entre el texto y el cuatrimestre (al tamaño del texto). */}
+              {"\u00A0\u00A0"}
+              <Image
+                src={dollyLogo}
+                alt="Dolly FIUBA"
+                title="Comentario importado de Dolly FIUBA"
+                draggable={false}
+                className="inline-block h-4 w-auto align-[-3px] select-none"
+              />
+            </>
+          )}
+        </span>
       </p>
     </article>
   );

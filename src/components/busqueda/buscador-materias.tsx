@@ -51,8 +51,9 @@ export function BuscadorMaterias({
         <Search size={16} aria-hidden="true" className="shrink-0 text-neutral-500" />
         {/* 16px en móvil evita el zoom de iOS al enfocar. */}
         <Command.Input
-          aria-label="Buscar materias por nombre o código"
-          placeholder="Buscar materia por nombre o código…"
+          autoCapitalize="off"
+          aria-label="Buscar materias por código o título"
+          placeholder="Buscar materia o código…"
           value={query}
           onValueChange={onQueryChange}
           className="h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-neutral-500 md:text-sm"
@@ -78,16 +79,17 @@ export function BuscadorMaterias({
               onSelect?.();
               router.push(`/materias/${materia.codigo}`);
             }}
-            className="flex cursor-pointer items-center gap-3 rounded px-2 py-3 text-sm select-none data-[selected=true]:bg-neutral-100"
+            className="flex cursor-pointer items-center gap-3 px-2 py-3 text-sm select-none data-[selected=true]:bg-neutral-100"
           >
-            <span className="min-w-0 flex-1">
+            <span className="min-w-0 flex-1 wrap-break-word">
               <TextoConMatches
-                className="font-mono"
+                className="font-numeros text-neutral-600"
                 texto={materia.codigo}
                 indices={matches?.find((match) => match.key === "codigo")?.indices}
               />
               {" · "}
               <TextoConMatches
+                className="font-acento text-base font-medium"
                 texto={materia.nombre}
                 indices={matches?.find((match) => match.key === "nombre")?.indices}
               />
@@ -96,8 +98,8 @@ export function BuscadorMaterias({
         ))}
         {restantes > 0 && (
           <p className="px-2 py-3 text-center text-xs text-neutral-500">
-            {restantes === 1 ? "1 materia más" : `${restantes} materias más`} · seguí escribiendo
-            para filtrar
+            <span className="font-numeros tabular-nums">{restantes}</span>{" "}
+            {restantes === 1 ? "materia más" : "materias más"} · seguí escribiendo para filtrar
           </p>
         )}
       </Command.List>

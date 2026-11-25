@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronsUpDown, Close } from "@withicons/react/pixel";
+import { ChevronsUpDown, Close } from "@withicons/react/plush";
 import { type ReactNode, createContext, useContext, useLayoutEffect, useRef } from "react";
 
 const ShellContext = createContext<{ alNavegar: () => void }>({ alNavegar: () => {} });
@@ -53,56 +53,59 @@ export function MateriaShell({
 
   return (
     <ShellContext value={{ alNavegar }}>
-      <div ref={shellRef} className="mx-auto flex max-w-6xl md:-mt-(--header-height) md:h-dvh">
-        <aside className="hidden min-h-0 w-80 shrink-0 flex-col border-r pt-(--header-height) md:flex">
-          {sidebar}
-        </aside>
+      {/* Fondo blanco a todo el ancho, igual que el header. */}
+      <div className="min-h-[calc(100dvh-var(--header-height))] bg-white md:-mt-(--header-height) md:min-h-0">
+        <div ref={shellRef} className="mx-auto flex max-w-6xl md:h-dvh">
+          <aside className="hidden min-h-0 w-80 shrink-0 flex-col border-r border-stone-300 pt-(--header-height) md:flex">
+            {sidebar}
+          </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <div
-            ref={barraRef}
-            className="sticky top-(--header-height) z-30 border-b bg-white/75 backdrop-blur-xl md:hidden"
-          >
-            <button
-              type="button"
-              aria-haspopup="dialog"
-              onClick={() => drawerRef.current?.showModal()}
-              className="flex w-full items-center gap-3 p-4 text-left"
+          <div className="flex min-w-0 flex-1 flex-col">
+            <div
+              ref={barraRef}
+              className="sticky top-(--header-height) z-30 border-b border-stone-300 bg-white/75 backdrop-blur-xl md:hidden"
             >
-              <span className="min-w-0 flex-1 font-pixel text-lg wrap-break-word">{titulo}</span>
-              <ChevronsUpDown size={16} aria-hidden="true" className="shrink-0 text-neutral-500" />
-              <span className="sr-only">Ver cátedras</span>
-            </button>
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                onClick={() => drawerRef.current?.showModal()}
+                className="flex w-full items-center gap-3 px-4 py-3 text-left"
+              >
+                <span className="min-w-0 flex-1 text-sm font-medium text-tinta">{titulo}</span>
+                <ChevronsUpDown size={18} aria-hidden="true" className="shrink-0 text-stone-500" />
+                <span className="sr-only">Ver cátedras</span>
+              </button>
+            </div>
+
+            <main
+              ref={mainRef}
+              className="min-w-0 flex-1 md:mt-(--header-height) md:min-h-0 md:overflow-y-auto"
+            >
+              {children}
+            </main>
           </div>
 
-          <main
-            ref={mainRef}
-            className="min-w-0 flex-1 md:min-h-0 md:overflow-y-auto md:pt-(--header-height)"
+          {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions -- Click en el backdrop; con teclado se cierra con Esc (nativo). */}
+          <dialog
+            ref={drawerRef}
+            aria-label="Cátedras"
+            onClick={(event) => event.target === event.currentTarget && cerrarDrawer()}
+            className="inset-y-0 right-auto left-0 m-0 h-dvh max-h-none w-[85vw] max-w-sm [translate:-100%] flex-col border-r border-stone-300 bg-white pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] transition-all transition-discrete duration-300 ease-out backdrop:bg-black/0 backdrop:transition-all backdrop:transition-discrete backdrop:duration-200 open:flex open:[translate:0] open:backdrop:bg-black/20 motion-reduce:transition-none md:hidden starting:open:[translate:-100%] starting:open:backdrop:bg-black/0"
           >
-            {children}
-          </main>
+            <div className="flex shrink-0 items-center justify-between border-b border-stone-300 py-1 pr-1 pl-4">
+              <h2 className="font-acento text-base text-tinta">Cátedras</h2>
+              <button
+                type="button"
+                onClick={cerrarDrawer}
+                aria-label="Cerrar"
+                className="flex size-11 items-center justify-center text-stone-500 hover:bg-stone-100 hover:text-tinta"
+              >
+                <Close size={18} aria-hidden="true" />
+              </button>
+            </div>
+            <div className="flex min-h-0 flex-1 flex-col">{sidebar}</div>
+          </dialog>
         </div>
-
-        {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions -- Click en el backdrop; con teclado se cierra con Esc (nativo). */}
-        <dialog
-          ref={drawerRef}
-          aria-label="Cátedras"
-          onClick={(event) => event.target === event.currentTarget && cerrarDrawer()}
-          className="inset-y-0 right-auto left-0 m-0 h-dvh max-h-none w-[85vw] max-w-sm [translate:-100%] flex-col border-r bg-white pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] transition-all transition-discrete duration-300 ease-out backdrop:bg-black/0 backdrop:transition-all backdrop:transition-discrete backdrop:duration-200 open:flex open:[translate:0] open:backdrop:bg-black/20 motion-reduce:transition-none md:hidden starting:open:[translate:-100%] starting:open:backdrop:bg-black/0"
-        >
-          <div className="flex shrink-0 items-center justify-between border-b px-4 py-3">
-            <h2 className="font-pixel text-lg">Cátedras</h2>
-            <button
-              type="button"
-              onClick={cerrarDrawer}
-              aria-label="Cerrar"
-              className="flex size-11 items-center justify-center rounded hover:bg-neutral-100"
-            >
-              <Close size={16} aria-hidden="true" />
-            </button>
-          </div>
-          <div className="flex min-h-0 flex-1 flex-col">{sidebar}</div>
-        </dialog>
       </div>
     </ShellContext>
   );

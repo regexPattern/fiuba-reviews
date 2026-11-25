@@ -16,7 +16,7 @@ export function Header() {
         aria-label="Navegación principal"
         className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4 md:px-6"
       >
-        <Link href="/" className="flex min-h-11 items-center font-pixel text-lg">
+        <Link href="/" className="flex min-h-11 items-center font-acento text-lg font-medium">
           FIUBA Reviews
         </Link>
         <Suspense fallback={<BotonBuscar disabled />}>

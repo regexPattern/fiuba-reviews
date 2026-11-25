@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Etiqueta } from "@/components/ui/etiqueta";
 import { getCatedrasMateria } from "@/server/db/queries/catedras";
 import { getMateria } from "@/server/db/queries/materias";
 import { ListaCatedras } from "./lista-catedras";
@@ -11,9 +12,10 @@ export async function TituloMateria({ params }: Pick<LayoutProps<"/materias/[cod
   if (!materia) notFound();
 
   return (
-    <>
-      {materia.codigo} · {materia.nombre}
-    </>
+    <span className="flex items-center gap-2">
+      <span className="min-w-0 truncate font-acento">{materia.nombre}</span>
+      <Etiqueta className="font-mono">{materia.codigo}</Etiqueta>
+    </span>
   );
 }
 
@@ -27,15 +29,18 @@ export async function SidebarMateria({
 
   return (
     <>
-      <header className="shrink-0 space-y-2 border-b p-4">
-        <h1 className="font-pixel text-lg">
-          {materia.codigo} · {materia.nombre}
-        </h1>
-        <p className="text-sm">
+      <header className="shrink-0 space-y-1.5 px-4 pt-4 pb-2">
+        <div className="flex items-start gap-2">
+          <h1 className="min-w-0 flex-1 font-acento text-base/5 font-medium text-tinta">
+            {materia.nombre}
+          </h1>
+          <Etiqueta className="font-mono">{materia.codigo}</Etiqueta>
+        </div>
+        <p className="text-sm text-stone-500">
           {materia.cuatrimestre ? (
             <>
               Última actualización de cátedras en{" "}
-              <span className="font-mono">
+              <span className="font-numeros text-stone-700 tabular-nums">
                 {materia.cuatrimestre.numero}C{materia.cuatrimestre.anio}
               </span>
               .
@@ -43,7 +48,7 @@ export async function SidebarMateria({
           ) : (
             <>
               Se muestran las cátedras de sus equivalencias:{" "}
-              <span className="font-mono">
+              <span className="font-numeros text-stone-700 tabular-nums">
                 {materia.equivalencias.map((e) => e.codigo).join(", ")}
               </span>
               .
