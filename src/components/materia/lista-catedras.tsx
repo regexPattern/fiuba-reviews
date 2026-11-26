@@ -70,7 +70,7 @@ export function ListaCatedras({
                 scroll={false}
                 onNavigate={alNavegar}
                 aria-current={catedra.codigo === activa ? "page" : undefined}
-                className="flex items-start gap-2 rounded-md border-[1.5px] border-transparent px-2.5 py-2 text-sm text-stone-600 hover:bg-stone-100 hover:text-stone-900 aria-[current=page]:relieve aria-[current=page]:bg-sky-50 aria-[current=page]:text-stone-900 aria-[current=page]:[--relieve:var(--color-fiuba-oscuro)]"
+                className="item-lista hover:bg-stone-100 hover:text-stone-900 aria-[current=page]:item-lista-activo"
               >
                 {/* Calificación a la izquierda con ancho fijo, así los nombres quedan alineados. `h-6`
                     es el alto de un renglón del nombre (`text-base/6`): si el nombre baja, queda a

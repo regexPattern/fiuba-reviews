@@ -32,8 +32,9 @@ export function BuscadorMaterias({
   const resultados = todos.slice(0, MAX_RESULTADOS);
   const restantes = todos.length - resultados.length;
 
-  // La selección se controla para que cada búsqueda nueva arranque en el primer resultado: cmdk
-  // intenta elegirlo al cambiar el texto, pero los resultados llegan después, con el debounce.
+  // cmdk resalta el primer resultado al cambiar el texto, pero con el debounce la lista nueva llega
+  // después. Por eso la selección se guarda junto con la búsqueda en la que se eligió: si la
+  // búsqueda cambia, se descarta y vuelve al primer resultado, sin `useEffect` ni render extra.
   const [seleccion, setSeleccion] = useState({ query: debouncedQuery, codigo: "" });
   const seleccionada =
     (seleccion.query === debouncedQuery && seleccion.codigo) || (resultados[0]?.item.codigo ?? "");
@@ -66,7 +67,8 @@ export function BuscadorMaterias({
             ? "Materias ordenadas por relevancia"
             : "Materias ordenadas por relevancia general"
         }
-        // cmdk envuelve los ítems en `[cmdk-list-sizer]`: el espaciado va ahí.
+        // cmdk mete los ítems dentro de un `div[cmdk-list-sizer]`, así que el `space-y` va en ese div
+        // y no en la lista (si no, solo separaría al sizer).
         className="min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto overscroll-contain p-2 [&_[cmdk-list-sizer]]:space-y-1.5"
       >
         {resultados.length === 0 && (
@@ -80,10 +82,10 @@ export function BuscadorMaterias({
               onSelect?.();
               router.push(`/materias/${materia.codigo}`);
             }}
-            // Mismo estilo que la lista de cátedras: la seleccionada queda en relieve celeste.
-            // `scroll-m*`: al navegar con flechas cmdk hace `scrollIntoView` y sin esto el ítem queda
-            // pegado al borde, sin el `p-2` de la lista. Abajo suma los 3px del canto del relieve.
-            className="flex cursor-pointer scroll-mt-2 scroll-mb-[calc(--spacing(2)+3px)] items-start gap-2 rounded-md border-[1.5px] border-transparent px-2.5 py-2 text-sm text-stone-600 select-none data-[selected=true]:relieve data-[selected=true]:bg-sky-50 data-[selected=true]:text-stone-900 data-[selected=true]:[--relieve:var(--color-fiuba-oscuro)]"
+            // Se usa `scroll-m*` porque al navegar con las flechas, cmdk hace `scrollIntoView`. Con
+            // estos márgenes, el ítem respeta el `p-2` de la lista (y abajo, los 3px del canto del
+            // relieve).
+            className="item-lista cursor-pointer scroll-mt-2 scroll-mb-[calc(--spacing(2)+3px)] select-none data-[selected=true]:item-lista-activo"
           >
             {/* Nombre primero y código apagado a la derecha, como en el encabezado de la materia. */}
             <TextoConMatches
