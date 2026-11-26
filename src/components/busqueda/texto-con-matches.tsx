@@ -1,13 +1,13 @@
-import type { FuseResultMatch } from "fuse.js";
+import type { Rango } from "@/lib/busqueda";
 
-/** Subraya las partes de `texto` indicadas por los `indices` de Fuse. */
+/** Subraya las partes de `texto` indicadas por los `indices` de la búsqueda. */
 export function TextoConMatches({
   texto,
   indices = [],
   className
 }: {
   texto: string;
-  indices?: FuseResultMatch["indices"];
+  indices?: readonly Rango[];
   className?: string;
 }) {
   const partes = [];

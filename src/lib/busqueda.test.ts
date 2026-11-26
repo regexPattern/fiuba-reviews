@@ -15,7 +15,11 @@ describe("búsqueda de cátedras", () => {
     expect(nombres("")).toEqual(catedras.map((catedra) => catedra.nombre));
   });
 
-  it("ignora tildes y tolera errores de tipeo", () => {
+  it("ignora tildes y mayúsculas", () => {
+    expect(nombres("GONZALEZ")).toEqual(["González-Amoreo-Petrovich"]);
+  });
+
+  it("tolera errores de tipeo", () => {
     expect(nombres("gonsalez")).toEqual(["González-Amoreo-Petrovich"]);
   });
 
@@ -45,5 +49,42 @@ describe("búsqueda de materias", () => {
   it("encuentra por nombre", () => {
     expect(codigos("algebra")).toEqual(["CB002"]);
     expect(codigos("datos algoritmos")).toEqual(["CB100"]);
+  });
+
+  it("prioriza coincidencias al comienzo de una palabra y si no respeta el orden original", () => {
+    const buscar = crearBusqueda(
+      [
+        { codigo: "TA001", nombre: "Criptoanálisis" },
+        { codigo: "CB001", nombre: "Análisis Matemático II" },
+        { codigo: "CB005", nombre: "Análisis Numérico" }
+      ],
+      ["codigo", "nombre"]
+    );
+    expect(buscar("analisis").map(({ item }) => item.codigo)).toEqual(["CB001", "CB005", "TA001"]);
+  });
+
+  it("pone las coincidencias exactas antes que las aproximadas", () => {
+    const buscar = crearBusqueda(
+      [{ nombre: "Gonzales-Pérez" }, { nombre: "González-Amoreo" }, { nombre: "Fernández" }],
+      ["nombre"]
+    );
+    // "Gonzales" está antes en la lista, pero es solo parecido.
+    expect(buscar("gonzalez").map(({ item }) => item.nombre)).toEqual([
+      "González-Amoreo",
+      "Gonzales-Pérez"
+    ]);
+  });
+
+  it("devuelve los rangos a subrayar sobre el texto original", () => {
+    const [resultado] = buscar("mate anal");
+    expect(resultado.matches).toEqual([
+      {
+        key: "nombre",
+        indices: [
+          [0, 3],
+          [9, 12]
+        ]
+      }
+    ]);
   });
 });
