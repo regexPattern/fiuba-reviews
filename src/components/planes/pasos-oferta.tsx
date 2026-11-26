@@ -92,7 +92,7 @@ export function PasosOferta({ ofertas }: { ofertas: OfertaCarrera[] }) {
               width={16}
               height={16}
               draggable={false}
-              className="size-4 shrink-0 rounded-[3px]"
+              className="size-4 shrink-0 rounded-sm"
             />
             <ChevronRight size={14} aria-hidden="true" className="shrink-0 text-stone-400" />
             Reportes
@@ -157,7 +157,7 @@ function SelectorPlataforma({
                 <Select.Item
                   key={opcion}
                   value={opcion}
-                  className="flex cursor-pointer items-center gap-2 rounded-md py-1.5 pr-2 pl-2 text-stone-700 outline-none select-none data-highlighted:bg-stone-100 data-highlighted:text-tinta data-selected:font-medium data-selected:text-tinta"
+                  className="flex cursor-pointer items-center gap-2 rounded-md py-1.5 pr-2 pl-2 text-stone-700 outline-none select-none data-highlighted:bg-stone-100 data-highlighted:text-stone-900 data-selected:font-medium data-selected:text-stone-900"
                 >
                   <Icono size={16} aria-hidden="true" className="shrink-0 text-stone-500" />
                   <Select.ItemText className="flex-1">{etiqueta}</Select.ItemText>
@@ -188,12 +188,12 @@ function Paso({
     <li className="relative flex gap-3 pb-1 not-last:after:absolute not-last:after:top-8 not-last:after:-bottom-4 not-last:after:left-3 not-last:after:w-px not-last:after:-translate-x-1/2 not-last:after:bg-stone-200">
       <span
         aria-hidden="true"
-        className="flex size-6 shrink-0 items-center justify-center rounded-full border-[1.5px] border-stone-300 bg-white font-numeros text-xs text-stone-600"
+        className="flex size-6 shrink-0 items-center justify-center rounded-full border-[1.5px] border-stone-300 bg-white font-mono text-xs text-stone-600"
       >
         {numero}
       </span>
       <div className="min-w-0 flex-1 space-y-2.5">
-        <h3 className="text-base/6 font-medium text-tinta">{titulo}</h3>
+        <h3 className="text-base/6 font-medium text-stone-900">{titulo}</h3>
         {children}
       </div>
     </li>
@@ -227,5 +227,5 @@ function Gesto({ children }: { children: ReactNode }) {
 
 /** Nombre de una opción de menú del sistema. */
 function Opcion({ children }: { children: ReactNode }) {
-  return <span className="font-medium text-tinta">{children}</span>;
+  return <span className="font-medium text-stone-900">{children}</span>;
 }

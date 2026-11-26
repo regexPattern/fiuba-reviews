@@ -6,19 +6,9 @@
 
   /* Celeste FIUBA oscuro: borde y canto de lo que está en relieve sobre celeste. */
   --color-fiuba-oscuro: oklch(48% 0.12 241.55);
-  /* Texto principal, casi negro y cálido. */
-  --color-tinta: oklch(21.6% 0.006 56.04);
 
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, monospace;
-
-  /* Fuente de acento: nombres de materias, cátedras y docentes, y títulos de sección. */
-  --font-acento: var(--font-sans);
-  /* Tracking de la fuente de acento (como `tracking-tight`). */
-  --tracking-acento: -0.025em;
-
-  /* Fuente de los números: calificaciones, cuatrimestres, cantidades. */
-  --font-numeros: var(--font-mono);
 }
 
 /*
@@ -82,7 +72,7 @@
 }
 
 @utility boton-secundario {
-  @apply boton relieve-boton bg-white px-2 py-1 font-medium text-tinta;
+  @apply boton relieve-boton bg-white px-2 py-1 font-medium text-stone-900;
 }
 
 /* Al pasar el mouse cambia solo el fondo: ni el peso ni el color del texto. */
@@ -92,16 +82,7 @@
 
 /* Rótulo chico en versalitas espaciadas (roles, aclaraciones). */
 @utility rotulo {
-  font-size: 0.6875rem;
-  line-height: 1rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-@layer utilities {
-  .font-acento {
-    letter-spacing: var(--tracking-acento);
-  }
+  @apply text-xs tracking-widest uppercase;
 }
 
 :root {

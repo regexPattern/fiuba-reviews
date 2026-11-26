@@ -71,7 +71,7 @@ export function MateriaShell({
                 onClick={() => drawerRef.current?.showModal()}
                 className="flex w-full items-center gap-3 px-4 py-3 text-left"
               >
-                <span className="min-w-0 flex-1 text-sm font-medium text-tinta">{titulo}</span>
+                <span className="min-w-0 flex-1 text-sm font-medium text-stone-900">{titulo}</span>
                 <ChevronsUpDown size={18} aria-hidden="true" className="shrink-0 text-stone-500" />
                 <span className="sr-only">Ver cátedras</span>
               </button>
@@ -93,12 +93,12 @@ export function MateriaShell({
             className="inset-y-0 right-auto left-0 m-0 h-dvh max-h-none w-[85vw] max-w-sm [translate:-100%] flex-col border-r border-stone-300 bg-white pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] transition-all transition-discrete duration-300 ease-out backdrop:bg-black/0 backdrop:transition-all backdrop:transition-discrete backdrop:duration-200 open:flex open:[translate:0] open:backdrop:bg-black/20 motion-reduce:transition-none md:hidden starting:open:[translate:-100%] starting:open:backdrop:bg-black/0"
           >
             <div className="flex shrink-0 items-center justify-between border-b border-stone-300 py-1 pr-1 pl-4">
-              <h2 className="font-acento text-base text-tinta">Cátedras</h2>
+              <h2 className="text-base tracking-tight text-stone-900">Cátedras</h2>
               <button
                 type="button"
                 onClick={cerrarDrawer}
                 aria-label="Cerrar"
-                className="flex size-11 items-center justify-center text-stone-500 hover:bg-stone-100 hover:text-tinta"
+                className="flex size-11 items-center justify-center text-stone-500 hover:bg-stone-100 hover:text-stone-900"
               >
                 <Close size={18} aria-hidden="true" />
               </button>

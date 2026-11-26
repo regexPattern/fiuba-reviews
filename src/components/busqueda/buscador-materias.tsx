@@ -56,7 +56,7 @@ export function BuscadorMaterias({
           placeholder="Buscar materia o código…"
           value={query}
           onValueChange={onQueryChange}
-          className="h-12 min-w-0 flex-1 bg-transparent text-base text-tinta outline-none placeholder:text-stone-400 md:text-sm"
+          className="h-12 min-w-0 flex-1 bg-transparent text-base text-stone-900 outline-none placeholder:text-stone-400 md:text-sm"
         />
         {inputAction}
       </div>
@@ -83,16 +83,16 @@ export function BuscadorMaterias({
             // Mismo estilo que la lista de cátedras: la seleccionada queda en relieve celeste.
             // `scroll-m*`: al navegar con flechas cmdk hace `scrollIntoView` y sin esto el ítem queda
             // pegado al borde, sin el `p-2` de la lista. Abajo suma los 3px del canto del relieve.
-            className="flex cursor-pointer scroll-mt-2 scroll-mb-[calc(--spacing(2)+3px)] items-start gap-2 rounded-md border-[1.5px] border-transparent px-2.5 py-2 text-sm text-stone-600 select-none data-[selected=true]:relieve data-[selected=true]:bg-sky-50 data-[selected=true]:text-tinta data-[selected=true]:[--relieve:var(--color-fiuba-oscuro)]"
+            className="flex cursor-pointer scroll-mt-2 scroll-mb-[calc(--spacing(2)+3px)] items-start gap-2 rounded-md border-[1.5px] border-transparent px-2.5 py-2 text-sm text-stone-600 select-none data-[selected=true]:relieve data-[selected=true]:bg-sky-50 data-[selected=true]:text-stone-900 data-[selected=true]:[--relieve:var(--color-fiuba-oscuro)]"
           >
             {/* Nombre primero y código apagado a la derecha, como en el encabezado de la materia. */}
             <TextoConMatches
-              className="min-w-0 flex-1 font-acento text-base/6 wrap-break-word"
+              className="min-w-0 flex-1 text-base/6 tracking-tight wrap-break-word"
               texto={materia.nombre}
               indices={matches?.find((match) => match.key === "nombre")?.indices}
             />
             <TextoConMatches
-              className="shrink-0 font-numeros text-sm/6 text-stone-400"
+              className="shrink-0 font-mono text-sm/6 text-stone-400"
               texto={materia.codigo}
               indices={matches?.find((match) => match.key === "codigo")?.indices}
             />
@@ -100,7 +100,7 @@ export function BuscadorMaterias({
         ))}
         {restantes > 0 && (
           <p className="px-2 py-3 text-center text-xs text-stone-500">
-            <span className="font-numeros tabular-nums">{restantes}</span>{" "}
+            <span className="font-mono tabular-nums">{restantes}</span>{" "}
             {restantes === 1 ? "materia más" : "materias más"} · seguí escribiendo para filtrar
           </p>
         )}

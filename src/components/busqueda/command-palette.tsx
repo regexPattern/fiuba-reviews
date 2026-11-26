@@ -54,7 +54,7 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
         // Click en el backdrop: el contenido ocupa todo el diálogo, así que el target solo es
         // el propio diálogo cuando se clickea afuera.
         onClick={(event) => event.target === event.currentTarget && cerrar()}
-        className="inset-x-0 top-[max(calc(var(--header-height)+1rem),15dvh)] bottom-auto mx-auto max-h-[75dvh] w-[calc(100%-2rem)] max-w-xl scale-97 flex-col overflow-hidden relieve bg-white text-tinta opacity-0 transition-all transition-discrete duration-200 ease-out backdrop:bg-black/0 backdrop:transition-all backdrop:transition-discrete backdrop:duration-200 open:flex open:scale-100 open:opacity-100 open:backdrop:bg-black/20 motion-reduce:transition-none starting:open:scale-97 starting:open:opacity-0 starting:open:backdrop:bg-black/0"
+        className="inset-x-0 top-[max(calc(var(--header-height)+1rem),15dvh)] bottom-auto mx-auto max-h-[75dvh] w-[calc(100%-2rem)] max-w-xl scale-97 flex-col overflow-hidden relieve bg-white text-stone-900 opacity-0 transition-all transition-discrete duration-200 ease-out backdrop:bg-black/0 backdrop:transition-all backdrop:transition-discrete backdrop:duration-200 open:flex open:scale-100 open:opacity-100 open:backdrop:bg-black/20 motion-reduce:transition-none starting:open:scale-97 starting:open:opacity-0 starting:open:backdrop:bg-black/0"
       >
         <BuscadorMaterias
           materias={materias}
@@ -67,7 +67,7 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
               onClick={cerrar}
               aria-label="Cerrar buscador"
               // Tecla chica en relieve, como los atajos del pie.
-              className="flex h-6 shrink-0 relieve-boton cursor-pointer items-center bg-white px-1.5 font-numeros text-xs text-stone-500 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fiuba"
+              className="flex h-6 shrink-0 relieve-boton cursor-pointer items-center bg-white px-1.5 font-mono text-xs text-stone-500 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fiuba"
             >
               <Close size={14} className="sm:hidden" aria-hidden="true" />
               <span className="hidden sm:inline">Esc</span>
@@ -124,7 +124,7 @@ export function BotonBuscar({ atajo, ...props }: ComponentProps<"button"> & { at
 /** Tecla chica en relieve bajo, para atajos de teclado. */
 function Tecla({ children }: { children: ReactNode }) {
   return (
-    <kbd className="inline-flex h-5 min-w-5 items-center justify-center relieve bg-white px-1 font-numeros text-xs font-normal tracking-normal text-stone-500 normal-case [--relieve-alto:2px]">
+    <kbd className="inline-flex h-5 min-w-5 items-center justify-center relieve bg-white px-1 font-mono text-xs font-normal tracking-normal text-stone-500 normal-case [--relieve-alto:2px]">
       {children}
     </kbd>
   );

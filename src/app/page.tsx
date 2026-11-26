@@ -3,7 +3,7 @@ import Image from "next/image";
 export default function Home() {
   return (
     <main className="mx-auto max-w-6xl p-6">
-      <h1 className="font-acento text-3xl font-semibold">FIUBA Reviews</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">FIUBA Reviews</h1>
       <Image
         src="/fiuba-scene.svg"
         alt="Ilustración de la fachada de la Facultad de Ingeniería de la UBA en puntos de luz"

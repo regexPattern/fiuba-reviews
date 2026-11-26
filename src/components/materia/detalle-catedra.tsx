@@ -38,7 +38,7 @@ function Docente({ docente, codigoCatedra }: { docente: DocenteCatedra; codigoCa
           no se corta. Desde `sm`, a la derecha y a la altura del nombre (`items-start`). */}
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-2">
         <div className="min-w-0 flex-1 space-y-1">
-          <h2 className="font-acento text-[1.375rem]/7 font-medium text-tinta">{docente.nombre}</h2>
+          <h2 className="text-xl/7 font-medium tracking-tight text-stone-900">{docente.nombre}</h2>
           {/* Nombre del SIU y rol separados por un punto. Si no entran en un renglón, el rol baja
               entero. El punto va al principio de cada parte y el `overflow-hidden` junto con el
               `-ml-4` recorta el de la que arranca un renglón, así nunca queda un punto colgando. */}
@@ -118,13 +118,12 @@ function BotonCalificar({
 
 /** Tarjeta en relieve con el resumen y un pie con la aclaración de que es generado con IA. */
 function ResumenIA({ resumen }: { resumen: string }) {
-  // Los textos arrancan a 26px del borde, igual que el de los comentarios (ícono de 18px +
-  // `gap-2`): 1.5px de borde + 24.5px de padding. El pie usa menos porque arranca con el ícono.
-  // Vertical: 19px, que con los 5px de interlineado de `text-base/relaxed` (16px en renglones de
-  // 26px) arriba y abajo se ve como los 24.5px de los costados.
+  // Los textos arrancan a ~26px del borde, igual que el de los comentarios (ícono de 18px + `gap-2`):
+  // 1.5px de borde + `px-6`. Vertical: `py-5`, que con el interlineado de `text-base/relaxed` se ve
+  // como el padding de los costados. El pie usa menos porque arranca con el ícono.
   return (
     <div className="overflow-hidden relieve bg-white">
-      <p className="px-[24.5px] py-[19px] text-base/relaxed text-stone-700">{resumen}</p>
+      <p className="px-6 py-5 text-base/relaxed text-stone-700">{resumen}</p>
       <footer className="flex items-center gap-2 border-t border-stone-200 bg-stone-50 px-3 py-2 rotulo text-stone-500">
         <Sparkles size={18} aria-hidden="true" className="shrink-0" />
         Resumen generado con IA

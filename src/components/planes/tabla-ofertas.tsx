@@ -67,7 +67,7 @@ function Fila({ oferta }: { oferta: OfertaCarrera }) {
   return (
     <tr>
       <th scope="row" className="px-4 py-2.5 font-normal">
-        <span className="block font-acento text-base/6 text-tinta">{oferta.nombre}</span>
+        <span className="block text-base/6 tracking-tight text-stone-900">{oferta.nombre}</span>
         {oferta.planVigente && (
           <span className="block text-xs text-stone-500">
             Plan <Numero>{oferta.planVigente}</Numero>
@@ -77,7 +77,7 @@ function Fila({ oferta }: { oferta: OfertaCarrera }) {
       {/* oxlint-disable-next-line jsx-a11y/control-has-associated-label -- Es una celda de datos, no un control: el texto es dinámico. */}
       <td className="px-4 py-2.5 text-right align-top">
         <span className="flex flex-col items-end gap-1 sm:flex-row sm:items-center sm:justify-end sm:gap-2">
-          <span className="font-numeros text-stone-700 tabular-nums">
+          <span className="font-mono text-stone-700 tabular-nums">
             {oferta.procesada ? formatearCuatrimestre(oferta.procesada) : "–"}
           </span>
           <span

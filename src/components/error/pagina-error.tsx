@@ -73,7 +73,7 @@ export function PaginaError({
       </figure>
 
       <div className="flex max-w-md flex-col items-center text-center">
-        <h1 className="font-acento text-5xl font-medium tracking-tight text-tinta">
+        <h1 className="text-5xl font-medium tracking-tight text-stone-900">
           {codigo !== undefined ? `Error ${codigo}` : "Error"}
         </h1>
         <p className="mt-4 text-base/relaxed text-balance text-stone-600">{descripcion}</p>

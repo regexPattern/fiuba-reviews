@@ -18,7 +18,7 @@ export function Header() {
       >
         <Link
           href="/"
-          className="flex min-h-11 items-center font-acento text-lg font-medium text-tinta"
+          className="flex min-h-11 items-center text-lg font-medium tracking-tight text-stone-900"
         >
           FIUBA Reviews
         </Link>

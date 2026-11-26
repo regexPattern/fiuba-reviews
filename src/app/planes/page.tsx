@@ -17,7 +17,9 @@ export default async function Page() {
     <main className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-12">
       <header className="max-w-2xl space-y-3">
         <p className="rotulo text-fiuba">Colaborar</p>
-        <h1 className="font-acento text-3xl font-medium text-tinta">Ofertas de comisiones</h1>
+        <h1 className="text-3xl font-medium tracking-tight text-stone-900">
+          Ofertas de comisiones
+        </h1>
         <p className="text-base/relaxed text-stone-700">
           Las cátedras de cada materia salen de la oferta de comisiones del SIU, pero cada alumno
           solo puede ver la de su propia carrera. Por eso, desde el 1C2025 las ofertas se actualizan
@@ -31,14 +33,14 @@ export default async function Page() {
 
       <div className="mt-10 grid items-start gap-10 lg:grid-cols-2 lg:gap-12">
         <section aria-labelledby="estado" className="space-y-4">
-          <h2 id="estado" className="font-acento text-xl font-medium text-tinta">
+          <h2 id="estado" className="text-xl font-medium tracking-tight text-stone-900">
             Estado por carrera
           </h2>
           <TablaOfertas ofertas={ofertas} ultimoCuatrimestre={ultimoCuatrimestre} />
         </section>
 
         <section aria-labelledby="enviar" className="space-y-4">
-          <h2 id="enviar" className="font-acento text-xl font-medium text-tinta">
+          <h2 id="enviar" className="text-xl font-medium tracking-tight text-stone-900">
             Enviar la oferta de tu carrera
           </h2>
           <PasosOferta ofertas={ofertas} />

@@ -34,8 +34,8 @@ export function PromedioDocente({
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="end" sideOffset={6} className="z-50">
           <Popover.Popup className="w-64 origin-(--transform-origin) relieve bg-white p-3 text-sm transition-[transform,opacity] duration-150 outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0">
-            <Popover.Title className="flex items-baseline justify-between gap-4 border-b border-stone-200 pb-2 text-tinta">
-              <span className="font-acento text-base/5">Promedios</span>
+            <Popover.Title className="flex items-baseline justify-between gap-4 border-b border-stone-200 pb-2 text-stone-900">
+              <span className="text-base/5 tracking-tight">Promedios</span>
               <span className="rotulo text-stone-500">
                 <Numero>{cantidadCalificaciones}</Numero>{" "}
                 {cantidadCalificaciones === 1 ? "calificación" : "calificaciones"}
