@@ -36,7 +36,6 @@ export function ListaCatedras({
       <div className="shrink-0 px-2 pt-3 pb-1">
         <label className="relative block">
           <span className="sr-only">Filtrar cátedras por docente</span>
-          {/* 16px en móvil: con menos, iOS hace zoom al enfocar. */}
           <input
             type="search"
             autoComplete="off"
@@ -46,7 +45,7 @@ export function ListaCatedras({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Filtrar por docente"
-            className="h-9 w-full rounded-md border-[1.5px] border-stone-300 bg-white px-2.5 pr-9 text-base outline-none placeholder:text-stone-400 focus-visible:border-fiuba focus-visible:ring-3 focus-visible:ring-fiuba/20 md:text-sm"
+            className="h-9 w-full campo pr-9 md:text-sm"
           />
           <ListFilter
             size={18}

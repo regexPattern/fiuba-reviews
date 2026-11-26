@@ -159,7 +159,6 @@ export function FormularioOferta({ ofertas }: { ofertas: OfertaCarrera[] }) {
 
       <label className="block">
         <span className="sr-only">Página de la oferta de comisiones copiada del SIU</span>
-        {/* 16px en móvil: con menos, iOS hace zoom al enfocar. */}
         <textarea
           name="contenido"
           required
@@ -172,7 +171,7 @@ export function FormularioOferta({ ofertas }: { ofertas: OfertaCarrera[] }) {
           spellCheck={false}
           autoComplete="off"
           placeholder="Pegá acá la página del SIU…"
-          className="block w-full resize-y rounded-md border-[1.5px] border-stone-300 bg-white px-2.5 py-2 font-mono text-base outline-none placeholder:font-sans placeholder:text-stone-400 focus-visible:border-fiuba focus-visible:ring-3 focus-visible:ring-fiuba/20 md:text-xs/5 md:placeholder:text-sm"
+          className="block w-full resize-y campo py-2 font-mono placeholder:font-sans md:text-xs/5 md:placeholder:text-sm"
         />
       </label>
 

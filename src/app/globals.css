@@ -93,9 +93,25 @@
   @apply relieve bg-sky-50 text-stone-900;
 }
 
+/* Campo de texto con borde (filtro de cátedras, formulario de la oferta). El foco va con `ring`: no
+   tiene relieve que pisar. */
+@utility campo {
+  @apply rounded-md border-[1.5px] border-stone-300 bg-white px-2.5 outline-none placeholder:text-stone-400 focus-visible:border-fiuba focus-visible:ring-3 focus-visible:ring-fiuba/20;
+}
+
 /* Rótulo chico en versalitas espaciadas (roles, aclaraciones). */
 @utility rotulo {
   @apply text-xs tracking-widest uppercase;
+}
+
+/* 16px por defecto en los campos: con menos, iOS hace zoom al enfocar. Desde `md` cada campo puede
+   achicarse con `md:text-*`; sin `md:` vuelve el zoom. */
+@layer base {
+  input,
+  textarea,
+  select {
+    @apply text-base;
+  }
 }
 
 :root {

@@ -50,14 +50,13 @@ export function BuscadorMaterias({
     >
       <div className="flex shrink-0 items-center gap-2 border-b border-stone-300 px-3">
         <Search size={18} aria-hidden="true" className="shrink-0 text-stone-500" />
-        {/* 16px en móvil evita el zoom de iOS al enfocar. */}
         <Command.Input
           autoCapitalize="off"
           aria-label="Buscar materias por código o título"
           placeholder="Buscar materia o código…"
           value={query}
           onValueChange={onQueryChange}
-          className="h-12 min-w-0 flex-1 bg-transparent text-base text-stone-900 outline-none placeholder:text-stone-400 md:text-sm"
+          className="h-12 min-w-0 flex-1 bg-transparent text-stone-900 outline-none placeholder:text-stone-400 md:text-sm"
         />
         {inputAction}
       </div>
