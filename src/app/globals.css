@@ -125,6 +125,12 @@
   --header-height: calc(3.5rem + env(safe-area-inset-top));
 }
 
+/* Reserva siempre el lugar de la barra de scroll: así no hay salto de layout cuando desaparece
+   (al abrir un modal) ni entre páginas con y sin scroll. */
+html {
+  scrollbar-gutter: stable;
+}
+
 /* Con un diálogo modal abierto el documento no scrollea por detrás (en móvil scrollea la ventana). */
 html:has(dialog:modal) {
   overflow: hidden;
