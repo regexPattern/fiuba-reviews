@@ -1,24 +1,14 @@
 "use client";
 
 import { Close, Search } from "@withicons/react/line";
-import {
-  type ComponentProps,
-  type ReactNode,
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore
-} from "react";
+import { type ComponentProps, type ReactNode, useEffect, useRef, useState } from "react";
+import { usaCmd, usePlataforma } from "@/lib/plataforma";
 import { BuscadorMaterias, type MateriaBuscador } from "./buscador-materias";
-
-const subscribePlatform = () => () => {};
-const getIsMac = () => /Mac|iPhone|iPad|iPod/i.test(navigator.platform);
-const getServerIsMac = () => false;
 
 export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [query, setQuery] = useState("");
-  const isMac = useSyncExternalStore(subscribePlatform, getIsMac, getServerIsMac);
+  const isMac = usaCmd(usePlataforma());
 
   function abrir() {
     const dialog = dialogRef.current;
@@ -30,12 +20,10 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
   const cerrar = () => dialogRef.current?.close();
 
   useEffect(() => {
-    const mac = getIsMac();
-
     function handleKeyDown(event: KeyboardEvent) {
       if (
         event.key.toLowerCase() === "k" &&
-        (mac ? event.metaKey : event.ctrlKey) &&
+        (isMac ? event.metaKey : event.ctrlKey) &&
         !event.altKey &&
         !event.shiftKey &&
         !event.isComposing
@@ -49,7 +37,7 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [isMac]);
 
   return (
     <>

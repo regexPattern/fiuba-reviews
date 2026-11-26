@@ -7,6 +7,7 @@ import {
   AlertCircle,
   AlertTriangle,
   CircleCheckBig,
+  Handshake,
   PartyPopper,
   Paste
 } from "@withicons/react/plush";
@@ -21,13 +22,15 @@ import {
   ordenCuatrimestre
 } from "@/lib/ofertas";
 
-type Tono = "neutro" | "ok" | "aviso" | "error";
+type Tono = "neutro" | "ok" | "aviso" | "error" | "gracias";
 
 const TONOS: Record<Tono, { icono: typeof Paste; clases: string }> = {
   neutro: { icono: Paste, clases: "text-stone-500" },
   ok: { icono: CircleCheckBig, clases: "text-emerald-700" },
   aviso: { icono: AlertTriangle, clases: "text-amber-800" },
-  error: { icono: AlertCircle, clases: "text-red-700" }
+  error: { icono: AlertCircle, clases: "text-red-700" },
+  // No es un error: la oferta está bien, solo que ya la teníamos.
+  gracias: { icono: Handshake, clases: "text-stone-600" }
 };
 
 const INICIAL: ResultadoEnvio = { estado: "inicial" };
@@ -78,7 +81,7 @@ function diagnosticar(
 
   if (ultima && ordenCuatrimestre(metadata.cuatrimestre) <= ordenCuatrimestre(ultima)) {
     return {
-      tono: "aviso",
+      tono: "gracias",
       mensaje: (
         <>
           Es la oferta de {nombre} del {cuatrimestre}, pero ya tenemos la del{" "}
