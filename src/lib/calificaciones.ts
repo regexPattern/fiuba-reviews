@@ -9,3 +9,12 @@ export const CRITERIOS = [
   { nombre: "panoramaAmplio", etiqueta: "Panorama amplio" },
   { nombre: "respondeMails", etiqueta: "Responde mails" }
 ] as const;
+
+export type NivelPuntaje = "muyBueno" | "bueno" | "regular" | "malo";
+
+export function nivelPuntaje(puntaje: number): NivelPuntaje {
+  if (puntaje >= 4.5) return "muyBueno";
+  if (puntaje >= 3.5) return "bueno";
+  if (puntaje >= 2.5) return "regular";
+  return "malo";
+}
