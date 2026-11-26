@@ -17,7 +17,7 @@ const URL_OFERTA_SIU = "https://guaraniautogestion.fi.uba.ar/g3w/oferta_comision
 
 /** Iconos de Phosphor: withicons no tiene logos de marcas. */
 const PLATAFORMAS: { valor: Plataforma; etiqueta: string; icono: Icon }[] = [
-  { valor: "windows", etiqueta: "Windows / Linux", icono: DesktopIcon },
+  { valor: "pc", etiqueta: "Windows / Linux", icono: DesktopIcon },
   { valor: "mac", etiqueta: "macOS", icono: AppleLogoIcon },
   { valor: "android", etiqueta: "Android", icono: AndroidLogoIcon },
   { valor: "ios", etiqueta: "iPhone / iPad", icono: AppleLogoIcon }
@@ -25,7 +25,7 @@ const PLATAFORMAS: { valor: Plataforma; etiqueta: string; icono: Icon }[] = [
 
 /** Cómo seleccionar y copiar la página en cada plataforma (pasos 2 y 3). */
 const COPIAR: Record<Plataforma, { seleccionar: ReactNode; copiar: ReactNode }> = {
-  windows: copiarConTeclado("Ctrl"),
+  pc: copiarConTeclado("Ctrl"),
   mac: copiarConTeclado("⌘"),
   android: {
     seleccionar: (

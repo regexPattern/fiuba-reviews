@@ -10,40 +10,26 @@ const UA = {
   android:
     "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36",
   iphone:
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1"
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
+  ipad: "Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1"
 };
 
 describe("detectarPlataforma", () => {
-  it("reconoce Windows y Linux como la misma plataforma", () => {
-    expect(
-      detectarPlataforma({ userAgent: UA.windows, platform: "Windows", maxTouchPoints: 0 })
-    ).toBe("windows");
-    expect(
-      detectarPlataforma({ userAgent: UA.linux, platform: "Linux x86_64", maxTouchPoints: 0 })
-    ).toBe("windows");
+  it("toma Windows y Linux como PC", () => {
+    expect(detectarPlataforma(UA.windows)).toBe("pc");
+    expect(detectarPlataforma(UA.linux)).toBe("pc");
   });
 
-  it("reconoce macOS, con platform viejo o de userAgentData", () => {
-    expect(detectarPlataforma({ userAgent: UA.mac, platform: "MacIntel", maxTouchPoints: 0 })).toBe(
-      "mac"
-    );
-    expect(detectarPlataforma({ userAgent: UA.mac, platform: "macOS", maxTouchPoints: 0 })).toBe(
-      "mac"
-    );
+  it("reconoce macOS, con el iPad incluido", () => {
+    expect(detectarPlataforma(UA.mac)).toBe("mac");
+    expect(detectarPlataforma(UA.ipad)).toBe("mac");
   });
 
-  it("reconoce Android aunque platform diga Linux", () => {
-    expect(
-      detectarPlataforma({ userAgent: UA.android, platform: "Linux armv8l", maxTouchPoints: 5 })
-    ).toBe("android");
+  it("reconoce Android aunque el UA diga Linux", () => {
+    expect(detectarPlataforma(UA.android)).toBe("android");
   });
 
-  it("reconoce el iPhone y el iPad que se hace pasar por Mac", () => {
-    expect(
-      detectarPlataforma({ userAgent: UA.iphone, platform: "iPhone", maxTouchPoints: 5 })
-    ).toBe("ios");
-    expect(detectarPlataforma({ userAgent: UA.mac, platform: "MacIntel", maxTouchPoints: 5 })).toBe(
-      "ios"
-    );
+  it("reconoce el iPhone", () => {
+    expect(detectarPlataforma(UA.iphone)).toBe("ios");
   });
 });
