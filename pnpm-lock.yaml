@@ -169,46 +169,10 @@ importers:
       '@base-ui/react':
         specifier: ^1.9.0
         version: 1.9.0(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      '@fontsource-variable/bitcount-prop-single':
-        specifier: ^5.3.0
-        version: 5.3.0
-      '@fontsource-variable/bitcount-single':
-        specifier: ^5.3.0
-        version: 5.3.0
-      '@fontsource-variable/doto':
-        specifier: ^5.3.0
-        version: 5.3.0
-      '@fontsource-variable/fraunces':
-        specifier: ^5.3.0
-        version: 5.3.0
       '@fontsource-variable/geist':
         specifier: ^5.3.0
         version: 5.3.0
       '@fontsource-variable/geist-mono':
-        specifier: ^5.3.0
-        version: 5.3.0
-      '@fontsource-variable/geist-pixel':
-        specifier: ^5.3.1
-        version: 5.3.1
-      '@fontsource-variable/handjet':
-        specifier: ^5.3.1
-        version: 5.3.1
-      '@fontsource-variable/jetbrains-mono':
-        specifier: ^5.3.0
-        version: 5.3.0
-      '@fontsource-variable/newsreader':
-        specifier: ^5.3.0
-        version: 5.3.0
-      '@fontsource-variable/pixelify-sans':
-        specifier: ^5.3.0
-        version: 5.3.0
-      '@fontsource-variable/source-serif-4':
-        specifier: ^5.3.1
-        version: 5.3.1
-      '@fontsource/instrument-serif':
-        specifier: ^5.3.0
-        version: 5.3.0
-      '@fontsource/silkscreen':
         specifier: ^5.3.0
         version: 5.3.0
       '@phosphor-icons/react':
@@ -260,9 +224,6 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.3.0(@types/react@19.3.0)
-      ascii.rest:
-        specifier: ^0.4.0
-        version: 0.4.0(react@19.3.0)
       oxfmt:
         specifier: ^0.79.0
         version: 0.79.0
@@ -272,9 +233,6 @@ importers:
       postcss:
         specifier: ^8.5.33
         version: 8.5.33
-      sharp:
-        specifier: ^0.35.5
-        version: 0.35.5(@types/node@26.6.6)
       tailwindcss:
         specifier: ^4.3.5
         version: 4.3.5
@@ -348,47 +306,11 @@ packages:
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
 
-  '@fontsource-variable/bitcount-prop-single@5.3.0':
-    resolution: {integrity: sha512-bYDakJ3n20JF8mLWsmzLbd5ddIlG2BGJowgEPTdjRnlJ/BgxhUQINgz1KYOyHYlaP63Zf5SAAlzM8IlgbHozrQ==}
-
-  '@fontsource-variable/bitcount-single@5.3.0':
-    resolution: {integrity: sha512-Dtmh0PBPeJvBVMRr76ADgTQKayn3crDFGx/LL9cz+i3RMFRobenhcZQSNZ4MmL9FAxdv1xJH2T5W6cbIcaUdZA==}
-
-  '@fontsource-variable/doto@5.3.0':
-    resolution: {integrity: sha512-mzvYblQT8AD0tOdBvni6+5E25LMKXKDVqbUutGafV78rIIq1w9s4G1IBpDcHJp+u2+dzsO3zCSm75mBQLguJjw==}
-
-  '@fontsource-variable/fraunces@5.3.0':
-    resolution: {integrity: sha512-9BYGySn4AHEJdgp9Z28tQ3X+laJMEOITXkQarZXeloWQZDq5oOvXJ3kDA8c7MGIfpogIaZfjrQBqmda8POOCKA==}
-
   '@fontsource-variable/geist-mono@5.3.0':
     resolution: {integrity: sha512-vBbuwDEo9AkrqADMXOrlAR3DFcJi4/JxeuU43FoiQERnNwsfXNnvxvReZG02cQKmyk4DZkZdBZX3oTDvy2zBAw==}
 
-  '@fontsource-variable/geist-pixel@5.3.1':
-    resolution: {integrity: sha512-2DA1zXUu6/F/7RJxtFGRrdsLmYWuuwhT8n/HAuCUsKLryCFHIAVSiSg6rYHsTCk7Qiu0q9D9QMpqbfOSC5Eugg==}
-
   '@fontsource-variable/geist@5.3.0':
     resolution: {integrity: sha512-j0m+vLQuG5XAYoHtGCVu0spvlGreR3EzpECUVzkFmI1mTVnAO38l/NEPDCFgZ177JxzYJCLSmTQibIiYPilGrA==}
-
-  '@fontsource-variable/handjet@5.3.1':
-    resolution: {integrity: sha512-AHs73GTcWNmzdo7jqrWXUnNwWiZXfBiTfCEGjxoN+fjtKKhJouriEsHZYkiI8WcVWjSGLfyMov+g4YYMd6wlHA==}
-
-  '@fontsource-variable/jetbrains-mono@5.3.0':
-    resolution: {integrity: sha512-F32xpS2NsGYoQi2ADSkKTgpJj7ozajsGgDJ8woTnqjmIB+dxDIqImjl4pXZVEExu8UFZ2ndhmX18EBS/hdz3Lw==}
-
-  '@fontsource-variable/newsreader@5.3.0':
-    resolution: {integrity: sha512-rrzYi43qMpbzwuFtf9OkWH8sxAPVPcQQQEwXpPtwaKYeJ8yVg5aLs5kawmo1f2Q1t1M38TLmEKCkGVDsYwgdFw==}
-
-  '@fontsource-variable/pixelify-sans@5.3.0':
-    resolution: {integrity: sha512-rOF07QCyHg9xb4UZF3lpXOM4UO+zo3y8tXvO7T+vy40GVt/GU8HL+/YWE029CMsbhOwk4plRDY9G8BU5cWs1ig==}
-
-  '@fontsource-variable/source-serif-4@5.3.1':
-    resolution: {integrity: sha512-4Rtay22SC4lMvw11r/+9kxANB6P3M0X8s1NudBC2v0J1KU2y3DcMoNcT3lBoZ/CqLirzf+StlO6UlJilyrvaUg==}
-
-  '@fontsource/instrument-serif@5.3.0':
-    resolution: {integrity: sha512-mDiaIg0u67sYV59fie92Wz4sM8UiVlbL7fLxnFPCKkX15DMASEnQTREbaP5S5/3DCcsoAOcQ0sV9E4AeY4QqYQ==}
-
-  '@fontsource/silkscreen@5.3.0':
-    resolution: {integrity: sha512-M1NQ3LQH0LFNvyFPd/piHEGMImPPtpLglNnLC6Vdcq9kL0jNIOtTQmksAWCc4enbDnw1OnIpZtjNEfRqYm/QmA==}
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -1324,15 +1246,6 @@ packages:
     resolution: {integrity: sha512-ik3ZgC9dY/lYVVM++OISsaYDeg1tb0VtP5uL3ouh1koGOaUMDPpbFIei4JkFimWUFPn90sbMNMXQAIVOlnYKJA==}
     engines: {node: '>=10'}
 
-  ascii.rest@0.4.0:
-    resolution: {integrity: sha512-lqKcesbm3Ij5ENvgs/CTRWF3HrjAogOoMJdqOh8rlRmdzG3uRSyqS/3chfnjJfcIeqj69MWI8+NstMZ/Br9Ivw==}
-    hasBin: true
-    peerDependencies:
-      react: '>=18'
-    peerDependenciesMeta:
-      react:
-        optional: true
-
   assertion-error@2.0.1:
     resolution: {integrity: sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA==}
     engines: {node: '>=12'}
@@ -1966,35 +1879,12 @@ snapshots:
 
   '@floating-ui/utils@0.2.12': {}
 
-  '@fontsource-variable/bitcount-prop-single@5.3.0': {}
-
-  '@fontsource-variable/bitcount-single@5.3.0': {}
-
-  '@fontsource-variable/doto@5.3.0': {}
-
-  '@fontsource-variable/fraunces@5.3.0': {}
-
   '@fontsource-variable/geist-mono@5.3.0': {}
-
-  '@fontsource-variable/geist-pixel@5.3.1': {}
 
   '@fontsource-variable/geist@5.3.0': {}
 
-  '@fontsource-variable/handjet@5.3.1': {}
-
-  '@fontsource-variable/jetbrains-mono@5.3.0': {}
-
-  '@fontsource-variable/newsreader@5.3.0': {}
-
-  '@fontsource-variable/pixelify-sans@5.3.0': {}
-
-  '@fontsource-variable/source-serif-4@5.3.1': {}
-
-  '@fontsource/instrument-serif@5.3.0': {}
-
-  '@fontsource/silkscreen@5.3.0': {}
-
-  '@img/colour@1.1.0': {}
+  '@img/colour@1.1.0':
+    optional: true
 
   '@img/sharp-darwin-arm64@0.35.5':
     optionalDependencies:
@@ -2595,10 +2485,6 @@ snapshots:
     dependencies:
       tslib: 2.9.1
 
-  ascii.rest@0.4.0(react@19.3.0):
-    optionalDependencies:
-      react: 19.3.0
-
   assertion-error@2.0.1: {}
 
   baseline-browser-mapping@2.11.39: {}
@@ -2865,7 +2751,8 @@ snapshots:
 
   scheduler@0.28.0: {}
 
-  semver@7.8.6: {}
+  semver@7.8.6:
+    optional: true
 
   server-only@0.0.1: {}
 
@@ -2901,6 +2788,7 @@ snapshots:
       '@img/sharp-win32-ia32': 0.35.5
       '@img/sharp-win32-x64': 0.35.5
       '@types/node': 26.6.6
+    optional: true
 
   source-map-js@1.2.4: {}
 

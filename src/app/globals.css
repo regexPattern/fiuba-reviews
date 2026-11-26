@@ -11,22 +11,13 @@
 
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, monospace;
-  --font-pixel: "Geist Pixel Variable", var(--font-mono);
 
-  /* Serifs en prueba para la fuente de acento (nombres de materias, cátedras y docentes). */
-  --font-instrument: "Instrument Serif", ui-serif, Georgia, serif;
-  --font-newsreader: "Newsreader Variable", ui-serif, Georgia, serif;
-  --font-fraunces: "Fraunces Variable", ui-serif, Georgia, serif;
-  --font-source-serif: "Source Serif 4 Variable", ui-serif, Georgia, serif;
-
-  /* Fuente de acento: cambiar acá para probar otra. */
+  /* Fuente de acento: nombres de materias, cátedras y docentes, y títulos de sección. */
   --font-acento: var(--font-sans);
+  /* Tracking de la fuente de acento (como `tracking-tight`). */
+  --tracking-acento: -0.025em;
 
-  /* Monospace en prueba para los números (calificaciones, cuatrimestres, cantidades). */
-  --font-jetbrains: "JetBrains Mono Variable", ui-monospace, monospace;
-  --font-geist-mono: var(--font-mono);
-
-  /* Fuente de los números: cambiar acá para probar otra. */
+  /* Fuente de los números: calificaciones, cuatrimestres, cantidades. */
   --font-numeros: var(--font-mono);
 }
 
@@ -108,15 +99,8 @@
 }
 
 @layer utilities {
-  .font-pixel {
-    /* Geist Pixel tiene un solo peso (400). Usamos la variante Square sin negrita sintética. */
-    font-variation-settings: "ELSH" 1;
-    font-synthesis: none;
-  }
-
   .font-acento {
-    /* Por si la fuente de acento tiene un solo peso (Instrument Serif): sin negrita sintética. */
-    font-synthesis: none;
+    letter-spacing: var(--tracking-acento);
   }
 }
 
