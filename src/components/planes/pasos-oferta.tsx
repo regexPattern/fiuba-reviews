@@ -4,7 +4,7 @@ import type { OfertaCarrera } from "@/server/db/queries/ofertas";
 import type { Icon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { Select } from "@base-ui/react/select";
-import { AndroidLogo, AppleLogo, Desktop } from "@phosphor-icons/react/ssr";
+import { AndroidLogoIcon, AppleLogoIcon, DesktopIcon } from "@phosphor-icons/react/ssr";
 import { ArrowUpRight, Check, ChevronDown, ChevronRight } from "@withicons/react/line";
 import Image from "next/image";
 import { useState } from "react";
@@ -17,10 +17,10 @@ const URL_OFERTA_SIU = "https://guaraniautogestion.fi.uba.ar/g3w/oferta_comision
 
 /** Iconos de Phosphor: withicons no tiene logos de marcas. */
 const PLATAFORMAS: { valor: Plataforma; etiqueta: string; icono: Icon }[] = [
-  { valor: "windows", etiqueta: "Windows / Linux", icono: Desktop },
-  { valor: "mac", etiqueta: "macOS", icono: AppleLogo },
-  { valor: "android", etiqueta: "Android", icono: AndroidLogo },
-  { valor: "ios", etiqueta: "iPhone / iPad", icono: AppleLogo }
+  { valor: "windows", etiqueta: "Windows / Linux", icono: DesktopIcon },
+  { valor: "mac", etiqueta: "macOS", icono: AppleLogoIcon },
+  { valor: "android", etiqueta: "Android", icono: AndroidLogoIcon },
+  { valor: "ios", etiqueta: "iPhone / iPad", icono: AppleLogoIcon }
 ];
 
 /** Cómo seleccionar y copiar la página en cada plataforma (pasos 2 y 3). */
