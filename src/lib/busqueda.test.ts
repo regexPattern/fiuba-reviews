@@ -51,7 +51,11 @@ describe("búsqueda de materias", () => {
     expect(codigos("datos algoritmos")).toEqual(["CB100"]);
   });
 
-  it("prioriza coincidencias al comienzo de una palabra y si no respeta el orden original", () => {
+  it("encuentra mientras se escribe, aunque la última palabra tenga una sola letra", () => {
+    expect(codigos("analisis m")).toEqual(["CB001"]);
+  });
+
+  it("entre las coincidencias exactas respeta el orden original", () => {
     const buscar = crearBusqueda(
       [
         { codigo: "TA001", nombre: "Criptoanálisis" },
@@ -60,7 +64,7 @@ describe("búsqueda de materias", () => {
       ],
       ["codigo", "nombre"]
     );
-    expect(buscar("analisis").map(({ item }) => item.codigo)).toEqual(["CB001", "CB005", "TA001"]);
+    expect(buscar("analisis").map(({ item }) => item.codigo)).toEqual(["TA001", "CB001", "CB005"]);
   });
 
   it("pone las coincidencias exactas antes que las aproximadas", () => {
@@ -77,7 +81,7 @@ describe("búsqueda de materias", () => {
 
   it("devuelve los rangos a subrayar sobre el texto original", () => {
     const [resultado] = buscar("mate anal");
-    expect(resultado.matches).toEqual([
+    expect(resultado.matches?.map(({ key, indices }) => ({ key, indices }))).toEqual([
       {
         key: "nombre",
         indices: [
