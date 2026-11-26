@@ -11,7 +11,7 @@ async function BusquedaGlobal() {
 /** Fijo y translúcido, el contenido scrollea por debajo. Suma el safe area superior por `viewport-fit=cover`. */
 export function Header() {
   return (
-    <header className="fixed top-0 right-(--compensacion-scrollbar) left-0 z-40 border-b border-stone-300 bg-white/75 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
+    <header className="fixed top-0 right-0 left-0 z-40 border-b border-stone-300 bg-white/75 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
       <nav
         aria-label="Navegación principal"
         className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4 md:px-6"

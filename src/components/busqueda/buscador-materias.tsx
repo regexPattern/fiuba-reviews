@@ -3,7 +3,7 @@
 import { Search } from "@withicons/react/line";
 import { Command } from "cmdk";
 import { useRouter } from "next/navigation";
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode, type Ref, useMemo, useState } from "react";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { crearBusqueda } from "@/lib/busqueda";
 import { TextoConMatches } from "./texto-con-matches";
@@ -17,13 +17,15 @@ export function BuscadorMaterias({
   query,
   onQueryChange,
   onSelect,
-  inputAction
+  inputAction,
+  inputRef
 }: {
   materias: MateriaBuscador[];
   query: string;
   onQueryChange: (query: string) => void;
   onSelect?: () => void;
   inputAction?: ReactNode;
+  inputRef?: Ref<HTMLInputElement>;
 }) {
   const router = useRouter();
   const debouncedQuery = useDebouncedValue(query);
@@ -51,6 +53,7 @@ export function BuscadorMaterias({
       <div className="flex shrink-0 items-center gap-2 border-b border-stone-300 px-3">
         <Search size={18} aria-hidden="true" className="shrink-0 text-stone-500" />
         <Command.Input
+          ref={inputRef}
           autoCapitalize="off"
           aria-label="Buscar materias por código o título"
           placeholder="Buscar materia o código…"
@@ -69,6 +72,13 @@ export function BuscadorMaterias({
         // cmdk mete los ítems dentro de un `div[cmdk-list-sizer]`, así que el `space-y` va en ese div
         // y no en la lista (si no, solo separaría al sizer).
         className="min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto overscroll-contain p-2 [&_[cmdk-list-sizer]]:space-y-1.5"
+        // En iOS, con el input enfocado, el gesto scrollea la página en vez de la lista. Al deslizar
+        // se le saca el foco (y se cierra el teclado), como en las búsquedas del sistema.
+        onTouchMove={() => {
+          const activo = document.activeElement;
+          if (activo instanceof HTMLInputElement && activo.hasAttribute("cmdk-input"))
+            activo.blur();
+        }}
       >
         {resultados.length === 0 && (
           <p className="py-6 text-center text-sm text-stone-400">No se encontraron materias.</p>

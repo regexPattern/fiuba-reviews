@@ -117,15 +117,4 @@
 :root {
   /* Alto del header fijo, incluido el safe area superior (`viewport-fit=cover`). */
   --header-height: calc(3.5rem + env(safe-area-inset-top));
-  /* Cuánto compensar a la derecha por la barra de scroll oculta; solo distinto de 0 con un modal abierto. */
-  --compensacion-scrollbar: 0px;
-}
-
-/* Con un diálogo modal abierto el documento no scrollea por detrás (en móvil scrollea la ventana).
-   La barra de scroll desaparece, así que se ocupa su lugar con padding para que el layout no salte.
-   `--ancho-scrollbar` lo mide `abrirModal` (`src/lib/modal.ts`) justo antes de abrir. */
-html:has(dialog:modal) {
-  --compensacion-scrollbar: var(--ancho-scrollbar, 0px);
-  overflow: hidden;
-  padding-right: var(--compensacion-scrollbar);
 }

@@ -1,25 +1,20 @@
 "use client";
 
+import { Dialog } from "@base-ui/react/dialog";
 import { Close, Search } from "@withicons/react/line";
 import { type ComponentProps, useEffect, useRef, useState } from "react";
 import { Tecla } from "@/components/ui/tecla";
-import { abrirModal } from "@/lib/modal";
 import { usaCmd, usePlataforma } from "@/lib/plataforma";
 import { BuscadorMaterias, type MateriaBuscador } from "./buscador-materias";
 
 export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [abierto, setAbierto] = useState(false);
   const [query, setQuery] = useState("");
   const isMac = usaCmd(usePlataforma());
 
-  function abrir() {
-    const dialog = dialogRef.current;
-    if (!dialog || dialog.open) return;
-    abrirModal(dialog);
-    dialog.querySelector("input")?.focus();
-  }
-
-  const cerrar = () => dialogRef.current?.close();
+  const cerrar = () => setAbierto(false);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -32,8 +27,7 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
       ) {
         event.preventDefault();
         if (event.repeat) return;
-        if (dialogRef.current?.open) cerrar();
-        else abrir();
+        setAbierto((abierto) => !abierto);
       }
     }
 
@@ -42,60 +36,69 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
   }, [isMac]);
 
   return (
-    <>
-      <BotonBuscar
-        onClick={abrir}
-        aria-keyshortcuts={isMac ? "Meta+k" : "Control+k"}
-        atajo={isMac ? "⌘ K" : "Ctrl K"}
+    <Dialog.Root
+      open={abierto}
+      onOpenChange={setAbierto}
+      // Se limpia al terminar la animación de cierre, así el texto no desaparece mientras se va.
+      onOpenChangeComplete={(abierto) => !abierto && setQuery("")}
+    >
+      <Dialog.Trigger
+        render={
+          <BotonBuscar
+            aria-keyshortcuts={isMac ? "Meta+k" : "Control+k"}
+            atajo={isMac ? "⌘ K" : "Ctrl K"}
+          />
+        }
       />
-      {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions -- Click en el backdrop; con teclado se cierra con Esc (nativo). */}
-      <dialog
-        ref={dialogRef}
-        aria-label="Buscar materias"
-        onClose={() => setQuery("")}
-        // Click en el backdrop: el contenido ocupa todo el diálogo, así que el target solo es
-        // el propio diálogo cuando se clickea afuera.
-        onClick={(event) => event.target === event.currentTarget && cerrar()}
-        className="inset-x-0 top-[max(calc(var(--header-height)+1rem),15dvh)] bottom-auto mx-auto max-h-[75dvh] w-[calc(100%-2rem)] max-w-xl scale-97 flex-col overflow-hidden relieve bg-white text-stone-900 opacity-0 transition-all transition-discrete duration-200 ease-out backdrop:bg-black/0 backdrop:transition-all backdrop:transition-discrete backdrop:duration-200 open:flex open:scale-100 open:opacity-100 open:backdrop:bg-black/20 motion-reduce:transition-none starting:open:scale-97 starting:open:opacity-0 starting:open:backdrop:bg-black/0"
-      >
-        <BuscadorMaterias
-          materias={materias}
-          query={query}
-          onQueryChange={setQuery}
-          onSelect={cerrar}
-          inputAction={
-            <button
-              type="button"
-              onClick={cerrar}
-              aria-label="Cerrar buscador"
-              // Tecla chica en relieve, como los atajos del pie.
-              className="flex h-6 shrink-0 relieve-boton cursor-pointer items-center bg-white px-1.5 font-mono text-xs text-stone-500 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fiuba"
-            >
-              <Close size={14} className="sm:hidden" aria-hidden="true" />
-              <span className="hidden sm:inline">Esc</span>
-            </button>
-          }
-        />
-        <div
-          aria-hidden="true"
-          className="hidden shrink-0 items-center gap-4 border-t border-stone-200 bg-stone-50 px-3 py-2 rotulo text-stone-500 sm:flex"
+      <Dialog.Portal>
+        {/* `z-50`: por encima del header fijo (`z-40`). */}
+        <Dialog.Backdrop className="fixed inset-0 z-50 min-h-dvh bg-black/20 transition-opacity duration-200 ease-out data-ending-style:opacity-0 data-starting-style:opacity-0 supports-[-webkit-touch-callout:none]:absolute motion-reduce:transition-none" />
+        <Dialog.Popup
+          ref={popupRef}
+          aria-label="Buscar materias"
+          // Al input, salvo con touch: ahí iOS no abre el teclado con un foco por código, y con el input
+          // enfocado el gesto scrollea la página en vez de la lista. Con touch se enfoca el popup.
+          initialFocus={(tipo) => (tipo === "touch" ? popupRef.current : inputRef.current)}
+          className="fixed inset-x-0 top-[max(calc(var(--header-height)+1rem),15dvh)] z-50 mx-auto flex max-h-[75dvh] w-[calc(100%-2rem)] max-w-xl flex-col overflow-hidden relieve bg-white text-stone-900 transition-[scale,opacity] duration-200 ease-out outline-none [--relieve:var(--color-stone-500)] data-ending-style:scale-97 data-ending-style:opacity-0 data-starting-style:scale-97 data-starting-style:opacity-0 motion-reduce:transition-none"
         >
-          <span className="flex items-center gap-1.5">
-            <Tecla chica>↑</Tecla>
-            <Tecla chica>↓</Tecla>
-            navegar
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Tecla chica>↵</Tecla>
-            abrir
-          </span>
-          <span className="ml-auto flex items-center gap-1.5">
-            <Tecla chica>Esc</Tecla>
-            cerrar
-          </span>
-        </div>
-      </dialog>
-    </>
+          <BuscadorMaterias
+            materias={materias}
+            query={query}
+            onQueryChange={setQuery}
+            onSelect={cerrar}
+            inputRef={inputRef}
+            inputAction={
+              <Dialog.Close
+                aria-label="Cerrar buscador"
+                // Tecla chica en relieve, como los atajos del pie.
+                className="flex h-6 shrink-0 relieve-boton cursor-pointer items-center bg-white px-1.5 font-mono text-xs text-stone-500 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fiuba"
+              >
+                <Close size={14} className="sm:hidden" aria-hidden="true" />
+                <span className="hidden sm:inline">Esc</span>
+              </Dialog.Close>
+            }
+          />
+          <div
+            aria-hidden="true"
+            className="hidden shrink-0 items-center gap-4 border-t border-stone-200 bg-stone-50 px-3 py-2 rotulo text-stone-500 sm:flex"
+          >
+            <span className="flex items-center gap-1.5">
+              <Tecla chica>↑</Tecla>
+              <Tecla chica>↓</Tecla>
+              navegar
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Tecla chica>↵</Tecla>
+              abrir
+            </span>
+            <span className="ml-auto flex items-center gap-1.5">
+              <Tecla chica>Esc</Tecla>
+              cerrar
+            </span>
+          </div>
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
 

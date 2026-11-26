@@ -18,7 +18,7 @@ export const viewport: Viewport = { viewportFit: "cover" };
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en">
-      <body className="bg-white font-sans antialiased">
+      <body className="relative bg-white font-sans antialiased">
         <Header />
         <div className="pt-(--header-height) pb-[env(safe-area-inset-bottom)] md:pb-0">
           {children}

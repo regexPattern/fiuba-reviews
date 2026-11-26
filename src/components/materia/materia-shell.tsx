@@ -1,8 +1,15 @@
 "use client";
 
+import { Drawer } from "@base-ui/react/drawer";
 import { ChevronsUpDown, Close } from "@withicons/react/line";
-import { type ReactNode, createContext, useContext, useLayoutEffect, useRef } from "react";
-import { abrirModal } from "@/lib/modal";
+import {
+  type ReactNode,
+  createContext,
+  useContext,
+  useLayoutEffect,
+  useRef,
+  useState
+} from "react";
 
 const ShellContext = createContext<{ alNavegar: () => void }>({ alNavegar: () => {} });
 export const useMateriaShell = () => useContext(ShellContext);
@@ -24,7 +31,7 @@ export function MateriaShell({
   const shellRef = useRef<HTMLDivElement>(null);
   const barraRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
-  const drawerRef = useRef<HTMLDialogElement>(null);
+  const [drawerAbierto, setDrawerAbierto] = useState(false);
 
   useLayoutEffect(() => {
     const shell = shellRef.current;
@@ -44,13 +51,11 @@ export function MateriaShell({
   }, []);
 
   function alNavegar() {
-    drawerRef.current?.close();
+    setDrawerAbierto(false);
     // En móvil scrollea la ventana y en desktop el panel principal.
     mainRef.current?.scrollTo({ top: 0 });
     window.scrollTo({ top: 0 });
   }
-
-  const cerrarDrawer = () => drawerRef.current?.close();
 
   return (
     <ShellContext value={{ alNavegar }}>
@@ -66,16 +71,45 @@ export function MateriaShell({
               ref={barraRef}
               className="sticky top-(--header-height) z-30 border-b border-stone-300 bg-white/75 backdrop-blur-xl md:hidden"
             >
-              <button
-                type="button"
-                aria-haspopup="dialog"
-                onClick={() => drawerRef.current && abrirModal(drawerRef.current)}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left"
+              <Drawer.Root
+                open={drawerAbierto}
+                onOpenChange={setDrawerAbierto}
+                swipeDirection="left"
               >
-                <span className="min-w-0 flex-1 text-sm font-medium text-stone-900">{titulo}</span>
-                <ChevronsUpDown size={18} aria-hidden="true" className="shrink-0 text-stone-500" />
-                <span className="sr-only">Ver cátedras</span>
-              </button>
+                <Drawer.Trigger className="flex w-full items-center gap-3 px-4 py-3 text-left">
+                  <span className="min-w-0 flex-1 text-sm font-medium text-stone-900">
+                    {titulo}
+                  </span>
+                  <ChevronsUpDown
+                    size={18}
+                    aria-hidden="true"
+                    className="shrink-0 text-stone-500"
+                  />
+                  <span className="sr-only">Ver cátedras</span>
+                </Drawer.Trigger>
+                <Drawer.Portal>
+                  {/* `z-50`: por encima del header fijo (`z-40`). Se aclara a medida que se arrastra el drawer. */}
+                  <Drawer.Backdrop className="fixed inset-0 z-50 min-h-dvh bg-black opacity-[calc(0.2*(1-var(--drawer-swipe-progress)))] transition-opacity duration-300 ease-out data-ending-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*300ms)] data-starting-style:opacity-0 data-swiping:duration-0 supports-[-webkit-touch-callout:none]:absolute motion-reduce:transition-none md:hidden" />
+                  <Drawer.Viewport className="fixed inset-0 z-50 flex md:hidden">
+                    <Drawer.Popup className="flex h-full w-[85vw] max-w-sm [transform:translateX(var(--drawer-swipe-movement-x))] flex-col border-r border-stone-300 bg-white pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] transition-transform duration-300 ease-out outline-none data-ending-style:[transform:translateX(-100%)] data-ending-style:duration-[calc(var(--drawer-swipe-strength)*300ms)] data-starting-style:[transform:translateX(-100%)] data-swiping:duration-0 data-swiping:select-none motion-reduce:transition-none">
+                      <Drawer.Content className="flex min-h-0 flex-1 flex-col">
+                        <div className="flex shrink-0 items-center justify-between border-b border-stone-300 py-1 pr-1 pl-4">
+                          <Drawer.Title className="text-base tracking-tight text-stone-900">
+                            Cátedras
+                          </Drawer.Title>
+                          <Drawer.Close
+                            aria-label="Cerrar"
+                            className="flex size-11 items-center justify-center text-stone-500 hover:bg-stone-100 hover:text-stone-900"
+                          >
+                            <Close size={18} aria-hidden="true" />
+                          </Drawer.Close>
+                        </div>
+                        <div className="flex min-h-0 flex-1 flex-col">{sidebar}</div>
+                      </Drawer.Content>
+                    </Drawer.Popup>
+                  </Drawer.Viewport>
+                </Drawer.Portal>
+              </Drawer.Root>
             </div>
 
             <main
@@ -85,27 +119,6 @@ export function MateriaShell({
               {children}
             </main>
           </div>
-
-          {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions -- Click en el backdrop; con teclado se cierra con Esc (nativo). */}
-          <dialog
-            ref={drawerRef}
-            aria-label="Cátedras"
-            onClick={(event) => event.target === event.currentTarget && cerrarDrawer()}
-            className="inset-y-0 right-auto left-0 m-0 h-dvh max-h-none w-[85vw] max-w-sm [translate:-100%] flex-col border-r border-stone-300 bg-white pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] transition-all transition-discrete duration-300 ease-out backdrop:bg-black/0 backdrop:transition-all backdrop:transition-discrete backdrop:duration-200 open:flex open:[translate:0] open:backdrop:bg-black/20 motion-reduce:transition-none md:hidden starting:open:[translate:-100%] starting:open:backdrop:bg-black/0"
-          >
-            <div className="flex shrink-0 items-center justify-between border-b border-stone-300 py-1 pr-1 pl-4">
-              <h2 className="text-base tracking-tight text-stone-900">Cátedras</h2>
-              <button
-                type="button"
-                onClick={cerrarDrawer}
-                aria-label="Cerrar"
-                className="flex size-11 items-center justify-center text-stone-500 hover:bg-stone-100 hover:text-stone-900"
-              >
-                <Close size={18} aria-hidden="true" />
-              </button>
-            </div>
-            <div className="flex min-h-0 flex-1 flex-col">{sidebar}</div>
-          </dialog>
         </div>
       </div>
     </ShellContext>
