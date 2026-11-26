@@ -2,6 +2,7 @@
 
 import { Close, Search } from "@withicons/react/line";
 import { type ComponentProps, type ReactNode, useEffect, useRef, useState } from "react";
+import { abrirModal } from "@/lib/modal";
 import { usaCmd, usePlataforma } from "@/lib/plataforma";
 import { BuscadorMaterias, type MateriaBuscador } from "./buscador-materias";
 
@@ -13,7 +14,7 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
   function abrir() {
     const dialog = dialogRef.current;
     if (!dialog || dialog.open) return;
-    dialog.showModal();
+    abrirModal(dialog);
     dialog.querySelector("input")?.focus();
   }
 

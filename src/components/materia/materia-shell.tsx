@@ -2,6 +2,7 @@
 
 import { ChevronsUpDown, Close } from "@withicons/react/line";
 import { type ReactNode, createContext, useContext, useLayoutEffect, useRef } from "react";
+import { abrirModal } from "@/lib/modal";
 
 const ShellContext = createContext<{ alNavegar: () => void }>({ alNavegar: () => {} });
 export const useMateriaShell = () => useContext(ShellContext);
@@ -68,7 +69,7 @@ export function MateriaShell({
               <button
                 type="button"
                 aria-haspopup="dialog"
-                onClick={() => drawerRef.current?.showModal()}
+                onClick={() => drawerRef.current && abrirModal(drawerRef.current)}
                 className="flex w-full items-center gap-3 px-4 py-3 text-left"
               >
                 <span className="min-w-0 flex-1 text-sm font-medium text-stone-900">{titulo}</span>
