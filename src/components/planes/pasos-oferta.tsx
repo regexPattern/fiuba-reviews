@@ -10,6 +10,7 @@ import Image from "next/image";
 import { useState } from "react";
 import siuLogo from "@/assets/siu-logo.png";
 import { FormularioOferta } from "@/components/planes/formulario-oferta";
+import { Tecla } from "@/components/ui/tecla";
 import { type Plataforma, usePlataforma } from "@/lib/plataforma";
 
 const URL_OFERTA_SIU = "https://guaraniautogestion.fi.uba.ar/g3w/oferta_comisiones";
@@ -208,15 +209,6 @@ function Atajo({ teclas }: { teclas: string[] }) {
         <Tecla key={tecla}>{tecla}</Tecla>
       ))}
     </span>
-  );
-}
-
-/** Tecla en relieve, como los botones. */
-function Tecla({ children }: { children: ReactNode }) {
-  return (
-    <kbd className="inline-flex h-6 min-w-6 items-center justify-center relieve bg-white px-1.5 font-mono text-xs text-stone-700 [--relieve-alto:2px]">
-      {children}
-    </kbd>
   );
 }
 

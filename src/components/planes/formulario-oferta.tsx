@@ -29,7 +29,6 @@ const TONOS: Record<Tono, { icono: typeof Paste; clases: string }> = {
   ok: { icono: CircleCheckBig, clases: "text-emerald-700" },
   aviso: { icono: AlertTriangle, clases: "text-amber-800" },
   error: { icono: AlertCircle, clases: "text-red-700" },
-  // No es un error: la oferta está bien, solo que ya la teníamos.
   gracias: { icono: Handshake, clases: "text-stone-600" }
 };
 

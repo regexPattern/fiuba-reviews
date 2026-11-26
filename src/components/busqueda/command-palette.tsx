@@ -1,7 +1,8 @@
 "use client";
 
 import { Close, Search } from "@withicons/react/line";
-import { type ComponentProps, type ReactNode, useEffect, useRef, useState } from "react";
+import { type ComponentProps, useEffect, useRef, useState } from "react";
+import { Tecla } from "@/components/ui/tecla";
 import { abrirModal } from "@/lib/modal";
 import { usaCmd, usePlataforma } from "@/lib/plataforma";
 import { BuscadorMaterias, type MateriaBuscador } from "./buscador-materias";
@@ -75,22 +76,21 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
             </button>
           }
         />
-        {/* Pie apagado, como el del resumen con IA. */}
         <div
           aria-hidden="true"
           className="hidden shrink-0 items-center gap-4 border-t border-stone-200 bg-stone-50 px-3 py-2 rotulo text-stone-500 sm:flex"
         >
           <span className="flex items-center gap-1.5">
-            <Tecla>↑</Tecla>
-            <Tecla>↓</Tecla>
+            <Tecla chica>↑</Tecla>
+            <Tecla chica>↓</Tecla>
             navegar
           </span>
           <span className="flex items-center gap-1.5">
-            <Tecla>↵</Tecla>
+            <Tecla chica>↵</Tecla>
             abrir
           </span>
           <span className="ml-auto flex items-center gap-1.5">
-            <Tecla>Esc</Tecla>
+            <Tecla chica>Esc</Tecla>
             cerrar
           </span>
         </div>
@@ -115,18 +115,9 @@ export function BotonBuscar({ atajo, ...props }: ComponentProps<"button"> & { at
       </span>
       {atajo && (
         <span className="ml-1 hidden sm:flex">
-          <Tecla>{atajo}</Tecla>
+          <Tecla chica>{atajo}</Tecla>
         </span>
       )}
     </button>
-  );
-}
-
-/** Tecla chica en relieve bajo, para atajos de teclado. */
-function Tecla({ children }: { children: ReactNode }) {
-  return (
-    <kbd className="inline-flex h-5 min-w-5 items-center justify-center relieve bg-white px-1 font-mono text-xs font-normal tracking-normal text-stone-500 normal-case [--relieve-alto:2px]">
-      {children}
-    </kbd>
   );
 }
