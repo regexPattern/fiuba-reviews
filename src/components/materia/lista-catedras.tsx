@@ -71,9 +71,6 @@ export function ListaCatedras({
                 aria-current={catedra.codigo === activa ? "page" : undefined}
                 className="item-lista hover:bg-stone-100 hover:text-stone-900 aria-[current=page]:item-lista-activo"
               >
-                {/* Calificación a la izquierda con ancho fijo, así los nombres quedan alineados. `h-6`
-                    es el alto de un renglón del nombre (`text-base/6`): si el nombre baja, queda a
-                    la altura del primero. */}
                 <span className="flex h-6 w-12 shrink-0 items-center gap-1 font-mono text-stone-600 tabular-nums">
                   <Star size={16} aria-hidden="true" className="shrink-0 text-fiuba" />
                   {catedra.calificacion > 0 ? catedra.calificacion.toFixed(1) : "–"}

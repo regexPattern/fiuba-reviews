@@ -108,7 +108,6 @@ export function BotonBuscar({ atajo, ...props }: ComponentProps<"button"> & { at
       type="button"
       aria-label="Buscar materias"
       aria-haspopup="dialog"
-      // Terciario, sin borde ni relieve: el atajo ya va en una tecla en relieve y dos cajas competirían.
       className="boton-terciario h-9 disabled:pointer-events-none disabled:opacity-50"
       {...props}
     >

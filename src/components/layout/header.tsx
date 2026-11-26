@@ -8,7 +8,6 @@ async function BusquedaGlobal() {
   return <CommandPalette materias={materias} />;
 }
 
-/** Fijo y translúcido, el contenido scrollea por debajo. Suma el safe area superior por `viewport-fit=cover`. */
 export function Header() {
   return (
     <header className="fixed top-0 right-0 left-0 z-40 border-b border-stone-300 bg-white/75 pt-[env(safe-area-inset-top)] backdrop-blur-xl">

@@ -34,14 +34,9 @@ function Docente({ docente, codigoCatedra }: { docente: DocenteCatedra; codigoCa
       // Que los anchors a un docente no queden debajo del header (y de la barra sticky en móvil).
       className="scroll-mt-[calc(var(--header-height)+var(--materia-sticky-height,0px)+1rem)] space-y-4 md:scroll-mt-[calc(var(--header-height)+1.5rem)]"
     >
-      {/* En pantallas chicas las acciones van en una fila debajo del nombre, así el nombre del SIU
-          no se corta. Desde `sm`, a la derecha y a la altura del nombre (`items-start`). */}
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-2">
         <div className="min-w-0 flex-1 space-y-1">
           <h2 className="text-xl/7 font-medium tracking-tight text-stone-900">{docente.nombre}</h2>
-          {/* Nombre del SIU y rol separados por un punto. Si no entran en un renglón, el rol baja
-              entero. El punto va al principio de cada parte y el `overflow-hidden` junto con el
-              `-ml-4` recorta el de la que arranca un renglón, así nunca queda un punto colgando. */}
           {(docente.nombreSiu || docente.rol) && (
             <div className="overflow-hidden">
               <p className="-ml-4 flex flex-wrap rotulo text-stone-500">
@@ -64,14 +59,10 @@ function Docente({ docente, codigoCatedra }: { docente: DocenteCatedra; codigoCa
               cantidadCalificaciones={docente.cantidadCalificaciones}
             />
           ) : (
-            // Misma forma que el botón del promedio pero apagado, tipo deshabilitado: no hay
-            // desglose para mostrar. Es un `span` y no un `button disabled`: no hay nada que hacer.
             <span className="shrink-0 relieve bg-stone-50 px-2.5 py-1 text-sm text-stone-400 select-none [--relieve:var(--color-stone-200)]">
               Sin calificaciones
             </span>
           )}
-          {/* En móvil, primero: la nota cambia de ancho entre docentes y así "Calificar" queda siempre
-              alineado a la izquierda. Desde `sm`, a la derecha de la nota (contra el borde). */}
           <BotonCalificar
             codigoDocente={docente.codigo}
             codigoCatedra={codigoCatedra}
@@ -116,7 +107,6 @@ function BotonCalificar({
   );
 }
 
-/** Tarjeta en relieve con el resumen y un pie con la aclaración de que es generado con IA. */
 function ResumenIA({ resumen }: { resumen: string }) {
   // Los textos arrancan a ~26px del borde, igual que el de los comentarios (ícono de 18px + `gap-2`):
   // 1.5px de borde + `px-6`. Vertical: `py-5`, que con el interlineado de `text-base/relaxed` se ve
@@ -132,11 +122,6 @@ function ResumenIA({ resumen }: { resumen: string }) {
   );
 }
 
-/**
- * Hueco punteado donde irían los comentarios: mismo borde y radio que las cajas en `relieve` pero
- * sin canto, así se lee como un lugar vacío y no como contenido. Texto en caja normal y no en
- * `rotulo`, para que no se confunda con el nombre del SIU y el rol de arriba.
- */
 function SinComentarios() {
   return (
     <p className="flex items-center gap-2 rounded-md border-[1.5px] border-dashed border-stone-300 px-3 py-3 text-sm text-stone-500">
@@ -175,9 +160,6 @@ function Comentario({ comentario }: { comentario: ComentarioDocente }) {
       <Quote size={18} aria-hidden="true" className="mt-1 shrink-0 text-stone-400" />
       <p className="min-w-0 flex-1 text-base/relaxed text-stone-700">
         <span className="whitespace-pre-wrap">{comentario.contenido.trim()}</span>
-        {/* Metadata al final del texto, en la misma línea. Fuera del `pre-wrap` para que el espacio
-            no quede al principio del renglón si la metadata baja. Doble espacio: el `nbsp` queda
-            pegado al texto y el normal es el punto de corte (un `margin` dejaría sangría al bajar). */}
         {"\u00A0 "}
         <span className="whitespace-nowrap text-stone-400 select-none">
           <span className="text-xs">
