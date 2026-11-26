@@ -1,20 +1,19 @@
 import type { StaticImageData } from "next/image";
 import Image from "next/image";
-import colectivoFalla from "@/assets/colectivo-99.webp";
+import colectivo99 from "@/assets/colectivo-99.webp";
 import colectivo400 from "@/assets/colectivo-400.webp";
 import colectivo404 from "@/assets/colectivo-404.webp";
 import colectivo500 from "@/assets/colectivo-500.webp";
 
-const COLECTIVOS: Partial<Record<number, StaticImageData>> = {
+const LINEA_POR_DEFECTO = 99;
+
+const COLECTIVOS: Record<number, StaticImageData> = {
+  [LINEA_POR_DEFECTO]: colectivo99,
   400: colectivo400,
   404: colectivo404,
   500: colectivo500
 };
 
-/**
- * Página de error con la foto del colectivo de la línea del código (o la del 99 si no hay una),
- * enmarcada como una foto impresa que cuelga de una chinche.
- */
 export function PaginaError({
   codigo,
   descripcion,
@@ -26,19 +25,15 @@ export function PaginaError({
   /** Acciones (links, botones) debajo del mensaje. */
   children?: React.ReactNode;
 }) {
-  const colectivo = (codigo !== undefined && COLECTIVOS[codigo]) || colectivoFalla;
+  const linea = codigo !== undefined && codigo in COLECTIVOS ? codigo : LINEA_POR_DEFECTO;
 
   return (
     <main className="flex min-h-[calc(100dvh-var(--header-height))] flex-col items-center justify-center gap-10 px-6 py-12">
       <figure className="relative flex w-full max-w-xs flex-col items-center sm:max-w-sm">
-        {/* Chinche vista desde atrás, un poco inclinada hacia arriba a la derecha: el canto, como el
-            del `relieve`, asoma abajo a la izquierda. Tapa el vértice del hilo. */}
         <span
           aria-hidden
           className="absolute top-0.5 left-1/2 z-10 size-5 -translate-1/2 rounded-full border-[1.5px] border-fiuba-oscuro bg-fiuba shadow-[-1.5px_2.5px_0_var(--color-fiuba-oscuro)]"
         />
-        {/* Hilo de la chinche al marco, a un 12% de cada borde. Se mete 4px debajo del marco (que se
-            dibuja encima) para que no se vea dónde termina contra el borde. */}
         <svg
           aria-hidden
           className="-mb-1 h-14 w-[76%]"
@@ -54,12 +49,10 @@ export function PaginaError({
             className="stroke-stone-300"
           />
         </svg>
-        {/* Marco en relieve como las cards (canto abajo, por fuera) y la foto hundida en él (canto
-            arriba, por dentro). */}
         <div className="relative w-full relieve bg-white p-3">
           <Image
-            src={colectivo}
-            alt={`Colectivo de la línea ${colectivo === colectivoFalla ? 99 : codigo}`}
+            src={COLECTIVOS[linea]}
+            alt={`Colectivo de la línea ${linea}`}
             placeholder="blur"
             preload
             sizes="(min-width: 640px) 360px, 90vw"
