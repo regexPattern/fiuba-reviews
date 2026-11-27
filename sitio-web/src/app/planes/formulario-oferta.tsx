@@ -14,11 +14,11 @@ import {
 import { useActionState, useMemo, useState } from "react";
 import {
   type Cuatrimestre,
-  extraerMetadataOferta,
   formatearCuatrimestre,
   normalizarNombre,
   ordenCuatrimestre
 } from "@/lib/ofertas";
+import { parseMetadata } from "@fiuba-reviews/parser-siu";
 import { type ResultadoEnvio, enviarOferta } from "./actions";
 
 type Tono = "neutro" | "ok" | "aviso" | "error" | "gracias";
@@ -50,9 +50,12 @@ function diagnosticar(
     return { tono: "neutro", mensaje: "Pegá la página copiada del SIU.", enviable: false };
   }
 
-  const metadata = extraerMetadataOferta(contenido);
+  let siu;
 
-  if (!metadata) {
+  try {
+    // Si la página trae varios períodos lectivos (filtro en `Todos`), se toma el primero.
+    [siu] = parseMetadata(contenido);
+  } catch {
     return {
       tono: "aviso",
       mensaje:
@@ -61,6 +64,10 @@ function diagnosticar(
     };
   }
 
+  const metadata = {
+    carrera: siu.carrera,
+    cuatrimestre: { numero: siu.cuatrimestre, anio: siu.anio }
+  };
   const cuatrimestre = <Cuatri cuatrimestre={metadata.cuatrimestre} />;
   const carrera = ofertas.find(
     (o) => normalizarNombre(o.nombre) === normalizarNombre(metadata.carrera)

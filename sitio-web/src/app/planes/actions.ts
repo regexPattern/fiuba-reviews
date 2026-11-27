@@ -4,13 +4,13 @@ import { and, eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import {
   type Cuatrimestre,
-  extraerMetadataOferta,
   formatearCuatrimestre,
   normalizarNombre,
   ordenCuatrimestre
 } from "@/lib/ofertas";
 import { tags } from "@/server/cache";
 import { db, schema } from "@/server/db";
+import { parseMetadata } from "@fiuba-reviews/parser-siu";
 
 export type ResultadoEnvio =
   | { estado: "inicial" }
@@ -34,14 +34,22 @@ export async function enviarOferta(
     return { estado: "error", mensaje: "El contenido enviado no es válido." };
   }
 
-  const metadata = extraerMetadataOferta(contenido);
+  let siu;
 
-  if (!metadata) {
+  try {
+    // Si la página trae varios períodos lectivos (filtro en `Todos`), se toma el primero.
+    [siu] = parseMetadata(contenido);
+  } catch {
     return {
       estado: "error",
       mensaje: "No reconocimos la oferta. Asegurate de copiar la página entera del SIU."
     };
   }
+
+  const metadata = {
+    carrera: siu.carrera,
+    cuatrimestre: { numero: siu.cuatrimestre, anio: siu.anio }
+  };
 
   const carreras = await db.select().from(schema.carrera);
   const carrera = carreras.find(
