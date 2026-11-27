@@ -1,0 +1,38 @@
+{
+  "name": "@fiuba-reviews/sitio-web",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run --dir src"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.9.0",
+    "@fiuba-reviews/db": "workspace:*",
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
+    "@phosphor-icons/react": "^2.1.10",
+    "@t3-oss/env-nextjs": "^0.13.11",
+    "@withicons/react": "^0.6.0",
+    "cmdk": "^1.1.1",
+    "drizzle-orm": "catalog:",
+    "fuse.js": "^7.5.0",
+    "next": "16.4.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "catalog:",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "postcss": "^8.5.33",
+    "tailwindcss": "^4.3.5",
+    "typescript": "catalog:",
+    "vitest": "^5.1.1"
+  }
+}

@@ -8,5 +8,5 @@
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "warn"
   },
-  "ignorePatterns": [".next/**", "out/**", "build/**", "next-env.d.ts"]
+  "ignorePatterns": ["**/.next/**", "**/out/**", "**/build/**", "**/next-env.d.ts"]
 }

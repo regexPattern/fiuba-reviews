@@ -1,13 +1,13 @@
-/node_modules
+node_modules/
 .pnpm-debug.log*
 
-/.next/
-/out/
-/build
+.next/
+out/
+build/
 next-env.d.ts
 *.tsbuildinfo
 
-/coverage
+coverage/
 
 .env*
 !.env.example
