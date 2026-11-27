@@ -1,8 +1,8 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { updateTag } from "next/cache";
-import { type Cuatrimestre, formatearCuatrimestre, ordenCuatrimestre } from "@/lib/cuatrimestres";
+import { type Cuatrimestre, formatearCuatrimestre } from "@/lib/cuatrimestres";
 import { buscarCarrera } from "@/lib/ofertas";
 import { tags } from "@/server/cache";
 import { db, schema } from "@/server/db";
@@ -46,7 +46,10 @@ export async function enviarOferta(
   const carrera = buscarCarrera(await db.select().from(schema.carrera), metadata.carrera);
 
   if (!carrera) {
-    return { estado: "error", mensaje: `No tenemos registrada la carrera «${metadata.carrera}».` };
+    return {
+      estado: "error",
+      mensaje: `No tenemos registrada la carrera «${metadata.carrera}».`
+    };
   }
 
   const [cuatrimestre] = await db
@@ -69,19 +72,24 @@ export async function enviarOferta(
 
   // Tanto las procesadas como las que esperan ser procesadas, así no se
   // reciben duplicadas.
+  const { numero, anio } = metadata.cuatrimestre;
   const existentes = await Promise.all(
     [schema.ofertaComisiones, schema.ofertaComisionesRaw].map((tabla) =>
       db
-        .select({ numero: schema.cuatrimestre.numero, anio: schema.cuatrimestre.anio })
+        .select({ codigo: tabla.codigoCuatrimestre })
         .from(tabla)
         .innerJoin(schema.cuatrimestre, eq(schema.cuatrimestre.codigo, tabla.codigoCuatrimestre))
-        .where(eq(tabla.codigoCarrera, carrera.codigo))
+        .where(
+          and(
+            eq(tabla.codigoCarrera, carrera.codigo),
+            sql`(${schema.cuatrimestre.anio}, ${schema.cuatrimestre.numero}) >= (${anio}, ${numero})`
+          )
+        )
+        .limit(1)
     )
   );
 
-  const yaExiste = existentes
-    .flat()
-    .some((c) => ordenCuatrimestre(c) >= ordenCuatrimestre(metadata.cuatrimestre));
+  const yaExiste = existentes.some((filas) => filas.length > 0);
 
   if (yaExiste) {
     return {
@@ -103,7 +111,10 @@ export async function enviarOferta(
       error
     });
 
-    return { estado: "error", mensaje: "No pudimos guardar la oferta. Probá de nuevo más tarde." };
+    return {
+      estado: "error",
+      mensaje: "No pudimos guardar la oferta. Probá de nuevo más tarde."
+    };
   }
 
   console.info("[enviarOferta] Oferta guardada.", {
@@ -115,5 +126,9 @@ export async function enviarOferta(
   // mostrar la oferta como "en proceso".
   updateTag(tags.ofertas);
 
-  return { estado: "enviada", carrera: carrera.nombre, cuatrimestre: metadata.cuatrimestre };
+  return {
+    estado: "enviada",
+    carrera: carrera.nombre,
+    cuatrimestre: metadata.cuatrimestre
+  };
 }

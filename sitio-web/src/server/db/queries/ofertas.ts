@@ -1,7 +1,7 @@
 import "server-only";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
-import { type Cuatrimestre, ordenCuatrimestre } from "@/lib/cuatrimestres";
+import { type Cuatrimestre, mismoCuatrimestre, ordenCuatrimestre } from "@/lib/cuatrimestres";
 import { tags } from "@/server/cache";
 import { db, schema } from "@/server/db";
 
@@ -23,22 +23,24 @@ export type OfertaCarrera = {
   estado: EstadoOferta;
 };
 
-/** Último cuatrimestre de cada carrera entre los pares `(carrera, cuatrimestre)`. */
-function ultimoPorCarrera(filas: { codigoCarrera: number; cuatrimestre: Cuatrimestre }[]) {
-  const ultimos = new Map<number, Cuatrimestre>();
-
-  for (const { codigoCarrera, cuatrimestre } of filas) {
-    const actual = ultimos.get(codigoCarrera);
-    if (!actual || ordenCuatrimestre(cuatrimestre) > ordenCuatrimestre(actual)) {
-      ultimos.set(codigoCarrera, cuatrimestre);
-    }
-  }
-
-  return ultimos;
-}
-
 const c = schema.cuatrimestre;
 const cuatrimestre = { numero: c.numero, anio: c.anio };
+
+/** Último cuatrimestre de cada carrera entre las ofertas de `tabla`. */
+async function ultimoPorCarrera(
+  tabla: typeof schema.ofertaComisiones | typeof schema.ofertaComisionesRaw
+) {
+  const filas = await db
+    .selectDistinctOn([tabla.codigoCarrera], {
+      codigoCarrera: tabla.codigoCarrera,
+      cuatrimestre
+    })
+    .from(tabla)
+    .innerJoin(c, eq(c.codigo, tabla.codigoCuatrimestre))
+    .orderBy(tabla.codigoCarrera, desc(c.anio), desc(c.numero));
+
+  return new Map(filas.map((f) => [f.codigoCarrera, f.cuatrimestre]));
+}
 
 /** Estado de la oferta de comisiones de cada carrera, ordenadas por nombre. */
 export async function getOfertasCarreras() {
@@ -46,27 +48,21 @@ export async function getOfertasCarreras() {
   cacheLife("max");
   cacheTag(tags.ofertas);
 
-  const [carreras, planes, procesadas, recibidas, cuatrimestres] = await Promise.all([
-    db.select().from(schema.carrera),
-    db
-      .select({ codigoCarrera: schema.plan.codigoCarrera, anio: schema.plan.anio })
-      .from(schema.plan)
-      .where(eq(schema.plan.vigente, true)),
-    db
-      .select({ codigoCarrera: schema.ofertaComisiones.codigoCarrera, cuatrimestre })
-      .from(schema.ofertaComisiones)
-      .innerJoin(c, eq(c.codigo, schema.ofertaComisiones.codigoCuatrimestre)),
-    db
-      .select({ codigoCarrera: schema.ofertaComisionesRaw.codigoCarrera, cuatrimestre })
-      .from(schema.ofertaComisionesRaw)
-      .innerJoin(c, eq(c.codigo, schema.ofertaComisionesRaw.codigoCuatrimestre)),
-    db.select(cuatrimestre).from(c)
-  ]);
+  const [carreras, planes, ultimasProcesadas, ultimasRecibidas, [ultimoCuatrimestre]] =
+    await Promise.all([
+      db.select().from(schema.carrera),
+      db
+        .select({
+          codigoCarrera: schema.plan.codigoCarrera,
+          anio: schema.plan.anio
+        })
+        .from(schema.plan)
+        .where(eq(schema.plan.vigente, true)),
+      ultimoPorCarrera(schema.ofertaComisiones),
+      ultimoPorCarrera(schema.ofertaComisionesRaw),
+      db.select(cuatrimestre).from(c).orderBy(desc(c.anio), desc(c.numero)).limit(1)
+    ]);
 
-  const ultimoCuatrimestre =
-    cuatrimestres.toSorted((a, b) => ordenCuatrimestre(b) - ordenCuatrimestre(a))[0] ?? null;
-  const ultimasProcesadas = ultimoPorCarrera(procesadas);
-  const ultimasRecibidas = ultimoPorCarrera(recibidas);
   const planesVigentes = new Map(planes.map((p) => [p.codigoCarrera, p.anio]));
 
   const ofertas = carreras
@@ -82,10 +78,7 @@ export async function getOfertasCarreras() {
       let estado: EstadoOferta;
       if (recibida) estado = "en-proceso";
       else if (!procesada) estado = "sin-oferta";
-      else if (
-        ultimoCuatrimestre &&
-        ordenCuatrimestre(procesada) >= ordenCuatrimestre(ultimoCuatrimestre)
-      )
+      else if (ultimoCuatrimestre && mismoCuatrimestre(procesada, ultimoCuatrimestre))
         estado = "al-dia";
       else estado = "desactualizada";
 
@@ -100,5 +93,5 @@ export async function getOfertasCarreras() {
     })
     .toSorted((a, b) => a.nombre.localeCompare(b.nombre, "es"));
 
-  return { ofertas, ultimoCuatrimestre };
+  return { ofertas, ultimoCuatrimestre: ultimoCuatrimestre ?? null };
 }
