@@ -1,11 +1,9 @@
 import type { ComentarioDocente, DocenteCatedra } from "@/server/db/queries/catedras";
-import type { Route } from "next";
-import { PenLine } from "@withicons/react/line";
 import { MessageCircleQuestion, Quote, Sparkles } from "@withicons/react/plush";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import dollyLogo from "@/assets/dolly-logo.png";
+import { BotonCalificar } from "@/components/calificacion/boton-calificar";
 import { ComentariosOcultos } from "@/components/materia/comentarios-ocultos";
 import { PromedioDocente } from "@/components/materia/promedio-docente";
 import { Numero } from "@/components/ui/numero";
@@ -64,7 +62,7 @@ function Docente({ docente, codigoCatedra }: { docente: DocenteCatedra; codigoCa
             </span>
           )}
           <BotonCalificar
-            codigoDocente={docente.codigo}
+            docente={{ codigo: docente.codigo, nombre: docente.nombre }}
             codigoCatedra={codigoCatedra}
             className="-order-1 sm:order-none"
           />
@@ -79,31 +77,6 @@ function Docente({ docente, codigoCatedra }: { docente: DocenteCatedra; codigoCa
         <SinComentarios />
       )}
     </section>
-  );
-}
-
-/** Botón primario (celeste) que lleva al formulario para calificar al docente. */
-function BotonCalificar({
-  codigoDocente,
-  codigoCatedra,
-  className
-}: {
-  codigoDocente: string;
-  codigoCatedra: string;
-  className?: string;
-}) {
-  const params = new URLSearchParams({ docente: codigoDocente, catedra: codigoCatedra });
-
-  return (
-    <Link
-      // TODO: la página `/calificar` todavía no existe en este sitio (misma URL que el anterior).
-      // El cast es por `typedRoutes`: sacarlo cuando exista la ruta.
-      href={`/calificar?${params}` as Route}
-      className={`boton-primario ${className ?? ""}`}
-    >
-      <PenLine size={16} aria-hidden="true" className="shrink-0" />
-      Calificar
-    </Link>
   );
 }
 
