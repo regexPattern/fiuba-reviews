@@ -11,6 +11,7 @@
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "@fiuba-reviews/db": "workspace:*",
+    "@fiuba-reviews/parser-siu": "workspace:*",
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource-variable/geist-mono": "^5.3.0",
     "@phosphor-icons/react": "^2.1.10",

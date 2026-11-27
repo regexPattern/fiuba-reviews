@@ -30,11 +30,10 @@ describe("extraerMetadataOferta", () => {
     });
   });
 
-  it("reconoce el cuatrimestre del filtro", () => {
-    expect(extraerMetadataOferta(encabezado("2025 - 2do Cuatrimestre"))?.cuatrimestre).toEqual({
-      numero: 2,
-      anio: 2025
-    });
+  it("toma el primer período lectivo si hay varios", () => {
+    const contenido = `${encabezado("Todos")}Período lectivo: 2026 - 2do Cuatrimestre\n`;
+
+    expect(extraerMetadataOferta(contenido)?.cuatrimestre).toEqual({ numero: 1, anio: 2026 });
   });
 
   it("devuelve null con contenido que no es del SIU", () => {
