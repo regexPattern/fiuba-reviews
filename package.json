@@ -2,8 +2,6 @@
   "name": "fiuba-reviews",
   "private": true,
   "scripts": {
-    "dev": "pnpm --filter @fiuba-reviews/sitio-web dev",
-    "build": "pnpm --filter @fiuba-reviews/sitio-web build",
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
     "format": "oxfmt --write .",
