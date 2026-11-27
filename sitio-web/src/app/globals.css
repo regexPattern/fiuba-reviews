@@ -1,10 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  /* Celeste FIUBA: rgb(0, 136, 204). */
   --color-fiuba: oklch(60% 0.141 241.55);
 
-  /* Celeste FIUBA oscuro: borde y canto de lo que está en relieve sobre celeste. */
+  /* Se usa para los bordes y relieves celestes. */
   --color-fiuba-oscuro: oklch(48% 0.12 241.55);
 
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
@@ -12,9 +11,16 @@
 }
 
 /*
- * Relieve tipo PostHog: borde de 1.5px y un canto sólido del mismo color abajo, como si la caja
- * fuera una tecla. Se colorea con `--relieve` (borde y canto) y `--relieve-alto` (alto del canto,
- * 3px por defecto).
+ * Hace que el elemento parezca una tecla levantada.
+ *
+ * - Un borde de 1.5px alrededor.
+ * - Una sombra sin blur, corrida hacia abajo y del mismo color que el borde. Como no está
+ *   difuminada, no parece una sombra: se ve como una franja sólida debajo de la caja (el "canto"
+ *   de la tecla), como si el borde de abajo fuera más grueso.
+ *
+ * Se configura con dos variables:
+ * - `--relieve`: color del borde y del canto (gris `stone-300` por defecto).
+ * - `--relieve-alto`: alto del canto (3px por defecto).
  */
 @utility relieve {
   border: 1.5px solid var(--relieve, var(--color-stone-300));
@@ -23,8 +29,7 @@
 }
 
 /*
- * `relieve` para cosas clickeables: al pasar el mouse sube un poco y al apretar se hunde. El
- * `translate` compensa el canto, así lo que está alrededor no se mueve.
+ * Relieve para cosas clickeables: al pasar el mouse sube un poco y al apretar se hunde.
  */
 @utility relieve-boton {
   --relieve-alto: 3px;
@@ -54,15 +59,12 @@
 }
 
 /*
- * Niveles de botón, como en PostHog:
- * - `boton-primario`: lleno y en relieve, para la acción principal (calificar).
- * - `boton-secundario`: blanco y en relieve, para acciones de apoyo (abrir el desglose).
- * - `boton-terciario`: sin borde ni relieve, solo fondo al pasar el mouse, para lo que no tiene
- *   que competir con el contenido (mostrar más/menos comentarios).
- * Todos comparten `boton`: tamaño de texto, alineación del ícono y el foco.
+ * Niveles de botón:
+ * - `boton-primario`: relleno y con relieve.
+ * - `boton-secundario`: blanco y con relieve.
+ * - `boton-terciario`: sin borde ni relieve, solo con fondo en hover.
  */
 @utility boton {
-  /* Foco con `outline` y no con `ring`: el `ring` es un `box-shadow` y pisaría el canto del relieve. */
   @apply flex shrink-0 cursor-pointer items-center gap-1.5 text-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fiuba;
 }
 
@@ -75,14 +77,13 @@
   @apply boton relieve-boton bg-white px-2 py-1 font-medium text-stone-900;
 }
 
-/* Al pasar el mouse cambia solo el fondo: ni el peso ni el color del texto. */
 @utility boton-terciario {
   @apply boton rounded-md px-3 py-1.5 text-stone-600 hover:bg-stone-100;
 }
 
 /*
  * Ítem de las listas de navegación (cátedras, buscador). El borde transparente ocupa el lugar del
- * de `relieve`, así el activo no se mueve. `item-lista-activo` va con la variante de cada lista.
+ * de `relieve`, así el activo no se mueve.
  */
 @utility item-lista {
   @apply flex items-start gap-2 rounded-md border-[1.5px] border-transparent px-2.5 py-2 text-sm text-stone-600;
@@ -99,14 +100,14 @@
   @apply rounded-md border-[1.5px] border-stone-300 bg-white px-2.5 outline-none placeholder:text-stone-400 focus-visible:border-fiuba focus-visible:ring-3 focus-visible:ring-fiuba/20;
 }
 
-/* Rótulo chico en versalitas espaciadas (roles, aclaraciones). */
+/* Rótulo chico en versalitas espaciadas. */
 @utility rotulo {
   @apply text-xs tracking-widest uppercase;
 }
 
-/* 16px por defecto en los campos: con menos, iOS hace zoom al enfocar. Desde `md` cada campo puede
-   achicarse con `md:text-*`; sin `md:` vuelve el zoom. */
 @layer base {
+  /* 16px por defecto en los campos: con menos, iOS hace zoom al enfocar. Desde
+  * `md` cada campo puede achicarse con `md:text-*`; sin `md:` vuelve el zoom. */
   input,
   textarea,
   select {

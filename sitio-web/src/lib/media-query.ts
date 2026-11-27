@@ -6,10 +6,10 @@ import { useCallback, useSyncExternalStore } from "react";
  */
 export function useMediaQuery(query: string) {
   const suscribir = useCallback(
-    (alCambiar: () => void) => {
+    (onChange: () => void) => {
       const lista = window.matchMedia(query);
-      lista.addEventListener("change", alCambiar);
-      return () => lista.removeEventListener("change", alCambiar);
+      lista.addEventListener("change", onChange);
+      return () => lista.removeEventListener("change", onChange);
     },
     [query]
   );
