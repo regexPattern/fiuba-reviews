@@ -7,7 +7,6 @@ export const env = createEnv({
     REVALIDATE_SECRET: z.string().min(32)
   },
   client: {
-    /** URL pública del sitio, para las URLs absolutas del sitemap, `robots.txt` y metadatos. */
     NEXT_PUBLIC_BASE_URL: z.url()
   },
   runtimeEnv: {

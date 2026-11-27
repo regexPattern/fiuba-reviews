@@ -22,9 +22,7 @@ const MAX_CARACTERES = 1_000_000;
 
 /**
  * Guarda una oferta pegada desde el SIU para procesarla después. La carrera y el cuatrimestre
- * se vuelven a sacar del contenido acá: no se confía en lo que detectó el cliente.
- *
- * TODO: validar un CAPTCHA (Turnstile) antes de escribir en la base.
+ * se vuelven a sacar del contenido acá (no se confía en lo que detectó el cliente).
  */
 export async function enviarOferta(
   _anterior: ResultadoEnvio,
