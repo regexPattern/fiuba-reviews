@@ -9,6 +9,7 @@ import { useMemo, useState } from "react";
 import { TextoConMatches } from "@/components/busqueda/texto-con-matches";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { crearBusqueda } from "@/lib/busqueda";
+import { formatearPuntaje } from "@/lib/calificaciones";
 import { useMateriaShell } from "./materia-shell";
 
 export function ListaCatedras({
@@ -73,7 +74,7 @@ export function ListaCatedras({
               >
                 <span className="flex h-6 w-12 shrink-0 items-center gap-1 font-mono text-stone-600 tabular-nums">
                   <Star size={16} aria-hidden="true" className="shrink-0 text-fiuba" />
-                  {catedra.calificacion > 0 ? catedra.calificacion.toFixed(1) : "–"}
+                  {catedra.calificacion > 0 ? formatearPuntaje(catedra.calificacion) : "–"}
                 </span>
                 <TextoConMatches
                   className="min-w-0 flex-1 text-base/6 tracking-tight"

@@ -9,7 +9,7 @@ export async function generateStaticParams() {
   return materias.map(({ codigo }) => ({ codigo }));
 }
 
-/** Sin cátedra elegida se muestra la primera del listado (la mejor calificada). */
+/** Sin cátedra elegida se muestra la primera del listado. */
 export default function Page({ params }: PageProps<"/materias/[codigo]">) {
   return (
     <Suspense fallback={<p className="p-4">Cargando cátedra…</p>}>

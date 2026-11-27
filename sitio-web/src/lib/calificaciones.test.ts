@@ -25,9 +25,10 @@ describe("PUNTAJES", () => {
 });
 
 describe("formatearPuntaje", () => {
-  it("usa coma decimal y omite el ,0", () => {
+  it("usa coma decimal y siempre un decimal", () => {
     expect(formatearPuntaje(4.5)).toBe("4,5");
-    expect(formatearPuntaje(4)).toBe("4");
+    expect(formatearPuntaje(4)).toBe("4,0");
+    expect(formatearPuntaje(3.66)).toBe("3,7");
   });
 });
 

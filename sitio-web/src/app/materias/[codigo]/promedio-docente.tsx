@@ -4,9 +4,13 @@ import type { PromediosDocente } from "@/server/db/queries/catedras";
 import { Popover } from "@base-ui/react/popover";
 import { ChevronDown } from "@withicons/react/line";
 import { Star } from "@withicons/react/plush";
-import { CRITERIOS, nivelPuntaje, type NivelPuntaje } from "@/lib/calificaciones";
+import {
+  CRITERIOS,
+  formatearPuntaje,
+  nivelPuntaje,
+  type NivelPuntaje
+} from "@/lib/calificaciones";
 
-/** Botón con el promedio general del docente que abre el desglose por criterio. */
 export function PromedioDocente({
   promedios,
   cantidadCalificaciones
@@ -17,10 +21,10 @@ export function PromedioDocente({
   return (
     <Popover.Root>
       <Popover.Trigger
-        aria-label={`Promedio ${promedios.general.toFixed(1)}. Ver desglose por criterio`}
+        aria-label={`Promedio ${formatearPuntaje(promedios.general)}. Ver desglose por criterio`}
         className="group boton-secundario"
       >
-        <span className="font-mono tabular-nums">{promedios.general.toFixed(1)}</span>
+        <span className="font-mono tabular-nums">{formatearPuntaje(promedios.general)}</span>
         <Star size={18} aria-hidden="true" className="text-fiuba" />
         {/* Indica que abre el desglose. Del set `line` y en gris: al lado de la estrella, otro
             ícono a color competiría con la nota. Gira cuando el popover está abierto. */}
@@ -44,13 +48,9 @@ export function PromedioDocente({
                   <dd
                     className={`flex items-center gap-1.5 ${COLOR_NUMERO[nivelPuntaje(promedios[nombre])]}`}
                   >
-                    <span className="font-mono tabular-nums">{promedios[nombre].toFixed(1)}</span>
+                    <span className="font-mono tabular-nums">{formatearPuntaje(promedios[nombre])}</span>
                     {/* Decorativa: el número ya lo dice. */}
-                    <Star
-                      size={16}
-                      aria-hidden="true"
-                      className={`shrink-0 ${COLOR_ESTRELLA[nivelPuntaje(promedios[nombre])]}`}
-                    />
+                    <Star size={16} aria-hidden="true" className="shrink-0" />
                   </dd>
                 </div>
               ))}
@@ -68,13 +68,4 @@ const COLOR_NUMERO: Record<NivelPuntaje, string> = {
   bueno: "text-green-700",
   regular: "text-stone-700",
   malo: "text-red-700"
-};
-
-/** Relleno de la estrella, de dorado a rojo a medida que baja el nivel. El relleno del set
-    `plush` es `--with-plush-c2`, así que lo pisamos en cada nivel. */
-const COLOR_ESTRELLA: Record<NivelPuntaje, string> = {
-  muyBueno: "[--with-plush-c2:var(--color-amber-400)]",
-  bueno: "[--with-plush-c2:var(--color-yellow-300)]",
-  regular: "[--with-plush-c2:var(--color-orange-500)]",
-  malo: "[--with-plush-c2:var(--color-red-600)]"
 };

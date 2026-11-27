@@ -15,12 +15,6 @@ import {
 
 const ESTRELLAS = Array.from({ length: PUNTAJE_MAXIMO }, (_, i) => i + 1);
 
-/**
- * Puntaje de 1 a 5 con estrellas. Cada estrella tiene dos mitades clickeables (media y entera),
- * salvo la primera, que entera vale 1 (no hay 0,5).
- * Es un radio group de Base UI: con las flechas se mueve de a medio punto, y con el mouse se
- * previsualiza el puntaje antes de elegirlo.
- */
 export function SelectorPuntaje({
   etiqueta,
   valor,
@@ -35,8 +29,6 @@ export function SelectorPuntaje({
   const [resaltado, setResaltado] = useState<Puntaje | null>(null);
   const mostrado = resaltado ?? valor ?? 0;
 
-  // El grupo es un `Fieldset` con `RadioGroup` adentro y la leyenda como etiqueta, como indica la
-  // guía de formularios de Base UI.
   return (
     <Field.Root invalid={invalido} className="group">
       <Fieldset.Root
@@ -82,7 +74,6 @@ export function SelectorPuntaje({
             </span>
           ))}
         </div>
-        {/* Con medias estrellas, el número evita tener que adivinar. */}
         <span aria-hidden="true" className="w-6 shrink-0 text-right text-sm text-stone-500">
           <span className="font-mono tabular-nums">{mostrado > 0 ? formatearPuntaje(mostrado) : "–"}</span>
         </span>
@@ -91,10 +82,6 @@ export function SelectorPuntaje({
   );
 }
 
-/**
- * La misma estrella `plush` dos veces: abajo vacía (rellenos en blanco, conserva el contorno y las
- * sombras) y arriba la dorada, recortada a la mitad si es media estrella.
- */
 function EstrellaPuntaje({ relleno }: { relleno: number }) {
   return (
     <span aria-hidden="true" className="pointer-events-none relative size-6">

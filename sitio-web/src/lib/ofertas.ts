@@ -1,6 +1,6 @@
 export type Cuatrimestre = { numero: number; anio: number };
 
-/** Para comparar nombres de carrera sin importar tildes, mayúsculas ni espacios. */
+/** Normaliza un nombre ignorando tildes, mayúsculas y espacios de más. */
 export function normalizarNombre(nombre: string) {
   return nombre
     .normalize("NFD")
@@ -10,11 +10,12 @@ export function normalizarNombre(nombre: string) {
     .toLowerCase();
 }
 
-/** Orden cronológico de un cuatrimestre, para compararlos. */
+/** Orden cronológico de un cuatrimestre. */
 export function ordenCuatrimestre({ numero, anio }: Cuatrimestre) {
   return anio * 2 + numero;
 }
 
+/** Cuatrimestre en formato corto, como `1C2026`. */
 export function formatearCuatrimestre({ numero, anio }: Cuatrimestre) {
   return `${numero}C${anio}`;
 }

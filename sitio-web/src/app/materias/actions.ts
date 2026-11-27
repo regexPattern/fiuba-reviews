@@ -12,8 +12,6 @@ export type ResultadoCalificacion = { estado: "enviada" } | { estado: "error"; m
 /**
  * Guarda la calificación de un docente y, si dejó uno, el comentario. El borrador llega tal cual
  * del cliente y se valida en `validarCalificacion`.
- *
- * TODO: validar un CAPTCHA (Turnstile) antes de escribir en la base.
  */
 export async function enviarCalificacion(entrada: unknown): Promise<ResultadoCalificacion> {
   const calificables = await getCuatrimestresCalificables();

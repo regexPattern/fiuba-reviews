@@ -14,11 +14,6 @@ import {
 const ShellContext = createContext<{ alNavegar: () => void }>({ alNavegar: () => {} });
 export const useMateriaShell = () => useContext(ShellContext);
 
-/**
- * Layout de una materia. En desktop, sidebar fijo y panel principal con su propio scroll.
- * En móvil scrollea el documento, así la barra flotante de Safari (iOS 26) deja ver el contenido
- * por debajo. El sidebar pasa a un drawer que se abre desde una barra sticky.
- */
 export function MateriaShell({
   titulo,
   sidebar,
@@ -59,7 +54,6 @@ export function MateriaShell({
 
   return (
     <ShellContext value={{ alNavegar }}>
-      {/* Fondo blanco a todo el ancho, igual que el header. */}
       <div className="min-h-[calc(100dvh-var(--header-height))] bg-white md:-mt-(--header-height) md:min-h-0">
         <div ref={shellRef} className="mx-auto flex max-w-6xl md:h-dvh">
           <aside className="hidden min-h-0 w-80 shrink-0 flex-col border-r border-stone-300 pt-(--header-height) md:flex">
@@ -88,10 +82,9 @@ export function MateriaShell({
                   <span className="sr-only">Ver cátedras</span>
                 </Drawer.Trigger>
                 <Drawer.Portal>
-                  {/* `z-50`: por encima del header fijo (`z-40`). Se aclara a medida que se arrastra el drawer. */}
                   <Drawer.Backdrop className="fixed inset-0 z-50 min-h-dvh bg-black opacity-[calc(0.2*(1-var(--drawer-swipe-progress)))] transition-opacity duration-300 ease-out data-ending-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*300ms)] data-starting-style:opacity-0 data-swiping:duration-0 supports-[-webkit-touch-callout:none]:absolute motion-reduce:transition-none md:hidden" />
                   <Drawer.Viewport className="fixed inset-0 z-50 flex md:hidden">
-                    <Drawer.Popup className="flex h-full w-[85vw] max-w-sm [transform:translateX(var(--drawer-swipe-movement-x))] flex-col border-r border-stone-300 bg-white pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] transition-transform duration-300 ease-out outline-none data-ending-style:[transform:translateX(-100%)] data-ending-style:duration-[calc(var(--drawer-swipe-strength)*300ms)] data-starting-style:[transform:translateX(-100%)] data-swiping:duration-0 data-swiping:select-none motion-reduce:transition-none">
+                    <Drawer.Popup className="flex h-full w-[85vw] max-w-sm transform-[translateX(var(--drawer-swipe-movement-x))] flex-col border-r border-stone-300 bg-white pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] transition-transform duration-300 ease-out outline-none data-ending-style:transform-[translateX(-100%)] data-ending-style:duration-[calc(var(--drawer-swipe-strength)*300ms)] data-starting-style:transform-[translateX(-100%)] data-swiping:duration-0 data-swiping:select-none motion-reduce:transition-none">
                       <Drawer.Content className="flex min-h-0 flex-1 flex-col">
                         <div className="flex shrink-0 items-center justify-between border-b border-stone-300 py-1 pr-1 pl-4">
                           <Drawer.Title className="text-base tracking-tight text-stone-900">

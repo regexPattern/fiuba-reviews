@@ -18,16 +18,21 @@ export type Criterio = (typeof CRITERIOS)[number]["nombre"];
 export const PUNTAJE_MINIMO = 1;
 export const PUNTAJE_MAXIMO = 5;
 
-/** De 1 a 5, de a media estrella (la base no acepta menos de 1). */
+/** De 1 a 5, de a media estrella. */
 export const PUNTAJES = Array.from(
   { length: (PUNTAJE_MAXIMO - PUNTAJE_MINIMO) * 2 + 1 },
   (_, i) => PUNTAJE_MINIMO + i / 2
 );
 export type Puntaje = number;
 
-/** Con coma decimal y sin `,0`: `4`, `4,5`. */
+const FORMATO_PUNTAJE = new Intl.NumberFormat("es-AR", {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1
+});
+
+/** Con coma decimal y siempre un decimal: `4,0`, `3,7`. */
 export function formatearPuntaje(puntaje: Puntaje) {
-  return puntaje.toLocaleString("es-AR", { maximumFractionDigits: 1 });
+  return FORMATO_PUNTAJE.format(puntaje);
 }
 
 export const LARGO_MAXIMO_COMENTARIO = 2000;

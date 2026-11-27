@@ -4,7 +4,6 @@ import { getCatedrasMateria } from "@/server/db/queries/catedras";
 import { getMateria } from "@/server/db/queries/materias";
 import { ListaCatedras } from "./lista-catedras";
 
-/** Título corto para la barra sticky móvil que abre el drawer de cátedras. */
 export async function TituloMateria({ params }: Pick<LayoutProps<"/materias/[codigo]">, "params">) {
   const { codigo } = await params;
   const materia = await getMateria(codigo);
@@ -12,7 +11,6 @@ export async function TituloMateria({ params }: Pick<LayoutProps<"/materias/[cod
   if (!materia) notFound();
 
   return (
-    // Misma tipografía que el título del sidebar: nombre a la izquierda y código a la derecha.
     <span className="flex items-baseline gap-2">
       <span className="min-w-0 flex-1 truncate text-base/5 font-medium tracking-tight">
         {materia.nombre}
@@ -33,8 +31,6 @@ export async function SidebarMateria({
   return (
     <>
       <header className="shrink-0 divide-y divide-stone-200 border-b border-stone-200">
-        {/* Nombre a la izquierda y código a la derecha, del mismo color, como parte del título. Si
-            el nombre baja, el código queda en la línea base del primer renglón. */}
         <h1 className="flex items-baseline gap-2 p-4 text-stone-900">
           <span className="min-w-0 flex-1 text-base/5 font-medium tracking-tight">
             {materia.nombre}

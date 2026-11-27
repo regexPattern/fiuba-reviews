@@ -14,10 +14,8 @@ export async function generateStaticParams() {
   );
 }
 
-/**
- * Solo se indexan las materias: su página ya muestra la mejor cátedra. Las cátedras no se indexan,
- * pero se siguen sus links (al resto de las cátedras y materias).
- */
+// No se indexan las cátedras, solo las materias. Pero si se siguen sus links
+// al resto de las cátedras y materias.
 export const metadata: Metadata = {
   robots: { index: false, follow: true }
 };
