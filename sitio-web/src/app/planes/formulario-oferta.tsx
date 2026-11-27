@@ -12,7 +12,6 @@ import {
   Paste
 } from "@withicons/react/plush";
 import { useActionState, useMemo, useState } from "react";
-import { type ResultadoEnvio, enviarOferta } from "@/app/planes/actions";
 import { Numero } from "@/components/ui/numero";
 import {
   type Cuatrimestre,
@@ -21,6 +20,7 @@ import {
   normalizarNombre,
   ordenCuatrimestre
 } from "@/lib/ofertas";
+import { type ResultadoEnvio, enviarOferta } from "./actions";
 
 type Tono = "neutro" | "ok" | "aviso" | "error" | "gracias";
 

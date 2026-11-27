@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { MateriaShell } from "@/components/materia/materia-shell";
-import { SidebarMateria, TituloMateria } from "@/components/materia/sidebar-materia";
 import { getMateria } from "@/server/db/queries/materias";
+import { MateriaShell } from "./materia-shell";
+import { SidebarMateria, TituloMateria } from "./sidebar-materia";
 
 export async function generateMetadata({
   params

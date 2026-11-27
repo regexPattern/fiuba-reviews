@@ -8,7 +8,6 @@ import { Form } from "@base-ui/react/form";
 import { Select } from "@base-ui/react/select";
 import { Check, ChevronsUpDown, LoaderCircle, Send } from "@withicons/react/line";
 import { type ElementType, type FormEvent, type ReactNode, useMemo, useRef, useState } from "react";
-import { SelectorPuntaje } from "@/components/calificacion/selector-puntaje";
 import { Numero } from "@/components/ui/numero";
 import {
   CRITERIOS,
@@ -16,6 +15,7 @@ import {
   type BorradorCalificacion,
   criteriosFaltantes
 } from "@/lib/calificaciones";
+import { SelectorPuntaje } from "./selector-puntaje";
 
 export function FormularioCalificacion({
   borrador,

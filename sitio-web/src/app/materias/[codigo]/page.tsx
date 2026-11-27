@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import { DetalleCatedra } from "@/components/materia/detalle-catedra";
 import { getCatedrasMateria } from "@/server/db/queries/catedras";
 import { getMateriasVigentes } from "@/server/db/queries/materias";
+import { DetalleCatedra } from "./detalle-catedra";
 
 export async function generateStaticParams() {
   const materias = await getMateriasVigentes();

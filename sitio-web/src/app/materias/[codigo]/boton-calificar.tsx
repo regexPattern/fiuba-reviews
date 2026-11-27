@@ -5,10 +5,10 @@ import { Drawer } from "@base-ui/react/drawer";
 import { Close, PenLine } from "@withicons/react/line";
 import { type ElementType, type ReactNode, useRef, useState, useTransition } from "react";
 import { enviarCalificacion } from "@/app/materias/actions";
-import { FormularioCalificacion } from "@/components/calificacion/formulario-calificacion";
 import { BORRADOR_VACIO, type BorradorCalificacion } from "@/lib/calificaciones";
 import { useMediaQuery } from "@/lib/media-query";
 import type { Cuatrimestre } from "@/lib/ofertas";
+import { FormularioCalificacion } from "./formulario-calificacion";
 
 /**
  * Botón primario (celeste) que abre el panel para calificar al docente: un dialog en desktop y un

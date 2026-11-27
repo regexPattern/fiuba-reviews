@@ -4,12 +4,12 @@ import { MessageCircleQuestion, Quote, Sparkles } from "@withicons/react/plush";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import dollyLogo from "@/assets/dolly-logo.png";
-import { BotonCalificar } from "@/components/calificacion/boton-calificar";
-import { ComentariosOcultos } from "@/components/materia/comentarios-ocultos";
-import { PromedioDocente } from "@/components/materia/promedio-docente";
 import { Numero } from "@/components/ui/numero";
 import { getCatedra } from "@/server/db/queries/catedras";
 import { getCuatrimestresCalificables } from "@/server/db/queries/cuatrimestres";
+import { BotonCalificar } from "./boton-calificar";
+import { ComentariosOcultos } from "./comentarios-ocultos";
+import { PromedioDocente } from "./promedio-docente";
 
 const COMENTARIOS_VISIBLES = 10;
 

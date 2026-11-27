@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { PasosOferta } from "@/components/planes/pasos-oferta";
-import { TablaOfertas } from "@/components/planes/tabla-ofertas";
 import { getOfertasCarreras } from "@/server/db/queries/ofertas";
+import { PasosOferta } from "./pasos-oferta";
+import { TablaOfertas } from "./tabla-ofertas";
 
 export const metadata: Metadata = {
   title: "Ofertas de comisiones | FIUBA Reviews",

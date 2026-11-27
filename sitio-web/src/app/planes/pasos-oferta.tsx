@@ -9,9 +9,9 @@ import { ArrowUpRight, Check, ChevronDown, ChevronRight } from "@withicons/react
 import Image from "next/image";
 import { useState } from "react";
 import siuLogo from "@/assets/siu-logo.png";
-import { FormularioOferta } from "@/components/planes/formulario-oferta";
 import { Tecla } from "@/components/ui/tecla";
 import { type Plataforma, usePlataforma } from "@/lib/plataforma";
+import { FormularioOferta } from "./formulario-oferta";
 
 const URL_OFERTA_SIU = "https://guaraniautogestion.fi.uba.ar/g3w/oferta_comisiones";
 
