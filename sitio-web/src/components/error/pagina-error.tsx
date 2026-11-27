@@ -1,7 +1,6 @@
 import type { StaticImageData } from "next/image";
 import Image from "next/image";
 import colectivo99 from "@/assets/colectivo-99.webp";
-import colectivo400 from "@/assets/colectivo-400.webp";
 import colectivo404 from "@/assets/colectivo-404.webp";
 import colectivo500 from "@/assets/colectivo-500.webp";
 
@@ -9,7 +8,6 @@ const LINEA_POR_DEFECTO = 99;
 
 const COLECTIVOS: Record<number, StaticImageData> = {
   [LINEA_POR_DEFECTO]: colectivo99,
-  400: colectivo400,
   404: colectivo404,
   500: colectivo500
 };
