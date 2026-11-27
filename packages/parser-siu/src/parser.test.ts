@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { parseMetadata, parseOfertas } from "./index";
+import { parsearMetadata, parsearOfertas } from "./parser";
 
-describe("parseOfertas", () => {
+describe("parsearOfertas", () => {
   it("genera una oferta por período lectivo", () => {
     const texto = `Propuesta: Ingeniería en Informática
 Período lectivo: 2026 - 1er Cuatrimestre
@@ -10,7 +10,7 @@ Actividad: ÁLGEBRA LINEAL (CB002)
 Período lectivo: 2026 - 2do Cuatrimestre
 Actividad: FÍSICA I (CB003)`;
 
-    const ofertas = parseOfertas(texto);
+    const ofertas = parsearOfertas(texto);
     const [oferta1, oferta2] = ofertas;
 
     expect(ofertas).toHaveLength(2);
@@ -35,7 +35,7 @@ Comisión: CURSO: 01B
 Actividad: ANÁLISIS MATEMÁTICO II (CB001)
 Comisión: CURSO: 1`;
 
-    const [oferta] = parseOfertas(texto);
+    const [oferta] = parsearOfertas(texto);
 
     expect(oferta?.materias.map((m) => [m.codigo, m.nombre])).toEqual([
       ["CB002", "ÁLGEBRA LINEAL"],
@@ -55,7 +55,7 @@ Actividad: ÁLGEBRA LINEAL (CB002)
 Comisión: CURSO: 01A
 Docentes: VARGAS GABRIELA (Profesor/a Adjunto/a), SOSA MARINA (Jefe/a Trabajos Practicos)`;
 
-    const [oferta] = parseOfertas(texto);
+    const [oferta] = parsearOfertas(texto);
 
     expect(oferta?.materias[0]?.comisiones[0]?.docentes).toEqual([
       { nombre: "VARGAS GABRIELA", rol: "Profesor/a Adjunto/a" },
@@ -70,7 +70,7 @@ Actividad: ÁLGEBRA LINEAL (CB002)
 Comisión: CURSO: 01B
 Docentes: Sin docentes`;
 
-    const [oferta] = parseOfertas(texto);
+    const [oferta] = parsearOfertas(texto);
 
     expect(oferta?.materias[0]?.comisiones[0]?.docentes).toEqual([]);
   });
@@ -87,7 +87,7 @@ Comisión: CURSO: 01B
 Tipo de clase\tDía\tHorario\tAula
 Sin definir \tSin definir\tSin definir \tAula a determinar`;
 
-    const [oferta] = parseOfertas(texto);
+    const [oferta] = parsearOfertas(texto);
 
     expect(oferta?.materias[0]?.comisiones[0]?.clases).toEqual([
       { tipo: "Teórica", dia: "Lunes", inicio: "09:00", fin: "11:00", aula: "403 - PC" },
@@ -104,7 +104,7 @@ Comisión: CURSO: 1
 Tipo de clase\tDía\tHorario\tAula
 Teórico Práctica Obligatoria\tSábado\t08:00 a 12:00\t`;
 
-    const [oferta] = parseOfertas(texto);
+    const [oferta] = parsearOfertas(texto);
 
     expect(oferta?.materias[0]?.comisiones[0]?.clases[0]?.aula).toBeNull();
   });
@@ -118,7 +118,7 @@ Comisión: CONDICIONALES
 Tipo de clase\tDía\tHorario\tAula
 Teórica \tLunes\t09:00 a 11:00 \t403 - PC`;
 
-    const [oferta] = parseOfertas(texto);
+    const [oferta] = parsearOfertas(texto);
 
     expect(oferta?.materias[0]?.comisiones[0]).toEqual({
       nombre: "CONDICIONALES",
@@ -133,7 +133,7 @@ Teórica \tLunes\t09:00 a 11:00 \t403 - PC`;
   it("falla si el texto no es del SIU", () => {
     const texto = "hola mundo";
 
-    expect(() => parseOfertas(texto)).toThrow();
+    expect(() => parsearOfertas(texto)).toThrow();
   });
 
   it("falla si el texto no contiene períodos", () => {
@@ -146,7 +146,7 @@ Todos
 Actividad:
 Todas`;
 
-    expect(() => parseOfertas(texto)).toThrow(/período/i);
+    expect(() => parsearOfertas(texto)).toThrow(/período/i);
   });
 
   describe("casos borde", () => {
@@ -161,7 +161,7 @@ Actividad:
 Todas
 Período lectivo: 2026 - 1er Cuatrimestre`;
 
-      const [oferta] = parseOfertas(texto);
+      const [oferta] = parsearOfertas(texto);
 
       expect(oferta?.materias).toEqual([]);
     });
@@ -173,7 +173,7 @@ Actividad: FÍSICA (CB003)
 Comisión: CURSO 1
 Docentes: A B (Profesor/a Adjunto/a), C D, E F (Ayudante 1ro/a)`;
 
-      const [oferta] = parseOfertas(texto);
+      const [oferta] = parsearOfertas(texto);
 
       expect(oferta?.materias[0]?.comisiones[0]?.docentes).toEqual([
         { nombre: "A B", rol: "Profesor/a Adjunto/a" },
@@ -192,7 +192,7 @@ Observaciones: consultar Docentes: otro (Jefe/a)
 Tipo de clase\tDía\tHorario\tAula
 Teórica\tLunes\t09:00 a 11:00\t403`;
 
-      const [oferta] = parseOfertas(texto);
+      const [oferta] = parsearOfertas(texto);
 
       expect(oferta?.materias[0]?.comisiones[0]?.docentes).toEqual([
         { nombre: "A B", rol: "Profesor/a Adjunto/a" }
@@ -208,7 +208,7 @@ Tipo de clase\tDía\tHorario\tAula
 Teórica\tLunes\tSin definir\tAula a determinar
 Práctica\tMartes\t09:00 a 11:00\tAula a determinar`;
 
-      const [oferta] = parseOfertas(texto);
+      const [oferta] = parsearOfertas(texto);
 
       expect(oferta?.materias[0]?.comisiones[0]?.clases).toEqual([
         {
@@ -229,7 +229,7 @@ Comisión: CURSO 1
 Tipo de clase\tDía\tHorario
 Teórica\tLunes\t09:00 a 11:00`;
 
-      const [oferta] = parseOfertas(texto);
+      const [oferta] = parsearOfertas(texto);
 
       expect(oferta?.materias[0]?.comisiones[0]?.clases[0]?.aula).toBeNull();
     });
@@ -241,7 +241,7 @@ Actividad: INGLÉS (NIVEL 1) (CB010)
 Comisión: CURSO 1
 Docentes: Sin docentes`;
 
-      const [oferta] = parseOfertas(texto);
+      const [oferta] = parsearOfertas(texto);
 
       expect(oferta?.materias[0]).toMatchObject({ nombre: "INGLÉS (NIVEL 1)", codigo: "CB010" });
     });
@@ -253,7 +253,7 @@ Actividad: FÍSICA (CB003)
 Comisión: CURSO 1
 Docentes: A B (Profesor/a Adjunto/a)`;
 
-      const [oferta] = parseOfertas(texto);
+      const [oferta] = parsearOfertas(texto);
 
       expect(oferta?.materias[0]?.comisiones[0]?.clases).toEqual([]);
     });
@@ -266,7 +266,7 @@ Actividad: QUÍMICA (CB004)
 Comisión: CURSO 1
 Docentes: Sin docentes`;
 
-      const [oferta] = parseOfertas(texto);
+      const [oferta] = parsearOfertas(texto);
 
       expect(oferta?.materias.map((m) => [m.codigo, m.comisiones.length])).toEqual([
         ["CB003", 0],
@@ -282,7 +282,7 @@ Docentes: Sin docentes`;
         "utf8"
       );
 
-      const ofertas = parseOfertas(texto);
+      const ofertas = parsearOfertas(texto);
       const codigosPorPeriodo = ofertas.map((oferta) =>
         oferta.materias
           .filter((m) =>
@@ -303,7 +303,7 @@ Docentes: Sin docentes`;
         "utf8"
       );
 
-      const [oferta] = parseOfertas(texto);
+      const [oferta] = parsearOfertas(texto);
       const materia = oferta?.materias.find((m) => m.codigo === "TB123");
       const condicionales = materia?.comisiones.find((c) => c.nombre === "CONDICIONALES");
 
@@ -313,7 +313,7 @@ Docentes: Sin docentes`;
     it("comisión con observaciones conserva docentes y clases", () => {
       const texto = readFileSync(new URL("./fixtures/civil-1C-2026.txt", import.meta.url), "utf8");
 
-      const [oferta] = parseOfertas(texto);
+      const [oferta] = parsearOfertas(texto);
       const comision = oferta?.materias
         .flatMap((m) => m.comisiones)
         .find((c) => c.nombre === "Koutsovitis");
@@ -345,7 +345,7 @@ Docentes: Sin docentes`;
         readFileSync(new URL(`./fixtures/${nombre}.txt`, import.meta.url), "utf8")
       );
 
-      const ofertas = textos.flatMap((texto) => parseOfertas(texto));
+      const ofertas = textos.flatMap((texto) => parsearOfertas(texto));
       const clases = ofertas.flatMap((o) =>
         o.materias.flatMap((m) => m.comisiones.flatMap((c) => c.clases))
       );
@@ -367,7 +367,7 @@ Docentes: Sin docentes`;
         "petroleo-2C-2025-y-1C-2026"
       ].map((nombre) => readFileSync(new URL(`./fixtures/${nombre}.txt`, import.meta.url), "utf8"));
 
-      const ofertas = textos.flatMap((texto) => parseOfertas(texto));
+      const ofertas = textos.flatMap((texto) => parsearOfertas(texto));
       const clases = ofertas.flatMap((o) =>
         o.materias.flatMap((m) => m.comisiones.flatMap((c) => c.clases))
       );
@@ -381,7 +381,7 @@ Docentes: Sin docentes`;
   });
 });
 
-describe("parseMetadata", () => {
+describe("parsearMetadata", () => {
   it("devuelve carrera, año y cuatrimestre de cada período", () => {
     const texto = `Propuesta: Ingeniería en Informática
 Período lectivo: 2026 - 1er Cuatrimestre
@@ -389,7 +389,7 @@ Actividad: ÁLGEBRA LINEAL (CB002)
 Período lectivo: 2026 - 2do Cuatrimestre
 Actividad: FÍSICA I (CB003)`;
 
-    const metadata = parseMetadata(texto);
+    const metadata = parsearMetadata(texto);
 
     expect(metadata).toEqual([
       { carrera: "Ingeniería en Informática", anio: 2026, cuatrimestre: 1 },

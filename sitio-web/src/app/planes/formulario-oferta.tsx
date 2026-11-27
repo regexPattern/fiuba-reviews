@@ -18,7 +18,7 @@ import {
   normalizarNombre,
   ordenCuatrimestre
 } from "@/lib/ofertas";
-import { parseMetadata } from "@fiuba-reviews/parser-siu";
+import { parsearMetadata } from "@fiuba-reviews/parser-siu";
 import { type ResultadoEnvio, enviarOferta } from "./actions";
 
 type Tono = "neutro" | "ok" | "aviso" | "error" | "gracias";
@@ -54,7 +54,7 @@ function diagnosticar(
 
   try {
     // Si la página trae varios períodos lectivos (filtro en `Todos`), se toma el primero.
-    [siu] = parseMetadata(contenido);
+    [siu] = parsearMetadata(contenido);
   } catch {
     return {
       tono: "aviso",

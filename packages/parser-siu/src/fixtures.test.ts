@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { parseMetadata, parseOfertas } from "./index";
+import { parsearMetadata, parsearOfertas } from "./parser";
 
 describe("ofertas reales", () => {
   it.each([
@@ -12,7 +12,7 @@ describe("ofertas reales", () => {
   ])("%s", (name, carrera, anio, cuatrimestre, materias, comisiones, clases) => {
     const texto = readFileSync(new URL(`./fixtures/${name}.txt`, import.meta.url), "utf8");
 
-    const ofertas = parseOfertas(texto);
+    const ofertas = parsearOfertas(texto);
     const resumen = ofertas.map((oferta) => {
       const comisiones = oferta.materias.flatMap((m) => m.comisiones);
       return {
@@ -35,7 +35,7 @@ describe("ofertas reales", () => {
     );
     const carrera = "Ingeniería en Petróleo";
 
-    const ofertas = parseOfertas(texto);
+    const ofertas = parsearOfertas(texto);
     const resumen = ofertas.map((oferta) => {
       const comisiones = oferta.materias.flatMap((m) => m.comisiones);
       return {
@@ -47,7 +47,7 @@ describe("ofertas reales", () => {
         clases: comisiones.reduce((sum, c) => sum + c.clases.length, 0)
       };
     });
-    const metadata = parseMetadata(texto);
+    const metadata = parsearMetadata(texto);
 
     expect(resumen).toEqual([
       { carrera, anio: 2025, cuatrimestre: 2, materias: 44, comisiones: 160, clases: 358 },
@@ -65,7 +65,7 @@ describe("ofertas reales", () => {
       "utf8"
     );
 
-    const [oferta] = parseOfertas(texto);
+    const [oferta] = parsearOfertas(texto);
     const algebra = oferta?.materias.find((m) => m.codigo === "CB002");
 
     expect(algebra?.nombre).toBe("ÁLGEBRA LINEAL");
@@ -88,7 +88,7 @@ describe("ofertas reales", () => {
   it("parsea una comisión sin horario definido (formato en una línea)", () => {
     const texto = readFileSync(new URL("./fixtures/mecanica-1C-2026.txt", import.meta.url), "utf8");
 
-    const [oferta] = parseOfertas(texto);
+    const [oferta] = parsearOfertas(texto);
     const algebra = oferta?.materias.find((m) => m.codigo === "CB002");
 
     expect(algebra?.comisiones[0]).toEqual({
@@ -105,7 +105,7 @@ describe("ofertas reales", () => {
   it("parsea una comisión sin docentes", () => {
     const texto = readFileSync(new URL("./fixtures/civil-1C-2026.txt", import.meta.url), "utf8");
 
-    const [oferta] = parseOfertas(texto);
+    const [oferta] = parsearOfertas(texto);
     const materia = oferta?.materias.find((m) => m.codigo === "TA040");
 
     expect(materia?.comisiones[0]).toEqual({ nombre: "CONDICIONALES", docentes: [], clases: [] });
@@ -114,7 +114,7 @@ describe("ofertas reales", () => {
   it("ignora las observaciones de las comisiones", () => {
     const texto = readFileSync(new URL("./fixtures/civil-1C-2026.txt", import.meta.url), "utf8");
 
-    const [oferta] = parseOfertas(texto);
+    const [oferta] = parsearOfertas(texto);
     const comisiones = oferta!.materias.flatMap((m) => m.comisiones);
 
     expect(JSON.stringify(comisiones)).not.toContain("Observaciones");

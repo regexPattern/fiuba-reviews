@@ -10,7 +10,7 @@ import {
 } from "@/lib/ofertas";
 import { tags } from "@/server/cache";
 import { db, schema } from "@/server/db";
-import { parseMetadata } from "@fiuba-reviews/parser-siu";
+import { parsearMetadata } from "@fiuba-reviews/parser-siu";
 
 export type ResultadoEnvio =
   | { estado: "inicial" }
@@ -38,7 +38,7 @@ export async function enviarOferta(
 
   try {
     // Si la página trae varios períodos lectivos (filtro en `Todos`), se toma el primero.
-    [siu] = parseMetadata(contenido);
+    [siu] = parsearMetadata(contenido);
   } catch {
     return {
       estado: "error",
