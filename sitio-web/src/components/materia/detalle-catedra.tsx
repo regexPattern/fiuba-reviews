@@ -1,3 +1,4 @@
+import type { Cuatrimestre } from "@/lib/ofertas";
 import type { ComentarioDocente, DocenteCatedra } from "@/server/db/queries/catedras";
 import { MessageCircleQuestion, Quote, Sparkles } from "@withicons/react/plush";
 import Image from "next/image";
@@ -8,24 +9,36 @@ import { ComentariosOcultos } from "@/components/materia/comentarios-ocultos";
 import { PromedioDocente } from "@/components/materia/promedio-docente";
 import { Numero } from "@/components/ui/numero";
 import { getCatedra } from "@/server/db/queries/catedras";
+import { getCuatrimestresCalificables } from "@/server/db/queries/cuatrimestres";
 
 const COMENTARIOS_VISIBLES = 10;
 
 export async function DetalleCatedra({ codigo }: { codigo: string }) {
-  const catedra = await getCatedra(codigo);
+  const [catedra, calificables] = await Promise.all([
+    getCatedra(codigo),
+    getCuatrimestresCalificables()
+  ]);
 
   if (!catedra) notFound();
+
+  const cuatrimestres = calificables.map(({ numero, anio }) => ({ numero, anio }));
 
   return (
     <div className="space-y-12 p-4 md:p-6">
       {catedra.docentes.map((docente) => (
-        <Docente key={docente.codigo} docente={docente} codigoCatedra={catedra.codigo} />
+        <Docente key={docente.codigo} docente={docente} cuatrimestres={cuatrimestres} />
       ))}
     </div>
   );
 }
 
-function Docente({ docente, codigoCatedra }: { docente: DocenteCatedra; codigoCatedra: string }) {
+function Docente({
+  docente,
+  cuatrimestres
+}: {
+  docente: DocenteCatedra;
+  cuatrimestres: Cuatrimestre[];
+}) {
   return (
     <section
       id={docente.codigo}
@@ -63,7 +76,7 @@ function Docente({ docente, codigoCatedra }: { docente: DocenteCatedra; codigoCa
           )}
           <BotonCalificar
             docente={{ codigo: docente.codigo, nombre: docente.nombre }}
-            codigoCatedra={codigoCatedra}
+            cuatrimestres={cuatrimestres}
             className="-order-1 sm:order-none"
           />
         </div>

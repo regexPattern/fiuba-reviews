@@ -7,12 +7,18 @@ import { RadioGroup } from "@base-ui/react/radio-group";
 import { Star } from "@withicons/react/plush";
 import { useState } from "react";
 import { Numero } from "@/components/ui/numero";
-import { PUNTAJE_MAXIMO, type Puntaje, formatearPuntaje } from "@/lib/calificaciones";
+import {
+  PUNTAJE_MAXIMO,
+  PUNTAJE_MINIMO,
+  type Puntaje,
+  formatearPuntaje
+} from "@/lib/calificaciones";
 
 const ESTRELLAS = Array.from({ length: PUNTAJE_MAXIMO }, (_, i) => i + 1);
 
 /**
- * Puntaje de 0,5 a 5 con estrellas. Cada estrella tiene dos mitades clickeables (media y entera).
+ * Puntaje de 1 a 5 con estrellas. Cada estrella tiene dos mitades clickeables (media y entera),
+ * salvo la primera, que entera vale 1 (no hay 0,5).
  * Es un radio group de Base UI: con las flechas se mueve de a medio punto, y con el mouse se
  * previsualiza el puntaje antes de elegirlo.
  */
@@ -55,15 +61,25 @@ export function SelectorPuntaje({
               className="relative flex size-8 items-center justify-center rounded-md has-focus-visible:outline-2 has-focus-visible:-outline-offset-2 has-focus-visible:outline-fiuba"
             >
               <EstrellaPuntaje relleno={Math.min(Math.max(mostrado - (estrella - 1), 0), 1)} />
-              {[estrella - 0.5, estrella].map((puntaje, mitad) => (
-                <Radio.Root
-                  key={puntaje}
-                  value={puntaje}
-                  aria-label={`${formatearPuntaje(puntaje)} de ${PUNTAJE_MAXIMO}`}
-                  onPointerEnter={(event) => event.pointerType === "mouse" && setResaltado(puntaje)}
-                  className={`absolute inset-y-0 w-1/2 cursor-pointer outline-none ${mitad === 0 ? "left-0" : "right-0"}`}
-                />
-              ))}
+              {[estrella - 0.5, estrella]
+                .filter((puntaje) => puntaje >= PUNTAJE_MINIMO)
+                .map((puntaje, _, mitades) => (
+                  <Radio.Root
+                    key={puntaje}
+                    value={puntaje}
+                    aria-label={`${formatearPuntaje(puntaje)} de ${PUNTAJE_MAXIMO}`}
+                    onPointerEnter={(event) =>
+                      event.pointerType === "mouse" && setResaltado(puntaje)
+                    }
+                    className={`absolute inset-y-0 cursor-pointer outline-none ${
+                      mitades.length === 1
+                        ? "inset-x-0"
+                        : puntaje % 1 === 0
+                          ? "right-0 w-1/2"
+                          : "left-0 w-1/2"
+                    }`}
+                  />
+                ))}
             </span>
           ))}
         </div>

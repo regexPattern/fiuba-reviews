@@ -3,42 +3,53 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { Drawer } from "@base-ui/react/drawer";
 import { Close, PenLine } from "@withicons/react/line";
-import { type ElementType, type ReactNode, useRef, useState } from "react";
+import { type ElementType, type ReactNode, useRef, useState, useTransition } from "react";
+import { enviarCalificacion } from "@/app/materias/actions";
 import { FormularioCalificacion } from "@/components/calificacion/formulario-calificacion";
 import { BORRADOR_VACIO, type BorradorCalificacion } from "@/lib/calificaciones";
 import { useMediaQuery } from "@/lib/media-query";
+import type { Cuatrimestre } from "@/lib/ofertas";
 
 /**
  * Botón primario (celeste) que abre el panel para calificar al docente: un dialog en desktop y un
  * drawer desde abajo en móvil. El borrador sobrevive a cerrar el panel (se descarta solo al enviar),
- * así que cerrarlo sin querer no pierde lo cargado.
+ * así que cerrarlo sin querer no pierde lo cargado. Si el servidor rechaza la calificación, el panel
+ * queda abierto con el error.
  */
 export function BotonCalificar({
   docente,
-  codigoCatedra,
+  cuatrimestres,
   className
 }: {
   docente: { codigo: string; nombre: string };
-  codigoCatedra: string;
+  /** Los que se pueden elegir, del más nuevo al más viejo. */
+  cuatrimestres: Cuatrimestre[];
   className?: string;
 }) {
   const botonRef = useRef<HTMLButtonElement>(null);
   const [abierto, setAbierto] = useState(false);
   const [borrador, setBorrador] = useState(BORRADOR_VACIO);
+  const [error, setError] = useState<string | null>(null);
+  const [enviando, startTransition] = useTransition();
   const enviado = useRef(false);
   // Mismo corte que el resto del sitio (`md`). Solo importa con el panel abierto, ya hidratado.
   const esDesktop = useMediaQuery("(min-width: 48rem)");
 
   function enviar(calificacion: BorradorCalificacion) {
-    // TODO: mandarla con una server action cuando exista la tabla de calificaciones, y mostrar el
-    // error si falla en vez de cerrar.
-    console.info("Calificación (todavía no se envía):", {
-      codigoDocente: docente.codigo,
-      codigoCatedra,
-      ...calificacion
+    setError(null);
+    startTransition(async () => {
+      const resultado = await enviarCalificacion({
+        codigoDocente: docente.codigo,
+        ...calificacion
+      });
+
+      if (resultado.estado === "error") {
+        setError(resultado.mensaje);
+        return;
+      }
+      enviado.current = true;
+      setAbierto(false);
     });
-    enviado.current = true;
-    setAbierto(false);
   }
 
   const raiz = {
@@ -49,6 +60,7 @@ export function BotonCalificar({
       if (!abierto && enviado.current) {
         enviado.current = false;
         setBorrador(BORRADOR_VACIO);
+        setError(null);
       }
     }
   };
@@ -57,8 +69,11 @@ export function BotonCalificar({
   const formulario = (cuerpo?: ElementType) => (
     <FormularioCalificacion
       borrador={borrador}
+      cuatrimestres={cuatrimestres}
       onChange={setBorrador}
       onEnviar={enviar}
+      enviando={enviando}
+      error={error}
       cuerpo={cuerpo}
     />
   );

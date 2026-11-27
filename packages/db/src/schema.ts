@@ -3,6 +3,7 @@ import {
   doublePrecision,
   integer,
   jsonb,
+  numeric,
   pgMaterializedView,
   pgTable,
   pgView,
@@ -82,6 +83,25 @@ export const comentario = pgTable("comentario", {
   codigoCuatrimestre: integer().notNull(),
   contenido: text().notNull(),
   deDolly: boolean().notNull(),
+  fechaCreacion: timestamp({ withTimezone: true, mode: "string" }),
+  codigoCalificacionDolly: integer()
+});
+
+/** Puntajes de 1 a 5 de a medio punto (`CHECK` en la base). A pesar del nombre, guarda todas. */
+const puntaje = () => numeric({ precision: 2, scale: 1, mode: "number" }).notNull();
+
+export const calificacionDolly = pgTable("calificacion_dolly", {
+  codigo: serial().primaryKey(),
+  codigoDocente: uuid().notNull(),
+  aceptaCritica: puntaje(),
+  asistencia: puntaje(),
+  buenTrato: puntaje(),
+  claridad: puntaje(),
+  claseOrganizada: puntaje(),
+  cumpleHorarios: puntaje(),
+  fomentaParticipacion: puntaje(),
+  panoramaAmplio: puntaje(),
+  respondeMails: puntaje(),
   fechaCreacion: timestamp({ withTimezone: true, mode: "string" })
 });
 

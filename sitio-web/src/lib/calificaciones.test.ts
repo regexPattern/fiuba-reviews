@@ -6,9 +6,9 @@ import {
   borradorCompleto,
   borradorTocado,
   criteriosFaltantes,
-  cuatrimestresRecientes,
   formatearPuntaje,
   PUNTAJES,
+  validarCalificacion,
   type BorradorCalificacion
 } from "./calificaciones";
 
@@ -19,8 +19,8 @@ const completo: BorradorCalificacion = {
 };
 
 describe("PUNTAJES", () => {
-  it("va de 0,5 a 5 de a medio punto", () => {
-    expect(PUNTAJES).toEqual([0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]);
+  it("va de 1 a 5 de a medio punto", () => {
+    expect(PUNTAJES).toEqual([1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]);
   });
 });
 
@@ -63,23 +63,51 @@ describe("borradorTocado", () => {
   });
 });
 
-describe("cuatrimestresRecientes", () => {
-  it("arranca por el 2C de agosto en adelante", () => {
-    expect(cuatrimestresRecientes(new Date(2026, 7, 1), 3)).toEqual([
-      { numero: 2, anio: 2026 },
-      { numero: 1, anio: 2026 },
-      { numero: 2, anio: 2025 }
-    ]);
+describe("validarCalificacion", () => {
+  const permitidos = [
+    { numero: 1, anio: 2026 },
+    { numero: 2, anio: 2025 }
+  ];
+  const envio = { ...completo, codigoDocente: "5f3c1b2e-8a4d-4e6f-9b7a-1c2d3e4f5a6b" };
+
+  it("acepta un envío completo y recorta el comentario", () => {
+    const resultado = validarCalificacion({ ...envio, comentario: "  Muy bueno \n" }, permitidos);
+    expect(resultado).toEqual({
+      ok: true,
+      calificacion: {
+        codigoDocente: envio.codigoDocente,
+        puntajes: envio.puntajes,
+        cuatrimestre: { numero: 1, anio: 2026 },
+        comentario: "Muy bueno"
+      }
+    });
   });
 
-  it("arranca por el 1C de marzo a julio", () => {
-    expect(cuatrimestresRecientes(new Date(2026, 2, 1), 2)).toEqual([
-      { numero: 1, anio: 2026 },
-      { numero: 2, anio: 2025 }
-    ]);
+  it("guarda un comentario vacío como null", () => {
+    const resultado = validarCalificacion({ ...envio, comentario: "   " }, permitidos);
+    expect(resultado.ok && resultado.calificacion.comentario).toBeNull();
   });
 
-  it("en el verano arranca por el 2C del año anterior", () => {
-    expect(cuatrimestresRecientes(new Date(2026, 0, 15), 1)).toEqual([{ numero: 2, anio: 2025 }]);
+  it("rechaza criterios faltantes o puntajes fuera de la escala", () => {
+    const { claridad: _, ...resto } = envio.puntajes;
+    expect(validarCalificacion({ ...envio, puntajes: resto }, permitidos).ok).toBe(false);
+    for (const puntaje of [0.5, 4.2, 6]) {
+      const puntajes = { ...envio.puntajes, claridad: puntaje };
+      expect(validarCalificacion({ ...envio, puntajes }, permitidos).ok).toBe(false);
+    }
+  });
+
+  it("rechaza un cuatrimestre que no se ofrece", () => {
+    const cuatrimestre = { numero: 1, anio: 2025 };
+    expect(validarCalificacion({ ...envio, cuatrimestre }, permitidos)).toEqual({
+      ok: false,
+      mensaje: "No se puede calificar el 1C2025."
+    });
+  });
+
+  it("rechaza un docente inválido o un comentario demasiado largo", () => {
+    expect(validarCalificacion({ ...envio, codigoDocente: "x" }, permitidos).ok).toBe(false);
+    const comentario = "a".repeat(LARGO_MAXIMO_COMENTARIO + 1);
+    expect(validarCalificacion({ ...envio, comentario }, permitidos).ok).toBe(false);
   });
 });

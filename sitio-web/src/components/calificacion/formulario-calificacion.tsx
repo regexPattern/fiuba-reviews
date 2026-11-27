@@ -6,27 +6,34 @@ import { Field } from "@base-ui/react/field";
 import { Fieldset } from "@base-ui/react/fieldset";
 import { Form } from "@base-ui/react/form";
 import { Select } from "@base-ui/react/select";
-import { Check, ChevronsUpDown, Send } from "@withicons/react/line";
-import { type ElementType, type FormEvent, type ReactNode, useRef, useState } from "react";
+import { Check, ChevronsUpDown, LoaderCircle, Send } from "@withicons/react/line";
+import { type ElementType, type FormEvent, type ReactNode, useMemo, useRef, useState } from "react";
 import { SelectorPuntaje } from "@/components/calificacion/selector-puntaje";
 import { Numero } from "@/components/ui/numero";
 import {
   CRITERIOS,
   LARGO_MAXIMO_COMENTARIO,
   type BorradorCalificacion,
-  criteriosFaltantes,
-  cuatrimestresRecientes
+  criteriosFaltantes
 } from "@/lib/calificaciones";
 
 export function FormularioCalificacion({
   borrador,
+  cuatrimestres: cuatrimestresCalificables,
   onChange,
   onEnviar,
+  enviando = false,
+  error = null,
   cuerpo: Cuerpo = "div"
 }: {
   borrador: BorradorCalificacion;
+  /** Los que se pueden elegir, del más nuevo al más viejo. */
+  cuatrimestres: Cuatrimestre[];
   onChange: (borrador: BorradorCalificacion) => void;
   onEnviar: (borrador: BorradorCalificacion) => void;
+  enviando?: boolean;
+  /** Error del servidor al enviar. */
+  error?: string | null;
   /** Contenedor del cuerpo: en el drawer, `Drawer.Content`. */
   cuerpo?: ElementType<{ className?: string; children?: ReactNode }>;
 }) {
@@ -34,14 +41,15 @@ export function FormularioCalificacion({
   const selectRef = useRef<HTMLButtonElement>(null);
   // Los errores se muestran recién después del primer intento de enviar.
   const [intentoEnviar, setIntentoEnviar] = useState(false);
-  // Solo se monta con el panel abierto, así que la fecha es siempre la del navegador.
-  const [cuatrimestres] = useState(() =>
-    cuatrimestresRecientes(new Date()).map((cuatrimestre) => ({
-      value: claveCuatrimestre(cuatrimestre),
-      // Igual que en los comentarios: `1C2026`.
-      label: `${cuatrimestre.numero}C${cuatrimestre.anio}`,
-      cuatrimestre
-    }))
+  const cuatrimestres = useMemo(
+    () =>
+      cuatrimestresCalificables.map((cuatrimestre) => ({
+        value: claveCuatrimestre(cuatrimestre),
+        // Igual que en los comentarios: `1C2026`.
+        label: `${cuatrimestre.numero}C${cuatrimestre.anio}`,
+        cuatrimestre
+      })),
+    [cuatrimestresCalificables]
   );
 
   const faltantes = criteriosFaltantes(borrador);
@@ -50,6 +58,7 @@ export function FormularioCalificacion({
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    if (enviando) return;
     setIntentoEnviar(true);
 
     if (faltantes.length > 0) {
@@ -197,11 +206,15 @@ export function FormularioCalificacion({
 
       <footer className="flex shrink-0 items-center justify-end gap-3 border-t border-stone-200 bg-stone-50 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:px-6">
         <p aria-live="polite" className="min-w-0 flex-1 text-sm text-red-700">
-          {errorCriterios}
+          {errorCriterios ?? error}
         </p>
-        <Button type="submit" className="boton-primario">
-          <Send size={16} aria-hidden="true" className="shrink-0" />
-          Enviar
+        <Button type="submit" disabled={enviando} focusableWhenDisabled className="boton-primario">
+          {enviando ? (
+            <LoaderCircle size={16} aria-hidden="true" className="shrink-0 animate-spin" />
+          ) : (
+            <Send size={16} aria-hidden="true" className="shrink-0" />
+          )}
+          {enviando ? "Enviando…" : "Enviar"}
         </Button>
       </footer>
     </Form>

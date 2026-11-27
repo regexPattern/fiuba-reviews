@@ -1,4 +1,5 @@
-import type { Cuatrimestre } from "@/lib/ofertas";
+import { z } from "zod";
+import { type Cuatrimestre, formatearCuatrimestre } from "./ofertas";
 
 export const CRITERIOS = [
   { nombre: "aceptaCritica", etiqueta: "Acepta crítica" },
@@ -14,11 +15,15 @@ export const CRITERIOS = [
 
 export type Criterio = (typeof CRITERIOS)[number]["nombre"];
 
-/** De 0,5 a 5, de a media estrella. */
-export const PUNTAJES = Array.from({ length: 10 }, (_, i) => (i + 1) / 2);
-export type Puntaje = number;
-
+export const PUNTAJE_MINIMO = 1;
 export const PUNTAJE_MAXIMO = 5;
+
+/** De 1 a 5, de a media estrella (la base no acepta menos de 1). */
+export const PUNTAJES = Array.from(
+  { length: (PUNTAJE_MAXIMO - PUNTAJE_MINIMO) * 2 + 1 },
+  (_, i) => PUNTAJE_MINIMO + i / 2
+);
+export type Puntaje = number;
 
 /** Con coma decimal y sin `,0`: `4`, `4,5`. */
 export function formatearPuntaje(puntaje: Puntaje) {
@@ -62,27 +67,66 @@ export function borradorTocado(borrador: BorradorCalificacion) {
   );
 }
 
-/**
- * Cuatrimestres que se pueden elegir al calificar, del más nuevo al más viejo. El primero es el que
- * está en curso: el 1C de marzo a julio y el 2C de agosto a diciembre. En el verano (enero y febrero)
- * el último es el 2C del año anterior.
- */
-export function cuatrimestresRecientes(hoy: Date, cantidad = 2): Cuatrimestre[] {
-  const mes = hoy.getMonth();
-  let actual: Cuatrimestre =
-    mes >= 7
-      ? { numero: 2, anio: hoy.getFullYear() }
-      : mes >= 2
-        ? { numero: 1, anio: hoy.getFullYear() }
-        : { numero: 2, anio: hoy.getFullYear() - 1 };
+/** Calificación lista para guardar: todos los puntajes válidos y el comentario sin espacios de más. */
+export type CalificacionValida = {
+  codigoDocente: string;
+  puntajes: Record<Criterio, Puntaje>;
+  cuatrimestre: Cuatrimestre;
+  /** `null` si no dejó comentario. */
+  comentario: string | null;
+};
 
-  const cuatrimestres: Cuatrimestre[] = [];
-  for (let i = 0; i < cantidad; i++) {
-    cuatrimestres.push(actual);
-    actual =
-      actual.numero === 2 ? { numero: 1, anio: actual.anio } : { numero: 2, anio: actual.anio - 1 };
+const puntajeValido = z.number().refine((p) => PUNTAJES.includes(p));
+
+const EnvioCalificacion = z.object({
+  codigoDocente: z.uuid(),
+  puntajes: z.object(
+    Object.fromEntries(CRITERIOS.map(({ nombre }) => [nombre, puntajeValido])) as Record<
+      Criterio,
+      typeof puntajeValido
+    >
+  ),
+  cuatrimestre: z.object({ numero: z.number(), anio: z.number() }),
+  comentario: z.string().max(LARGO_MAXIMO_COMENTARIO)
+});
+
+/**
+ * Valida en el servidor lo que manda el panel de calificación: no se confía en el cliente. El
+ * cuatrimestre tiene que ser uno de los `permitidos` (los que se ofrecen en el panel).
+ */
+export function validarCalificacion(
+  entrada: unknown,
+  permitidos: Cuatrimestre[]
+): { ok: true; calificacion: CalificacionValida } | { ok: false; mensaje: string } {
+  const envio = EnvioCalificacion.safeParse(entrada);
+
+  if (!envio.success) {
+    return { ok: false, mensaje: "La calificación enviada no es válida." };
   }
-  return cuatrimestres;
+
+  const { codigoDocente, puntajes, cuatrimestre, comentario } = envio.data;
+  const permitido = permitidos.some(
+    (c) => c.numero === cuatrimestre.numero && c.anio === cuatrimestre.anio
+  );
+
+  if (!permitido) {
+    return {
+      ok: false,
+      mensaje: `No se puede calificar el ${formatearCuatrimestre(cuatrimestre)}.`
+    };
+  }
+
+  const recortado = comentario.trim();
+
+  return {
+    ok: true,
+    calificacion: {
+      codigoDocente,
+      puntajes,
+      cuatrimestre: { numero: cuatrimestre.numero, anio: cuatrimestre.anio },
+      comentario: recortado === "" ? null : recortado
+    }
+  };
 }
 
 export type NivelPuntaje = "muyBueno" | "bueno" | "regular" | "malo";
