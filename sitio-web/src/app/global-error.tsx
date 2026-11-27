@@ -13,9 +13,12 @@ export default function GlobalError({ error, retry }: { error: unknown; retry: (
   }, [error]);
 
   return (
-    <html lang="es">
+    <html lang="es-AR">
       <body
         className="bg-white font-sans antialiased"
+        /* Como el header esta inyectado en el layout global de la app, para
+          que el error inesperado se muestre solo en pantalla tenemos que
+          reescribir esta variable CSS para esconder el header. */
         style={{ "--header-height": "0px" } as React.CSSProperties}
       >
         <title>Algo salió mal | FIUBA Reviews</title>
