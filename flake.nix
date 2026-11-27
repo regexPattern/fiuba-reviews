@@ -31,6 +31,11 @@
         formatter = pkgs.alejandra;
 
         devenv.shells.default = {
+          packages = with pkgs; [
+            tailwindcss-language-server
+            vscode-css-languageserver
+          ];
+
           languages.javascript = {
             enable = true;
             package = pkgs.nodejs_26;
