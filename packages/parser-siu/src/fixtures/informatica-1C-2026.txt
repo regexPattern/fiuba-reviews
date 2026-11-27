@@ -1,0 +1,1610 @@
+
+ 0
+ CARLOS CASTILLO 
+Propuesta: Ingeniería en Informática
+ 70: 25/02/2026 14:30
+Inscripción a Materias
+Inscripción a Exámenes
+Reportes 
+Encuestas 
+Trámites 
+Mis datos personales
+Cursos
+Perfil: Alumno 
+Oferta de comisiones
+Filtros
+LunesMartesMiércolesJuevesViernesSábadoDomingoSin definir
+Período lectivo: 
+Todos
+Actividad: 
+Todas
+  
+Docente: 
+Todos
+  Ubicacion: 
+Todas
+Período lectivo: 2026 - 1er Cuatrimestre
+Actividad: ÁLGEBRA LINEAL (CB002)
+Comisión: CURSO: 01A
+Turno: Sin definir
+Cupo / insc.: 62 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: VARGAS GABRIELA (Profesor/a Adjunto/a), PALACIOS PATRICIA ELIZABETH (Jefe/a Trabajos Practicos), SOSA MARINA (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Teórica	Lunes	09:00 a 11:00	403 - PC
+Práctica	Lunes	11:00 a 13:00	403 - PC
+Teórica	Miércoles	09:00 a 11:00	403 - PC
+Práctica	Miércoles	11:00 a 13:00	403 - PC
+Comisión: CURSO: 01B
+Turno: Sin definir
+Cupo / insc.: 63 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: VARGAS GABRIELA (Profesor/a Adjunto/a), PERALTA NORA BEATRIZ (Jefe/a Trabajos Practicos), PONCE DE LEON ROBLES FABIAN ARTURO (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Lunes	09:00 a 11:00	403 - PC
+Práctica	Lunes	11:00 a 13:00	418-PC
+Teórica	Miércoles	09:00 a 11:00	403 - PC
+Práctica	Miércoles	11:00 a 13:00	418-PC
+Comisión: CURSO: 02A
+Turno: Sin definir
+Cupo / insc.: 62 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: VIBRENTIS FRANCISCO ANTONIO (Profesor/a Adjunto/a), FAGES LUCIANO RODOLFO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	14:00 a 16:00	400-PC
+Práctica	Martes	16:00 a 18:00	200-PC
+Teórica	Jueves	14:00 a 16:00	400-PC
+Práctica	Jueves	16:00 a 18:00	400-PC
+Comisión: CURSO: 02B
+Turno: Sin definir
+Cupo / insc.: 63 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: VIBRENTIS FRANCISCO ANTONIO (Profesor/a Adjunto/a), CASTILLO DENISSE AZUCENA (Ayudante 1ro/a), GOMEZ CIAPPONI LAUTARO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	14:00 a 16:00	400-PC
+Práctica	Martes	16:00 a 18:00	107-PC
+Teórica	Jueves	14:00 a 16:00	400-PC
+Práctica	Jueves	16:00 a 18:00	105-PC
+Comisión: CURSO: 04A
+Turno: Sin definir
+Cupo / insc.: 62 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: LOPEZ CLAUDIA ANDREA (Profesor/a Adjunto/a), ORECCHIA MONICA INES (Jefe/a Trabajos Practicos), ALVAREZ PONTE LUCIA INES (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Práctica	Martes	09:00 a 11:00	510 - PC
+Teórica	Martes	11:00 a 13:00	403 - PC
+Práctica	Jueves	09:00 a 11:00	510 - PC
+Teórica	Jueves	11:00 a 13:00	403 - PC
+Comisión: CURSO: 04B
+Turno: Sin definir
+Cupo / insc.: 63 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: LOPEZ CLAUDIA ANDREA (Profesor/a Adjunto/a), ALONSO RAGGIO Stefanía Ayelén (Ayudante 1ro/a), KLINGER MAGALI SILVINA (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Práctica	Martes	09:00 a 11:00	416-PC
+Teórica	Martes	11:00 a 13:00	403 - PC
+Práctica	Jueves	09:00 a 11:00	510 - PC
+Teórica	Jueves	11:00 a 13:00	403 - PC
+Comisión: CURSO: 05
+Turno: Sin definir
+Cupo / insc.: 75 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: PALACIOS PATRICIA ELIZABETH (Profesor/a Adjunto/a), OCELLO MATIAS LEONEL (Ayudante 1ro/a), VIBRENTIS FRANCISCO ANTONIO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Miércoles	09:00 a 11:00	510 - PC
+Práctica	Miércoles	11:00 a 13:00	510 - PC
+Teórica	Viernes	09:00 a 11:00	510 - PC
+Práctica	Viernes	11:00 a 13:00	510 - PC
+Comisión: CURSO: 06A
+Turno: Sin definir
+Cupo / insc.: 57 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: BOGGI SILVINA (Profesor/a Adjunto/a), VENTURIELLO VERONICA LAURA (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Lunes	09:00 a 11:00	201-PC
+Práctica	Lunes	11:00 a 13:00	201-PC
+Teórica	Miércoles	09:00 a 11:00	201-PC
+Práctica	Miércoles	11:00 a 13:00	201-PC
+Comisión: CURSO: 06B
+Turno: Sin definir
+Cupo / insc.: 58 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: BOGGI SILVINA (Profesor/a Adjunto/a), DOMINGUEZ ANALIA CLAUDIA (Ayudante 1ro/a), ROHDENBURG ERICA ELISABET (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Lunes	09:00 a 11:00	201-PC
+Práctica	Lunes	11:00 a 13:00	303-PC
+Teórica	Miércoles	09:00 a 11:00	201-PC
+Práctica	Miércoles	11:00 a 13:00	303-PC
+Comisión: CURSO:07A
+Turno: Sin definir
+Cupo / insc.: 57 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: CENTENO HERNAN DIEGO (Profesor/a Adjunto/a), ALVAREZ PONTE LUCIA INES (Ayudante 1ro/a), ENDELLI JORGE RODOLFO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	09:00 a 11:00	500 - PC
+Práctica	Martes	11:00 a 13:00	500 - PC
+Teórica	Jueves	09:00 a 11:00	500 - PC
+Práctica	Jueves	11:00 a 13:00	500 - PC
+Comisión: CURSO: 10
+Turno: Sin definir
+Cupo / insc.: 75 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: GIRIBET JUAN IGNACIO (Profesor/a Adjunto/a), CHARO GISELA DANIELA (Ayudante 1ro/a), CRUZ HERNANDEZ CRISTIAN ALEJANDRO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Miércoles	09:00 a 11:00	203-PC
+Práctica	Miércoles	11:00 a 13:00	203-PC
+Teórica	Viernes	09:00 a 11:00	203-PC
+Práctica	Viernes	11:00 a 13:00	203-PC
+Comisión: CURSO: 13A
+Turno: Sin definir
+Cupo / insc.: 62 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: CABANA ADRIANA ELENA (Profesor/a Adjunto/a), PONCE DE LEON ROBLES FABIAN ARTURO (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Práctica	Miércoles	13:00 a 15:00	418-PC
+Teórica	Miércoles	15:00 a 17:00	510 - PC
+Práctica	Viernes	13:00 a 15:00	418-PC
+Teórica	Viernes	15:00 a 17:00	510 - PC
+Comisión: CURSO: 13B
+Turno: Sin definir
+Cupo / insc.: 63 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: CABANA ADRIANA ELENA (Profesor/a Adjunto/a), PRESENZA JUAN FRANCISCO (Ayudante 1ro/a), RODRIGUEZ MARIA LAURA (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Práctica	Miércoles	13:00 a 15:00	414-PC
+Teórica	Miércoles	15:00 a 17:00	510 - PC
+Práctica	Viernes	13:00 a 15:00	414-PC
+Teórica	Viernes	15:00 a 17:00	510 - PC
+Comisión: CURSO:15A
+Turno: Sin definir
+Cupo / insc.: 57 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: PALAU GABRIEL ALEXIS (Profesor/a Adjunto/a), GALVAN MONICA BEATRIZ (Jefe/a Trabajos Practicos), CATUOGNO EZEQUIEL PATRICIO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico	Lunes	17:00 a 19:00	500 - PC
+Práctica	Lunes	19:00 a 21:00	507 - PC
+Teórico	Miércoles	17:00 a 19:00	201-PC
+Práctica	Miércoles	19:00 a 21:00	509 - PC
+Comisión: CURSO:17
+Turno: Sin definir
+Cupo / insc.: 75 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: MENDIETA JULIO ANTONIO (Jefe/a Trabajos Practicos), VALDETTARO MARCELO ALEJANDRO (Jefe/a Trabajos Practicos), BLANCÁ FERNANDO DANIEL (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	07:00 a 09:00	500 - PC
+Práctica	Martes	09:00 a 11:00	319-PC
+Teórica	Jueves	07:00 a 09:00	500 - PC
+Práctica	Jueves	09:00 a 11:00	319-PC
+Comisión: CURSO:19
+Turno: Sin definir
+Cupo / insc.: 100 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: GARCIA SERRANO SILVINA AIDA (Profesor/a Adjunto/a), FAGES LUCIANO RODOLFO (Ayudante 1ro/a), SILVESTRE DAMIAN ISMAEL (Ayudante 1ro/a), VENTURIELLO VERONICA LAURA (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Lunes	13:00 a 15:00	200-PC
+Práctica	Lunes	15:00 a 17:00	200-PC
+Teórica	Miércoles	13:00 a 15:00	200-PC
+Práctica	Miércoles	15:00 a 17:00	200-PC
+Comisión: CURSO:23A
+Turno: Sin definir
+Cupo / insc.: 62 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: GRYNBERG SEBASTIAN PABLO (Profesor/a Adjunto/a), CASSANI MARIA VICTORIA (Ayudante 1ro/a), PONCE DE LEON ROBLES FABIAN ARTURO (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Lunes	07:00 a 09:00	400-PC
+Práctica	Lunes	09:00 a 11:00	400-PC
+Teórica	Miércoles	07:00 a 09:00	400-PC
+Práctica	Miércoles	09:00 a 11:00	400-PC
+Comisión: CURSO:23B
+Turno: Sin definir
+Cupo / insc.: 63 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: GRYNBERG SEBASTIAN PABLO (Profesor/a Adjunto/a), PEREYRA A DESIGNAR (Ayudante 1ro/a), TORLASCO FLORENCIA ALEJANDRA (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Lunes	07:00 a 09:00	400-PC
+Práctica	Lunes	09:00 a 11:00	400-PC
+Teórica	Miércoles	07:00 a 09:00	400-PC
+Práctica	Miércoles	09:00 a 11:00	400-PC
+Comisión: CURSO: 24
+Turno: Sin definir
+Cupo / insc.: 65 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: PERALTA NORA BEATRIZ (Profesor/a Adjunto/a), GALVAN MONICA BEATRIZ (Jefe/a Trabajos Practicos), FANCIOTTI TOMAS (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Lunes	15:00 a 17:00	510 - PC
+Práctica	Lunes	17:00 a 19:00	510 - PC
+Teórica	Miércoles	15:00 a 17:00	313-PC
+Práctica	Miércoles	17:00 a 19:00	313-PC
+Comisión: CURSO: 25
+Turno: Sin definir
+Cupo / insc.: 65 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: CANGA SANDRA CARMEN (Profesor/a Adjunto/a), ORECCHIA MONICA INES (Profesor/a Adjunto/a), AGUERRE JUAN FRANCISCO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	16:00 a 18:00	416-PC
+Práctica	Martes	18:00 a 20:00	416-PC
+Teórica	Jueves	16:00 a 18:00	416-PC
+Práctica	Jueves	18:00 a 20:00	416-PC
+Comisión: CURSO: 07B
+Turno: Sin definir
+Cupo / insc.: 58 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: CENTENO HERNAN DIEGO (Profesor/a Adjunto/a), KLINGER MAGALI SILVINA (Ayudante 1ro/a), PEREYRA A DESIGNAR (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	09:00 a 11:00	500 - PC
+Práctica	Martes	11:00 a 13:00	202-PC
+Teórica	Jueves	09:00 a 11:00	500 - PC
+Práctica	Jueves	11:00 a 13:00	202-PC
+Comisión: CURSO:15B
+Turno: Sin definir
+Cupo / insc.: 58 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: PALAU GABRIEL ALEXIS (Profesor/a Adjunto/a), GRÖER MARIA GABRIELA (Jefe/a Trabajos Practicos), RIZZO ELISABETH AMALIA (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Lunes	17:00 a 19:00	500 - PC
+Práctica	Lunes	19:00 a 21:00	319-PC
+Teórica	Miércoles	17:00 a 19:00	201-PC
+Práctica	Miércoles	19:00 a 21:00	507 - PC
+Actividad: ALGORITMOS Y ESTRUCTURAS DE DATOS (CB100)
+Comisión: CURSO: 01-Schmidt
+Turno: Sin definir
+Cupo / insc.: 40 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: SCHMIDT GUSTAVO ADOLFO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Miércoles	19:00 a 22:00	Clase Virtual-PC
+Práctica Obligatoria	Jueves	19:00 a 22:00	Clase Virtual-PC
+Comisión: CURSO: 02-Buchwald
+Turno: Sin definir
+Cupo / insc.: 110 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: BUCHWALD MARTIN EZEQUIEL (Profesor/a Adjunto/a), ESTEBAN FEDERICO MARTIN (Jefe/a Trabajos Practicos), GENENDER PEÑA EZEQUIEL DAVID (Jefe/a Trabajos Practicos), AGUIRRE ARGERICH FACUNDO AGUSTIN (Ayudante 2do/a), HARRIET ELIANA (Ayudante 2do/a), MOLINA TAIEL ALEXIS (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Lunes	17:30 a 19:00	400-PC
+Práctica Obligatoria	Lunes	19:00 a 20:30	400-PC
+Teórica Obligatoria	Jueves	17:30 a 19:00	Clase Virtual-PC
+Práctica Obligatoria	Jueves	19:00 a 20:30	Clase Virtual-PC
+Comisión: CURSO: 03-Juarez
+Turno: Sin definir
+Cupo / insc.: 80 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: JUAREZ ANDRES ALBERTO (Profesor/a Adjunto/a), CIARALLO CRISTIAN ADRIAN (Jefe/a Trabajos Practicos), FARETTA YANINA BELEN (Ayudante 2do/a), MARIANETTI NICOLAS GABRIEL (Ayudante 2do/a), RUIZ DIAZ JULIAN (Ayudante 2do/a), PASCUAL OSORIO JUAN MANUEL (Ayudante 2do/a ad-honorem), PATIÑO FRANCO MAURICIO (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Martes	18:00 a 21:00	313-PC
+Práctica Obligatoria	Jueves	18:00 a 21:00	313-PC
+Comisión: CURSO: 04-Mendez/Pandolfo
+Turno: Sin definir
+Cupo / insc.: 80 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MENDEZ MARIANO (Profesor/a Adjunto/a), MUCCIO ADRIAN (Jefe/a Trabajos Practicos), SIBIKOWSKI NICOLAS IVAN (Ayudante 1ro/a), CORREA VALENTINA LAURA (Ayudante 2do/a), DIAZ MIGUEZ ABRIL (Ayudante 2do/a), PANDOLFO LUCAS HERNAN (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	18:00 a 21:00	Clase Virtual-PC
+Práctica Obligatoria	Jueves	18:00 a 21:00	302-PC
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MENDEZ MARIANO (Profesor/a Adjunto/a), MUCCIO ADRIAN (Jefe/a Trabajos Practicos), SIBIKOWSKI NICOLAS IVAN (Ayudante 1ro/a), CORREA VALENTINA LAURA (Ayudante 2do/a), DIAZ MIGUEZ ABRIL (Ayudante 2do/a), PANDOLFO LUCAS HERNAN (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: ANÁLISIS MATEMÁTICO II (CB001)
+Comisión: CURSO: 01B
+Turno: Sin definir
+Cupo / insc.: 58 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: MANCILLA AGUILAR JOSE LUIS (Profesor/a Titular/a), MENDIETA JULIO ANTONIO (Jefe/a Trabajos Practicos), MONSERRAT DUCCOLI MIGUEL PABLO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	09:00 a 11:00	201-PC
+Práctica	Martes	11:00 a 13:00	203-PC
+Teórica	Jueves	09:00 a 11:00	201-PC
+Práctica	Jueves	11:00 a 13:00	203-PC
+Comisión: CURSO: 02A
+Turno: Sin definir
+Cupo / insc.: 62 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: LOPEZ CLAUDIA ANDREA (Profesor/a Adjunto/a), PORTOCARRERO MIRANDA MICHAEL PERCY (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	07:00 a 09:00	403 - PC
+Práctica	Martes	09:00 a 11:00	411 - PC
+Teórica	Jueves	07:00 a 09:00	403 - PC
+Práctica	Jueves	09:00 a 11:00	411 - PC
+Comisión: CURSO: 02B
+Turno: Sin definir
+Cupo / insc.: 63 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: LOPEZ CLAUDIA ANDREA (Profesor/a Adjunto/a), GARCIA ADRIANA EVA (Jefe/a Trabajos Practicos), ENDELLI JORGE RODOLFO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	07:00 a 09:00	403 - PC
+Práctica	Martes	09:00 a 11:00	418-PC
+Teórica	Jueves	07:00 a 09:00	403 - PC
+Práctica	Jueves	09:00 a 11:00	418-PC
+Comisión: CURSO: 03
+Turno: Sin definir
+Cupo / insc.: 75 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: BUCELLO PABLO AUGUSTO (Profesor/a Adjunto/a), OLIVA CARLA MARIANA (Jefe/a Trabajos Practicos), DE ROSSI FERNANDO DANIEL (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Lunes	09:00 a 11:00	313-PC
+Práctica	Lunes	11:00 a 13:00	313-PC
+Teórica	Miércoles	09:00 a 11:00	313-PC
+Práctica	Miércoles	11:00 a 13:00	313-PC
+Comisión: CURSO: 04A
+Turno: Sin definir
+Cupo / insc.: 62 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: ZITTO MIGUEL EDUARDO (Profesor/a Adjunto/a), GOMEZ CIAPPONI LAUTARO (Ayudante 1ro/a), BIBILONI FERNANDO (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Práctica	Martes	09:00 a 11:00	400-PC
+Teórica	Martes	11:00 a 13:00	400-PC
+Práctica	Viernes	09:00 a 11:00	400-PC
+Teórica	Viernes	11:00 a 13:00	400-PC
+Comisión: CURSO: 04B
+Turno: Sin definir
+Cupo / insc.: 63 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: ZITTO MIGUEL EDUARDO (Profesor/a Adjunto/a), DURANTE FLAVIO ANIBAL (Ayudante 1ro/a), MORINIGO FERREIRA ANGEL ANDERSON (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Práctica	Martes	09:00 a 11:00	506 - PC
+Teórica	Martes	11:00 a 13:00	400-PC
+Práctica	Viernes	09:00 a 11:00	506 - PC
+Teórica	Viernes	11:00 a 13:00	400-PC
+Comisión: CURSO: 05A
+Turno: Sin definir
+Cupo / insc.: 87 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: MAULHARDT MARTIN ENRIQUE (Profesor/a Adjunto/a), MIGUEL AIDA CARMEN (Jefe/a Trabajos Practicos), GOMEZ CIAPPONI LAUTARO (Ayudante 1ro/a), BLAZQUEZ ROCIO AZUL (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	09:00 a 11:00	403 - PC
+Práctica	Martes	11:00 a 13:00	200-PC
+Teórica	Viernes	09:00 a 11:00	403 - PC
+Práctica	Viernes	11:00 a 13:00	200-PC
+Comisión: CURSO: 05B
+Turno: Sin definir
+Cupo / insc.: 63 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: MAULHARDT MARTIN ENRIQUE (Profesor/a Adjunto/a), MONZON NELSON HUGO (Ayudante 1ro/a), BIBILONI FERNANDO (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	09:00 a 11:00	403 - PC
+Práctica	Martes	11:00 a 13:00	411 - PC
+Teórica	Viernes	09:00 a 11:00	403 - PC
+Práctica	Viernes	11:00 a 13:00	200-PC
+Comisión: CURSO: 06A
+Turno: Sin definir
+Cupo / insc.: 57 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: SOLA MARCOS OSCAR (Profesor/a Adjunto/a), PIÑERA EDUARDO ERNESTO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Práctica	Lunes	13:00 a 15:00	319-PC
+Teórica	Lunes	15:00 a 17:00	500 - PC
+Práctica	Miércoles	13:00 a 15:00	319-PC
+Teórica	Miércoles	15:00 a 17:00	500 - PC
+Comisión: CURSO: 06B
+Turno: Sin definir
+Cupo / insc.: 58 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: SOLA MARCOS OSCAR (Profesor/a Adjunto/a), GUALTIERI SERGIO ALBERTO (Ayudante 1ro/a), OLIVA CARLA MARIANA (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Práctica	Lunes	13:00 a 15:00	500 - PC
+Teórica	Lunes	15:00 a 17:00	500 - PC
+Práctica	Miércoles	13:00 a 15:00	500 - PC
+Teórica	Miércoles	15:00 a 17:00	500 - PC
+Comisión: CURSO: 07
+Turno: Sin definir
+Cupo / insc.: 75 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: PUEBLA MANUEL LEANDRO (Profesor/a Adjunto/a), PEREYRA A DESIGNAR (Jefe/a Trabajos Practicos), BOHORQUEZ GUTIERREZ RUBEN ANDRES (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Lunes	09:00 a 11:00	411 - PC
+Práctica	Lunes	11:00 a 13:00	411 - PC
+Teórica	Miércoles	09:00 a 11:00	411 - PC
+Práctica	Miércoles	11:00 a 13:00	411 - PC
+Comisión: CURSO: 08A
+Turno: Sin definir
+Cupo / insc.: 57 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: GIGOLA SILVIA VIVIANA (Profesor/a Adjunto/a), PEREYRA A DESIGNAR (Ayudante 1ro/a), ROHDENBURG ERICA ELISABET (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Práctica	Lunes	09:00 a 11:00	202-PC
+Teórica	Lunes	11:00 a 13:00	400-PC
+Práctica	Miércoles	09:00 a 11:00	202-PC
+Teórica	Miércoles	11:00 a 13:00	400-PC
+Comisión: CURSO: 08B
+Turno: Sin definir
+Cupo / insc.: 58 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: GIGOLA SILVIA VIVIANA (Profesor/a Adjunto/a), PEREYRA A DESIGNAR (Ayudante 1ro/a), VENTURIELLO VERONICA LAURA (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Práctica	Lunes	09:00 a 11:00	107-PC
+Teórica	Lunes	11:00 a 13:00	400-PC
+Práctica	Miércoles	09:00 a 11:00	107-PC
+Teórica	Miércoles	11:00 a 13:00	400-PC
+Comisión: CURSO:10
+Turno: Sin definir
+Cupo / insc.: 75 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: SASYK ROMAN JORGE (Profesor/a Adjunto/a), CHORNY FERNANDO (Jefe/a Trabajos Practicos), GUALTIERI SERGIO ALBERTO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Lunes	13:00 a 15:00	203-PC
+Práctica	Lunes	15:00 a 17:00	203-PC
+Teórica	Miércoles	13:00 a 15:00	203-PC
+Práctica	Miércoles	15:00 a 17:00	203-PC
+Comisión: CURSO:11A
+Turno: Sin definir
+Cupo / insc.: 62 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: DE ROSSI FERNANDO DANIEL (Profesor/a Adjunto/a), ZHANG FAN (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Práctica	Martes	14:00 a 16:00	305-PC
+Teórica	Martes	16:00 a 18:00	418-PC
+Práctica	Jueves	14:00 a 16:00	302-PC
+Teórica	Jueves	16:00 a 18:00	201-PC
+Comisión: CURSO:11B
+Turno: Sin definir
+Cupo / insc.: 63 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: DE ROSSI FERNANDO DANIEL (Profesor/a Adjunto/a), SASSANO MYRIAM PATRICIA (Profesor/a Adjunto/a), VOROBIOFF NICOLAS (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Práctica	Martes	14:00 a 16:00	310-PC
+Teórica	Martes	16:00 a 18:00	418-PC
+Práctica	Jueves	14:00 a 16:00	313-PC
+Teórica	Jueves	16:00 a 18:00	201-PC
+Comisión: CURSO:12A
+Turno: Sin definir
+Cupo / insc.: 57 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: CENTENO HERNAN DIEGO (Profesor/a Adjunto/a), CANGA SANDRA CARMEN (Jefe/a Trabajos Practicos), VOROBIOFF NICOLAS (Ayudante 1ro/a), ZHANG FAN (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	14:00 a 16:00	418-PC
+Práctica	Martes	16:00 a 18:00	303-PC
+Teórica	Jueves	14:00 a 16:00	201-PC
+Práctica	Jueves	16:00 a 18:00	310-PC
+Comisión: CURSO:12B
+Turno: Sin definir
+Cupo / insc.: 58 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: CENTENO HERNAN DIEGO (Profesor/a Adjunto/a), SILVESTRE DAMIAN ISMAEL (Ayudante 1ro/a), VICEDO JUAN PABLO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	14:00 a 16:00	418-PC
+Práctica	Martes	16:00 a 18:00	313-PC
+Teórica	Jueves	14:00 a 16:00	201-PC
+Práctica	Jueves	16:00 a 18:00	302-PC
+Comisión: CURSO:14
+Turno: Sin definir
+Cupo / insc.: 75 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: COMAS JORGE MIGUEL (Profesor/a Adjunto/a), CANEPA VICTOR MANUEL (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	18:00 a 20:00	500 - PC
+Práctica	Martes	20:00 a 22:00	500 - PC
+Teórica	Viernes	18:00 a 20:00	500 - PC
+Práctica	Viernes	20:00 a 22:00	500 - PC
+Comisión: CURSO: 15A
+Turno: Sin definir
+Cupo / insc.: 62 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: SEMINARA SILVIA ALEJANDRA (Profesor/a Adjunto/a), OLIVA CECILIA MARIEL (Jefe/a Trabajos Practicos), WILK BERNARDO MATIAS (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Práctica	Lunes	17:00 a 19:00	313-PC
+Teórica	Lunes	19:00 a 21:00	310-PC
+Práctica	Miércoles	17:00 a 19:00	418-PC
+Teórica	Miércoles	19:00 a 21:00	510 - PC
+Comisión: CURSO:15B
+Turno: Sin definir
+Cupo / insc.: 63 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: SEMINARA SILVIA ALEJANDRA (Profesor/a Adjunto/a), LUCUY SUAREZ FRED ALBERTO (Ayudante 1ro/a), LA COLLA AUGUSTO (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Práctica	Lunes	17:00 a 19:00	302-PC
+Teórica	Lunes	19:00 a 21:00	310-PC
+Práctica	Miércoles	17:00 a 19:00	302-PC
+Teórica	Miércoles	19:00 a 21:00	510 - PC
+Comisión: CURSO: 16
+Turno: Sin definir
+Cupo / insc.: 90 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: GONZALEZ DANIEL ALEJANDRO (Profesor/a Adjunto/a), AMOREO ANIBAL (Jefe/a Trabajos Practicos), SMILOVICH DAMIAN NICOLAS (Jefe/a Trabajos Practicos), PETROVICH JOSE LUIS ALEJANDRO (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	18:00 a 20:00	E9 - PC
+Práctica	Martes	20:00 a 22:00	E9 - PC
+Teórica	Jueves	18:00 a 20:00	E9 - PC
+Práctica	Jueves	20:00 a 22:00	E9 - PC
+Comisión: CURSO: 01A
+Turno: Sin definir
+Cupo / insc.: 57 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: MANCILLA AGUILAR JOSE LUIS (Profesor/a Titular/a), CENTENO HERNAN DIEGO (Jefe/a Trabajos Practicos), GARCIA ADRIANA EVA (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	09:00 a 11:00	201-PC
+Práctica	Martes	11:00 a 13:00	201-PC
+Teórica	Jueves	09:00 a 11:00	201-PC
+Práctica	Jueves	11:00 a 13:00	201-PC
+Actividad: ANÁLISIS MATEMÁTICO III (CB005)
+Comisión: CURSO: 02
+Turno: Sin definir
+Cupo / insc.: 65 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MURMIS GUSTAVO MARCELO (Profesor/a Asociado/a), MURMIS EDUARDO GABRIEL (Profesor/a Adjunto/a), DEL RIO GARCIA FEDERICO MANUEL (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Lunes	18:00 a 20:00	418-PC
+Práctica	Lunes	20:00 a 22:00	418-PC
+Teórica	Miércoles	18:00 a 20:00	414-PC
+Práctica	Miércoles	20:00 a 22:00	414-PC
+Comisión: CURSO: 01
+Turno: Sin definir
+Cupo / insc.: 65 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: CACHILE MARIO ANDRES (Profesor/a Adjunto/a), PEÑA NELLY HAYDEE (Jefe/a Trabajos Practicos), MONZON NELSON HUGO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	14:00 a 16:00	510 - PC
+Práctica	Martes	16:00 a 18:00	510 - PC
+Teórica	Jueves	14:00 a 16:00	Aula a determinar
+Práctica	Jueves	16:00 a 18:00	Aula a determinar
+Actividad: APRENDIZAJE AUTOMÁTICO (TA061)
+Comisión: CURSO: 01-Merlino
+Turno: Sin definir
+Cupo / insc.: 40 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MERLINO HERNAN DANIEL (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	07:00 a 10:00	Aula a determinar
+Teórico Práctica Obligatoria	Jueves	07:00 a 10:00	Aula a determinar
+Actividad: APRENDIZAJE PROFUNDO (TA062)
+Comisión: CURSO: 1
+Turno: Sin definir
+Cupo / insc.: 20 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: LEW SERGIO EDUARDO (Profesor/a Asociado/a), VEIGA RICARDO ALFREDO (Profesor/a Asociado/a), MININNI CAMILO JUAN (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	16:00 a 19:00	Aula a determinar
+Teórico Práctica Obligatoria	Miércoles	16:00 a 19:00	Aula a determinar
+Actividad: ARQUITECTURA DE SOFTWARE (TB034)
+Comisión: CURSO: 01-Calonico
+Turno: Sin definir
+Cupo / insc.: 30 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: CALONICO CHRISTIAN MARIO (Profesor/a Adjunto/a), RUGILO GUILLERMO HERNAN (Ayudante 2do/a), D'ASCANIO MARIANO CLAUDIO (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Jueves	18:00 a 22:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: CALONICO CHRISTIAN MARIO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Jueves	18:00 a 22:00	Aula a determinar
+Actividad: BASE DE DATOS (TA044)
+Comisión: CURSO: 01-Román
+Turno: Sin definir
+Cupo / insc.: 110 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: ROMAN LUCAS ALEJANDRO (Profesor/a Adjunto/a), FASCE ALBERTO ARMANDO (Jefe/a Trabajos Practicos), CAMPOAMOR SEBASTIAN (Ayudante 1ro/a), CALIZ BLANCO ALEJO MARTIN EZEQUIEL (Ayudante 2do/a), COLAVECCHIA Taiel (Ayudante 2do/a), DE ANGELIS RIVA LUKAS NAHUEL (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Martes	19:00 a 22:00	Aula a determinar
+Práctica Obligatoria	Miércoles	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: 02-Merlino
+Turno: Sin definir
+Cupo / insc.: 45 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MERLINO HERNAN DANIEL (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	07:00 a 10:00	Aula a determinar
+Teórico Práctica Obligatoria	Miércoles	07:00 a 10:00	Aula a determinar
+Comisión: CURSO: 03-Cabrera
+Turno: Sin definir
+Cupo / insc.: 75 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: CABRERA JOSE LUIS (Profesor/a Adjunto/a), BERNARDI ADRIAN SERGIO (Jefe/a Trabajos Practicos), AQUISTA KAILÁSH (Ayudante 2do/a), FONTENLA MARIA SOL (Ayudante 2do/a ad-honorem), SEGURA AGUSTINA (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	19:00 a 22:00	Aula a determinar
+Teórico Práctica Obligatoria	Jueves	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: CABRERA JOSE LUIS (Profesor/a Adjunto/a), BERNARDI ADRIAN SERGIO (Jefe/a Trabajos Practicos), AQUISTA KAILÁSH (Ayudante 2do/a), FONTENLA MARIA SOL (Ayudante 2do/a ad-honorem), SEGURA AGUSTINA (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: CAPITAL HUMANO Y COMPORTAMIENTO ORGANIZACIONAL (TC013)
+Comisión: Curso Único
+Turno: Sin definir
+Cupo / insc.: 100 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: RICKERT CARLOS (Profesor/a Adjunto/a), DOMINGUEZ MARIA MERCEDES (Jefe/a Trabajos Practicos), KLEIN MARIA CAROLINA (Ayudante 1ro/a), SABINO LEANDRO OSCAR (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Jueves	18:00 a 22:00	Aula a determinar
+Comisión: Curso Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 10 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: RICKERT CARLOS (Profesor/a Adjunto/a), DOMINGUEZ MARIA MERCEDES (Jefe/a Trabajos Practicos), KLEIN MARIA CAROLINA (Ayudante 1ro/a), SABINO LEANDRO OSCAR (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Jueves	18:00 a 22:00	Aula a determinar
+Actividad: CIENCIA DE DATOS (TA047)
+Comisión: CURSO: 01-Martinelli
+Turno: Sin definir
+Cupo / insc.: 60 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MARTINELLI DAMIAN ARIEL (Profesor/a Adjunto/a), GOLMAR NATALIA (Jefe/a Trabajos Practicos), BRUSATI IGNACIO (Ayudante 2do/a), CALIZ BLANCO ALEJO MARTIN EZEQUIEL (Ayudante 2do/a), PONTI JULIETA (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	19:00 a 22:00	Aula a determinar
+Teórico Práctica Obligatoria	Jueves	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: 02-Rodriguez
+Turno: Sin definir
+Cupo / insc.: 60 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: RODRIGUEZ JUAN MANUEL (Profesor/a Adjunto/a), VILLANUEVA Azul (Jefe/a Trabajos Practicos), MASTELLI FRANCO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Martes	19:00 a 22:00	Aula a determinar
+Práctica Obligatoria	Jueves	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MARTINELLI DAMIAN ARIEL (Profesor/a Adjunto/a), GOLMAR NATALIA (Jefe/a Trabajos Practicos), BRUSATI IGNACIO (Ayudante 2do/a), CALIZ BLANCO ALEJO MARTIN EZEQUIEL (Ayudante 2do/a), PONTI JULIETA (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: COMERCIALIZACIÓN DE PRODUCTOS Y SERVICIOS (TA023)
+Comisión: Curso Único
+Turno: Sin definir
+Cupo / insc.: 100 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: ESCARDO ADRIAN JAVIER (Profesor/a Adjunto/a), SWINYARD CARLOS MARCELO (Profesor/a Adjunto/a), FAINSOD ALEJANDRO ISRAEL (Jefe/a Trabajos Practicos), MIGUEL BRUNILDA RAQUEL (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Miércoles	19:00 a 23:00	Aula a determinar
+Comisión: Curso Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 10 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: ESCARDO ADRIAN JAVIER (Profesor/a Adjunto/a), SWINYARD CARLOS MARCELO (Profesor/a Adjunto/a), FAINSOD ALEJANDRO ISRAEL (Jefe/a Trabajos Practicos), MIGUEL BRUNILDA RAQUEL (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Miércoles	19:00 a 23:00	Aula a determinar
+Actividad: COMPUTACIÓN CUÁNTICA (TB032)
+Comisión: CURSO: 01-Caram
+Turno: Sin definir
+Cupo / insc.: 40 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: CARAM LEONIDAS FACUNDO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Miércoles	19:00 a 22:00	Aula a determinar
+Teórico Práctica Obligatoria	Jueves	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: CARAM LEONIDAS FACUNDO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Miércoles	19:00 a 22:00	Aula a determinar
+Teórico Práctica Obligatoria	Jueves	19:00 a 22:00	Aula a determinar
+Actividad: EMPRENDIMIENTOS EN INGENIERÍA (TC015)
+Comisión: Curso 1
+Turno: Sin definir
+Cupo / insc.: 20 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: IRURETA AGUSTINA (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Miércoles	15:00 a 19:00	Aula a determinar
+Actividad: EMPRESAS DE BASE TECNOLÓGICA I (TC018)
+Comisión: CURSO: 01-Godoy
+Turno: Sin definir
+Cupo / insc.: 200 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: GODOY ANDRES ALEJANDRO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	18:00 a 21:00	Aula a determinar
+Teórico Práctica Obligatoria	Miércoles	18:00 a 21:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: GODOY ANDRES ALEJANDRO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	18:00 a 21:00	Aula a determinar
+Teórico Práctica Obligatoria	Miércoles	18:00 a 21:00	Aula a determinar
+Actividad: EMPRESAS DE BASE TECNOLÓGICA II (TC019)
+Comisión: CURSO: 01-Di Mauro
+Turno: Sin definir
+Cupo / insc.: 150 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: DI MAURO FRANCO (Profesor/a Adjunto/a), FERRERO MAXIMILIANO (Jefe/a Trabajos Practicos), RODRIGUEZ CHABELI (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	18:00 a 21:00	Aula a determinar
+Teórico Práctica Obligatoria	Jueves	18:00 a 21:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: DI MAURO FRANCO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	18:00 a 21:00	Aula a determinar
+Teórico Práctica Obligatoria	Jueves	18:00 a 21:00	Aula a determinar
+Actividad: ENERGÍAS RENOVABLES (TA039)
+Comisión: CURSO 1
+Turno: Sin definir
+Cupo / insc.: 20 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: OTERO ALEJANDRO DANIEL (Profesor/a Adjunto/a), RIGONI SANTIAGO (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	15:00 a 19:00	Aula a determinar
+Comisión: CURSO PARA ESTUDIANTES INTERNACIONALES
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: OTERO ALEJANDRO DANIEL (Profesor/a Adjunto/a), RIGONI SANTIAGO (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	15:00 a 19:00	Aula a determinar
+Actividad: FÍSICA PARA INFORMÁTICA (CB024)
+Comisión: CURSO: 01
+Turno: Sin definir
+Cupo / insc.: 50 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: MATTEO CLAUDIA LEDA (Profesor/a Adjunto/a), KONDRATIUK NADIA YAMILA (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Miércoles	14:00 a 18:00	Aula a determinar
+Comisión: CURSO: 02
+Turno: Sin definir
+Cupo / insc.: 50 / 0
+Instancias: Promoción
+Ubicación: Sede Unica
+Docentes: SORICHETTI PATRICIO ANIBAL (Profesor/a Titular/a), MATTEO CLAUDIA LEDA (Profesor/a Adjunto/a), DRESZMAN ALAN (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Jueves	14:00 a 18:00	Aula a determinar
+Actividad: FUNDAMENTOS DE PROGRAMACIÓN (TB021)
+Comisión: CURSO: 01-Guarna
+Turno: Sin definir
+Cupo / insc.: 125 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: GUARNA PABLO FRANCISCO (Profesor/a Adjunto/a), JUAREZ ANDRES ALBERTO (Jefe/a Trabajos Practicos), BIANCHI GUSTAVO OSCAR (Ayudante 1ro/a), GARCIA JAIME DIEGO (Ayudante 1ro/a), MARIANETTI NICOLAS GABRIEL (Ayudante 2do/a), SERRA DIEGO ADRIAN (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	19:00 a 22:00	201-PC
+Teórico Práctica Obligatoria	Jueves	19:00 a 22:00	310-PC
+Comisión: CURSO: 02-Azcurra
+Turno: Sin definir
+Cupo / insc.: 120 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: AZCURRA DIEGO ANDRES (Profesor/a Adjunto/a), SALVIA MARTIN MIGUEL (Jefe/a Trabajos Practicos), BIANCHI GUSTAVO OSCAR (Ayudante 1ro/a), OTERO MARCOS JULIAN (Ayudante 1ro/a), SERRA DIEGO ADRIAN (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Miércoles	16:00 a 22:00	Clase Virtual-PC
+Comisión: CURSO: 03-Essaya
+Turno: Sin definir
+Cupo / insc.: 85 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: ESSAYA DIEGO NICOLAS (Profesor/a Adjunto/a), ESTEBAN FEDERICO MARTIN (Jefe/a Trabajos Practicos), DI SANTO JAVIER MARIANO (Ayudante 2do/a), KRISTAL JUAN IGNACIO (Ayudante 2do/a), SANTONI MAURO JAVIER (Ayudante 2do/a), SPRENGER ROBERTA (Ayudante 2do/a), ROVIRA ROSSEL FRANCISCO (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Lunes	18:00 a 21:00	Clase Virtual-PC
+Práctica Obligatoria	Miércoles	18:00 a 21:00	414-PC
+Comisión: CURSO: 04-Mendez
+Turno: Sin definir
+Cupo / insc.: 85 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MENDEZ MARIANO (Profesor/a Asociado/a), BOCACCIO AGUSTINA (Ayudante 2do/a), DIAZ REAL MARIA SOL (Ayudante 2do/a), FRACCARO AGUSTINA (Ayudante 2do/a), MASSONE MARIO BERNARDO (Ayudante 2do/a), RODRIGUEZ DALA TOMAS (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Martes	18:00 a 21:00	414-PC
+Práctica Obligatoria	Jueves	18:00 a 21:00	203-PC
+Comisión: CURSO: 05-Servetto
+Turno: Sin definir
+Cupo / insc.: 25 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: SERVETTO ARTURO CARLOS (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	15:00 a 18:00	Clase Virtual-PC
+Teórico Práctica Obligatoria	Martes	15:00 a 18:00	LF - PC
+Comisión: CURSO: 06-Servetto
+Turno: Sin definir
+Cupo / insc.: 25 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: SERVETTO ARTURO CARLOS (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	15:00 a 18:00	Clase Virtual-PC
+Teórico Práctica Obligatoria	Miércoles	15:00 a 18:00	LB - PC
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: GUARNA PABLO FRANCISCO (Profesor/a Adjunto/a), JUAREZ ANDRES ALBERTO (Jefe/a Trabajos Practicos), BIANCHI GUSTAVO OSCAR (Ayudante 1ro/a), GARCIA JAIME DIEGO (Ayudante 1ro/a), MARIANETTI NICOLAS GABRIEL (Ayudante 2do/a), SERRA DIEGO ADRIAN (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: GERENCIAMIENTO DE LA CALIDAD (TA024)
+Comisión: Curso Único
+Turno: Sin definir
+Cupo / insc.: 100 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: KOLL MARCELO HORACIO (Profesor/a Adjunto/a), MARTINEZ MARCELO ALEJANDRO (Jefe/a Trabajos Practicos), CAROLA LUIS FEDERICO JOSE (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Viernes	18:30 a 22:30	Aula a determinar
+Comisión: Curso Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 10 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: KOLL MARCELO HORACIO (Profesor/a Adjunto/a), MARTINEZ MARCELO ALEJANDRO (Jefe/a Trabajos Practicos), CAROLA LUIS FEDERICO JOSE (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Viernes	18:30 a 22:30	Aula a determinar
+Actividad: GESTIÓN DEL DESARROLLO DE SISTEMAS INFORMÁTICOS (TC017)
+Comisión: CURSO: 01-Fontela
+Turno: Sin definir
+Cupo / insc.: 80 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: FONTELA MOISES CARLOS (Profesor/a Titular/a), SCHENONE MARCELO HERNAN (Jefe/a Trabajos Practicos), CHELALA JUAN CRUZ (Ayudante 1ro/a), NAON MARCELO CARLOS (Ayudante 1ro/a), SMOCOVICH ELIZABETH KARIN (Ayudante 1ro/a), GADDI MARIA PILAR (Ayudante 2do/a), GUGLIELMONE LIONEL OSCAR (Ayudante 2do/a), LELOUTRE DANIELA DENISSE (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Desarrollo y Consulta	Miércoles	16:00 a 17:00	Aula a determinar
+Teórico Práctica Obligatoria	Miércoles	17:00 a 19:00	Aula a determinar
+Práctica	Miércoles	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: 02-Turri
+Turno: Sin definir
+Cupo / insc.: 50 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: TURRI ALEJANDRO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Desarrollo y Consulta	Jueves	16:00 a 17:00	Aula a determinar
+Teórico Práctica Obligatoria	Jueves	17:00 a 22:00	Aula a determinar
+Comisión: CURSO: 03-Fontdevila
+Turno: Sin definir
+Cupo / insc.: 50 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: FONTDEVILA DIEGO (Profesor/a Adjunto/a), GABARDINI JUAN ALBERTO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica	Lunes	16:00 a 22:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: FONTELA MOISES CARLOS (Profesor/a Titular/a), FONTDEVILA DIEGO (Profesor/a Adjunto/a), GABARDINI JUAN ALBERTO (Profesor/a Adjunto/a), TURRI ALEJANDRO (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: INGENIERÍA DE SOFTWARE I (TA046)
+Comisión: CURSO:01- Villagra
+Turno: Sin definir
+Cupo / insc.: 75 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: VILLAGRA SERGIO GUSTAVO (Profesor/a Adjunto/a), BRUNO TOMAS (Ayudante 1ro/a), DE BENEDETTI GUIDO RUBEN (Ayudante 1ro/a), FERNANDEZ LEONARDO DANIEL (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	18:30 a 21:30	Aula a determinar
+Teórico Práctica Obligatoria	Jueves	18:30 a 21:30	Aula a determinar
+Comisión: CURSO:02- Montaldo
+Turno: Sin definir
+Cupo / insc.: 75 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MONTALDO DIEGO FERNANDO (Profesor/a Adjunto/a), CUROTTO CARLOS EZEQUIEL (Ayudante 1ro/a), BEROCH SANTIAGO (Ayudante 2do/a), CARAMES AGUSTIN EDUARDO (Ayudante 2do/a), PETRAGLIA GONZALO LEONEL (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	19:00 a 22:00	Aula a determinar
+Teórico Práctica Obligatoria	Miércoles	19:00 a 22:00	Aula a determinar
+Comisión: CURSO:03- Leveroni
+Turno: Sin definir
+Cupo / insc.: 68 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: LEVERONI LUCIANO (Profesor/a Adjunto/a), BURELLA JUAN MATIAS (Jefe/a Trabajos Practicos), SZEJNFELD SIRKIS TOMAS (Ayudante 2do/a), TARAS JULIETA BELEN (Ayudante 2do/a), LOYARTE IVAN (Ayudante 2do/a ad-honorem), SINGER JOAQUIN (Ayudante de 2da)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	18:00 a 22:00	Aula a determinar
+Teórico Práctica Obligatoria	Viernes	18:00 a 22:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: VILLAGRA SERGIO GUSTAVO (Profesor/a Adjunto/a), BRUNO TOMAS (Ayudante 1ro/a), DE BENEDETTI GUIDO RUBEN (Ayudante 1ro/a), FERNANDEZ LEONARDO DANIEL (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: INGENIERÍA DE SOFTWARE II (TA049)
+Comisión: CURSO: 02-Paez
+Turno: Sin definir
+Cupo / insc.: 40 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: PAEZ NICOLAS MARTIN (Profesor/a Adjunto/a), DE LA FUENTE HERNAN (Ayudante 2do/a), SPASIUK KEVIN MATEO (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	08:00 a 11:00	Aula a determinar
+Teórico Práctica Obligatoria	Jueves	08:00 a 11:00	Aula a determinar
+Comisión: CURSO: 03-Rojas
+Turno: Sin definir
+Cupo / insc.: 70 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: ROJAS AGUSTIN (Profesor/a Adjunto/a), FERNANDEZ THEILLET NICOLAS PABLO (Ayudante 2do/a), CAROL LUGONES LUIS IGNACIO (Ayudante 2do/a ad-honorem), CUNEO PAULO CESAR (Ayudante 2do/a ad-honorem), ECHECONEA RODRIGO DE JESUS (Ayudante 2do/a ad-honorem), FONSECA MATIAS MANUEL (Ayudante 2do/a ad-honorem), LAVANDEIRA LUCAS (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	19:00 a 22:00	Aula a determinar
+Teórico Práctica Obligatoria	Viernes	18:00 a 21:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: PAEZ NICOLAS MARTIN (Profesor/a Adjunto/a), DE LA FUENTE HERNAN (Ayudante 2do/a), SPASIUK KEVIN MATEO (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: INTRODUCCIÓN A LA TRANSICIÓN ENERGÉTICA (TC016)
+Comisión: CURSO 1
+Turno: Sin definir
+Cupo / insc.: Sin definir / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: GIOVAGNOLI FLORENCIA VALERIA (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Miércoles	18:00 a 22:00	Aula a determinar
+Actividad: INTRODUCCIÓN AL DESARROLLO DE SOFTWARE (TB022)
+Comisión: CURSO: 01-Camejo
+Turno: Sin definir
+Cupo / insc.: 265 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: CAMEJO MANUEL (Profesor/a Adjunto/a), BILBAO MANUEL IÑAKI (Ayudante 2do/a), RIEDEL NICOLAS AGUSTIN (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	19:00 a 22:00	Aula a determinar
+Teórico Práctica Obligatoria	Jueves	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: 02-Lanzillotta
+Turno: Sin definir
+Cupo / insc.: 265 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: LANZILLOTTA BRUNO (Jefe/a Trabajos Practicos), CAPRA FRANCO DANIEL (Ayudante 2do/a), CHAVES LEONEL ABEL (Ayudante 2do/a), DI MATTEO CAROLINA (Ayudante 2do/a), MARTINEZ SASTRE GONZALO GABRIEL (Ayudante 2do/a), PALAVECINO ARNOLD NESTOR FABIAN (Ayudante 2do/a), SOSA CRISTIAN MARTIN (Ayudante 2do/a), VILLEGAS CABRAL TOMAS ARIEL (Ayudante 2do/a), CATTANEO ARIADNA ANTONELLA (Ayudante 2do/a ad-honorem), D' ABBRACCIO LAUTARO (Ayudante 2do/a ad-honorem), ESPERON RAMIRO (Ayudante 2do/a ad-honorem), LUCCHESI FRANCO DANTE (Ayudante 2do/a ad-honorem), REYNOSO Aylen (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica	Lunes	18:30 a 21:30	Aula a determinar
+Teórico Práctica	Miércoles	18:30 a 21:30	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: CAMEJO MANUEL (Profesor/a Adjunto/a), BILBAO MANUEL IÑAKI (Ayudante 2do/a), RIEDEL NICOLAS AGUSTIN (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: LENGUAJES Y COMPILADORES I (TB027)
+Comisión: CURSO: 01-Del Mazo
+Turno: Sin definir
+Cupo / insc.: 40 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: del MAZO FEDERICO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	18:00 a 22:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: del MAZO FEDERICO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	18:00 a 22:00	Aula a determinar
+Actividad: MODELACIÓN NUMÉRICA (CB051)
+Comisión: CURSO: 01-Re
+Turno: Sin definir
+Cupo / insc.: 90 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: RE MARIANO (Profesor/a Adjunto/a), GARCIA PABLO EZEQUIEL (Ayudante 1ro/a), SARTI Marina (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Jueves	14:00 a 18:00	Aula a determinar
+Comisión: CURSO: 02-Tarela
+Turno: Sin definir
+Cupo / insc.: 90 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: TARELA PABLO ADRIAN (Profesor/a Adjunto/a), EZCURRA DIEGO MARTIN (Jefe/a Trabajos Practicos), POLTARAK GUILLERMO RAUL CARLOS (Ayudante 1ro/a), DIAZ MARIA BELEN (Ayudante 2do/a), COSTA DA CUNHA JOAQUIN (Ayudante 2do/a ad-honorem), GRUN AGUSTINA JOHANNA (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Lunes	18:00 a 20:00	414-PC
+Práctica Obligatoria	Lunes	20:00 a 22:00	414-PC
+Comisión: CURSO: 03-Griggio
+Turno: Sin definir
+Cupo / insc.: 90 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: GRIGGIO DANIEL ADALBERTO (Profesor/a Adjunto/a), CERRUTTI SILVANA VALERIA (Ayudante 1ro/a), NAVARRO FABIAN (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	18:00 a 22:00	222-PC
+Comisión: CURSO: 04-Schwarz
+Turno: Sin definir
+Cupo / insc.: 90 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: SCHWARZ GONZALEZ RODOLFO ALEJANDRO (Profesor/a Adjunto/a), SOSA GERMAN EZEQUIEL (Jefe/a Trabajos Practicos), CASTAÑO ENRIQUETA (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	15:00 a 19:00	Aula a determinar
+Comisión: CURSO: 05-Sassano
+Turno: Sin definir
+Cupo / insc.: 90 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: GARCIA EZEQUIEL (Jefe/a Trabajos Practicos), HUSAIN CERRUTI IGNACIO SANTIAGO (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Miércoles	08:00 a 10:00	Clase Virtual-PC
+Práctica Obligatoria	Jueves	08:00 a 10:00	Clase Virtual-PC
+Comisión: CURSO: 06-Rodriguez
+Turno: Sin definir
+Cupo / insc.: 50 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: RODRIGUEZ DANIEL FABIAN (Profesor/a Adjunto/a), MACHIUNAS MONICA VALERIA (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Miércoles	15:00 a 19:00	400-PC
+Comisión: CURSO: 07-Cavaliere Practica Martes 20 hs
+Turno: Sin definir
+Cupo / insc.: 90 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: CAVALIERE MIGUEL ANGEL (Profesor/a Adjunto/a), MASTROPIETRO GABRIEL MARCELO (Jefe/a Trabajos Practicos), EZCURRA DIEGO MARTIN (Ayudante 1ro/a), KOWAL ADRIAN MARCELO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Martes	18:00 a 20:00	Clase Virtual-PC
+Práctica Obligatoria	Martes	20:00 a 22:00	Clase Virtual-PC
+Comisión: CURSO: 08-Cavaliere Práctica Martes 16 hs
+Turno: Sin definir
+Cupo / insc.: 45 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: BALZAROTTI FEDERICO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Práctica Obligatoria	Martes	14:00 a 18:00	Clase Virtual-PC
+Comisión: CURSO Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: RE MARIANO (Profesor/a Adjunto/a), GARCIA PABLO EZEQUIEL (Ayudante 1ro/a), SARTI Marina (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: ORGANIZACIÓN DEL COMPUTADOR (TB023)
+Comisión: CURSO: 01-Benitez
+Turno: Sin definir
+Cupo / insc.: 60 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: BENITEZ CARLOS EDUARDO (Profesor/a Adjunto/a), MARTOS PEDRO IGNACIO DOMINGO (Jefe/a Trabajos Practicos), BERRUEZO RAMIRO NICOLAS (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	19:00 a 22:00	Clase Virtual-PC
+Teórico Práctica Obligatoria	Miércoles	19:00 a 22:00	Clase Virtual-PC
+Comisión: CURSO: 03-Burin
+Turno: Sin definir
+Cupo / insc.: 60 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: BURIN ABRAHAM ALBERTO DANIEL (Profesor/a Adjunto/a), GUTIERREZ NESTOR SERGIO (Jefe/a Trabajos Practicos), NOVODVORETZ OSCAR DARIO (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	15:00 a 19:00	411 - PC
+Teórico Práctica Obligatoria	Martes	19:00 a 23:00	411 - PC
+Comisión: CURSO: 04-Volpi
+Turno: Sin definir
+Cupo / insc.: 70 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: VOLPI MARCELO EDUARDO (Profesor/a Adjunto/a), LLASAT VANESA (Jefe/a Trabajos Practicos), LOPEZ JUAN JOSE (Jefe/a Trabajos Practicos), MARTOS PEDRO IGNACIO DOMINGO (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Martes	08:00 a 11:00	200-PC
+Teórico Práctica Obligatoria	Miércoles	19:00 a 22:00	313-PC
+Comisión: CURSO: 05-Musso Rodriguez Práctica Obligatoria 1 (Miercoles)
+Turno: Sin definir
+Cupo / insc.: 40 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MUSSO RODRIGUEZ GUILLERMO ANDRES (Profesor/a Adjunto/a), TRINCHERO DANIEL ADRIAN (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Martes	07:00 a 10:00	Clase Virtual-PC
+Práctica Obligatoria	Miércoles	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: 06-Musso Rodriguez Práctica Obligatoria 2( Martes Paiva)
+Turno: Sin definir
+Cupo / insc.: 40 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MUSSO RODRIGUEZ GUILLERMO ANDRES (Profesor/a Adjunto/a), PAYVA MATIAS ALEJANDRO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Martes	07:00 a 10:00	Clase Virtual-PC
+Práctica Obligatoria	Martes	19:00 a 22:00	319-PC
+Comisión: CURSO: 07-Musso Rodriguez Práctica Obligatoria 3 (Martes Capece)
+Turno: Sin definir
+Cupo / insc.: 40 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MUSSO RODRIGUEZ GUILLERMO ANDRES (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Martes	07:00 a 10:00	Clase Virtual-PC
+Práctica Obligatoria	Martes	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: 08-Musso Rodriguez Práctica Obligatoria 4 (Jueves Martos)
+Turno: Sin definir
+Cupo / insc.: 40 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MUSSO RODRIGUEZ GUILLERMO ANDRES (Profesor/a Adjunto/a), MARTOS PEDRO IGNACIO DOMINGO (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Martes	07:00 a 10:00	Clase Virtual-PC
+Práctica Obligatoria	Jueves	19:00 a 22:00	319-PC
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MARCHI EDGARDO JOSE (Profesor/a Asociado/a), BENITEZ CARLOS EDUARDO (Profesor/a Adjunto/a), BURIN ABRAHAM ALBERTO DANIEL (Profesor/a Adjunto/a), MUSSO RODRIGUEZ GUILLERMO ANDRES (Profesor/a Adjunto/a), VOLPI MARCELO EDUARDO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: PARADIGMAS DE PROGRAMACIÓN (TB025)
+Comisión: CURSO: 01-Suarez
+Turno: Sin definir
+Cupo / insc.: 105 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: SANCHEZ DIEGO (Profesor/a Adjunto/a), SUAREZ JOSE PABLO (Profesor/a Adjunto/a), NAFTALI MAIA RAQUEL (Ayudante 1ro/a), RODRIGUEZ MASSUH PABLO MATIAS (Ayudante 1ro/a), GOMEZ JOAQUIN (Ayudante 2do/a), VALDEZ ULZURRUN SANTIAGO MARTIN (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Práctica Obligatoria	Martes	19:00 a 22:00	403 - PC
+Teórica Obligatoria	Jueves	19:00 a 22:00	201-PC
+Comisión: CURSO: 02-Brasburg
+Turno: Sin definir
+Cupo / insc.: 65 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: BRASBURG FEDERICO (Profesor/a Adjunto/a), RAIK IGNACIO MARTIN (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	18:30 a 21:30	303-PC
+Teórico Práctica Obligatoria	Jueves	18:30 a 21:30	305-PC
+Comisión: CURSO: 03-Essaya
+Turno: Sin definir
+Cupo / insc.: 105 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: ESSAYA DIEGO NICOLAS (Profesor/a Adjunto/a), CIARALLO CRISTIAN ADRIAN (Jefe/a Trabajos Practicos), CARRANZA LIHUEN (Ayudante 2do/a), MARAGGI SANTIAGO JOSE MARIA (Ayudante 2do/a), SALLUZZI LUCA (Ayudante 2do/a), CASTRO MARTINEZ JOSE IGNACIO (Ayudante 2do/a ad-honorem), FINCI DANIEL ALEJANRO (Ayudante 2do/a ad-honorem), VITA SANCHEZ Macarena (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Práctica Obligatoria	Lunes	14:00 a 17:00	Clase Virtual-PC
+Práctica Obligatoria	Viernes	18:00 a 21:00	Clase Virtual-PC
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: BRASBURG FEDERICO (Profesor/a Adjunto/a), SUAREZ JOSE PABLO (Profesor/a Adjunto/a), ESSAYA DIEGO NICOLAS (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: PROBABILIDAD Y ESTADÍSTICA (CB003)
+Comisión: CURSO: 02
+Turno: Sin definir
+Cupo / insc.: 65 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: PUEBLA MANUEL LEANDRO (Profesor/a Adjunto/a), ARAUJO BELLA PAMELA TATIANA (Ayudante 2do/a), MENDAÑA JOAQUIN (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórico-Práctica	Lunes	15:00 a 17:00	302-PC
+Teórico-Práctica	Miércoles	15:00 a 19:00	202-PC
+Comisión: CURSO: 03
+Turno: Sin definir
+Cupo / insc.: 65 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: BELLO IGNACIO ALBERTO (Profesor/a Adjunto/a), BERTALOT FEDERICO MATIAS (Jefe/a Trabajos Practicos), LANDEROS VILLANUEVA RICARDO ADOLFO (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórico-Práctica	Lunes	19:00 a 23:00	201-PC
+Teórico-Práctica	Miércoles	19:00 a 21:00	201-PC
+Comisión: CURSO: 06
+Turno: Sin definir
+Cupo / insc.: 65 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: BELLO IGNACIO ALBERTO (Profesor/a Adjunto/a), FARIÑA JULIAN (Jefe/a Trabajos Practicos), WILK BERNARDO MATIAS (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico-Práctica	Martes	19:00 a 23:00	222-PC
+Teórico-Práctica	Jueves	19:00 a 21:00	407 - PC
+Comisión: CURSO: 05
+Turno: Sin definir
+Cupo / insc.: 65 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: SOSA MARINA (Profesor/a Adjunto/a), TRINCHINA LUCILA ANAEL (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica	Martes	14:00 a 18:00	E9 - PC
+Teórico Práctica	Viernes	14:00 a 16:00	E9 - PC
+Comisión: CURSO: 04
+Turno: Sin definir
+Cupo / insc.: 65 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: SOSA MARINA (Profesor/a Adjunto/a), EDWARDS MOLINA DIEGO JULIO (Ayudante 1ro/a), ZACCARIA CLARA INES (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórico-Práctica	Martes	09:00 a 13:00	310-PC
+Teórico-Práctica	Viernes	09:00 a 11:00	310-PC
+Comisión: CURSO: 01
+Turno: Sin definir
+Cupo / insc.: 70 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: PEREZ SILVIA NOEMI (Profesor/a Adjunto/a), ALVAREZ PONTE LUCIA INES (Ayudante 1ro/a), DE ANGELIS RIVA LUKAS NAHUEL (Ayudante 1ro/a), LOPEZ FERNANDO MARTIN (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórico-Práctica	Lunes	09:00 a 13:00	500 - PC
+Teórico-Práctica	Miércoles	09:00 a 11:00	500 - PC
+Comisión: CURSO: 07
+Turno: Sin definir
+Cupo / insc.: 65 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: KORNBLIT FERNANDO (Profesor/a Adjunto/a), MENDIBURU MARIANA (Jefe/a Trabajos Practicos), ROBLES EZEQUIEL (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórico-Práctica	Miércoles	17:00 a 19:00	510 - PC
+Teórico-Práctica	Viernes	17:00 a 21:00	418-PC
+Comisión: CURSO 10: REMOTO SICRONICO PARA RECURSANTES
+Turno: Sin definir
+Cupo / insc.: 50 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: PEÑA NELLY HAYDEE (Profesor/a Adjunto/a), ALBERT RAYMUNDO JOSE (Ayudante 1ro/a), GARCIA BIANCA CAMILA (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica	Martes	09:00 a 13:00	Clase Virtual-PC
+Teórico Práctica	Jueves	11:00 a 13:00	Clase Virtual-PC
+Actividad: PROGRAMACIÓN CONCURRENTE (TB026)
+Comisión: CURSO: 01-Deymonnaz
+Turno: Sin definir
+Cupo / insc.: 120 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: DEYMONNAZ PABLO ANDRES (Profesor/a Adjunto/a), SCARPINELLI ARIEL ALEJANDRO (Ayudante 1ro/a), LONGO NICOLAS (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Martes	19:00 a 22:00	Aula a determinar
+Práctica Obligatoria	Miércoles	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: DEYMONNAZ PABLO ANDRES (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Martes	19:00 a 22:00	Aula a determinar
+Práctica Obligatoria	Miércoles	19:00 a 22:00	Aula a determinar
+Actividad: REDES (TA048)
+Comisión: CURSO:01-Alvarez Hamelin
+Turno: Sin definir
+Cupo / insc.: 80 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: ALVAREZ HAMELIN JOSE IGNACIO (Profesor/a Titular/a), LOPEZ PECORA JUAN IGNACIO (Jefe/a Trabajos Practicos), HORN MIGUEL AGUSTIN (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Práctica Obligatoria	Martes	19:00 a 22:00	Aula a determinar
+Teórica Obligatoria	Viernes	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: 02-Alvarez Hamelin
+Turno: Sin definir
+Cupo / insc.: 80 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: ALVAREZ HAMELIN JOSE IGNACIO (Profesor/a Titular/a), BALBIANO JOSE LUIS (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Práctica Obligatoria	Jueves	18:00 a 21:00	Aula a determinar
+Teórica Obligatoria	Viernes	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: 03-Volpi
+Turno: Sin definir
+Cupo / insc.: 80 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: VOLPI MARCELO EDUARDO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Lunes	16:00 a 19:00	Aula a determinar
+Práctica Obligatoria	Viernes	16:00 a 19:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: ALVAREZ HAMELIN JOSE IGNACIO (Profesor/a Titular/a), LOPEZ PECORA JUAN IGNACIO (Jefe/a Trabajos Practicos), HORN MIGUEL AGUSTIN (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: SIMULACIÓN (TB028)
+Comisión: CURSO: 01-Caiafa
+Turno: Sin definir
+Cupo / insc.: 32 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: CAIAFA CESAR FEDERICO (Profesor/a Adjunto/a), BENITEZ CARLOS MARCELO (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Práctica Obligatoria	Martes	19:00 a 22:00	Aula a determinar
+Teórica Obligatoria	Viernes	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: CAIAFA CESAR FEDERICO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Práctica Obligatoria	Martes	19:00 a 22:00	Aula a determinar
+Teórica Obligatoria	Viernes	19:00 a 22:00	Aula a determinar
+Actividad: SISTEMAS DISTRIBUIDOS I (TA050)
+Comisión: CURSO: 01-Roca
+Turno: Sin definir
+Cupo / insc.: 80 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: ROCA PABLO DANIEL (Profesor/a Adjunto/a), ROBLES GABRIEL (Ayudante 1ro/a), BARRENECHE FRANCO (Ayudante 2do/a), NOCETTI TOMAS AGUSTIN (Ayudante 2do/a ad-honorem), ZULAICA RIVERA NICOLAS EZEQUIEL (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	19:00 a 22:00	Aula a determinar
+Teórico Práctica Obligatoria	Jueves	19:00 a 22:00	Aula a determinar
+Comisión: Curso: 02-Espina
+Turno: Sin definir
+Cupo / insc.: 25 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: ESPINA EMMANUEL EDUARDO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Miércoles	18:00 a 21:00	Aula a determinar
+Teórico Práctica Obligatoria	Viernes	18:00 a 21:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: ROCA PABLO DANIEL (Profesor/a Adjunto/a), ROBLES GABRIEL (Ayudante 1ro/a), BARRENECHE FRANCO (Ayudante 2do/a), NOCETTI TOMAS AGUSTIN (Ayudante 2do/a ad-honorem), ZULAICA RIVERA NICOLAS EZEQUIEL (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: SISTEMAS OPERATIVOS (TA043)
+Comisión: CURSO: 01-Mendez
+Turno: Sin definir
+Cupo / insc.: 135 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MENDEZ MARIANO (Profesor/a Asociado/a), IRIBARNE CATELLA PATRICIO (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Teórica Obligatoria	Miércoles	18:00 a 21:00	Aula a determinar
+Práctica Obligatoria	Viernes	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: 02-Mendez
+Turno: Sin definir
+Cupo / insc.: 135 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MENDEZ MARIANO (Profesor/a Asociado/a), ESPINA EMMANUEL EDUARDO (Profesor/a Adjunto/a), IRIBARNE CATELLA PATRICIO (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Teórica	Martes	18:00 a 21:00	Aula a determinar
+Práctica	Viernes	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MENDEZ MARIANO (Profesor/a Asociado/a), ESPINA EMMANUEL EDUARDO (Profesor/a Adjunto/a), IRIBARNE CATELLA PATRICIO (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: TALLER DE PROGRAMACIÓN (TA045)
+Comisión: CURSO: 01-Veiga
+Turno: Sin definir
+Cupo / insc.: 100 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: VEIGA ANDRES ARTURO (Profesor/a Adjunto/a), CAPON BLANQUER MATEO (Ayudante 2do/a), DI PAOLA MARTIN PABLO (Ayudante 2do/a), ENCINOZA VILELA NATHALIA LUCIA (Ayudante 2do/a), ERLICH IVAN (Ayudante 2do/a), BELLAERA LEONARDO ALEJANDRO (Ayudante 2do/a ad-honorem), GAMARRA ELIANA ANABELLE (Ayudante 2do/a ad-honorem), GIAMPIERI MUTTI LEONARDO EMMANUEL (Ayudante 2do/a ad-honorem), VAZQUEZ FERNANDEZ FRANCISCO MANUEL (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	18:00 a 22:00	Aula a determinar
+Desarrollo y Consulta	Jueves	18:00 a 22:00	Aula a determinar
+Comisión: CURSO: 02-Deymonnaz
+Turno: Sin definir
+Cupo / insc.: 90 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: DEYMONNAZ PABLO ANDRES (Profesor/a Adjunto/a), MILETTA CARLOS MARTIN (Jefe/a Trabajos Practicos), BONO JUAN GABRIEL (Ayudante 1ro/a), FIRMAPAZ AGUSTIN EZEQUIEL (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	18:00 a 22:00	Aula a determinar
+Desarrollo y Consulta	Jueves	18:00 a 22:00	Aula a determinar
+Comisión: CURSO: 03-Camejo
+Turno: Sin definir
+Cupo / insc.: 30 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: CAMEJO MANUEL (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	18:00 a 22:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: CAMEJO MANUEL (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: TALLER DE SEGURIDAD INFORMÁTICA (TA051)
+Comisión: CURSO: 1 Pagola
+Turno: Sin definir
+Cupo / insc.: 65 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: PAGOLA HUGO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	19:30 a 22:30	Aula a determinar
+Teórico Práctica Obligatoria	Viernes	19:30 a 22:30	Aula a determinar
+Comisión: Curso 2: Mendez
+Turno: Sin definir
+Cupo / insc.: 65 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: MENDEZ MARIANO (Profesor/a Asociado/a), DI PAOLA MARTIN PABLO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	19:00 a 22:00	Aula a determinar
+Teórico Práctica Obligatoria	Jueves	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: PAGOLA HUGO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: TECNOLOGÍAS EMERGENTES EN LA TRANSICIÓN ENERGÉTICA (TA042)
+Comisión: CURSO 1
+Turno: Sin definir
+Cupo / insc.: Sin definir / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: VINSON EDGARDO GUSTAVO (Profesor/a Asociado/a), ROMERO VALERIA CAROLINA ESTEFANIA (Jefe/a Trabajos Practicos), ZELADA ROMERO Henry Michel (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Viernes	18:00 a 22:00	Aula a determinar
+Comisión: CURSO INTERNACIONALES 1
+Turno: Sin definir
+Cupo / insc.: Sin definir / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: VINSON EDGARDO GUSTAVO (Profesor/a Asociado/a), ROMERO VALERIA CAROLINA ESTEFANIA (Jefe/a Trabajos Practicos), ZELADA ROMERO Henry Michel (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Viernes	18:00 a 22:00	Aula a determinar
+Actividad: TEORÍA DE ALGORITMOS (TB024)
+Comisión: CURSO: 01-Podberezski
+Turno: Sin definir
+Cupo / insc.: 100 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: PODBEREZSKI VICTOR DANIEL (Profesor/a Adjunto/a), LUDUEÑO LUCAS EZEQUIEL (Ayudante 1ro/a), ASCHIERI JUAN PABLO (Ayudante 2do/a), UNTROJB KEVIN (Ayudante 2do/a ad-honorem)
+Tipo de clase	Día	Horario	Aula
+Práctica Obligatoria	Lunes	19:00 a 22:00	Aula a determinar
+Teórica Obligatoria	Miércoles	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: 02-Buchwald
+Turno: Sin definir
+Cupo / insc.: 110 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: BUCHWALD MARTIN EZEQUIEL (Profesor/a Adjunto/a), GENENDER PEÑA EZEQUIEL DAVID (Jefe/a Trabajos Practicos), BAT MENTZEL MARCOS EZEQUIEL (Ayudante 2do/a), DE LUCA ANDREA FELIPE (Ayudante 2do/a), FIGUEROA RODRIGUEZ ANDREA EMPERATRIZ (Ayudante 2do/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Lunes	19:00 a 22:00	Aula a determinar
+Teórico Práctica Obligatoria	Jueves	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: 03-Echevarria
+Turno: Sin definir
+Cupo / insc.: 80 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: ECHEVARRIA PABLO (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	19:00 a 22:00	Aula a determinar
+Teórico Práctica Obligatoria	Jueves	19:00 a 22:00	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: BUCHWALD MARTIN EZEQUIEL (Profesor/a Adjunto/a), ECHEVARRIA PABLO (Profesor/a Adjunto/a), PODBEREZSKI VICTOR DANIEL (Profesor/a Adjunto/a)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: TESIS DE INGENIERÍA INFORMÁTICA (TA052)
+Comisión: 1-Garcia Jaime
+Turno: Sin definir
+Cupo / insc.: 2 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: GARCIA JAIME DIEGO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 1 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: GARCIA JAIME DIEGO (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: TRABAJO PROFESIONAL DE INGENIERÍA INFORMÁTICA (TA053)
+Comisión: CURSO UNICO
+Turno: Sin definir
+Cupo / insc.: 150 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: FONTELA MOISES CARLOS (Profesor/a Titular/a), SALADINO MARCOS ARTURO (Jefe/a Trabajos Practicos), PERROTTA AGUSTIN (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Comisión: CURSO: Estudiantes Internacionales
+Turno: Sin definir
+Cupo / insc.: 5 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: FONTELA MOISES CARLOS (Profesor/a Titular/a), SALADINO MARCOS ARTURO (Jefe/a Trabajos Practicos), PERROTTA AGUSTIN (Ayudante 1ro/a)
+Tipo de clase	Día	Horario	Aula
+Sin definir	Sin definir	Sin definir	Aula a determinar
+Actividad: USO EFICIENTE DE LA ENERGÍA (TA040)
+Comisión: CURSO 1
+Turno: Sin definir
+Cupo / insc.: 15 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: TANIDES CARLOS GUSTAVO (Profesor/a Adjunto/a), IGLESIAS FURFARO HERNAN DARIO (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	15:00 a 19:00	Aula a determinar
+Comisión: CURSO PARA ESTUDIANTES INTERNACIONALES
+Turno: Sin definir
+Cupo / insc.: 20 / 0
+Instancias: Regularidad
+Ubicación: Sede Unica
+Docentes: TANIDES CARLOS GUSTAVO (Profesor/a Adjunto/a), IGLESIAS FURFARO HERNAN DARIO (Jefe/a Trabajos Practicos)
+Tipo de clase	Día	Horario	Aula
+Teórico Práctica Obligatoria	Martes	15:00 a 19:00	Aula a determinar
+

@@ -204,6 +204,18 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
+  packages/parser-siu:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.6
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: ^5.1.1
+        version: 5.1.1(@types/node@26.6.6)(vite@8.3.8(@types/node@26.6.6)(jiti@2.7.0))
+
   sitio-web:
     dependencies:
       '@base-ui/react':
