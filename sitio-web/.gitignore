@@ -1,0 +1,10 @@
+/.next/
+/out/
+/build/
+next-env.d.ts
+
+/.vercel/
+
+/coverage/
+/playwright-report/
+/test-results/

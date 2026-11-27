@@ -7,8 +7,6 @@ import { useEffect } from "react";
 import { PaginaError } from "@/components/error/pagina-error";
 import "./globals.css";
 
-// Reemplaza al layout raíz cuando este falla: no hay header, así que la página ocupa toda la
-// pantalla (`--header-height: 0px`).
 export default function GlobalError({ error, retry }: { error: unknown; retry: () => void }) {
   useEffect(() => {
     console.error(error);
