@@ -8,7 +8,6 @@ import { Form } from "@base-ui/react/form";
 import { Select } from "@base-ui/react/select";
 import { Check, ChevronsUpDown, LoaderCircle, Send } from "@withicons/react/line";
 import { type ElementType, type FormEvent, type ReactNode, useMemo, useRef, useState } from "react";
-import { Numero } from "@/components/ui/numero";
 import {
   CRITERIOS,
   LARGO_MAXIMO_COMENTARIO,
@@ -184,9 +183,9 @@ export function FormularioCalificacion({
               {/* Solo cerca del límite, para no distraer. */}
               {largoComentario > LARGO_MAXIMO_COMENTARIO * 0.8 && (
                 <span className="text-xs text-stone-400">
-                  <Numero>
+                  <span className="font-mono tabular-nums">
                     {largoComentario}/{LARGO_MAXIMO_COMENTARIO}
-                  </Numero>
+                  </span>
                 </span>
               )}
             </div>

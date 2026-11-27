@@ -1,6 +1,5 @@
 import type { Cuatrimestre } from "@/lib/ofertas";
 import type { EstadoOferta, OfertaCarrera } from "@/server/db/queries/ofertas";
-import { Numero } from "@/components/ui/numero";
 import { formatearCuatrimestre } from "@/lib/ofertas";
 
 const ETIQUETAS: Record<EstadoOferta, { texto: string; clases: string }> = {
@@ -29,13 +28,13 @@ export function TablaOfertas({
     <div className="overflow-hidden relieve bg-white">
       <table className="w-full text-left text-sm">
         <caption className="border-b border-stone-200 px-4 py-3 text-left text-sm text-stone-500">
-          <Numero>{alDia}</Numero> de <Numero>{ofertas.length}</Numero> carreras al día
+          <span className="font-mono tabular-nums">{alDia}</span> de <span className="font-mono tabular-nums">{ofertas.length}</span> carreras al día
           {ultimoCuatrimestre && (
             <>
               {" "}
               con el{" "}
               <span className="text-stone-700">
-                <Numero>{formatearCuatrimestre(ultimoCuatrimestre)}</Numero>
+                <span className="font-mono tabular-nums">{formatearCuatrimestre(ultimoCuatrimestre)}</span>
               </span>
             </>
           )}
@@ -70,7 +69,7 @@ function Fila({ oferta }: { oferta: OfertaCarrera }) {
         <span className="block text-base/6 tracking-tight text-stone-900">{oferta.nombre}</span>
         {oferta.planVigente && (
           <span className="block text-xs text-stone-500">
-            Plan <Numero>{oferta.planVigente}</Numero>
+            Plan <span className="font-mono tabular-nums">{oferta.planVigente}</span>
           </span>
         )}
       </th>
@@ -92,7 +91,7 @@ function Fila({ oferta }: { oferta: OfertaCarrera }) {
             {oferta.recibida && (
               <>
                 {" "}
-                <Numero>{formatearCuatrimestre(oferta.recibida)}</Numero>
+                <span className="font-mono tabular-nums">{formatearCuatrimestre(oferta.recibida)}</span>
               </>
             )}
           </span>

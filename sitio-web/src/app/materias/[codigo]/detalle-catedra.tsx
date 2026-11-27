@@ -4,7 +4,6 @@ import { MessageCircleQuestion, Quote, Sparkles } from "@withicons/react/plush";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import dollyLogo from "@/assets/dolly-logo.png";
-import { Numero } from "@/components/ui/numero";
 import { getCatedra } from "@/server/db/queries/catedras";
 import { getCuatrimestresCalificables } from "@/server/db/queries/cuatrimestres";
 import { BotonCalificar } from "./boton-calificar";
@@ -149,9 +148,9 @@ function Comentario({ comentario }: { comentario: ComentarioDocente }) {
         {"\u00A0 "}
         <span className="whitespace-nowrap text-stone-400 select-none">
           <span className="text-xs">
-            <Numero>
+            <span className="font-mono tabular-nums">
               {comentario.cuatrimestre.numero}C{comentario.cuatrimestre.anio}
-            </Numero>
+            </span>
           </span>
           {comentario.deDolly && (
             <>

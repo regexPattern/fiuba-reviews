@@ -59,6 +59,18 @@
 }
 
 /*
+ * Forma de tecla de teclado. El relieve va aparte: `relieve` para mostrar un atajo, `relieve-boton`
+ * si se puede apretar.
+ */
+@utility tecla {
+  @apply inline-flex h-6 min-w-6 items-center justify-center bg-white px-1.5 font-mono text-xs font-normal tracking-normal normal-case text-stone-700;
+}
+
+@utility tecla-chica {
+  @apply h-5 min-w-5 px-1 text-stone-500;
+}
+
+/*
  * Niveles de botón:
  * - `boton-primario`: relleno y con relieve.
  * - `boton-secundario`: blanco y con relieve.

@@ -6,7 +6,6 @@ import { Radio } from "@base-ui/react/radio";
 import { RadioGroup } from "@base-ui/react/radio-group";
 import { Star } from "@withicons/react/plush";
 import { useState } from "react";
-import { Numero } from "@/components/ui/numero";
 import {
   PUNTAJE_MAXIMO,
   PUNTAJE_MINIMO,
@@ -85,7 +84,7 @@ export function SelectorPuntaje({
         </div>
         {/* Con medias estrellas, el número evita tener que adivinar. */}
         <span aria-hidden="true" className="w-6 shrink-0 text-right text-sm text-stone-500">
-          <Numero>{mostrado > 0 ? formatearPuntaje(mostrado) : "–"}</Numero>
+          <span className="font-mono tabular-nums">{mostrado > 0 ? formatearPuntaje(mostrado) : "–"}</span>
         </span>
       </Fieldset.Root>
     </Field.Root>

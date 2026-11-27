@@ -2,7 +2,6 @@
 
 import { ChevronDown } from "@withicons/react/line";
 import { type ReactNode, useId, useRef, useState } from "react";
-import { Numero } from "@/components/ui/numero";
 
 export function ComentariosOcultos({
   cantidad,
@@ -48,7 +47,7 @@ export function ComentariosOcultos({
           "Mostrar menos comentarios"
         ) : (
           <span>
-            Mostrar <Numero>{cantidad}</Numero>{" "}
+            Mostrar <span className="font-mono tabular-nums">{cantidad}</span>{" "}
             {cantidad === 1 ? "comentario más" : "comentarios más"}
           </span>
         )}

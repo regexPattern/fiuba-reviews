@@ -4,10 +4,10 @@ import colectivo99 from "@/assets/colectivo-99.webp";
 import colectivo404 from "@/assets/colectivo-404.webp";
 import colectivo500 from "@/assets/colectivo-500.webp";
 
-const LINEA_POR_DEFECTO = 99;
+const LINEA_COLECTIVO_POR_DEFECTO = 99;
 
-const COLECTIVOS: Record<number, StaticImageData> = {
-  [LINEA_POR_DEFECTO]: colectivo99,
+const IMAGENES_COLECTIVOS: Record<number, StaticImageData> = {
+  [LINEA_COLECTIVO_POR_DEFECTO]: colectivo99,
   404: colectivo404,
   500: colectivo500
 };
@@ -17,13 +17,13 @@ export function PaginaError({
   descripcion,
   children
 }: {
-  /** Sin código (error desconocido) el título es "Error". */
+  // Sin código (error desconocido) el título es "Error".
   codigo?: number;
   descripcion: React.ReactNode;
-  /** Acciones (links, botones) debajo del mensaje. */
+  // Acciones (links, botones) debajo del mensaje.
   children?: React.ReactNode;
 }) {
-  const linea = codigo !== undefined && codigo in COLECTIVOS ? codigo : LINEA_POR_DEFECTO;
+  const lineaColectivo = codigo !== undefined && codigo in IMAGENES_COLECTIVOS ? codigo : LINEA_COLECTIVO_POR_DEFECTO;
 
   return (
     <main className="flex min-h-[calc(100dvh-var(--header-height))] flex-col items-center justify-center gap-10 px-6 py-12">
@@ -49,8 +49,8 @@ export function PaginaError({
         </svg>
         <div className="relative w-full relieve bg-white p-3">
           <Image
-            src={COLECTIVOS[linea]}
-            alt={`Colectivo de la línea ${linea}`}
+            src={IMAGENES_COLECTIVOS[lineaColectivo]}
+            alt={`Colectivo de la línea ${lineaColectivo}`}
             placeholder="blur"
             preload
             sizes="(min-width: 640px) 360px, 90vw"

@@ -4,7 +4,6 @@ import type { PromediosDocente } from "@/server/db/queries/catedras";
 import { Popover } from "@base-ui/react/popover";
 import { ChevronDown } from "@withicons/react/line";
 import { Star } from "@withicons/react/plush";
-import { Numero } from "@/components/ui/numero";
 import { CRITERIOS, nivelPuntaje, type NivelPuntaje } from "@/lib/calificaciones";
 
 /** Botón con el promedio general del docente que abre el desglose por criterio. */
@@ -21,7 +20,7 @@ export function PromedioDocente({
         aria-label={`Promedio ${promedios.general.toFixed(1)}. Ver desglose por criterio`}
         className="group boton-secundario"
       >
-        <Numero>{promedios.general.toFixed(1)}</Numero>
+        <span className="font-mono tabular-nums">{promedios.general.toFixed(1)}</span>
         <Star size={18} aria-hidden="true" className="text-fiuba" />
         {/* Indica que abre el desglose. Del set `line` y en gris: al lado de la estrella, otro
             ícono a color competiría con la nota. Gira cuando el popover está abierto. */}
@@ -35,7 +34,7 @@ export function PromedioDocente({
         <Popover.Positioner side="bottom" align="end" sideOffset={6} className="z-50">
           <Popover.Popup className="w-64 origin-(--transform-origin) relieve bg-white p-3 text-sm transition-[transform,opacity] duration-150 outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0">
             <Popover.Title className="border-b border-stone-200 pb-2 text-center rotulo text-stone-500">
-              <Numero>{cantidadCalificaciones}</Numero>{" "}
+              <span className="font-mono tabular-nums">{cantidadCalificaciones}</span>{" "}
               {cantidadCalificaciones === 1 ? "calificación" : "calificaciones"}
             </Popover.Title>
             <dl className="space-y-1.5 pt-2">
@@ -45,7 +44,7 @@ export function PromedioDocente({
                   <dd
                     className={`flex items-center gap-1.5 ${COLOR_NUMERO[nivelPuntaje(promedios[nombre])]}`}
                   >
-                    <Numero>{promedios[nombre].toFixed(1)}</Numero>
+                    <span className="font-mono tabular-nums">{promedios[nombre].toFixed(1)}</span>
                     {/* Decorativa: el número ya lo dice. */}
                     <Star
                       size={16}

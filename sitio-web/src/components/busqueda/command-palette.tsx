@@ -3,7 +3,6 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { Close, Search } from "@withicons/react/line";
 import { type ComponentProps, useEffect, useRef, useState } from "react";
-import { Tecla } from "@/components/ui/tecla";
 import { usaCmd, usePlataforma } from "@/lib/plataforma";
 import { BuscadorMaterias, type MateriaBuscador } from "./buscador-materias";
 
@@ -51,7 +50,6 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
         }
       />
       <Dialog.Portal>
-        {/* `z-50`: por encima del header fijo (`z-40`). */}
         <Dialog.Backdrop className="fixed inset-0 z-50 min-h-dvh bg-black/20 transition-opacity duration-200 ease-out data-ending-style:opacity-0 data-starting-style:opacity-0 supports-[-webkit-touch-callout:none]:absolute motion-reduce:transition-none" />
         <Dialog.Popup
           ref={popupRef}
@@ -70,8 +68,7 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
             inputAction={
               <Dialog.Close
                 aria-label="Cerrar buscador"
-                // Tecla chica en relieve, como los atajos del pie.
-                className="flex h-6 shrink-0 relieve-boton cursor-pointer items-center bg-white px-1.5 font-mono text-xs text-stone-500 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fiuba"
+                className="tecla shrink-0 relieve-boton cursor-pointer text-stone-500 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fiuba"
               >
                 <Close size={14} className="sm:hidden" aria-hidden="true" />
                 <span className="hidden sm:inline">Esc</span>
@@ -83,16 +80,16 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
             className="hidden shrink-0 items-center gap-4 border-t border-stone-200 bg-stone-50 px-3 py-2 rotulo text-stone-500 sm:flex"
           >
             <span className="flex items-center gap-1.5">
-              <Tecla chica>↑</Tecla>
-              <Tecla chica>↓</Tecla>
+              <kbd className="tecla tecla-chica relieve [--relieve-alto:2px]">↑</kbd>
+              <kbd className="tecla tecla-chica relieve [--relieve-alto:2px]">↓</kbd>
               navegar
             </span>
             <span className="flex items-center gap-1.5">
-              <Tecla chica>↵</Tecla>
+              <kbd className="tecla tecla-chica relieve [--relieve-alto:2px]">↵</kbd>
               abrir
             </span>
             <span className="ml-auto flex items-center gap-1.5">
-              <Tecla chica>Esc</Tecla>
+              <kbd className="tecla tecla-chica relieve [--relieve-alto:2px]">Esc</kbd>
               cerrar
             </span>
           </div>
@@ -117,7 +114,7 @@ export function BotonBuscar({ atajo, ...props }: ComponentProps<"button"> & { at
       </span>
       {atajo && (
         <span className="ml-1 hidden sm:flex">
-          <Tecla chica>{atajo}</Tecla>
+          <kbd className="tecla tecla-chica relieve [--relieve-alto:2px]">{atajo}</kbd>
         </span>
       )}
     </button>

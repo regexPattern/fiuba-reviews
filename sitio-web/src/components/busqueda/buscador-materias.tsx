@@ -34,9 +34,14 @@ export function BuscadorMaterias({
   const resultados = todos.slice(0, MAX_RESULTADOS);
   const restantes = todos.length - resultados.length;
 
-  // cmdk resalta el primer resultado al cambiar el texto, pero con el debounce la lista nueva llega
-  // después. Por eso la selección se guarda junto con la búsqueda en la que se eligió: si la
-  // búsqueda cambia, se descarta y vuelve al primer resultado, sin `useEffect` ni render extra.
+  // cmdk resalta el primer resultado apenas cambia el texto del input, pero
+  // por el debounce la lista nueva todavía no llegó. Entonces termina
+  // resaltado el primer ítem de la lista vieja, y cuando llega la nueva ese
+  // ítem puede no estar o no ser el primero.
+  //
+  // Para solucionar esto, controlamos la selección nosotros y la guardamos
+  // junto con la búsqueda (`debouncedQuery`) en la que se eligió.
+  //
   const [seleccion, setSeleccion] = useState({ query: debouncedQuery, codigo: "" });
   const seleccionada =
     (seleccion.query === debouncedQuery && seleccion.codigo) || (resultados[0]?.item.codigo ?? "");
@@ -71,9 +76,11 @@ export function BuscadorMaterias({
         }
         // cmdk mete los ítems dentro de un `div[cmdk-list-sizer]`, así que el `space-y` va en ese div
         // y no en la lista (si no, solo separaría al sizer).
-        className="min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto overscroll-contain p-2 [&_[cmdk-list-sizer]]:space-y-1.5"
-        // En iOS, con el input enfocado, el gesto scrollea la página en vez de la lista. Al deslizar
-        // se le saca el foco (y se cierra el teclado), como en las búsquedas del sistema.
+        className="min-h-0 flex-1 scrollbar-gutter-stable overflow-y-auto overscroll-contain p-2 **:[[cmdk-list-sizer]]:space-y-1.5"
+        // En iOS, mientras el input de búsqueda tiene el foco (teclado abierto), deslizar el dedo
+        // sobre la lista scrollea la página entera en lugar de la lista. Para evitarlo, apenas el
+        // usuario empieza a deslizar sobre la lista le sacamos el foco al input, lo que cierra el
+        // teclado y el scroll pasa a la lista.
         onTouchMove={() => {
           const activo = document.activeElement;
           if (activo instanceof HTMLInputElement && activo.hasAttribute("cmdk-input"))
@@ -92,11 +99,9 @@ export function BuscadorMaterias({
               router.push(`/materias/${materia.codigo}`);
             }}
             // Se usa `scroll-m*` porque al navegar con las flechas, cmdk hace `scrollIntoView`. Con
-            // estos márgenes, el ítem respeta el `p-2` de la lista (y abajo, los 3px del canto del
-            // relieve).
+            // estos márgenes, el ítem respeta el `p-2` de la lista y los 3px del relieve de abajo.
             className="item-lista cursor-pointer scroll-mt-2 scroll-mb-[calc(--spacing(2)+3px)] select-none data-[selected=true]:item-lista-activo"
           >
-            {/* Nombre primero y código apagado a la derecha, como en el encabezado de la materia. */}
             <TextoConMatches
               className="min-w-0 flex-1 text-base/6 tracking-tight wrap-break-word"
               texto={materia.nombre}

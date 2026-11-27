@@ -9,7 +9,6 @@ import { ArrowUpRight, Check, ChevronDown, ChevronRight } from "@withicons/react
 import Image from "next/image";
 import { useState } from "react";
 import siuLogo from "@/assets/siu-logo.png";
-import { Tecla } from "@/components/ui/tecla";
 import { type Plataforma, usePlataforma } from "@/lib/plataforma";
 import { FormularioOferta } from "./formulario-oferta";
 
@@ -206,7 +205,9 @@ function Atajo({ teclas }: { teclas: string[] }) {
   return (
     <span className="mx-0.5 inline-flex items-center gap-1 align-middle">
       {teclas.map((tecla) => (
-        <Tecla key={tecla}>{tecla}</Tecla>
+        <kbd key={tecla} className="tecla relieve [--relieve-alto:2px]">
+          {tecla}
+        </kbd>
       ))}
     </span>
   );

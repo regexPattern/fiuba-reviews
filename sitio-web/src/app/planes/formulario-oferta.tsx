@@ -12,7 +12,6 @@ import {
   Paste
 } from "@withicons/react/plush";
 import { useActionState, useMemo, useState } from "react";
-import { Numero } from "@/components/ui/numero";
 import {
   type Cuatrimestre,
   extraerMetadataOferta,
@@ -111,7 +110,7 @@ function diagnosticar(
 function Cuatri({ cuatrimestre }: { cuatrimestre: Cuatrimestre }) {
   return (
     <span className="font-medium">
-      <Numero>{formatearCuatrimestre(cuatrimestre)}</Numero>
+      <span className="font-mono tabular-nums">{formatearCuatrimestre(cuatrimestre)}</span>
     </span>
   );
 }
