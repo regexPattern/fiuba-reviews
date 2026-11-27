@@ -12,12 +12,12 @@ export async function generateMetadata({
 
   if (!materia) return {};
 
-  return { title: `${materia.codigo} • ${materia.nombre} | FIUBA Reviews` };
+  return { title: `${materia.codigo} • ${materia.nombre}` };
 }
 
 /**
- * Las materias y cátedras solo cambian con un deploy, así que toda la ruta se prerenderiza
- * completa en el build.
+ * Toda la ruta se prerenderiza en el build; cuando cambian los datos se invalida por tag (ver
+ * `server/cache.ts`).
  */
 export const ensureStatic = "navigation";
 

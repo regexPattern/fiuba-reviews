@@ -1,9 +1,9 @@
-import type { Cuatrimestre } from "@/lib/ofertas";
 import type { ComentarioDocente, DocenteCatedra } from "@/server/db/queries/catedras";
 import { MessageCircleQuestion, Quote, Sparkles } from "@withicons/react/plush";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import dollyLogo from "@/assets/dolly-logo.png";
+import { type Cuatrimestre, formatearCuatrimestre } from "@/lib/cuatrimestres";
 import { getCatedra } from "@/server/db/queries/catedras";
 import { getCuatrimestresCalificables } from "@/server/db/queries/cuatrimestres";
 import { BotonCalificar } from "./boton-calificar";
@@ -41,7 +41,6 @@ function Docente({
   return (
     <section
       id={docente.codigo}
-      // Que los anchors a un docente no queden debajo del header (y de la barra sticky en móvil).
       className="scroll-mt-[calc(var(--header-height)+var(--materia-sticky-height,0px)+1rem)] space-y-4 md:scroll-mt-[calc(var(--header-height)+1.5rem)]"
     >
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-2">
@@ -53,7 +52,7 @@ function Docente({
                 {[docente.nombreSiu, docente.rol].filter(Boolean).map((parte) => (
                   <span
                     key={parte}
-                    className="relative pl-4 before:absolute before:left-1.5 before:content-['·'_/_'']"
+                    className="relative pl-4 before:absolute before:left-1.5 before:content-['·'/'']"
                   >
                     {parte}
                   </span>
@@ -76,7 +75,7 @@ function Docente({
           <BotonCalificar
             docente={{ codigo: docente.codigo, nombre: docente.nombre }}
             cuatrimestres={cuatrimestres}
-            className="-order-1 sm:order-none"
+            className="-order-1 sm:order-0"
           />
         </div>
       </header>
@@ -93,9 +92,8 @@ function Docente({
 }
 
 function ResumenIA({ resumen }: { resumen: string }) {
-  // Los textos arrancan a ~26px del borde, igual que el de los comentarios (ícono de 18px + `gap-2`):
-  // 1.5px de borde + `px-6`. Vertical: `py-5`, que con el interlineado de `text-base/relaxed` se ve
-  // como el padding de los costados. El pie usa menos porque arranca con el ícono.
+  // El `px-6` es para que el texto del resumen arranque alineado con el de los comentarios de abajo
+  // (que tienen el ícono de las comillas adelante).
   return (
     <div className="overflow-hidden relieve bg-white">
       <p className="px-6 py-5 text-base/relaxed text-stone-700">{resumen}</p>
@@ -149,12 +147,11 @@ function Comentario({ comentario }: { comentario: ComentarioDocente }) {
         <span className="whitespace-nowrap text-stone-400 select-none">
           <span className="text-xs">
             <span className="font-mono tabular-nums">
-              {comentario.cuatrimestre.numero}C{comentario.cuatrimestre.anio}
+              {formatearCuatrimestre(comentario.cuatrimestre)}
             </span>
           </span>
           {comentario.deDolly && (
             <>
-              {/* Mismo espacio que entre el texto y el cuatrimestre (al tamaño del texto). */}
               {"\u00A0\u00A0"}
               <Image
                 src={dollyLogo}

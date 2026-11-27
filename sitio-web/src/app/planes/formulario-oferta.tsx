@@ -12,14 +12,10 @@ import {
   Paste
 } from "@withicons/react/plush";
 import { useActionState, useMemo, useState } from "react";
-import {
-  type Cuatrimestre,
-  formatearCuatrimestre,
-  normalizarNombre,
-  ordenCuatrimestre
-} from "@/lib/ofertas";
+import { type Cuatrimestre, formatearCuatrimestre, ordenCuatrimestre } from "@/lib/cuatrimestres";
+import { buscarCarrera } from "@/lib/ofertas";
 import { parsearMetadata } from "@fiuba-reviews/parser-siu";
-import { type ResultadoEnvio, enviarOferta } from "./actions";
+import { type ResultadoOferta, enviarOferta } from "./actions";
 
 type Tono = "neutro" | "ok" | "aviso" | "error" | "gracias";
 
@@ -31,7 +27,7 @@ const TONOS: Record<Tono, { icono: typeof Paste; clases: string }> = {
   gracias: { icono: Handshake, clases: "text-stone-600" }
 };
 
-const INICIAL: ResultadoEnvio = { estado: "inicial" };
+const INICIAL: ResultadoOferta = { estado: "inicial" };
 
 /** La más nueva entre la procesada y la recibida: contra esa se compara lo que se pega. */
 function ultimaConocida({ procesada, recibida }: OfertaCarrera) {
@@ -50,12 +46,9 @@ function diagnosticar(
     return { tono: "neutro", mensaje: "Pegá la página copiada del SIU.", enviable: false };
   }
 
-  let siu;
+  const [metadata] = parsearMetadata(contenido);
 
-  try {
-    // Si la página trae varios períodos lectivos (filtro en `Todos`), se toma el primero.
-    [siu] = parsearMetadata(contenido);
-  } catch {
+  if (!metadata) {
     return {
       tono: "aviso",
       mensaje:
@@ -64,14 +57,8 @@ function diagnosticar(
     };
   }
 
-  const metadata = {
-    carrera: siu.carrera,
-    cuatrimestre: { numero: siu.cuatrimestre, anio: siu.anio }
-  };
   const cuatrimestre = <Cuatri cuatrimestre={metadata.cuatrimestre} />;
-  const carrera = ofertas.find(
-    (o) => normalizarNombre(o.nombre) === normalizarNombre(metadata.carrera)
-  );
+  const carrera = buscarCarrera(ofertas, metadata.carrera);
 
   if (!carrera) {
     return {
@@ -138,7 +125,7 @@ export function FormularioOferta({ ofertas }: { ofertas: OfertaCarrera[] }) {
   // El resultado del servidor solo se muestra hasta que se vuelve a editar lo pegado.
   const [editado, setEditado] = useState(false);
   const [resultado, accion, enviando] = useActionState(
-    async (anterior: ResultadoEnvio, formData: FormData) => {
+    async (anterior: ResultadoOferta, formData: FormData) => {
       setEditado(false);
       const resultado = await enviarOferta(anterior, formData);
       if (resultado.estado === "enviada") setContenido("");

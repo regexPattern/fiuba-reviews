@@ -1,9 +1,8 @@
 import Fuse, { type FuseResult } from "fuse.js";
+import { normalizarTexto } from "./texto";
 
 /** Rango `[inicio, fin]` (inclusive) del texto que coincide con la búsqueda. */
 export type Rango = readonly [number, number];
-
-const normalizar = (texto: string) => texto.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 
 /** Búsqueda fuzzy con Fuse. */
 export function crearBusqueda<T>(items: T[], keys: (keyof T & string)[]) {
@@ -18,11 +17,11 @@ export function crearBusqueda<T>(items: T[], keys: (keyof T & string)[]) {
   });
 
   return (query: string): FuseResult<T>[] => {
-    const palabras = normalizar(query).split(/\s+/).filter(Boolean);
+    const palabras = normalizarTexto(query).split(/\s+/).filter(Boolean);
     if (palabras.length === 0) return items.map((item, refIndex) => ({ item, refIndex }));
 
     const esExacta = (item: T) =>
-      palabras.every((p) => keys.some((k) => normalizar(String(item[k] ?? "")).includes(p)));
+      palabras.every((p) => keys.some((k) => normalizarTexto(String(item[k] ?? "")).includes(p)));
 
     const resultados = fuse.search(query);
     const exactas = resultados

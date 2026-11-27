@@ -63,7 +63,7 @@
  * si se puede apretar.
  */
 @utility tecla {
-  @apply inline-flex h-6 min-w-6 items-center justify-center bg-white px-1.5 font-mono text-xs font-normal tracking-normal normal-case text-stone-700;
+  @apply inline-flex h-6 min-w-6 items-center justify-center bg-white px-1.5 font-mono text-xs font-normal tracking-normal text-stone-700 normal-case;
 }
 
 @utility tecla-chica {
@@ -106,13 +106,11 @@
   @apply relieve bg-sky-50 text-stone-900;
 }
 
-/* Campo de texto con borde (filtro de cátedras, formulario de la oferta). El foco va con `ring`: no
-   tiene relieve que pisar. */
+/* Campo de texto con borde (filtro de cátedras, formulario de la oferta). */
 @utility campo {
   @apply rounded-md border-[1.5px] border-stone-300 bg-white px-2.5 outline-none placeholder:text-stone-400 focus-visible:border-fiuba focus-visible:ring-3 focus-visible:ring-fiuba/20;
 }
 
-/* Rótulo chico en versalitas espaciadas. */
 @utility rotulo {
   @apply text-xs tracking-widest uppercase;
 }

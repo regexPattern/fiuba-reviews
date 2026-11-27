@@ -2,10 +2,14 @@ import type { Clase, Docente, Metadata, Oferta } from "./tipos";
 
 const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
+/**
+ * Una oferta por cada período lectivo de la página, en el orden en que aparecen (con el filtro
+ * en `Todos` puede haber varios). Vacío si el texto no es una oferta del SIU.
+ */
 export function parsearOfertas(text: string): Oferta[] {
   const lines = text.split(/\r?\n/).map((line) => line.trim());
   const carrera = lines.map((line) => line.match(/^Propuesta: (.+)$/)?.[1]).find(Boolean);
-  if (!carrera) throw new Error("No se encontró la carrera (Propuesta) en el texto del SIU");
+  if (!carrera) return [];
 
   const ofertas: Oferta[] = [];
 
@@ -20,8 +24,8 @@ export function parsearOfertas(text: string): Oferta[] {
     const ultimaComision = materia?.comisiones.at(-1);
 
     if (periodo) {
-      const cuatrimestre = Number(periodo[2]) === 1 ? 1 : 2;
-      ofertas.push({ carrera, anio: Number(periodo[1]), cuatrimestre, materias: [] });
+      const numero = Number(periodo[2]) === 1 ? 1 : 2;
+      ofertas.push({ carrera, cuatrimestre: { numero, anio: Number(periodo[1]) }, materias: [] });
     } else if (actividad && oferta) {
       oferta.materias.push({ nombre: actividad[1]!, codigo: actividad[2]!, comisiones: [] });
     } else if (comision && materia) {
@@ -34,17 +38,12 @@ export function parsearOfertas(text: string): Oferta[] {
     }
   }
 
-  if (ofertas.length === 0)
-    throw new Error("No se encontró el período lectivo en el texto del SIU");
   return ofertas;
 }
 
+/** Como `parsearOfertas`, pero solo la carrera y el cuatrimestre de cada período. */
 export function parsearMetadata(text: string): Metadata[] {
-  return parsearOfertas(text).map(({ carrera, anio, cuatrimestre }) => ({
-    carrera,
-    anio,
-    cuatrimestre
-  }));
+  return parsearOfertas(text).map(({ carrera, cuatrimestre }) => ({ carrera, cuatrimestre }));
 }
 
 function parsearDocentes(text: string): Docente[] {

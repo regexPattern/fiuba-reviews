@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { type Cuatrimestre, formatearCuatrimestre } from "./ofertas";
+import { type Cuatrimestre, formatearCuatrimestre, mismoCuatrimestre } from "./cuatrimestres";
 
 export const CRITERIOS = [
   { nombre: "aceptaCritica", etiqueta: "Acepta crítica" },
@@ -13,16 +13,12 @@ export const CRITERIOS = [
   { nombre: "respondeMails", etiqueta: "Responde mails" }
 ] as const;
 
-export type Criterio = (typeof CRITERIOS)[number]["nombre"];
+type Criterio = (typeof CRITERIOS)[number]["nombre"];
 
 export const PUNTAJE_MINIMO = 1;
 export const PUNTAJE_MAXIMO = 5;
 
 /** De 1 a 5, de a media estrella. */
-export const PUNTAJES = Array.from(
-  { length: (PUNTAJE_MAXIMO - PUNTAJE_MINIMO) * 2 + 1 },
-  (_, i) => PUNTAJE_MINIMO + i / 2
-);
 export type Puntaje = number;
 
 const FORMATO_PUNTAJE = new Intl.NumberFormat("es-AR", {
@@ -50,88 +46,45 @@ export const BORRADOR_VACIO: BorradorCalificacion = {
   comentario: ""
 };
 
+const NOMBRES = CRITERIOS.map(({ nombre }) => nombre) as [Criterio, ...Criterio[]];
+
 /** Criterios sin puntaje, en el orden de `CRITERIOS`. */
 export function criteriosFaltantes(borrador: BorradorCalificacion): Criterio[] {
-  return CRITERIOS.map(({ nombre }) => nombre).filter((nombre) => !borrador.puntajes[nombre]);
+  return NOMBRES.filter((nombre) => !borrador.puntajes[nombre]);
 }
 
-export function borradorCompleto(borrador: BorradorCalificacion) {
-  return (
-    criteriosFaltantes(borrador).length === 0 &&
-    borrador.cuatrimestre !== null &&
-    borrador.comentario.length <= LARGO_MAXIMO_COMENTARIO
-  );
-}
-
-/** Si el borrador tiene algo cargado, para no tirarlo sin avisar. */
-export function borradorTocado(borrador: BorradorCalificacion) {
-  return (
-    Object.keys(borrador.puntajes).length > 0 ||
-    borrador.cuatrimestre !== null ||
-    borrador.comentario.trim() !== ""
-  );
-}
-
-/** Calificación lista para guardar: todos los puntajes válidos y el comentario sin espacios de más. */
-export type CalificacionValida = {
-  codigoDocente: string;
-  puntajes: Record<Criterio, Puntaje>;
-  cuatrimestre: Cuatrimestre;
-  /** `null` si no dejó comentario. */
-  comentario: string | null;
-};
-
-const puntajeValido = z.number().refine((p) => PUNTAJES.includes(p));
-
-const EnvioCalificacion = z.object({
-  codigoDocente: z.uuid(),
-  puntajes: z.object(
-    Object.fromEntries(CRITERIOS.map(({ nombre }) => [nombre, puntajeValido])) as Record<
-      Criterio,
-      typeof puntajeValido
-    >
-  ),
-  cuatrimestre: z.object({ numero: z.number(), anio: z.number() }),
-  comentario: z.string().max(LARGO_MAXIMO_COMENTARIO)
-});
+const PuntajeSchema = z.number().min(PUNTAJE_MINIMO).max(PUNTAJE_MAXIMO).multipleOf(0.5);
 
 /**
  * Valida en el servidor lo que manda el panel de calificación: no se confía en el cliente. El
- * cuatrimestre tiene que ser uno de los `permitidos` (los que se ofrecen en el panel).
+ * cuatrimestre tiene que ser uno de los `permitidos` (los que se ofrecen en el panel), y se
+ * devuelve el de `permitidos` tal cual. El comentario se recorta y queda `null` si está vacío.
+ *
+ * Solo el error de cuatrimestre trae un mensaje para mostrar; el resto usa los de zod.
  */
-export function validarCalificacion(
-  entrada: unknown,
-  permitidos: Cuatrimestre[]
-): { ok: true; calificacion: CalificacionValida } | { ok: false; mensaje: string } {
-  const envio = EnvioCalificacion.safeParse(entrada);
+export function schemaCalificacion<C extends Cuatrimestre>(permitidos: C[]) {
+  return z.object({
+    codigoDocente: z.uuid(),
+    puntajes: z.record(z.enum(NOMBRES), PuntajeSchema),
+    cuatrimestre: z.object({ numero: z.number(), anio: z.number() }).transform((c, ctx) => {
+      const permitido = permitidos.find((p) => mismoCuatrimestre(p, c));
 
-  if (!envio.success) {
-    return { ok: false, mensaje: "La calificación enviada no es válida." };
-  }
+      if (!permitido) {
+        ctx.addIssue({
+          code: "custom",
+          message: `No se puede calificar el ${formatearCuatrimestre(c)}.`
+        });
+        return z.NEVER;
+      }
 
-  const { codigoDocente, puntajes, cuatrimestre, comentario } = envio.data;
-  const permitido = permitidos.some(
-    (c) => c.numero === cuatrimestre.numero && c.anio === cuatrimestre.anio
-  );
-
-  if (!permitido) {
-    return {
-      ok: false,
-      mensaje: `No se puede calificar el ${formatearCuatrimestre(cuatrimestre)}.`
-    };
-  }
-
-  const recortado = comentario.trim();
-
-  return {
-    ok: true,
-    calificacion: {
-      codigoDocente,
-      puntajes,
-      cuatrimestre: { numero: cuatrimestre.numero, anio: cuatrimestre.anio },
-      comentario: recortado === "" ? null : recortado
-    }
-  };
+      return permitido;
+    }),
+    comentario: z
+      .string()
+      .trim()
+      .max(LARGO_MAXIMO_COMENTARIO)
+      .transform((c) => c || null)
+  });
 }
 
 export type NivelPuntaje = "muyBueno" | "bueno" | "regular" | "malo";

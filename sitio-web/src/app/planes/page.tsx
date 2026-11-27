@@ -4,7 +4,7 @@ import { PasosOferta } from "./pasos-oferta";
 import { TablaOfertas } from "./tabla-ofertas";
 
 export const metadata: Metadata = {
-  title: "Ofertas de comisiones | FIUBA Reviews",
+  title: "Ofertas de comisiones",
   description:
     "Ayudá a mantener al día las cátedras de FIUBA Reviews enviando la oferta de comisiones de tu carrera.",
   robots: { index: false, follow: false }

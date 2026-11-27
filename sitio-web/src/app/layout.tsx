@@ -10,7 +10,7 @@ const DESCRIPCION =
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_BASE_URL),
-  title: "FIUBA Reviews",
+  title: { default: "FIUBA Reviews", template: "%s | FIUBA Reviews" },
   description: DESCRIPCION,
   authors: [{ name: "Carlos Eduardo Castillo Pereira" }],
   robots: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large" },

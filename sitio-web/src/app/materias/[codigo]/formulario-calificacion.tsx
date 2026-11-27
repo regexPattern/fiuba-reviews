@@ -1,19 +1,26 @@
 "use client";
 
-import type { Cuatrimestre } from "@/lib/ofertas";
 import { Button } from "@base-ui/react/button";
 import { Field } from "@base-ui/react/field";
 import { Fieldset } from "@base-ui/react/fieldset";
 import { Form } from "@base-ui/react/form";
 import { Select } from "@base-ui/react/select";
 import { Check, ChevronsUpDown, LoaderCircle, Send } from "@withicons/react/line";
-import { type ElementType, type FormEvent, type ReactNode, useMemo, useRef, useState } from "react";
+import {
+  type ElementType,
+  type ReactNode,
+  type SubmitEvent,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 import {
   CRITERIOS,
   LARGO_MAXIMO_COMENTARIO,
   type BorradorCalificacion,
   criteriosFaltantes
 } from "@/lib/calificaciones";
+import { type Cuatrimestre, formatearCuatrimestre } from "@/lib/cuatrimestres";
 import { SelectorPuntaje } from "./selector-puntaje";
 
 export function FormularioCalificacion({
@@ -33,7 +40,6 @@ export function FormularioCalificacion({
   enviando?: boolean;
   /** Error del servidor al enviar. */
   error?: string | null;
-  /** Contenedor del cuerpo: en el drawer, `Drawer.Content`. */
   cuerpo?: ElementType<{ className?: string; children?: ReactNode }>;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
@@ -42,12 +48,10 @@ export function FormularioCalificacion({
   const [intentoEnviar, setIntentoEnviar] = useState(false);
   const cuatrimestres = useMemo(
     () =>
-      cuatrimestresCalificables.map((cuatrimestre) => ({
-        value: claveCuatrimestre(cuatrimestre),
-        // Igual que en los comentarios: `1C2026`.
-        label: `${cuatrimestre.numero}C${cuatrimestre.anio}`,
-        cuatrimestre
-      })),
+      cuatrimestresCalificables.map((cuatrimestre) => {
+        const clave = formatearCuatrimestre(cuatrimestre);
+        return { value: clave, label: clave, cuatrimestre };
+      }),
     [cuatrimestresCalificables]
   );
 
@@ -55,7 +59,7 @@ export function FormularioCalificacion({
   const faltaCuatrimestre = borrador.cuatrimestre === null;
   const largoComentario = borrador.comentario.length;
 
-  function handleSubmit(event: FormEvent) {
+  function alEnviar(event: SubmitEvent) {
     event.preventDefault();
     if (enviando) return;
     setIntentoEnviar(true);
@@ -70,7 +74,7 @@ export function FormularioCalificacion({
       selectRef.current?.focus();
       return;
     }
-    onEnviar({ ...borrador, comentario: borrador.comentario.trim() });
+    onEnviar(borrador);
   }
 
   const errorCriterios =
@@ -81,14 +85,12 @@ export function FormularioCalificacion({
       : null;
 
   return (
-    <Form ref={formRef} onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+    <Form ref={formRef} onSubmit={alEnviar} className="flex min-h-0 flex-1 flex-col">
       <Cuerpo className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain p-4 md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-6 md:space-y-0 md:px-6 md:py-6">
         <Fieldset.Root>
           <Fieldset.Legend className="mb-1 rotulo text-stone-500 md:mb-2">
             Criterios
           </Fieldset.Legend>
-          {/* En desktop sobra lugar: sin divisores y con aire entre criterios, como la página de
-              calificar del sitio anterior. */}
           <div className="divide-y divide-stone-100 md:space-y-1 md:divide-y-0">
             {CRITERIOS.map(({ nombre, etiqueta }) => (
               <div key={nombre} data-criterio={nombre}>
@@ -110,13 +112,12 @@ export function FormularioCalificacion({
             invalid={intentoEnviar && faltaCuatrimestre}
             className="space-y-1.5 md:space-y-2"
           >
-            {/* No es un `<label>` nativo: el control es un botón. */}
             <Field.Label nativeLabel={false} render={<div />} className="rotulo text-stone-500">
               Cuatrimestre que cursaste
             </Field.Label>
             <Select.Root
               items={cuatrimestres}
-              value={borrador.cuatrimestre ? claveCuatrimestre(borrador.cuatrimestre) : null}
+              value={borrador.cuatrimestre ? formatearCuatrimestre(borrador.cuatrimestre) : null}
               onValueChange={(valor) =>
                 onChange({
                   ...borrador,
@@ -137,10 +138,6 @@ export function FormularioCalificacion({
                 </Select.Icon>
               </Select.Trigger>
               <Select.Portal>
-                {/* `z-60`: por encima del dialog y del drawer (`z-50`). */}
-                {/* Sin `alignItemWithTrigger`: con él, el popup tapa el botón y se corre a la izquierda
-                    para alinear el texto de la opción con el del botón. Con dos opciones, un
-                    desplegable común abajo y del mismo ancho se entiende mejor. */}
                 <Select.Positioner
                   alignItemWithTrigger={false}
                   sideOffset={6}
@@ -167,7 +164,6 @@ export function FormularioCalificacion({
                 </Select.Positioner>
               </Select.Portal>
             </Select.Root>
-            {/* `match`: la validez la maneja el formulario, no la validación nativa. */}
             {intentoEnviar && faltaCuatrimestre && (
               <Field.Error match className="text-sm text-red-700">
                 Elegí el cuatrimestre en que cursaste.
@@ -180,7 +176,6 @@ export function FormularioCalificacion({
               <Field.Label className="rotulo text-stone-500">
                 Comentario <span className="tracking-normal normal-case">(opcional)</span>
               </Field.Label>
-              {/* Solo cerca del límite, para no distraer. */}
               {largoComentario > LARGO_MAXIMO_COMENTARIO * 0.8 && (
                 <span className="text-xs text-stone-400">
                   <span className="font-mono tabular-nums">
@@ -218,8 +213,4 @@ export function FormularioCalificacion({
       </footer>
     </Form>
   );
-}
-
-function claveCuatrimestre({ numero, anio }: Cuatrimestre) {
-  return `${anio}-${numero}`;
 }

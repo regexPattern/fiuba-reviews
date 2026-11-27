@@ -1,7 +1,6 @@
 export type Metadata = {
   carrera: string;
-  anio: number;
-  cuatrimestre: 1 | 2;
+  cuatrimestre: { numero: 1 | 2; anio: number };
 };
 
 export type Docente = {

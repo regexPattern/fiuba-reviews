@@ -11,15 +11,15 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [abierto, setAbierto] = useState(false);
   const [query, setQuery] = useState("");
-  const isMac = usaCmd(usePlataforma());
+  const conCmd = usaCmd(usePlataforma());
 
   const cerrar = () => setAbierto(false);
 
   useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
+    function alPresionarTecla(event: KeyboardEvent) {
       if (
         event.key.toLowerCase() === "k" &&
-        (isMac ? event.metaKey : event.ctrlKey) &&
+        (conCmd ? event.metaKey : event.ctrlKey) &&
         !event.altKey &&
         !event.shiftKey &&
         !event.isComposing
@@ -30,9 +30,9 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
       }
     }
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isMac]);
+    document.addEventListener("keydown", alPresionarTecla);
+    return () => document.removeEventListener("keydown", alPresionarTecla);
+  }, [conCmd]);
 
   return (
     <Dialog.Root
@@ -44,8 +44,8 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
       <Dialog.Trigger
         render={
           <BotonBuscar
-            aria-keyshortcuts={isMac ? "Meta+k" : "Control+k"}
-            atajo={isMac ? "⌘ K" : "Ctrl K"}
+            aria-keyshortcuts={conCmd ? "Meta+k" : "Control+k"}
+            atajo={conCmd ? "⌘ K" : "Ctrl K"}
           />
         }
       />
@@ -57,7 +57,7 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
           // Al input, salvo con touch: ahí iOS no abre el teclado con un foco por código, y con el input
           // enfocado el gesto scrollea la página en vez de la lista. Con touch se enfoca el popup.
           initialFocus={(tipo) => (tipo === "touch" ? popupRef.current : inputRef.current)}
-          className="fixed inset-x-0 top-[max(calc(var(--header-height)+1rem),15dvh)] z-50 mx-auto flex max-h-[75dvh] w-[calc(100%-2rem)] max-w-xl flex-col overflow-hidden relieve bg-white text-stone-900 [--relieve:var(--color-stone-400)] transition-[scale,opacity] duration-200 ease-out outline-none data-ending-style:scale-97 data-ending-style:opacity-0 data-starting-style:scale-97 data-starting-style:opacity-0 motion-reduce:transition-none"
+          className="fixed inset-x-0 top-[max(calc(var(--header-height)+1rem),15dvh)] z-50 mx-auto flex max-h-[75dvh] w-[calc(100%-2rem)] max-w-xl flex-col overflow-hidden relieve bg-white text-stone-900 transition-[scale,opacity] duration-200 ease-out outline-none [--relieve:var(--color-stone-400)] data-ending-style:scale-97 data-ending-style:opacity-0 data-starting-style:scale-97 data-starting-style:opacity-0 motion-reduce:transition-none"
         >
           <BuscadorMaterias
             materias={materias}

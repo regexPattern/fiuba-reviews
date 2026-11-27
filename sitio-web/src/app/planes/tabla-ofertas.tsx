@@ -1,6 +1,5 @@
-import type { Cuatrimestre } from "@/lib/ofertas";
 import type { EstadoOferta, OfertaCarrera } from "@/server/db/queries/ofertas";
-import { formatearCuatrimestre } from "@/lib/ofertas";
+import { type Cuatrimestre, formatearCuatrimestre } from "@/lib/cuatrimestres";
 
 const ETIQUETAS: Record<EstadoOferta, { texto: string; clases: string }> = {
   "al-dia": { texto: "Al día", clases: "bg-emerald-50 text-emerald-700 border-emerald-200" },
@@ -28,13 +27,16 @@ export function TablaOfertas({
     <div className="overflow-hidden relieve bg-white">
       <table className="w-full text-left text-sm">
         <caption className="border-b border-stone-200 px-4 py-3 text-left text-sm text-stone-500">
-          <span className="font-mono tabular-nums">{alDia}</span> de <span className="font-mono tabular-nums">{ofertas.length}</span> carreras al día
+          <span className="font-mono tabular-nums">{alDia}</span> de{" "}
+          <span className="font-mono tabular-nums">{ofertas.length}</span> carreras al día
           {ultimoCuatrimestre && (
             <>
               {" "}
               con el{" "}
               <span className="text-stone-700">
-                <span className="font-mono tabular-nums">{formatearCuatrimestre(ultimoCuatrimestre)}</span>
+                <span className="font-mono tabular-nums">
+                  {formatearCuatrimestre(ultimoCuatrimestre)}
+                </span>
               </span>
             </>
           )}
@@ -91,7 +93,9 @@ function Fila({ oferta }: { oferta: OfertaCarrera }) {
             {oferta.recibida && (
               <>
                 {" "}
-                <span className="font-mono tabular-nums">{formatearCuatrimestre(oferta.recibida)}</span>
+                <span className="font-mono tabular-nums">
+                  {formatearCuatrimestre(oferta.recibida)}
+                </span>
               </>
             )}
           </span>

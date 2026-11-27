@@ -23,7 +23,8 @@ export function PaginaError({
   // Acciones (links, botones) debajo del mensaje.
   children?: React.ReactNode;
 }) {
-  const lineaColectivo = codigo !== undefined && codigo in IMAGENES_COLECTIVOS ? codigo : LINEA_COLECTIVO_POR_DEFECTO;
+  const lineaColectivo =
+    codigo !== undefined && codigo in IMAGENES_COLECTIVOS ? codigo : LINEA_COLECTIVO_POR_DEFECTO;
 
   return (
     <main className="flex min-h-[calc(100dvh-var(--header-height))] flex-col items-center justify-center gap-10 px-6 py-12">

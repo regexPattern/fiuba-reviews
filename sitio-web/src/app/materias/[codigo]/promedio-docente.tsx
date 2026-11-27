@@ -4,12 +4,7 @@ import type { PromediosDocente } from "@/server/db/queries/catedras";
 import { Popover } from "@base-ui/react/popover";
 import { ChevronDown } from "@withicons/react/line";
 import { Star } from "@withicons/react/plush";
-import {
-  CRITERIOS,
-  formatearPuntaje,
-  nivelPuntaje,
-  type NivelPuntaje
-} from "@/lib/calificaciones";
+import { CRITERIOS, formatearPuntaje, nivelPuntaje, type NivelPuntaje } from "@/lib/calificaciones";
 
 export function PromedioDocente({
   promedios,
@@ -48,7 +43,9 @@ export function PromedioDocente({
                   <dd
                     className={`flex items-center gap-1.5 ${COLOR_NUMERO[nivelPuntaje(promedios[nombre])]}`}
                   >
-                    <span className="font-mono tabular-nums">{formatearPuntaje(promedios[nombre])}</span>
+                    <span className="font-mono tabular-nums">
+                      {formatearPuntaje(promedios[nombre])}
+                    </span>
                     {/* Decorativa: el número ya lo dice. */}
                     <Star size={16} aria-hidden="true" className="shrink-0" />
                   </dd>

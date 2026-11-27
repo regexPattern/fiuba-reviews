@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { formatearCuatrimestre } from "@/lib/cuatrimestres";
 import { getCatedrasMateria } from "@/server/db/queries/catedras";
 import { getMateria } from "@/server/db/queries/materias";
 import { ListaCatedras } from "./lista-catedras";
@@ -42,7 +43,7 @@ export async function SidebarMateria({
             <>
               Última actualización de cátedras en{" "}
               <span className="font-mono text-stone-700 tabular-nums">
-                {materia.cuatrimestre.numero}C{materia.cuatrimestre.anio}
+                {formatearCuatrimestre(materia.cuatrimestre)}
               </span>
               .
             </>

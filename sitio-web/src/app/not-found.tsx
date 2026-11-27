@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PaginaError } from "@/components/error/pagina-error";
 
-export const metadata: Metadata = { title: "Página no encontrada | FIUBA Reviews" };
+export const metadata: Metadata = { title: "Página no encontrada" };
 
 export default function NotFound() {
   return (

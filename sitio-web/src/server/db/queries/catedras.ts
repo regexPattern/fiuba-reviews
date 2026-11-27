@@ -85,7 +85,7 @@ export async function getCatedra(codigo: string) {
       .innerJoin(c, eq(c.codigoDocente, cd.codigoDocente))
       .innerJoin(cu, eq(cu.codigo, c.codigoCuatrimestre))
       .where(eq(cd.codigoCatedra, codigo))
-      .orderBy(desc(c.codigoCuatrimestre), desc(c.codigo))
+      .orderBy(desc(cu.anio), desc(cu.numero), desc(c.codigo))
   ]);
 
   if (docentes.length === 0) return null;
@@ -101,7 +101,7 @@ export async function getCatedra(codigo: string) {
   };
 }
 
-export type Catedra = NonNullable<Awaited<ReturnType<typeof getCatedra>>>;
+type Catedra = NonNullable<Awaited<ReturnType<typeof getCatedra>>>;
 export type DocenteCatedra = Catedra["docentes"][number];
 export type PromediosDocente = NonNullable<DocenteCatedra["promedios"]>;
 export type ComentarioDocente = DocenteCatedra["comentarios"][number];

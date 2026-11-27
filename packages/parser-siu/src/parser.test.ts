@@ -16,13 +16,11 @@ Actividad: FÍSICA I (CB003)`;
     expect(ofertas).toHaveLength(2);
     expect(oferta1).toMatchObject({
       carrera: "Ingeniería en Informática",
-      anio: 2026,
-      cuatrimestre: 1
+      cuatrimestre: { numero: 1, anio: 2026 }
     });
     expect(oferta2).toMatchObject({
       carrera: "Ingeniería en Informática",
-      anio: 2026,
-      cuatrimestre: 2
+      cuatrimestre: { numero: 2, anio: 2026 }
     });
   });
 
@@ -130,13 +128,13 @@ Teórica \tLunes\t09:00 a 11:00 \t403 - PC`;
     });
   });
 
-  it("falla si el texto no es del SIU", () => {
+  it("no devuelve nada si el texto no es del SIU", () => {
     const texto = "hola mundo";
 
-    expect(() => parsearOfertas(texto)).toThrow();
+    expect(parsearOfertas(texto)).toEqual([]);
   });
 
-  it("falla si el texto no contiene períodos", () => {
+  it("no devuelve nada si el texto no contiene períodos", () => {
     const texto = ` 0
  CARLOS CASTILLO
 Propuesta: Ingeniería en Informática
@@ -146,7 +144,7 @@ Todos
 Actividad:
 Todas`;
 
-    expect(() => parsearOfertas(texto)).toThrow(/período/i);
+    expect(parsearOfertas(texto)).toEqual([]);
   });
 
   describe("casos borde", () => {
@@ -392,8 +390,8 @@ Actividad: FÍSICA I (CB003)`;
     const metadata = parsearMetadata(texto);
 
     expect(metadata).toEqual([
-      { carrera: "Ingeniería en Informática", anio: 2026, cuatrimestre: 1 },
-      { carrera: "Ingeniería en Informática", anio: 2026, cuatrimestre: 2 }
+      { carrera: "Ingeniería en Informática", cuatrimestre: { numero: 1, anio: 2026 } },
+      { carrera: "Ingeniería en Informática", cuatrimestre: { numero: 2, anio: 2026 } }
     ]);
   });
 });

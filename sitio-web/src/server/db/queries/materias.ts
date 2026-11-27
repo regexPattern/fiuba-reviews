@@ -41,5 +41,3 @@ export async function getMateria(codigo: string) {
 
   return { ...resto, cuatrimestre: numero !== null && anio !== null ? { numero, anio } : null };
 }
-
-export type Materia = NonNullable<Awaited<ReturnType<typeof getMateria>>>;

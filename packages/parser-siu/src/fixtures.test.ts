@@ -17,8 +17,8 @@ describe("ofertas reales", () => {
       const comisiones = oferta.materias.flatMap((m) => m.comisiones);
       return {
         carrera: oferta.carrera,
-        anio: oferta.anio,
-        cuatrimestre: oferta.cuatrimestre,
+        anio: oferta.cuatrimestre.anio,
+        cuatrimestre: oferta.cuatrimestre.numero,
         materias: oferta.materias.length,
         comisiones: comisiones.length,
         clases: comisiones.reduce((sum, c) => sum + c.clases.length, 0)
@@ -40,8 +40,8 @@ describe("ofertas reales", () => {
       const comisiones = oferta.materias.flatMap((m) => m.comisiones);
       return {
         carrera: oferta.carrera,
-        anio: oferta.anio,
-        cuatrimestre: oferta.cuatrimestre,
+        anio: oferta.cuatrimestre.anio,
+        cuatrimestre: oferta.cuatrimestre.numero,
         materias: oferta.materias.length,
         comisiones: comisiones.length,
         clases: comisiones.reduce((sum, c) => sum + c.clases.length, 0)
@@ -54,8 +54,8 @@ describe("ofertas reales", () => {
       { carrera, anio: 2026, cuatrimestre: 1, materias: 46, comisiones: 179, clases: 394 }
     ]);
     expect(metadata).toEqual([
-      { carrera, anio: 2025, cuatrimestre: 2 },
-      { carrera, anio: 2026, cuatrimestre: 1 }
+      { carrera, cuatrimestre: { numero: 2, anio: 2025 } },
+      { carrera, cuatrimestre: { numero: 1, anio: 2026 } }
     ]);
   });
 

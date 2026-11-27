@@ -33,7 +33,6 @@ export function ListaCatedras({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      {/* `px-2`, igual que la lista: el input queda alineado con el borde de la cátedra seleccionada. */}
       <div className="shrink-0 px-2 pt-3 pb-1">
         <label className="relative block">
           <span className="sr-only">Filtrar cátedras por docente</span>

@@ -174,7 +174,6 @@ function SelectorPlataforma({
   );
 }
 
-/** Paso numerado: el número en un círculo y una línea que lo une con el siguiente. */
 function Paso({
   numero,
   titulo,
@@ -200,7 +199,6 @@ function Paso({
   );
 }
 
-/** Combinación de teclas, cada una en relieve, dentro de una oración. */
 function Atajo({ teclas }: { teclas: string[] }) {
   return (
     <span className="mx-0.5 inline-flex items-center gap-1 align-middle">
@@ -213,7 +211,7 @@ function Atajo({ teclas }: { teclas: string[] }) {
   );
 }
 
-/** Instrucción de un paso. Interlineado de 28px para que las teclas en relieve no separen las líneas. */
+/** Con el interlineado alto, las teclas en relieve no separan las líneas. */
 function Gesto({ children }: { children: ReactNode }) {
   return <p className="text-sm/7 text-stone-600">{children}</p>;
 }

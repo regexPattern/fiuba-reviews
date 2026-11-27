@@ -48,7 +48,6 @@ export function SelectorPuntaje({
           {ESTRELLAS.map((estrella) => (
             <span
               key={estrella}
-              // `size-8`: área táctil cómoda (dos mitades de 16px) aunque la estrella sea más chica.
               className="relative flex size-8 items-center justify-center rounded-md has-focus-visible:outline-2 has-focus-visible:-outline-offset-2 has-focus-visible:outline-fiuba"
             >
               <EstrellaPuntaje relleno={Math.min(Math.max(mostrado - (estrella - 1), 0), 1)} />
@@ -75,7 +74,9 @@ export function SelectorPuntaje({
           ))}
         </div>
         <span aria-hidden="true" className="w-6 shrink-0 text-right text-sm text-stone-500">
-          <span className="font-mono tabular-nums">{mostrado > 0 ? formatearPuntaje(mostrado) : "–"}</span>
+          <span className="font-mono tabular-nums">
+            {mostrado > 0 ? formatearPuntaje(mostrado) : "–"}
+          </span>
         </span>
       </Fieldset.Root>
     </Field.Root>

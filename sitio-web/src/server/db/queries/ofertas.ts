@@ -1,7 +1,7 @@
 import "server-only";
 import { eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
-import { type Cuatrimestre, ordenCuatrimestre } from "@/lib/ofertas";
+import { type Cuatrimestre, ordenCuatrimestre } from "@/lib/cuatrimestres";
 import { tags } from "@/server/cache";
 import { db, schema } from "@/server/db";
 

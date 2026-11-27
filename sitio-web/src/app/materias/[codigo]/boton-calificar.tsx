@@ -1,13 +1,13 @@
 "use client";
 
+import type { Cuatrimestre } from "@/lib/cuatrimestres";
 import { Dialog } from "@base-ui/react/dialog";
 import { Drawer } from "@base-ui/react/drawer";
 import { Close, PenLine } from "@withicons/react/line";
 import { type ElementType, type ReactNode, useRef, useState, useTransition } from "react";
 import { enviarCalificacion } from "@/app/materias/actions";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { BORRADOR_VACIO, type BorradorCalificacion } from "@/lib/calificaciones";
-import { useMediaQuery } from "@/lib/media-query";
-import type { Cuatrimestre } from "@/lib/ofertas";
 import { FormularioCalificacion } from "./formulario-calificacion";
 
 /**
@@ -138,10 +138,7 @@ export function BotonCalificar({
   );
 }
 
-/**
- * Título y botón de cerrar, con las partes del dialog o del drawer según cuál esté abierto. El
- * cerrar es una tecla chica en relieve, como en el buscador: `Esc` en desktop y una cruz en móvil.
- */
+/** Título y botón de cerrar, con las partes del dialog o del drawer según cuál esté abierto. */
 function Encabezado({
   titulo: Titulo,
   cerrar: Cerrar,

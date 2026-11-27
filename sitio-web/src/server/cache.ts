@@ -3,7 +3,8 @@
  * por tag, cuando cambian los datos.
  *
  *  - `materias`: listado de materias vigentes y sus equivalencias (cambia con los planes).
- *  - `materia:<codigo>`: info de una materia vigente (nombre, última actualización).
+ *  - `materia:<codigo>`: info de una materia vigente (nombre, última actualización). También la
+ *    usa el listado de cátedras, que depende de las equivalencias de la materia.
  *  - `catedras:<codigo>`: cátedras propias de una materia y sus calificaciones. Una materia
  *    vigente que usa equivalencias depende de los `catedras:` de cada equivalencia.
  *  - `catedra:<uuid>`: detalle de una cátedra (docentes, promedios y comentarios).

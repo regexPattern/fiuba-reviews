@@ -2,59 +2,48 @@
 
 import { and, eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
-import {
-  type Cuatrimestre,
-  formatearCuatrimestre,
-  normalizarNombre,
-  ordenCuatrimestre
-} from "@/lib/ofertas";
+import { type Cuatrimestre, formatearCuatrimestre, ordenCuatrimestre } from "@/lib/cuatrimestres";
+import { buscarCarrera } from "@/lib/ofertas";
 import { tags } from "@/server/cache";
 import { db, schema } from "@/server/db";
 import { parsearMetadata } from "@fiuba-reviews/parser-siu";
 
-export type ResultadoEnvio =
+export type ResultadoOferta =
   | { estado: "inicial" }
   | { estado: "enviada"; carrera: string; cuatrimestre: Cuatrimestre }
   | { estado: "error"; mensaje: string };
 
-/** La página entera del SIU ronda los 100 KB en las carreras más grandes. */
-const MAX_CARACTERES = 1_000_000;
+/*
+ * La página entera del SIU ronda los 100 KB en las carreras más grandes,
+ * entonces le damos el doble por seguridad.
+ */
+const MAX_CARACTERES = 2 * 1_000_000;
 
 /**
  * Guarda una oferta pegada desde el SIU para procesarla después. La carrera y el cuatrimestre
  * se vuelven a sacar del contenido acá (no se confía en lo que detectó el cliente).
  */
 export async function enviarOferta(
-  _anterior: ResultadoEnvio,
+  _anterior: ResultadoOferta,
   formData: FormData
-): Promise<ResultadoEnvio> {
+): Promise<ResultadoOferta> {
   const contenido = formData.get("contenido");
 
   if (typeof contenido !== "string" || contenido.length > MAX_CARACTERES) {
     return { estado: "error", mensaje: "El contenido enviado no es válido." };
   }
 
-  let siu;
+  const [metadata] = parsearMetadata(contenido);
 
-  try {
-    // Si la página trae varios períodos lectivos (filtro en `Todos`), se toma el primero.
-    [siu] = parsearMetadata(contenido);
-  } catch {
+  if (!metadata) {
     return {
       estado: "error",
-      mensaje: "No reconocimos la oferta. Asegurate de copiar la página entera del SIU."
+      mensaje:
+        "No reconocemos esto como la oferta del SIU. Copiá la página entera, incluido el encabezado con tu carrera."
     };
   }
 
-  const metadata = {
-    carrera: siu.carrera,
-    cuatrimestre: { numero: siu.cuatrimestre, anio: siu.anio }
-  };
-
-  const carreras = await db.select().from(schema.carrera);
-  const carrera = carreras.find(
-    (c) => normalizarNombre(c.nombre) === normalizarNombre(metadata.carrera)
-  );
+  const carrera = buscarCarrera(await db.select().from(schema.carrera), metadata.carrera);
 
   if (!carrera) {
     return { estado: "error", mensaje: `No tenemos registrada la carrera «${metadata.carrera}».` };
@@ -78,7 +67,8 @@ export async function enviarOferta(
     };
   }
 
-  // Tanto las procesadas como las que esperan ser procesadas: así no se reciben duplicadas.
+  // Tanto las procesadas como las que esperan ser procesadas, así no se
+  // reciben duplicadas.
   const existentes = await Promise.all(
     [schema.ofertaComisiones, schema.ofertaComisionesRaw].map((tabla) =>
       db
@@ -121,7 +111,8 @@ export async function enviarOferta(
     codigoCuatrimestre: cuatrimestre.codigo
   });
 
-  // La tabla de la página pasa a mostrar la oferta como "en proceso".
+  // Invalidamos el cache para que la tabla de la página se regenere y pase a
+  // mostrar la oferta como "en proceso".
   updateTag(tags.ofertas);
 
   return { estado: "enviada", carrera: carrera.nombre, cuatrimestre: metadata.cuatrimestre };
