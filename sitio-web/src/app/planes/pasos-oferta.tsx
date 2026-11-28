@@ -14,58 +14,55 @@ import { FormularioOferta } from "./formulario-oferta";
 
 const URL_OFERTA_SIU = "https://guaraniautogestion.fi.uba.ar/g3w/oferta_comisiones";
 
-/** Iconos de Phosphor: withicons no tiene logos de marcas. */
-const PLATAFORMAS: { valor: Plataforma; etiqueta: string; icono: Icon }[] = [
-  { valor: "pc", etiqueta: "Windows / Linux", icono: DesktopIcon },
-  { valor: "mac", etiqueta: "macOS", icono: AppleLogoIcon },
-  { valor: "android", etiqueta: "Android", icono: AndroidLogoIcon },
-  { valor: "ios", etiqueta: "iPhone / iPad", icono: AppleLogoIcon }
+const PLATAFORMAS: { valor: Plataforma; label: string; icono: Icon }[] = [
+  { valor: "pc", label: "Windows / Linux", icono: DesktopIcon },
+  { valor: "mac", label: "macOS", icono: AppleLogoIcon },
+  { valor: "android", label: "Android", icono: AndroidLogoIcon },
+  { valor: "ios", label: "iPhone / iPad", icono: AppleLogoIcon }
 ];
 
-/** Cómo seleccionar y copiar la página en cada plataforma (pasos 2 y 3). */
-const COPIAR: Record<Plataforma, { seleccionar: ReactNode; copiar: ReactNode }> = {
+const INSTRUCCIONES_COPIA: Record<Plataforma, { seleccionar: ReactNode; copiar: ReactNode }> = {
   pc: copiarConTeclado("Ctrl"),
   mac: copiarConTeclado("⌘"),
   android: {
     seleccionar: (
-      <Gesto>
+      <Instruccion>
         Mantené presionada cualquier palabra y tocá <Opcion>Seleccionar todo</Opcion> en el menú que
         aparece.
-      </Gesto>
+      </Instruccion>
     ),
     copiar: (
-      <Gesto>
+      <Instruccion>
         Tocá <Opcion>Copiar</Opcion> en el mismo menú.
-      </Gesto>
+      </Instruccion>
     )
   },
   ios: {
     seleccionar: (
-      <Gesto>
+      <Instruccion>
         Mantené presionada la primera palabra de la página y arrastrá el final de la selección hasta
         abajo de todo, para que entre desde tu carrera hasta la última comisión.
-      </Gesto>
+      </Instruccion>
     ),
     copiar: (
-      <Gesto>
+      <Instruccion>
         Tocá <Opcion>Copiar</Opcion> en el menú que aparece sobre la selección.
-      </Gesto>
+      </Instruccion>
     )
   }
 };
 
-/** En la compu es lo mismo con Ctrl o con ⌘. */
 function copiarConTeclado(modificador: string) {
   return {
     seleccionar: (
-      <Gesto>
-        Apretá <Atajo teclas={[modificador, "A"]} /> para seleccionar toda la página.
-      </Gesto>
+      <Instruccion>
+        Apretá <Shortcut teclas={[modificador, "A"]} /> para seleccionar toda la página.
+      </Instruccion>
     ),
     copiar: (
-      <Gesto>
-        Apretá <Atajo teclas={[modificador, "C"]} /> para copiar todo lo seleccionado.
-      </Gesto>
+      <Instruccion>
+        Apretá <Shortcut teclas={[modificador, "C"]} /> para copiar todo lo seleccionado.
+      </Instruccion>
     )
   };
 }
@@ -102,10 +99,10 @@ export function PasosOferta({ ofertas }: { ofertas: OfertaCarrera[] }) {
           </a>
         </Paso>
         <Paso numero={2} titulo="Seleccioná toda la página">
-          {COPIAR[plataforma].seleccionar}
+          {INSTRUCCIONES_COPIA[plataforma].seleccionar}
         </Paso>
         <Paso numero={3} titulo="Copiala">
-          {COPIAR[plataforma].copiar}
+          {INSTRUCCIONES_COPIA[plataforma].copiar}
         </Paso>
         <Paso numero={4} titulo="Pegala acá abajo y enviala">
           <FormularioOferta ofertas={ofertas} />
@@ -115,7 +112,6 @@ export function PasosOferta({ ofertas }: { ofertas: OfertaCarrera[] }) {
   );
 }
 
-/** Dropdown con la plataforma: viene detectada, así que es secundario y alcanza con una línea. */
 function SelectorPlataforma({
   valor,
   onChange
@@ -127,7 +123,7 @@ function SelectorPlataforma({
 
   return (
     <Select.Root
-      items={PLATAFORMAS.map(({ valor, etiqueta }) => ({ value: valor, label: etiqueta }))}
+      items={PLATAFORMAS.map(({ valor, label }) => ({ value: valor, label }))}
       value={valor}
       onValueChange={(nueva) => nueva && onChange(nueva)}
     >
@@ -153,14 +149,14 @@ function SelectorPlataforma({
         >
           <Select.Popup className="min-w-(--anchor-width) origin-(--transform-origin) relieve bg-white p-1 text-sm transition-[transform,opacity] duration-150 outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none">
             <Select.List>
-              {PLATAFORMAS.map(({ valor: opcion, etiqueta, icono: Icono }) => (
+              {PLATAFORMAS.map(({ valor: opcion, label, icono: Icono }) => (
                 <Select.Item
                   key={opcion}
                   value={opcion}
                   className="flex cursor-pointer items-center gap-2 rounded-md py-1.5 pr-2 pl-2 text-stone-700 outline-none select-none data-highlighted:bg-stone-100 data-highlighted:text-stone-900 data-selected:font-medium data-selected:text-stone-900"
                 >
                   <Icono size={16} aria-hidden="true" className="shrink-0 text-stone-500" />
-                  <Select.ItemText className="flex-1">{etiqueta}</Select.ItemText>
+                  <Select.ItemText className="flex-1">{label}</Select.ItemText>
                   <Select.ItemIndicator className="ml-3 text-fiuba">
                     <Check size={14} aria-hidden="true" />
                   </Select.ItemIndicator>
@@ -199,7 +195,7 @@ function Paso({
   );
 }
 
-function Atajo({ teclas }: { teclas: string[] }) {
+function Shortcut({ teclas }: { teclas: string[] }) {
   return (
     <span className="mx-0.5 inline-flex items-center gap-1 align-middle">
       {teclas.map((tecla) => (
@@ -211,12 +207,14 @@ function Atajo({ teclas }: { teclas: string[] }) {
   );
 }
 
-/** Con el interlineado alto, las teclas en relieve no separan las líneas. */
-function Gesto({ children }: { children: ReactNode }) {
+/*
+ * Interlineado alto para que todas las líneas tengan el mismo alto, aunque alguna tenga una
+ * tecla.
+ */
+function Instruccion({ children }: { children: ReactNode }) {
   return <p className="text-sm/7 text-stone-600">{children}</p>;
 }
 
-/** Nombre de una opción de menú del sistema. */
 function Opcion({ children }: { children: ReactNode }) {
   return <span className="font-medium text-stone-900">{children}</span>;
 }

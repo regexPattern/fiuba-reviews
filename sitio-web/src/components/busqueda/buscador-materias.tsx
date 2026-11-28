@@ -5,7 +5,7 @@ import { Command } from "cmdk";
 import { useRouter } from "next/navigation";
 import { type ReactNode, type Ref, useMemo, useState } from "react";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { crearBusqueda } from "@/lib/busqueda";
+import { crearIndiceDeBusqueda } from "@/lib/busqueda";
 import { TextoConMatches } from "./texto-con-matches";
 
 export type MateriaBuscador = { codigo: string; nombre: string };
@@ -29,19 +29,20 @@ export function BuscadorMaterias({
 }) {
   const router = useRouter();
   const debouncedQuery = useDebouncedValue(query);
-  const buscar = useMemo(() => crearBusqueda(materias, ["codigo", "nombre"]), [materias]);
+  const buscar = useMemo(() => crearIndiceDeBusqueda(materias, ["codigo", "nombre"]), [materias]);
   const todos = useMemo(() => buscar(debouncedQuery), [buscar, debouncedQuery]);
   const resultados = todos.slice(0, MAX_RESULTADOS);
   const restantes = todos.length - resultados.length;
 
-  // cmdk resalta el primer resultado apenas cambia el texto del input, pero
-  // por el debounce la lista nueva todavía no llegó. Entonces termina
-  // resaltado el primer ítem de la lista vieja, y cuando llega la nueva ese
-  // ítem puede no estar o no ser el primero.
-  //
-  // Para solucionar esto, controlamos la selección nosotros y la guardamos
-  // junto con la búsqueda (`debouncedQuery`) en la que se eligió.
-  //
+  /*
+   * Cuando cambia el texto del input, cmdk resalta el primer resultado, pero
+   * por el debounce la lista todavía es la de la búsqueda anterior. Cuando
+   * llegan los resultados nuevos, el ítem resaltado puede no estar o no ser el
+   * primero.
+   *
+   * Por eso la selección se guarda junto con la búsqueda en la que se hizo. Si
+   * la búsqueda cambió, se resalta el primer resultado nuevo.
+   */
   const [seleccion, setSeleccion] = useState({ query: debouncedQuery, codigo: "" });
   const seleccionada =
     (seleccion.query === debouncedQuery && seleccion.codigo) || (resultados[0]?.item.codigo ?? "");
@@ -74,13 +75,17 @@ export function BuscadorMaterias({
             ? "Materias ordenadas por relevancia"
             : "Materias ordenadas por relevancia general"
         }
-        // cmdk mete los ítems dentro de un `div[cmdk-list-sizer]`, así que el `space-y` va en ese div
-        // y no en la lista (si no, solo separaría al sizer).
+        /*
+         * cmdk mete los ítems dentro de un `div[cmdk-list-sizer]`, así que el `space-y` va en ese
+         * div y no en la lista (si no, solo separaría al sizer).
+         */
         className="min-h-0 flex-1 scrollbar-gutter-stable overflow-y-auto overscroll-contain p-2 **:[[cmdk-list-sizer]]:space-y-1.5"
-        // En iOS, mientras el input de búsqueda tiene el foco (teclado abierto), deslizar el dedo
-        // sobre la lista scrollea la página entera en lugar de la lista. Para evitarlo, apenas el
-        // usuario empieza a deslizar sobre la lista le sacamos el foco al input, lo que cierra el
-        // teclado y el scroll pasa a la lista.
+        /*
+         * En iOS, mientras el input de búsqueda tiene el foco (teclado abierto), deslizar el dedo
+         * sobre la lista scrollea la página entera en lugar de la lista. Para evitarlo, apenas el
+         * usuario empieza a deslizar sobre la lista le sacamos el foco al input, lo que cierra el
+         * teclado y el scroll pasa a la lista.
+         */
         onTouchMove={() => {
           const activo = document.activeElement;
           if (activo instanceof HTMLInputElement && activo.hasAttribute("cmdk-input"))
@@ -98,8 +103,10 @@ export function BuscadorMaterias({
               onSelect?.();
               router.push(`/materias/${materia.codigo}`);
             }}
-            // Se usa `scroll-m*` porque al navegar con las flechas, cmdk hace `scrollIntoView`. Con
-            // estos márgenes, el ítem respeta el `p-2` de la lista y los 3px del relieve de abajo.
+            /*
+             * Se usa `scroll-m*` porque al navegar con las flechas, cmdk hace `scrollIntoView`. Con
+             * estos márgenes, el ítem respeta el `p-2` de la lista y los 3px del relieve de abajo.
+             */
             className="item-lista cursor-pointer scroll-mt-2 scroll-mb-[calc(--spacing(2)+3px)] select-none data-[selected=true]:item-lista-activo"
           >
             <TextoConMatches

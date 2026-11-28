@@ -14,8 +14,10 @@ export async function generateStaticParams() {
   );
 }
 
-// No se indexan las cátedras, solo las materias. Pero si se siguen sus links
-// al resto de las cátedras y materias.
+/*
+ * Las cátedras no se indexan (ver `sitemap.ts`), pero los buscadores sí siguen
+ * sus links al resto de las cátedras y materias.
+ */
 export const metadata: Metadata = {
   robots: { index: false, follow: true }
 };
@@ -34,7 +36,8 @@ async function Catedra({
   const { codigo, catedra } = await params;
   const catedras = await getCatedrasMateria(codigo);
 
-  // La cátedra tiene que ser una de las que se muestran en esta materia.
+  /* 404 si la cátedra no es de esta materia (o de sus equivalentes), aunque
+   * exista. */
   if (!catedras.some((c) => c.codigo === catedra)) notFound();
 
   return <DetalleCatedra codigo={catedra} />;

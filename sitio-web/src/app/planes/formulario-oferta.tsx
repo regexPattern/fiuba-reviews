@@ -12,14 +12,21 @@ import {
   Paste
 } from "@withicons/react/plush";
 import { useActionState, useMemo, useState } from "react";
-import { type Cuatrimestre, formatearCuatrimestre, ordenCuatrimestre } from "@/lib/cuatrimestres";
-import { buscarCarrera } from "@/lib/ofertas";
+import { type Cuatrimestre, esPosterior, formatearCuatrimestre } from "@/lib/cuatrimestres";
 import { parsearMetadata } from "@fiuba-reviews/parser-siu";
 import { type ResultadoOferta, enviarOferta } from "./actions";
+import { buscarCarrera } from "./utils";
 
-type Tono = "neutro" | "ok" | "aviso" | "error" | "gracias";
+/**
+ * - `neutro`: todavía no se pegó nada.
+ * - `ok`: la oferta se puede enviar.
+ * - `aviso`: lo pegado no es una oferta del SIU o la carrera no está registrada.
+ * - `error`: el servidor rechazó la oferta o falló al guardarla.
+ * - `gracias`: ya tenemos esa oferta o una más nueva.
+ */
+type VarianteEstado = "neutro" | "ok" | "aviso" | "error" | "gracias";
 
-const TONOS: Record<Tono, { icono: typeof Paste; clases: string }> = {
+const VARIANTES_ESTADO: Record<VarianteEstado, { icono: typeof Paste; clases: string }> = {
   neutro: { icono: Paste, clases: "text-stone-500" },
   ok: { icono: CircleCheckBig, clases: "text-emerald-700" },
   aviso: { icono: AlertTriangle, clases: "text-amber-800" },
@@ -29,28 +36,23 @@ const TONOS: Record<Tono, { icono: typeof Paste; clases: string }> = {
 
 const INICIAL: ResultadoOferta = { estado: "inicial" };
 
-/** La más nueva entre la procesada y la recibida: contra esa se compara lo que se pega. */
-function ultimaConocida({ procesada, recibida }: OfertaCarrera) {
-  return recibida ?? procesada;
-}
-
 /**
- * Qué se detectó en lo pegado y si se puede enviar. Lo mismo se vuelve a validar en el servidor;
- * acá es para avisar antes de enviar.
+ * Valida lo pegado para avisar antes de enviar si la carrera, el cuatrimestre o la oferta tienen
+ * algún problema. El servidor lo vuelve a validar en `enviarOferta`.
  */
-function diagnosticar(
+function validarOferta(
   contenido: string,
   ofertas: OfertaCarrera[]
-): { tono: Tono; mensaje: ReactNode; enviable: boolean } {
+): { variante: VarianteEstado; mensaje: ReactNode; enviable: boolean } {
   if (contenido.trim() === "") {
-    return { tono: "neutro", mensaje: "Pegá la página copiada del SIU.", enviable: false };
+    return { variante: "neutro", mensaje: "Pegá la página copiada del SIU.", enviable: false };
   }
 
   const [metadata] = parsearMetadata(contenido);
 
   if (!metadata) {
     return {
-      tono: "aviso",
+      variante: "aviso",
       mensaje:
         "No reconocemos esto como la oferta del SIU. Copiá la página entera, incluido el encabezado con tu carrera.",
       enviable: false
@@ -62,18 +64,19 @@ function diagnosticar(
 
   if (!carrera) {
     return {
-      tono: "aviso",
+      variante: "aviso",
       mensaje: <>No tenemos registrada la carrera «{metadata.carrera}».</>,
       enviable: false
     };
   }
 
-  const ultima = ultimaConocida(carrera);
+  /* `recibida` solo está si es más nueva que `procesada`. */
+  const ultima = carrera.recibida ?? carrera.procesada;
   const nombre = <span className="font-medium">{carrera.nombre}</span>;
 
-  if (ultima && ordenCuatrimestre(metadata.cuatrimestre) <= ordenCuatrimestre(ultima)) {
+  if (ultima && !esPosterior(metadata.cuatrimestre, ultima)) {
     return {
-      tono: "gracias",
+      variante: "gracias",
       mensaje: (
         <>
           Es la oferta de {nombre} del {cuatrimestre}, pero ya tenemos la del{" "}
@@ -85,7 +88,7 @@ function diagnosticar(
   }
 
   return {
-    tono: "ok",
+    variante: "ok",
     mensaje: (
       <>
         Oferta de {nombre} del {cuatrimestre}
@@ -109,8 +112,8 @@ function Cuatri({ cuatrimestre }: { cuatrimestre: Cuatrimestre }) {
   );
 }
 
-function Estado({ tono, children }: { tono: Tono; children: ReactNode }) {
-  const { icono: Icono, clases } = TONOS[tono];
+function Estado({ variante, children }: { variante: VarianteEstado; children: ReactNode }) {
+  const { icono: Icono, clases } = VARIANTES_ESTADO[variante];
 
   return (
     <p className={`flex items-start gap-2 text-sm ${clases}`}>
@@ -122,9 +125,9 @@ function Estado({ tono, children }: { tono: Tono; children: ReactNode }) {
 
 export function FormularioOferta({ ofertas }: { ofertas: OfertaCarrera[] }) {
   const [contenido, setContenido] = useState("");
-  // El resultado del servidor solo se muestra hasta que se vuelve a editar lo pegado.
+  /* El resultado del servidor solo se muestra hasta que se vuelve a editar lo pegado. */
   const [editado, setEditado] = useState(false);
-  const [resultado, accion, enviando] = useActionState(
+  const [resultado, formAction, enviando] = useActionState(
     async (anterior: ResultadoOferta, formData: FormData) => {
       setEditado(false);
       const resultado = await enviarOferta(anterior, formData);
@@ -134,11 +137,11 @@ export function FormularioOferta({ ofertas }: { ofertas: OfertaCarrera[] }) {
     INICIAL
   );
 
-  const diagnostico = useMemo(() => diagnosticar(contenido, ofertas), [contenido, ofertas]);
+  const validacion = useMemo(() => validarOferta(contenido, ofertas), [contenido, ofertas]);
   const respuesta = editado ? INICIAL : resultado;
 
   return (
-    <form action={accion} className="space-y-3">
+    <form action={formAction} className="space-y-3">
       {respuesta.estado === "enviada" && (
         <output className="flex gap-2 rounded-md border-[1.5px] border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm text-emerald-800">
           <PartyPopper size={18} aria-hidden="true" className="mt-px shrink-0" />
@@ -171,14 +174,14 @@ export function FormularioOferta({ ofertas }: { ofertas: OfertaCarrera[] }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div aria-live="polite" className="min-w-0 flex-1">
           {respuesta.estado === "error" ? (
-            <Estado tono="error">{respuesta.mensaje}</Estado>
+            <Estado variante="error">{respuesta.mensaje}</Estado>
           ) : (
-            <Estado tono={diagnostico.tono}>{diagnostico.mensaje}</Estado>
+            <Estado variante={validacion.variante}>{validacion.mensaje}</Estado>
           )}
         </div>
         <button
           type="submit"
-          disabled={!diagnostico.enviable || enviando}
+          disabled={!validacion.enviable || enviando}
           className="boton-primario self-end disabled:pointer-events-none disabled:bg-stone-100 disabled:text-stone-400 disabled:[--relieve:var(--color-stone-300)] sm:self-start"
         >
           {enviando ? (

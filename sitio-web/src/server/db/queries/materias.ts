@@ -6,7 +6,7 @@ import { db, schema } from "@/server/db";
 
 const m = schema.materiaVigente;
 
-/** Materias de planes vigentes ordenadas por relevancia. */
+/** Devuelve las materias de planes vigentes, ordenadas por relevancia. */
 export async function getMateriasVigentes() {
   "use cache";
   cacheLife("max");
@@ -15,7 +15,7 @@ export async function getMateriasVigentes() {
   return db.select({ codigo: m.codigo, nombre: m.nombre }).from(m).orderBy(m.orden);
 }
 
-/** Info de una materia vigente, o `null` si no está en un plan vigente. */
+/** Devuelve la info de una materia vigente, o `null` si no está en un plan vigente. */
 export async function getMateria(codigo: string) {
   "use cache";
   cacheLife("max");

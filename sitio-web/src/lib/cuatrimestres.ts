@@ -1,15 +1,16 @@
 export type Cuatrimestre = { numero: number; anio: number };
 
-/** Orden cronológico de un cuatrimestre. */
-export function ordenCuatrimestre({ numero, anio }: Cuatrimestre) {
-  return anio * 2 + numero;
+/** Indica si el cuatrimestre `a` es posterior al `b`. */
+export function esPosterior(a: Cuatrimestre, b: Cuatrimestre) {
+  return a.anio > b.anio || (a.anio === b.anio && a.numero > b.numero);
 }
 
-export function mismoCuatrimestre(a: Cuatrimestre, b: Cuatrimestre) {
+/** Indica si `a` y `b` son el mismo cuatrimestre. */
+export function esMismoCuatrimestre(a: Cuatrimestre, b: Cuatrimestre) {
   return a.numero === b.numero && a.anio === b.anio;
 }
 
-/** Cuatrimestre en formato corto, como `1C2026`. */
+/** Formatea el cuatrimestre con el número, una `C` y el año. */
 export function formatearCuatrimestre({ numero, anio }: Cuatrimestre) {
   return `${numero}C${anio}`;
 }

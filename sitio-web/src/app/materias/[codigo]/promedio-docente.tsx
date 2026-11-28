@@ -4,7 +4,8 @@ import type { PromediosDocente } from "@/server/db/queries/catedras";
 import { Popover } from "@base-ui/react/popover";
 import { ChevronDown } from "@withicons/react/line";
 import { Star } from "@withicons/react/plush";
-import { CRITERIOS, formatearPuntaje, nivelPuntaje, type NivelPuntaje } from "@/lib/calificaciones";
+import { CRITERIOS } from "@/lib/calificaciones";
+import { formatearPuntaje } from "@/lib/utils";
 
 export function PromedioDocente({
   promedios,
@@ -21,8 +22,6 @@ export function PromedioDocente({
       >
         <span className="font-mono tabular-nums">{formatearPuntaje(promedios.general)}</span>
         <Star size={18} aria-hidden="true" className="text-fiuba" />
-        {/* Indica que abre el desglose. Del set `line` y en gris: al lado de la estrella, otro
-            ícono a color competiría con la nota. Gira cuando el popover está abierto. */}
         <ChevronDown
           size={14}
           aria-hidden="true"
@@ -37,16 +36,15 @@ export function PromedioDocente({
               {cantidadCalificaciones === 1 ? "calificación" : "calificaciones"}
             </Popover.Title>
             <dl className="space-y-1.5 pt-2">
-              {CRITERIOS.map(({ nombre, etiqueta }) => (
+              {CRITERIOS.map(({ nombre, label }) => (
                 <div key={nombre} className="flex items-center justify-between gap-4">
-                  <dt className="text-stone-500">{etiqueta}</dt>
+                  <dt className="text-stone-500">{label}</dt>
                   <dd
                     className={`flex items-center gap-1.5 ${COLOR_NUMERO[nivelPuntaje(promedios[nombre])]}`}
                   >
                     <span className="font-mono tabular-nums">
                       {formatearPuntaje(promedios[nombre])}
                     </span>
-                    {/* Decorativa: el número ya lo dice. */}
                     <Star size={16} aria-hidden="true" className="shrink-0" />
                   </dd>
                 </div>
@@ -59,7 +57,15 @@ export function PromedioDocente({
   );
 }
 
-/** Verde para lo bueno, rojo para lo malo, como los `+`/`−` de un diff. */
+type NivelPuntaje = "muyBueno" | "bueno" | "regular" | "malo";
+
+function nivelPuntaje(puntaje: number): NivelPuntaje {
+  if (puntaje >= 4.5) return "muyBueno";
+  if (puntaje >= 3.5) return "bueno";
+  if (puntaje >= 2.5) return "regular";
+  return "malo";
+}
+
 const COLOR_NUMERO: Record<NivelPuntaje, string> = {
   muyBueno: "text-green-700",
   bueno: "text-green-700",

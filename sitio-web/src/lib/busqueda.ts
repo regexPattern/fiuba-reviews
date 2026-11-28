@@ -1,27 +1,30 @@
 import Fuse, { type FuseResult } from "fuse.js";
-import { normalizarTexto } from "./texto";
+import { normalizar } from "./utils";
 
-/** Rango `[inicio, fin]` (inclusive) del texto que coincide con la búsqueda. */
+/** Índices `[inicio, fin]` (inclusivo) del texto que matchea la query de
+ * búsqueda. Sirven para resaltar el match en la UI. */
 export type Rango = readonly [number, number];
 
-/** Búsqueda fuzzy con Fuse. */
-export function crearBusqueda<T>(items: T[], keys: (keyof T & string)[]) {
+/** Crea el índice para búsquedas fuzzy sobre los `items` según las `keys`, y
+ * devuelve la función de búsqueda. */
+export function crearIndiceDeBusqueda<T>(items: T[], keys: (keyof T & string)[]) {
   const fuse = new Fuse(items, {
     keys,
     ignoreDiacritics: true,
     ignoreLocation: true,
     threshold: 0.35,
     includeMatches: true,
-    // Las palabras separadas por espacios se buscan en cualquier orden y tienen que estar todas.
+    /* Las palabras separadas por espacios se buscan en cualquier orden y tienen que estar todas. */
     useExtendedSearch: true
   });
 
   return (query: string): FuseResult<T>[] => {
-    const palabras = normalizarTexto(query).split(/\s+/).filter(Boolean);
+    const palabras = normalizar(query).split(/\s+/).filter(Boolean);
     if (palabras.length === 0) return items.map((item, refIndex) => ({ item, refIndex }));
 
+    /* TODO: Revisar la performance de siempre normalizar el texto. */
     const esExacta = (item: T) =>
-      palabras.every((p) => keys.some((k) => normalizarTexto(String(item[k] ?? "")).includes(p)));
+      palabras.every((p) => keys.some((k) => normalizar(String(item[k] ?? "")).includes(p)));
 
     const resultados = fuse.search(query);
     const exactas = resultados

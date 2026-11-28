@@ -11,7 +11,7 @@ import {
   useState
 } from "react";
 
-const ShellContext = createContext<{ alNavegar: () => void }>({ alNavegar: () => {} });
+const ShellContext = createContext<{ onNavigate: () => void }>({ onNavigate: () => {} });
 export const useMateriaShell = () => useContext(ShellContext);
 
 export function MateriaShell({
@@ -33,7 +33,11 @@ export function MateriaShell({
     const barra = barraRef.current;
     if (!shell || !barra) return;
 
-    // Para el `scroll-margin` de los anchors a docentes. Cambia con el ancho, el texto y las fuentes.
+    /*
+     * Guarda el alto de la barra sticky en `--materia-sticky-height`, que usan los `scroll-mt-*`
+     * para que la barra no tape a los docentes al ir a un anchor. Se vuelve a medir cuando cambia
+     * el alto, que depende del ancho de la pantalla, del texto y de las fuentes.
+     */
     const actualizar = () =>
       shell.style.setProperty(
         "--materia-sticky-height",
@@ -45,15 +49,14 @@ export function MateriaShell({
     return () => observer.disconnect();
   }, []);
 
-  function alNavegar() {
+  function handleNavigate() {
     setDrawerAbierto(false);
-    // En móvil scrollea la ventana y en desktop el panel principal.
     mainRef.current?.scrollTo({ top: 0 });
     window.scrollTo({ top: 0 });
   }
 
   return (
-    <ShellContext value={{ alNavegar }}>
+    <ShellContext value={{ onNavigate: handleNavigate }}>
       <div className="min-h-[calc(100dvh-var(--header-height))] bg-white md:-mt-(--header-height) md:min-h-0">
         <div ref={shellRef} className="mx-auto flex max-w-6xl md:h-dvh">
           <aside className="hidden min-h-0 w-80 shrink-0 flex-col border-r border-stone-300 pt-(--header-height) md:flex">

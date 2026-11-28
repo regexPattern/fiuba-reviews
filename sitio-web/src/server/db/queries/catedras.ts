@@ -5,7 +5,7 @@ import { tags } from "@/server/cache";
 import { db, schema } from "@/server/db";
 import { getMateria } from "./materias";
 
-/** Cátedras de una materia, ordenadas por calificación desc y nombre asc. */
+/** Devuelve las cátedras de una materia, de mejor a peor calificación y después por nombre. */
 export async function getCatedrasMateria(codigo: string) {
   "use cache";
   cacheLife("max");
@@ -13,7 +13,7 @@ export async function getCatedrasMateria(codigo: string) {
   const materia = await getMateria(codigo);
   if (!materia) return [];
 
-  // Una materia que usa equivalencias muestra las cátedras de esas otras materias.
+  /* Una materia que usa equivalencias muestra las cátedras de esas otras materias. */
   cacheTag(tags.materia(codigo), ...materia.codigosMateriasFuente.map(tags.catedras));
 
   const cm = schema.catedraMostrada;
@@ -34,7 +34,7 @@ export async function getCatedrasMateria(codigo: string) {
 
 export type CatedraListada = Awaited<ReturnType<typeof getCatedrasMateria>>[number];
 
-/** Docentes de una cátedra con sus promedios y comentarios, o `null` si no existe. */
+/** Devuelve los docentes de una cátedra con sus promedios y comentarios, o `null` si no existe. */
 export async function getCatedra(codigo: string) {
   "use cache";
   cacheLife("max");
@@ -53,7 +53,7 @@ export async function getCatedra(codigo: string) {
         rol: d.rol,
         resumenComentarios: d.resumenComentarios,
         cantidadCalificaciones: sql<number>`coalesce(${r.cantidad}, 0)`,
-        // Drizzle devuelve `null` en vez del objeto si el docente no tiene calificaciones.
+        /* Drizzle devuelve `null` en vez del objeto si el docente no tiene calificaciones. */
         promedios: {
           general: r.promedio,
           aceptaCritica: r.aceptaCritica,

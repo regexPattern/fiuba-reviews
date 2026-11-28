@@ -1,73 +1,34 @@
 import { z } from "zod";
-import { type Cuatrimestre, formatearCuatrimestre, mismoCuatrimestre } from "./cuatrimestres";
+import { type Cuatrimestre, esMismoCuatrimestre, formatearCuatrimestre } from "./cuatrimestres";
 
 export const CRITERIOS = [
-  { nombre: "aceptaCritica", etiqueta: "Acepta crítica" },
-  { nombre: "asistencia", etiqueta: "Asistencia" },
-  { nombre: "buenTrato", etiqueta: "Buen trato" },
-  { nombre: "claridad", etiqueta: "Claridad" },
-  { nombre: "claseOrganizada", etiqueta: "Clase organizada" },
-  { nombre: "cumpleHorarios", etiqueta: "Cumple horarios" },
-  { nombre: "fomentaParticipacion", etiqueta: "Fomenta participación" },
-  { nombre: "panoramaAmplio", etiqueta: "Panorama amplio" },
-  { nombre: "respondeMails", etiqueta: "Responde mails" }
+  { nombre: "aceptaCritica", label: "Acepta crítica" },
+  { nombre: "asistencia", label: "Asistencia" },
+  { nombre: "buenTrato", label: "Buen trato" },
+  { nombre: "claridad", label: "Claridad" },
+  { nombre: "claseOrganizada", label: "Clase organizada" },
+  { nombre: "cumpleHorarios", label: "Cumple horarios" },
+  { nombre: "fomentaParticipacion", label: "Fomenta participación" },
+  { nombre: "panoramaAmplio", label: "Panorama amplio" },
+  { nombre: "respondeMails", label: "Responde mails" }
 ] as const;
 
-type Criterio = (typeof CRITERIOS)[number]["nombre"];
+export type Criterio = (typeof CRITERIOS)[number]["nombre"];
 
-export const PUNTAJE_MINIMO = 1;
-export const PUNTAJE_MAXIMO = 5;
+export const MIN_PUNTAJE = 1;
+export const MAX_PUNTAJE = 5;
 
-/** De 1 a 5, de a media estrella. */
-export type Puntaje = number;
+export const MAX_CARACTERES_COMENTARIO = 2000;
 
-const FORMATO_PUNTAJE = new Intl.NumberFormat("es-AR", {
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 1
-});
+const SchemaPuntaje = z.number().min(MIN_PUNTAJE).max(MAX_PUNTAJE).multipleOf(0.5);
 
-/** Con coma decimal y siempre un decimal: `4,0`, `3,7`. */
-export function formatearPuntaje(puntaje: Puntaje) {
-  return FORMATO_PUNTAJE.format(puntaje);
-}
-
-export const LARGO_MAXIMO_COMENTARIO = 2000;
-
-/** Lo que se va completando en el panel de calificación, antes de enviarlo. */
-export type BorradorCalificacion = {
-  puntajes: Partial<Record<Criterio, Puntaje>>;
-  cuatrimestre: Cuatrimestre | null;
-  comentario: string;
-};
-
-export const BORRADOR_VACIO: BorradorCalificacion = {
-  puntajes: {},
-  cuatrimestre: null,
-  comentario: ""
-};
-
-const NOMBRES = CRITERIOS.map(({ nombre }) => nombre) as [Criterio, ...Criterio[]];
-
-/** Criterios sin puntaje, en el orden de `CRITERIOS`. */
-export function criteriosFaltantes(borrador: BorradorCalificacion): Criterio[] {
-  return NOMBRES.filter((nombre) => !borrador.puntajes[nombre]);
-}
-
-const PuntajeSchema = z.number().min(PUNTAJE_MINIMO).max(PUNTAJE_MAXIMO).multipleOf(0.5);
-
-/**
- * Valida en el servidor lo que manda el panel de calificación: no se confía en el cliente. El
- * cuatrimestre tiene que ser uno de los `permitidos` (los que se ofrecen en el panel), y se
- * devuelve el de `permitidos` tal cual. El comentario se recorta y queda `null` si está vacío.
- *
- * Solo el error de cuatrimestre trae un mensaje para mostrar; el resto usa los de zod.
- */
-export function schemaCalificacion<C extends Cuatrimestre>(permitidos: C[]) {
+/** Crea el schema de validación de una calificación a partir de los `cuatrimestres` permitidos. */
+export function crearSchemaCalificacion<C extends Cuatrimestre>(cuatrimestres: C[]) {
   return z.object({
     codigoDocente: z.uuid(),
-    puntajes: z.record(z.enum(NOMBRES), PuntajeSchema),
+    puntajes: z.record(z.enum(CRITERIOS.map(({ nombre }) => nombre)), SchemaPuntaje),
     cuatrimestre: z.object({ numero: z.number(), anio: z.number() }).transform((c, ctx) => {
-      const permitido = permitidos.find((p) => mismoCuatrimestre(p, c));
+      const permitido = cuatrimestres.find((p) => esMismoCuatrimestre(p, c));
 
       if (!permitido) {
         ctx.addIssue({
@@ -82,16 +43,7 @@ export function schemaCalificacion<C extends Cuatrimestre>(permitidos: C[]) {
     comentario: z
       .string()
       .trim()
-      .max(LARGO_MAXIMO_COMENTARIO)
+      .max(MAX_CARACTERES_COMENTARIO)
       .transform((c) => c || null)
   });
-}
-
-export type NivelPuntaje = "muyBueno" | "bueno" | "regular" | "malo";
-
-export function nivelPuntaje(puntaje: number): NivelPuntaje {
-  if (puntaje >= 4.5) return "muyBueno";
-  if (puntaje >= 3.5) return "bueno";
-  if (puntaje >= 2.5) return "regular";
-  return "malo";
 }

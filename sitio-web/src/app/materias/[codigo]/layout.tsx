@@ -16,8 +16,8 @@ export async function generateMetadata({
 }
 
 /**
- * Toda la ruta se prerenderiza en el build; cuando cambian los datos se invalida por tag (ver
- * `server/cache.ts`).
+ * Exige que toda la ruta se genere en el build. Los datos se actualizan
+ * invalidando por tag (ver `server/cache.ts`).
  */
 export const ensureStatic = "navigation";
 

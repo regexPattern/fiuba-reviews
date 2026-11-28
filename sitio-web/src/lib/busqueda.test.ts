@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { crearBusqueda } from "./busqueda";
+import { crearIndiceDeBusqueda } from "./busqueda";
 
 describe("búsqueda de cátedras", () => {
   const catedras = [
@@ -8,7 +8,7 @@ describe("búsqueda de cátedras", () => {
     { nombre: "Acero-López-García-Endelli-Portocarrero" },
     { nombre: "González-Amoreo-Petrovich" }
   ];
-  const buscar = crearBusqueda(catedras, ["nombre"]);
+  const buscar = crearIndiceDeBusqueda(catedras, ["nombre"]);
   const nombres = (query: string) => buscar(query).map(({ item }) => item.nombre);
 
   it("sin búsqueda devuelve todas en el orden original", () => {
@@ -39,7 +39,7 @@ describe("búsqueda de materias", () => {
     { codigo: "CB002", nombre: "Álgebra Lineal" },
     { codigo: "CB100", nombre: "Algoritmos y Estructuras de Datos" }
   ];
-  const buscar = crearBusqueda(materias, ["codigo", "nombre"]);
+  const buscar = crearIndiceDeBusqueda(materias, ["codigo", "nombre"]);
   const codigos = (query: string) => buscar(query).map(({ item }) => item.codigo);
 
   it("encuentra por código", () => {
@@ -56,7 +56,7 @@ describe("búsqueda de materias", () => {
   });
 
   it("entre las coincidencias exactas respeta el orden original", () => {
-    const buscar = crearBusqueda(
+    const buscar = crearIndiceDeBusqueda(
       [
         { codigo: "TA001", nombre: "Criptoanálisis" },
         { codigo: "CB001", nombre: "Análisis Matemático II" },
@@ -68,11 +68,11 @@ describe("búsqueda de materias", () => {
   });
 
   it("pone las coincidencias exactas antes que las aproximadas", () => {
-    const buscar = crearBusqueda(
+    const buscar = crearIndiceDeBusqueda(
       [{ nombre: "Gonzales-Pérez" }, { nombre: "González-Amoreo" }, { nombre: "Fernández" }],
       ["nombre"]
     );
-    // "Gonzales" está antes en la lista, pero es solo parecido.
+    /* "Gonzales" está antes en la lista, pero es solo parecido. */
     expect(buscar("gonzalez").map(({ item }) => item.nombre)).toEqual([
       "González-Amoreo",
       "Gonzales-Pérez"

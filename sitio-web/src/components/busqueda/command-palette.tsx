@@ -16,7 +16,7 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
   const cerrar = () => setAbierto(false);
 
   useEffect(() => {
-    function alPresionarTecla(event: KeyboardEvent) {
+    function handleKeyDown(event: KeyboardEvent) {
       if (
         event.key.toLowerCase() === "k" &&
         (conCmd ? event.metaKey : event.ctrlKey) &&
@@ -30,22 +30,25 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
       }
     }
 
-    document.addEventListener("keydown", alPresionarTecla);
-    return () => document.removeEventListener("keydown", alPresionarTecla);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [conCmd]);
 
   return (
     <Dialog.Root
       open={abierto}
       onOpenChange={setAbierto}
-      // Se limpia al terminar la animación de cierre, así el texto no desaparece mientras se va.
+      /*
+       * La búsqueda se borra al terminar de cerrarse, así el texto no desaparece durante la
+       * animación.
+       */
       onOpenChangeComplete={(abierto) => !abierto && setQuery("")}
     >
       <Dialog.Trigger
         render={
           <BotonBuscar
             aria-keyshortcuts={conCmd ? "Meta+k" : "Control+k"}
-            atajo={conCmd ? "⌘ K" : "Ctrl K"}
+            shortcut={conCmd ? "⌘ K" : "Ctrl K"}
           />
         }
       />
@@ -54,8 +57,12 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
         <Dialog.Popup
           ref={popupRef}
           aria-label="Buscar materias"
-          // Al input, salvo con touch: ahí iOS no abre el teclado con un foco por código, y con el input
-          // enfocado el gesto scrollea la página en vez de la lista. Con touch se enfoca el popup.
+          /*
+           * Con mouse o teclado, el foco va al input para escribir directo.
+           * Con touch va al popup, porque en iOS el teclado no se abre si el
+           * input se enfoca solo al abrir el buscador, y además se rompe el
+           * scroll de la lista.
+           */
           initialFocus={(tipo) => (tipo === "touch" ? popupRef.current : inputRef.current)}
           className="fixed inset-x-0 top-[max(calc(var(--header-height)+1rem),15dvh)] z-50 mx-auto flex max-h-[75dvh] w-[calc(100%-2rem)] max-w-xl flex-col overflow-hidden relieve bg-white text-stone-900 transition-[scale,opacity] duration-200 ease-out outline-none [--relieve:var(--color-stone-400)] data-ending-style:scale-97 data-ending-style:opacity-0 data-starting-style:scale-97 data-starting-style:opacity-0 motion-reduce:transition-none"
         >
@@ -99,7 +106,10 @@ export function CommandPalette({ materias }: { materias: MateriaBuscador[] }) {
   );
 }
 
-export function BotonBuscar({ atajo, ...props }: ComponentProps<"button"> & { atajo?: string }) {
+export function BotonBuscar({
+  shortcut,
+  ...props
+}: ComponentProps<"button"> & { shortcut?: string }) {
   return (
     <button
       type="button"
@@ -112,9 +122,9 @@ export function BotonBuscar({ atajo, ...props }: ComponentProps<"button"> & { at
       <span>
         Buscar<span className="hidden sm:inline"> materias</span>
       </span>
-      {atajo && (
+      {shortcut && (
         <span className="ml-1 hidden sm:flex">
-          <kbd className="tecla tecla-chica relieve [--relieve-alto:2px]">{atajo}</kbd>
+          <kbd className="tecla tecla-chica relieve [--relieve-alto:2px]">{shortcut}</kbd>
         </span>
       )}
     </button>

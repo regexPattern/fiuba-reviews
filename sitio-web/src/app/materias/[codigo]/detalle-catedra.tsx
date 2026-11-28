@@ -10,7 +10,7 @@ import { BotonCalificar } from "./boton-calificar";
 import { ComentariosOcultos } from "./comentarios-ocultos";
 import { PromedioDocente } from "./promedio-docente";
 
-const COMENTARIOS_VISIBLES = 10;
+const MAX_COMENTARIOS_VISIBLES = 10;
 
 export async function DetalleCatedra({ codigo }: { codigo: string }) {
   const [catedra, calificables] = await Promise.all([
@@ -92,10 +92,12 @@ function Docente({
 }
 
 function ResumenIA({ resumen }: { resumen: string }) {
-  // El `px-6` es para que el texto del resumen arranque alineado con el de los comentarios de abajo
-  // (que tienen el ícono de las comillas adelante).
   return (
     <div className="overflow-hidden relieve bg-white">
+      {/*
+        * `px-6` alinea el texto con el de los comentarios, que tienen el ícono
+        * de comillas adelante.
+        */}
       <p className="px-6 py-5 text-base/relaxed text-stone-700">{resumen}</p>
       <footer className="flex items-center gap-2 border-t border-stone-200 bg-stone-50 px-3 py-2 rotulo text-stone-500">
         <Sparkles size={18} aria-hidden="true" className="shrink-0" />
@@ -115,8 +117,8 @@ function SinComentarios() {
 }
 
 function Comentarios({ id, comentarios }: { id: string; comentarios: ComentarioDocente[] }) {
-  const visibles = comentarios.slice(0, COMENTARIOS_VISIBLES);
-  const ocultos = comentarios.slice(COMENTARIOS_VISIBLES);
+  const visibles = comentarios.slice(0, MAX_COMENTARIOS_VISIBLES);
+  const ocultos = comentarios.slice(MAX_COMENTARIOS_VISIBLES);
 
   return (
     <div

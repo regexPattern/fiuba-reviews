@@ -6,27 +6,23 @@ import { Radio } from "@base-ui/react/radio";
 import { RadioGroup } from "@base-ui/react/radio-group";
 import { Star } from "@withicons/react/plush";
 import { useState } from "react";
-import {
-  PUNTAJE_MAXIMO,
-  PUNTAJE_MINIMO,
-  type Puntaje,
-  formatearPuntaje
-} from "@/lib/calificaciones";
+import { MAX_PUNTAJE, MIN_PUNTAJE } from "@/lib/calificaciones";
+import { formatearPuntaje } from "@/lib/utils";
 
-const ESTRELLAS = Array.from({ length: PUNTAJE_MAXIMO }, (_, i) => i + 1);
+const ESTRELLAS = Array.from({ length: MAX_PUNTAJE }, (_, i) => i + 1);
 
 export function SelectorPuntaje({
-  etiqueta,
+  label,
   valor,
   onChange,
   invalido
 }: {
-  etiqueta: string;
-  valor: Puntaje | undefined;
-  onChange: (valor: Puntaje) => void;
+  label: string;
+  valor: number | undefined;
+  onChange: (valor: number) => void;
   invalido?: boolean;
 }) {
-  const [resaltado, setResaltado] = useState<Puntaje | null>(null);
+  const [resaltado, setResaltado] = useState<number | null>(null);
   const mostrado = resaltado ?? valor ?? 0;
 
   return (
@@ -35,14 +31,14 @@ export function SelectorPuntaje({
         render={
           <RadioGroup
             value={valor ?? null}
-            onValueChange={(valor) => onChange(valor as Puntaje)}
+            onValueChange={(valor) => valor !== null && onChange(valor)}
             onPointerLeave={() => setResaltado(null)}
           />
         }
         className="flex items-center gap-3 py-0.5 md:gap-4 md:py-0.5"
       >
         <Fieldset.Legend className="min-w-0 flex-1 text-sm text-stone-700 group-data-invalid:text-red-700">
-          {etiqueta}
+          {label}
         </Fieldset.Legend>
         <div className="flex shrink-0">
           {ESTRELLAS.map((estrella) => (
@@ -52,12 +48,12 @@ export function SelectorPuntaje({
             >
               <EstrellaPuntaje relleno={Math.min(Math.max(mostrado - (estrella - 1), 0), 1)} />
               {[estrella - 0.5, estrella]
-                .filter((puntaje) => puntaje >= PUNTAJE_MINIMO)
+                .filter((puntaje) => puntaje >= MIN_PUNTAJE)
                 .map((puntaje, _, mitades) => (
                   <Radio.Root
                     key={puntaje}
                     value={puntaje}
-                    aria-label={`${formatearPuntaje(puntaje)} de ${PUNTAJE_MAXIMO}`}
+                    aria-label={`${formatearPuntaje(puntaje)} de ${MAX_PUNTAJE}`}
                     onPointerEnter={(event) =>
                       event.pointerType === "mouse" && setResaltado(puntaje)
                     }

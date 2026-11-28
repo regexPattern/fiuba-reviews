@@ -14,37 +14,41 @@ import {
   useRef,
   useState
 } from "react";
-import {
-  CRITERIOS,
-  LARGO_MAXIMO_COMENTARIO,
-  type BorradorCalificacion,
-  criteriosFaltantes
-} from "@/lib/calificaciones";
+import { CRITERIOS, type Criterio, MAX_CARACTERES_COMENTARIO } from "@/lib/calificaciones";
 import { type Cuatrimestre, formatearCuatrimestre } from "@/lib/cuatrimestres";
 import { SelectorPuntaje } from "./selector-puntaje";
+
+/** Lo que se va completando en el panel de calificación, antes de enviarlo. */
+export type BorradorCalificacion = {
+  puntajes: Partial<Record<Criterio, number>>;
+  cuatrimestre: Cuatrimestre | null;
+  comentario: string;
+};
+
+function criteriosFaltantes(borrador: BorradorCalificacion): Criterio[] {
+  return CRITERIOS.map(({ nombre }) => nombre).filter((nombre) => !borrador.puntajes[nombre]);
+}
 
 export function FormularioCalificacion({
   borrador,
   cuatrimestres: cuatrimestresCalificables,
   onChange,
-  onEnviar,
+  onSubmit,
   enviando = false,
   error = null,
   cuerpo: Cuerpo = "div"
 }: {
   borrador: BorradorCalificacion;
-  /** Los que se pueden elegir, del más nuevo al más viejo. */
   cuatrimestres: Cuatrimestre[];
   onChange: (borrador: BorradorCalificacion) => void;
-  onEnviar: (borrador: BorradorCalificacion) => void;
+  onSubmit: (borrador: BorradorCalificacion) => void;
   enviando?: boolean;
-  /** Error del servidor al enviar. */
   error?: string | null;
   cuerpo?: ElementType<{ className?: string; children?: ReactNode }>;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const selectRef = useRef<HTMLButtonElement>(null);
-  // Los errores se muestran recién después del primer intento de enviar.
+  /* Los errores se muestran recién después del primer intento de enviar. */
   const [intentoEnviar, setIntentoEnviar] = useState(false);
   const cuatrimestres = useMemo(
     () =>
@@ -59,7 +63,7 @@ export function FormularioCalificacion({
   const faltaCuatrimestre = borrador.cuatrimestre === null;
   const largoComentario = borrador.comentario.length;
 
-  function alEnviar(event: SubmitEvent) {
+  function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
     if (enviando) return;
     setIntentoEnviar(true);
@@ -74,7 +78,7 @@ export function FormularioCalificacion({
       selectRef.current?.focus();
       return;
     }
-    onEnviar(borrador);
+    onSubmit(borrador);
   }
 
   const errorCriterios =
@@ -85,17 +89,17 @@ export function FormularioCalificacion({
       : null;
 
   return (
-    <Form ref={formRef} onSubmit={alEnviar} className="flex min-h-0 flex-1 flex-col">
+    <Form ref={formRef} onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
       <Cuerpo className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain p-4 md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-6 md:space-y-0 md:px-6 md:py-6">
         <Fieldset.Root>
           <Fieldset.Legend className="mb-1 rotulo text-stone-500 md:mb-2">
             Criterios
           </Fieldset.Legend>
           <div className="divide-y divide-stone-100 md:space-y-1 md:divide-y-0">
-            {CRITERIOS.map(({ nombre, etiqueta }) => (
+            {CRITERIOS.map(({ nombre, label }) => (
               <div key={nombre} data-criterio={nombre}>
                 <SelectorPuntaje
-                  etiqueta={etiqueta}
+                  label={label}
                   valor={borrador.puntajes[nombre]}
                   invalido={intentoEnviar && faltantes.includes(nombre)}
                   onChange={(puntaje) =>
@@ -176,16 +180,16 @@ export function FormularioCalificacion({
               <Field.Label className="rotulo text-stone-500">
                 Comentario <span className="tracking-normal normal-case">(opcional)</span>
               </Field.Label>
-              {largoComentario > LARGO_MAXIMO_COMENTARIO * 0.8 && (
+              {largoComentario > MAX_CARACTERES_COMENTARIO * 0.8 && (
                 <span className="text-xs text-stone-400">
                   <span className="font-mono tabular-nums">
-                    {largoComentario}/{LARGO_MAXIMO_COMENTARIO}
+                    {largoComentario}/{MAX_CARACTERES_COMENTARIO}
                   </span>
                 </span>
               )}
             </div>
             <Field.Control
-              render={<textarea rows={4} maxLength={LARGO_MAXIMO_COMENTARIO} />}
+              render={<textarea rows={4} maxLength={MAX_CARACTERES_COMENTARIO} />}
               value={borrador.comentario}
               onValueChange={(comentario) => onChange({ ...borrador, comentario })}
               placeholder="¿Cómo fue cursar con este docente?"

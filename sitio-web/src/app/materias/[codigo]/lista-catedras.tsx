@@ -8,8 +8,8 @@ import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { TextoConMatches } from "@/components/busqueda/texto-con-matches";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { crearBusqueda } from "@/lib/busqueda";
-import { formatearPuntaje } from "@/lib/calificaciones";
+import { crearIndiceDeBusqueda } from "@/lib/busqueda";
+import { formatearPuntaje } from "@/lib/utils";
 import { useMateriaShell } from "./materia-shell";
 
 export function ListaCatedras({
@@ -19,12 +19,12 @@ export function ListaCatedras({
   codigoMateria: string;
   catedras: CatedraListada[];
 }) {
-  const { alNavegar } = useMateriaShell();
-  // Sin cátedra en la URL, la página muestra la primera.
+  const { onNavigate } = useMateriaShell();
+  /* Sin cátedra en la URL, la página muestra la primera. */
   const activa = useParams<{ catedra?: string }>().catedra ?? catedras[0]?.codigo;
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebouncedValue(query);
-  const buscar = useMemo(() => crearBusqueda(catedras, ["nombre"]), [catedras]);
+  const buscar = useMemo(() => crearIndiceDeBusqueda(catedras, ["nombre"]), [catedras]);
   const resultados = useMemo(() => buscar(debouncedQuery), [buscar, debouncedQuery]);
 
   if (catedras.length === 0) {
@@ -56,18 +56,21 @@ export function ListaCatedras({
       </div>
       <nav
         aria-label="Cátedras"
-        className="min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto overscroll-contain"
+        className="min-h-0 flex-1 scrollbar-gutter-stable overflow-y-auto overscroll-contain"
       >
         <ul className="space-y-1.5 p-2">
           {resultados.map(({ item: catedra, matches }) => (
             <li key={catedra.codigo}>
               <Link
                 href={`/materias/${codigoMateria}/catedras/${catedra.codigo}`}
-                // Prefetch completo, no solo hasta el Suspense: el click es instantáneo.
+                /*
+                 * Con `partialPrefetching`, el prefetch por defecto solo carga la shell de la
+                 * materia, sin lo que depende de `params`, como el detalle de la cátedra. Así se
+                 * precarga entero y no se ve "Cargando cátedra…" al hacer click.
+                 */
                 prefetch={true}
-                // Scrollea la shell, así no queda debajo del header.
                 scroll={false}
-                onNavigate={alNavegar}
+                onNavigate={onNavigate}
                 aria-current={catedra.codigo === activa ? "page" : undefined}
                 className="item-lista hover:bg-stone-100 hover:text-stone-900 aria-[current=page]:item-lista-activo"
               >

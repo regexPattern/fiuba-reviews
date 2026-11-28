@@ -1,7 +1,7 @@
 import "server-only";
 import { desc, eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
-import { type Cuatrimestre, mismoCuatrimestre, ordenCuatrimestre } from "@/lib/cuatrimestres";
+import { type Cuatrimestre, esMismoCuatrimestre, esPosterior } from "@/lib/cuatrimestres";
 import { tags } from "@/server/cache";
 import { db, schema } from "@/server/db";
 
@@ -26,7 +26,6 @@ export type OfertaCarrera = {
 const c = schema.cuatrimestre;
 const cuatrimestre = { numero: c.numero, anio: c.anio };
 
-/** Último cuatrimestre de cada carrera entre las ofertas de `tabla`. */
 async function ultimoPorCarrera(
   tabla: typeof schema.ofertaComisiones | typeof schema.ofertaComisionesRaw
 ) {
@@ -42,7 +41,7 @@ async function ultimoPorCarrera(
   return new Map(filas.map((f) => [f.codigoCarrera, f.cuatrimestre]));
 }
 
-/** Estado de la oferta de comisiones de cada carrera, ordenadas por nombre. */
+/** Devuelve el estado de la oferta de comisiones de cada carrera, ordenadas por nombre. */
 export async function getOfertasCarreras() {
   "use cache";
   cacheLife("max");
@@ -70,15 +69,14 @@ export async function getOfertasCarreras() {
       const procesada = ultimasProcesadas.get(codigo) ?? null;
       const ultimaRecibida = ultimasRecibidas.get(codigo) ?? null;
       const recibida =
-        ultimaRecibida &&
-        (!procesada || ordenCuatrimestre(ultimaRecibida) > ordenCuatrimestre(procesada))
+        ultimaRecibida && (!procesada || esPosterior(ultimaRecibida, procesada))
           ? ultimaRecibida
           : null;
 
       let estado: EstadoOferta;
       if (recibida) estado = "en-proceso";
       else if (!procesada) estado = "sin-oferta";
-      else if (ultimoCuatrimestre && mismoCuatrimestre(procesada, ultimoCuatrimestre))
+      else if (ultimoCuatrimestre && esMismoCuatrimestre(procesada, ultimoCuatrimestre))
         estado = "al-dia";
       else estado = "desactualizada";
 

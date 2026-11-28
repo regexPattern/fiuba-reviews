@@ -14,11 +14,14 @@ export function ComentariosOcultos({
   const botonRef = useRef<HTMLButtonElement>(null);
   const id = useId();
 
-  function alternar() {
+  function handleToggle() {
     setAbiertos(!abiertos);
 
-    // Al ocultar, lo de arriba se achica y el botón sube: lo traemos a la vista para no dejar al
-    // usuario en medio del docente siguiente.
+    /*
+     * Al ocultar, los comentarios desaparecen y el botón sube, a veces fuera
+     * de la pantalla. Se scrollea hasta el botón para que el usuario no quede
+     * viendo el docente siguiente.
+     */
     if (abiertos) {
       requestAnimationFrame(() => botonRef.current?.scrollIntoView({ block: "nearest" }));
     }
@@ -35,7 +38,7 @@ export function ComentariosOcultos({
         type="button"
         aria-expanded={abiertos}
         aria-controls={id}
-        onClick={alternar}
+        onClick={handleToggle}
         className="mx-auto mt-1 boton-terciario scroll-mt-[calc(var(--header-height)+var(--materia-sticky-height,0px)+1rem)] scroll-mb-4"
       >
         <ChevronDown

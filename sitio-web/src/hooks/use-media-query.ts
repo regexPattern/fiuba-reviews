@@ -1,8 +1,9 @@
 import { useCallback, useSyncExternalStore } from "react";
 
 /**
- * Si la media query coincide. En el servidor no se sabe, así que da `false`
- * hasta hidratar. Usarlo solo para lo que no se ve en el primer render.
+ * Hook para saber si la pantalla cumple la media query `query`. Durante el
+ * SSR devuelve `false`, así que no conviene usarlo para lo que se ve al
+ * cargar la página, porque cambiaría al hidratar.
  */
 export function useMediaQuery(query: string) {
   const suscribir = useCallback(

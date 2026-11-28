@@ -1,7 +1,6 @@
-"use client";
-
 import { useEffect, useState } from "react";
 
+/** Hook que devuelve `value` recién cuando pasan `delayMs` sin que cambie. */
 export function useDebouncedValue<T>(value: T, delayMs = 80): T {
   const [debounced, setDebounced] = useState(value);
 

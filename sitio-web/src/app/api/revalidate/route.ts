@@ -5,9 +5,8 @@ import { env } from "@/env";
 import { tags } from "@/server/cache";
 
 /**
- * Invalida el caché después de una actualización de datos. Una misma actualización puede
- * necesitar varios campos (p. ej. una calificación cambia el detalle de una cátedra y el orden
- * del listado de cátedras de su materia).
+ * Invalida el caché después de una actualización de datos. Se pueden mandar varios campos a la
+ * vez, porque un mismo cambio puede afectar a más de uno.
  *
  *  - `planes`: cambiaron las materias vigentes o sus equivalencias.
  *  - `materias`: cambió la info o el listado de cátedras (incluidas sus calificaciones) de estas
@@ -16,7 +15,7 @@ import { tags } from "@/server/cache";
  *  - `ofertas`: se procesaron ofertas de comisiones (estado por carrera en `/planes`).
  *  - `tags`: tags arbitrarios, para invalidaciones manuales.
  */
-const Body = z.object({
+const SchemaRevalidacion = z.object({
   planes: z.boolean().default(false),
   ofertas: z.boolean().default(false),
   materias: z.array(z.string().min(1)).default([]),
@@ -24,7 +23,7 @@ const Body = z.object({
   tags: z.array(z.string().min(1)).default([])
 });
 
-function autorizado(req: Request) {
+function estaAutorizado(req: Request) {
   const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
   const recibido = Buffer.from(token);
   const esperado = Buffer.from(env.REVALIDATE_SECRET);
@@ -33,11 +32,11 @@ function autorizado(req: Request) {
 }
 
 export async function POST(req: Request) {
-  if (!autorizado(req)) {
+  if (!estaAutorizado(req)) {
     return Response.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const body = Body.safeParse(await req.json().catch(() => null));
+  const body = SchemaRevalidacion.safeParse(await req.json().catch(() => null));
 
   if (!body.success) {
     return Response.json({ error: z.prettifyError(body.error) }, { status: 400 });

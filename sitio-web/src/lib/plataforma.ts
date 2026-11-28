@@ -3,8 +3,8 @@ import { useSyncExternalStore } from "react";
 export type Plataforma = "pc" | "mac" | "android" | "ios";
 
 /**
- * Plataforma del usuario según el user agent.
- * En iPad se toma como Mac porque desde iPadOS 13 usan el mismo user agent.
+ * Detecta la plataforma del usuario según el user agent.
+ * Los iPad se detectan como Mac, porque desde iPadOS 13 mandan el mismo user agent.
  */
 export function detectarPlataforma(userAgent: string): Plataforma {
   if (/Android/i.test(userAgent)) return "android";
@@ -16,14 +16,17 @@ export function detectarPlataforma(userAgent: string): Plataforma {
 /** Las plataformas donde los atajos usan ⌘ en vez de Ctrl. */
 export const usaCmd = (plataforma: Plataforma) => plataforma === "mac" || plataforma === "ios";
 
-const suscribir = () => () => {};
+const subscribe = () => () => {};
 
-const plataformaDelNavegador = () => detectarPlataforma(navigator.userAgent);
+const plataformaSnapshot = () => detectarPlataforma(navigator.userAgent);
 
-/** En el servidor no se sabe así que se corrige al hidratar. */
-const plataformaDelServidor = (): Plataforma => "pc";
+const plataformaServerSnapshot = (): Plataforma => "pc";
 
-/** Plataforma detectada del navegador. */
+/**
+ * Hook para detectar la plataforma del usuario al hidratar la página. Durante
+ * el SSR devuelve `"pc"` por defecto, así el primer frame ya tiene un valor y
+ * no `undefined`.
+ */
 export function usePlataforma() {
-  return useSyncExternalStore(suscribir, plataformaDelNavegador, plataformaDelServidor);
+  return useSyncExternalStore(subscribe, plataformaSnapshot, plataformaServerSnapshot);
 }

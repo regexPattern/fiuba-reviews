@@ -29,9 +29,11 @@ export const metadata: Metadata = {
   }
 };
 
-// `viewportFit: "cover"` hace que la página ocupe toda la pantalla, incluso debajo del notch y
-// de la barra flotante de Safari (iOS 26+). Por eso cada elemento pegado a un borde (header,
-// drawers, footers) suma `env(safe-area-inset-*)` a su padding para no quedar tapado.
+/*
+ * `viewportFit: "cover"` hace que la página ocupe toda la pantalla, incluso debajo del notch y
+ * de la barra flotante de Safari (iOS 26+). Por eso cada elemento pegado a un borde (header,
+ * drawers, footers) suma `env(safe-area-inset-*)` a su padding para no quedar tapado.
+ */
 export const viewport: Viewport = { viewportFit: "cover" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

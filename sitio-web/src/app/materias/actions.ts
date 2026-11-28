@@ -2,20 +2,21 @@
 
 import { eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
-import { schemaCalificacion } from "@/lib/calificaciones";
+import { crearSchemaCalificacion } from "@/lib/calificaciones";
 import { tags } from "@/server/cache";
 import { db, schema } from "@/server/db";
 import { getCuatrimestresCalificables } from "@/server/db/queries/cuatrimestres";
+import { logger } from "@/server/logger";
+
+const log = logger.child({ scope: "enviarCalificacion" });
 
 type ResultadoCalificacion = { estado: "enviada" } | { estado: "error"; mensaje: string };
 
-/**
- * Guarda la calificación de un docente y, si dejó uno, el comentario. El borrador llega tal cual
- * del cliente y se valida con `schemaCalificacion`.
- */
+/** Guarda la calificación de un docente y, si tiene, su comentario. */
 export async function enviarCalificacion(entrada: unknown): Promise<ResultadoCalificacion> {
   const calificables = await getCuatrimestresCalificables();
-  const validacion = schemaCalificacion(calificables).safeParse(entrada, {
+  const SchemaCalificacion = crearSchemaCalificacion(calificables);
+  const validacion = SchemaCalificacion.safeParse(entrada, {
     error: () => "La calificación enviada no es válida."
   });
 
@@ -53,10 +54,7 @@ export async function enviarCalificacion(entrada: unknown): Promise<ResultadoCal
       }
     });
   } catch (error) {
-    console.error("[enviarCalificacion] Error al guardar la calificación.", {
-      codigoDocente,
-      error
-    });
+    log.error({ codigoDocente, err: error }, "Error al guardar la calificación.");
 
     return {
       estado: "error",
@@ -64,13 +62,12 @@ export async function enviarCalificacion(entrada: unknown): Promise<ResultadoCal
     };
   }
 
-  console.info("[enviarCalificacion] Calificación guardada.", {
-    codigoDocente,
-    conComentario: comentario !== null
-  });
+  log.info({ codigoDocente, conComentario: comentario !== null }, "Calificación guardada.");
 
-  // Cambian los promedios y comentarios de cada cátedra del docente, y con ellos el orden de las
-  // cátedras de su materia.
+  /*
+   * Invalida cada cátedra del docente, porque cambian sus promedios y comentarios, y el listado de
+   * cátedras de la materia, porque puede cambiar el orden.
+   */
   const catedras = await db
     .select({ codigo: schema.catedraDocente.codigoCatedra })
     .from(schema.catedraDocente)

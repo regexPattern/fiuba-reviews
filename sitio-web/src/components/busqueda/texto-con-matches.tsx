@@ -1,6 +1,5 @@
 import type { Rango } from "@/lib/busqueda";
 
-/** Subraya las partes de `texto` indicadas por los `indices` de la búsqueda. */
 export function TextoConMatches({
   texto,
   indices = [],

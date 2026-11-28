@@ -17,10 +17,8 @@ export function PaginaError({
   descripcion,
   children
 }: {
-  // Sin código (error desconocido) el título es "Error".
   codigo?: number;
   descripcion: React.ReactNode;
-  // Acciones (links, botones) debajo del mensaje.
   children?: React.ReactNode;
 }) {
   const lineaColectivo =

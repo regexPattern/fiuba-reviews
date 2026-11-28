@@ -9,14 +9,19 @@ export default function Error({ error, retry }: { error: unknown; retry: () => v
     console.error(error);
   }, [error]);
 
-  // Los errores de Server Components llegan con `digest`; el resto es desconocido (el 99).
-  const delServidor = error instanceof Error && "digest" in error;
+  /*
+   * Los errores de Server Components llegan con `digest`, un hash que genera
+   * Next para no mandarle al navegador el mensaje real del error. Con ese hash
+   * se lo encuentra en los logs del servidor. Para esos errores la página dice
+   * "Error 500", y para los del navegador dice solo "Error".
+   */
+  const esDelServidor = error instanceof Error && "digest" in error;
 
   return (
     <>
       <title>Algo salió mal | FIUBA Reviews</title>
       <PaginaError
-        codigo={delServidor ? 500 : undefined}
+        codigo={esDelServidor ? 500 : undefined}
         descripcion="Algo se rompió en el camino. Probá de nuevo en un rato."
       >
         <button type="button" onClick={() => retry()} className="boton-primario">

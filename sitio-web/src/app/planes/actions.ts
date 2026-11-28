@@ -3,10 +3,11 @@
 import { and, eq, sql } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import { type Cuatrimestre, formatearCuatrimestre } from "@/lib/cuatrimestres";
-import { buscarCarrera } from "@/lib/ofertas";
 import { tags } from "@/server/cache";
 import { db, schema } from "@/server/db";
+import { logger } from "@/server/logger";
 import { parsearMetadata } from "@fiuba-reviews/parser-siu";
+import { buscarCarrera } from "./utils";
 
 export type ResultadoOferta =
   | { estado: "inicial" }
@@ -14,14 +15,16 @@ export type ResultadoOferta =
   | { estado: "error"; mensaje: string };
 
 /*
- * La página entera del SIU ronda los 100 KB en las carreras más grandes,
- * entonces le damos el doble por seguridad.
+ * La página del SIU ronda los 100 000 caracteres en las carreras más grandes (ver los fixtures de
+ * `parser-siu`), entonces le damos el doble para dejar margen.
  */
-const MAX_CARACTERES = 2 * 1_000_000;
+const MAX_CARACTERES_OFERTA = 200_000;
+
+const log = logger.child({ scope: "enviarOferta" });
 
 /**
- * Guarda una oferta pegada desde el SIU para procesarla después. La carrera y el cuatrimestre
- * se vuelven a sacar del contenido acá (no se confía en lo que detectó el cliente).
+ * Guarda una oferta pegada desde el SIU para procesarla después. La carrera y el cuatrimestre se
+ * vuelven a leer del contenido, sin confiar en lo que detectó el cliente.
  */
 export async function enviarOferta(
   _anterior: ResultadoOferta,
@@ -29,7 +32,7 @@ export async function enviarOferta(
 ): Promise<ResultadoOferta> {
   const contenido = formData.get("contenido");
 
-  if (typeof contenido !== "string" || contenido.length > MAX_CARACTERES) {
+  if (typeof contenido !== "string" || contenido.length > MAX_CARACTERES_OFERTA) {
     return { estado: "error", mensaje: "El contenido enviado no es válido." };
   }
 
@@ -70,8 +73,10 @@ export async function enviarOferta(
     };
   }
 
-  // Tanto las procesadas como las que esperan ser procesadas, así no se
-  // reciben duplicadas.
+  /*
+   * Busca si ya hay una oferta de este cuatrimestre o de uno más nuevo, tanto entre las procesadas
+   * como entre las que esperan ser procesadas, así no se reciben duplicadas ni viejas.
+   */
   const { numero, anio } = metadata.cuatrimestre;
   const existentes = await Promise.all(
     [schema.ofertaComisiones, schema.ofertaComisionesRaw].map((tabla) =>
@@ -105,11 +110,10 @@ export async function enviarOferta(
       contenido
     });
   } catch (error) {
-    console.error("[enviarOferta] Error al guardar la oferta.", {
-      codigoCarrera: carrera.codigo,
-      codigoCuatrimestre: cuatrimestre.codigo,
-      error
-    });
+    log.error(
+      { codigoCarrera: carrera.codigo, codigoCuatrimestre: cuatrimestre.codigo, err: error },
+      "Error al guardar la oferta."
+    );
 
     return {
       estado: "error",
@@ -117,13 +121,12 @@ export async function enviarOferta(
     };
   }
 
-  console.info("[enviarOferta] Oferta guardada.", {
-    codigoCarrera: carrera.codigo,
-    codigoCuatrimestre: cuatrimestre.codigo
-  });
+  log.info(
+    { codigoCarrera: carrera.codigo, codigoCuatrimestre: cuatrimestre.codigo },
+    "Oferta guardada."
+  );
 
-  // Invalidamos el cache para que la tabla de la página se regenere y pase a
-  // mostrar la oferta como "en proceso".
+  /* Invalida la tabla de ofertas, para que muestre esta como "en proceso". */
   updateTag(tags.ofertas);
 
   return {
